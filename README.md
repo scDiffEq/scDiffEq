@@ -37,8 +37,6 @@ One of the ways we got started thinking about this project was based conceptuall
 
 We have been working with some of the developers at NVIDIA who have given us early access to their "*omniverse*" software. I haven't had much time to play with it yet, but they sent us a tarbell of code to use. They generated this cool animation for us a while back.
 
-![landscape_animation](https://github.com/pinellolab/sc-neural-ODEs/bin/landscape_animation.mp4)
-
 #### Notebooks I will clean and upload:
 1. Toy simulation of a single hyperparabola attractor from a set of simple, non-linear equations (2-D):
 ```
