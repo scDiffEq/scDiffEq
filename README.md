@@ -37,6 +37,7 @@ One of the ways we got started thinking about this project was based conceptuall
 
 We have been working with some of the developers at NVIDIA who have given us early access to their "*omniverse*" software. I haven't had much time to play with it yet, but they sent us a tarbell of code to use. They generated this cool animation for us a while back.
 
+![landscape_animation](https://github.com/pinellolab/sc-neural-ODEs/bin/landscape_animation.mp4)
 
 #### Notebooks I will clean and upload:
 1. Toy simulation of a single hyperparabola attractor from a set of simple, non-linear equations (2-D):
@@ -61,11 +62,16 @@ def state_eqn(state, t):
 
 4. Deriving time from velocity (in a simulation)
 
+#### Datasets
+1. Toy dataset - based on this <a href="https://scholar.google.com/citations?user=cMBBPisAAAAJ&hl=en#d=gs_md_cita-d&u=%2Fcitations%3Fview_op%3Dview_citation%26hl%3Den%26user%3DcMBBPisAAAAJ%26citation_for_view%3DcMBBPisAAAAJ%3A_FxGoFyzp5QC%26tzom%3D420">paper</a>. This paper is also the foundation of our investigation into this "scLandscape" idea. 
+2. EMT simulation - based on this <a href="https://www.pnas.org/content/110/45/18144">paper</a>.
+3. <a href="https://www.nature.com/articles/s41588-019-0489-5?proof=t">Real EMT data (CROP-seq)</a>
+4. Barcoded LARRY dataset (<a href="https://science.sciencemag.org/content/367/6479/eaaw3381">Weinreb, *Science* 2020</a>)
+
 #### Problems I am facing and questions that need to be answered
 1. Training accuracy in spaces of uneven density.
-2. What is the best way to infer trajectory in the absence of defined trajectories. In simulations, I have been  
-
+2. What is the best way to infer trajectory in the absence of defined trajectories. In simulations, I have these built-in.
 
 #### Final thoughts on collaboration
-- Maybe we can use this GitHub repo to asynchronously update each other on our progress? 
+- Maybe we can use this GitHub repo to asynchronously update each other on our progress?
 - This is my main project so any ideas you have that you feel like you don't have enough bandwidth for, just let me know and we can coordinate.
