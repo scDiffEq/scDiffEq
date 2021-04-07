@@ -1,0 +1,16 @@
+LICENSE
+README.md
+setup.py
+datasets/README.md
+notebooks/EMT_Simulation.ipynb
+notebooks/README.md
+notebooks/EMT_simulation/EMT_timecourse_data.csv
+notebooks/EMT_simulation/reaching_epithelial.csv
+notebooks/EMT_simulation/reaching_hybrid.csv
+notebooks/EMT_simulation/reaching_mesenchymal.csv
+scdiffeq/__init__.py
+scdiffeq.egg-info/PKG-INFO
+scdiffeq.egg-info/SOURCES.txt
+scdiffeq.egg-info/dependency_links.txt
+scdiffeq.egg-info/requires.txt
+scdiffeq.egg-info/top_level.txt
