@@ -25,6 +25,7 @@ setup(
         "numpy>=1.19.2",
         "pandas>=1.1.2",
         "torchdiffeq>=0.2.1",
+	"scprep>=1.1.0",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
