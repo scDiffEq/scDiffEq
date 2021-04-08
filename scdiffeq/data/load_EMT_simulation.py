@@ -32,5 +32,4 @@ def load_EMT_simulation(save_local=False):
     if save_local != False:
         adata.write(str(save_local) + "EMT_simulation.h5ad")
         
-
     return adata

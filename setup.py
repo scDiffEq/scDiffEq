@@ -26,6 +26,7 @@ setup(
         "pandas>=1.1.2",
         "torchdiffeq>=0.2.1",
 	"scprep>=1.1.0",
+	"nb-black>=1.0.7",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
