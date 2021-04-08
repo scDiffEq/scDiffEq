@@ -109,6 +109,19 @@ def load_from_GCP_bucket(gcloud_path, save_destination="./", keep_local_copy=Tru
     """
     Given a path to an object in a google bucket, this function downloads the
     file and returns the file path to be passed onto a data reading function.
+    
+    Parameters:
+    -----------
+    gcloud_path
+        Path to google bucket item (i.e., gs://some/data)
+    
+    save_destination
+        Where the saved filed should go. 
+        
+    Returns:
+    --------
+    file
+        path to a file that was just downlaoded
     """
 
     file = "".join([save_destination, os.path.basename(gcloud_path)])
@@ -122,9 +135,6 @@ def load_from_GCP_bucket(gcloud_path, save_destination="./", keep_local_copy=Tru
         )
         os.system(gcloud_download_command)
 
-    if keep_local_copy == False:
-        os.remove(file)
-
     return file
 
 
@@ -132,11 +142,33 @@ def load_adata_from_GCP_bucket(
     gcloud_path, save_destination="./", keep_local_copy=True
 ):
 
-    """"""
+    """
+    Loads AnnData from a Google Bucket location. Uses the general function, load_from_GCP_bucket which can grab any file from a bucket and reads it as AnnData.
+    
+    Parameters:
+    -----------
+    gcloud_path
+        Path to google bucket item (i.e., gs://some/data)
+    
+    save_destination
+        Where the saved filed should go. 
+    
+    keep_local_copy
+        If False, the file will be erased from disk once loaded into memory. 
+    
+    Returns:
+    --------
+    adata
+        AnnData object
+    
+    """
 
     downloaded_file = load_from_GCP_bucket(
         gcloud_path, save_destination, keep_local_copy
     )
     adata = a.read_h5ad(downloaded_file)
+    
+    if keep_local_copy == False:
+        os.remove(downloaded_file)
 
     return adata
