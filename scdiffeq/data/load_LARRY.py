@@ -24,5 +24,6 @@ def load_LARRY(save_destination="./", keep_local_copy=True):
     
     data_path = "gs://klein-data-science-2020/LARRY.h5ad"
     adata = utils.load_adata_from_GCP_bucket(data_path, save_destination, keep_local_copy)
+    print(adata)
     
     return adata
