@@ -1,5 +1,5 @@
 
-from . import data_loader_utils as utils
+from . import _data_loader_utils as utils
 
 import os
 import scanpy as sc
