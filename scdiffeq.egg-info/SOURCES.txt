@@ -1,7 +1,6 @@
 LICENSE
 README.md
 setup.py
-datasets/README.md
 notebooks/EMT_Simulation.ipynb
 notebooks/README.md
 notebooks/EMT_simulation/EMT_timecourse_data.csv
@@ -14,3 +13,10 @@ scdiffeq.egg-info/SOURCES.txt
 scdiffeq.egg-info/dependency_links.txt
 scdiffeq.egg-info/requires.txt
 scdiffeq.egg-info/top_level.txt
+scdiffeq/data/__init__.py
+scdiffeq/data/_data_loader_utils.py
+scdiffeq/data/load_EMT_simulation.py
+scdiffeq/data/load_LARRY.py
+scdiffeq/machine_learning/__init__.py
+scdiffeq/plotting/__init__.py
+scdiffeq/utilities/__init__.py
