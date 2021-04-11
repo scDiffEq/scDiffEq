@@ -8,3 +8,6 @@ __email__ = ', '.join([
 ])
 
 from . import data
+from . import machine_learning as ml
+from . import plotting  as pl
+from . import utilities as ut
