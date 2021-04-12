@@ -89,7 +89,7 @@ def loader(func, *args, **kwargs):
         log.debug(
             "Loading cached {}({}, {}) dataset".format(func.__name__, args, kwargs)
         )
-        adata = anndata.read_h5ad(filepath)
+        adata = a.read_h5ad(filepath)
         adata.__from_cache__ = True
         return adata
     else:

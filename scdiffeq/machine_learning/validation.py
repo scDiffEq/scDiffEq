@@ -17,7 +17,7 @@ def check_loss_whole_trajectory(adata, validation_data_object):
     
     with torch.no_grad():
         validation_batch = get_minibatch(validation_data_object)
-        adata.uns["latest_validation_predictions"], validation_loss = minibatch_odeint(adata, validation_batch, mode="validation")
+        adata.uns["latest_validation_predictions"], validation_loss = sc_odeint(adata, validation_batch, mode="validation")
         
         training_error = calc_perc_error(adata, "training")
         validation_error = calc_perc_error(adata, "validation")
