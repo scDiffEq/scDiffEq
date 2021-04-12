@@ -1,5 +1,6 @@
 
 import numpy as np
+from . import general_utility_functions as util
 from .subsetting_functions import subset_adata
 from .subsetting_functions import randomly_subset_trajectories
 
@@ -149,26 +150,6 @@ class _data_splitting:
         self.validation = validation
         self.test = test
 
-
-def _ensure_array(adata):
-
-    """
-    Parameters:
-    -----------
-    adata
-        AnnData object
-
-    Returns:
-    --------
-    None, modified in place.
-    """
-
-    try:
-        adata.X = adata.X.toarray()
-    except:
-        pass
-
-
 def split_test_train(
     adata,
     trajectory_column="trajectory",
@@ -216,7 +197,7 @@ def split_test_train(
     """
 
     # ensure the data is not in sparse format
-    _ensure_array(adata)
+    util.ensure_array(adata)
 
     #
     train, validation, test = _test_train_split_by_trajectory(
