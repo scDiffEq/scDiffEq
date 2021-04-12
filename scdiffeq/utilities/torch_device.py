@@ -37,6 +37,6 @@ def torch_device(array, device=set_device()):
     
     """
     
-    tensor = torch.Tensor(numpy_array).to(device)
+    tensor = torch.Tensor(array).to(device)
 
     return tensor

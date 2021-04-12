@@ -1,3 +1,7 @@
+import anndata as a
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def ensure_array(adata):
 
@@ -54,3 +58,23 @@ def load_development_libraries():
 
     
     return odeint, torch, np, pd, plt, nn, a, os, time, optim, sp, PCA, 
+
+
+
+from ..machine_learning.pca import principle_component_analysis as pca
+
+def use_embedding(adata, emb="X_pca"):
+
+    """use the dimensionally reduced matrix as the adata.X data matrix."""
+
+    try:
+        adata.obsm["X_pca"]
+    except:
+        pca(adata)
+
+    bdata = a.AnnData(adata.obsm[emb])
+    bdata.obs = adata.obs
+    bdata.uns = adata.uns
+    pca(bdata)
+    
+    return bdata

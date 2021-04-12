@@ -110,3 +110,26 @@ def randomly_subset_trajectories(adata, set_of_trajectories, subset):
     )
 
     return random_subset_of_trajectories
+
+def isolate_trajectory(data_object, trajectory_number):
+
+    """
+    Get the entire obs df for a given trajectory.
+    
+    Parameters:
+    -----------
+    data_object
+        assumes the the object contains data_object.obs
+    
+    trajectory_number
+        number that is assumed to be present within data_object.obs.trajectory
+        
+    Returns:
+    --------
+    df
+        data_object.obs dataframe subset for only the trajectory queried
+    """
+
+    df = data_object.obs.loc[data_object.obs.trajectory == trajectory_number]
+
+    return df
