@@ -16,7 +16,7 @@ def presets_for_plotting_multiple_trajectories(ax, title, x, y, xlab, ylab):
 
     return ax
 
-def _single_fig_presets(title, x_lab, y_lab, size=(10,8), title_fontsize=20, title_adjustment_factor=1.1, axis_label_fontsize=15):
+def single_fig_presets(title, x_lab, y_lab, size=(10,8), title_fontsize=20, title_adjustment_factor=1.1, axis_label_fontsize=15):
     
     """
     presets for one single figure to look nice

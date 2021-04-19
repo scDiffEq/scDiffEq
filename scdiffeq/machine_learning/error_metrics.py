@@ -8,10 +8,10 @@ def calc_perc_error(adata, subset):
     if subset == "test":
         
         try:
-            pred_y = adata.uns["latest_test_predictions"].detach().numpy()
+            pred_y = adata.uns["latest_test_predictions"].cpu().detach().numpy()
         except:
             pred_y = adata.uns["latest_test_predictions"]
-        true_y = adata.uns["latest_test_true_y"].detach().numpy()
+        true_y = adata.uns["latest_test_true_y"].cpu().detach().numpy()
         
         try:
             pred_y = pred_y.reshape(true_y.shape[0], true_y.shape[1], true_y.shape[2])
@@ -22,21 +22,21 @@ def calc_perc_error(adata, subset):
     elif subset == "training":
         
         try:
-            pred_y = adata.uns["latest_training_predictions"].detach().numpy()
+            pred_y = adata.uns["latest_training_predictions"].cpu().detach().numpy()
         except:
             pred_y = adata.uns["latest_training_predictions"]
         try:
-            true_y = adata.uns["latest_training_true_y"].detach().numpy()
+            true_y = adata.uns["latest_training_true_y"].cpu().detach().numpy()
         except:
             true_y = adata.uns["latest_training_true_y"]
             
     elif subset == "validation":  
         try:
-            pred_y = adata.uns["latest_validation_predictions"].detach().numpy()
+            pred_y = adata.uns["latest_validation_predictions"].cpu().detach().numpy()
         except:
             pred_y = adata.uns["latest_validation_predictions"]
         try:
-            true_y = adata.uns["latest_validation_true_y"].detach().numpy()
+            true_y = adata.uns["latest_validation_true_y"].cpu().detach().numpy()
         except:
             true_y = adata.uns["latest_validation_true_y"]
         

@@ -25,3 +25,5 @@ from .general_utility_functions import load_development_libraries as devlibs
 from .general_utility_functions import use_embedding
 
 from .save_adata import write_h5ad
+
+from .load_model import load_model

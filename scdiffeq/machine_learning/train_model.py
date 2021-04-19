@@ -23,8 +23,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from ..plotting.plotting_presets import _single_fig_presets as presets
-
+from ..plotting.plotting_presets import single_fig_presets as presets
 
 def running_mean(x, N):
     
@@ -168,7 +167,7 @@ def save(adata, plot_training):
     training_loss_path, validation_loss_path, model_vector_field = save_model(adata)
     
     if plot_training==True:
-        plot_progress(adata, training_loss_path, validation_loss_path)
+        plot_training_validation_loss(adata, training_loss_path, validation_loss_path)
             
     write_h5ad(adata)
     

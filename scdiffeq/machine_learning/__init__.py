@@ -12,3 +12,5 @@ from .sc_odeint import sc_odeint
 from .get_minibatch import get_minibatch
 from .ode_funcs import ode_func
 from .train_model import train_model
+from .pca import principle_component_analysis as pca
+from .evaluate import evaluate_test_traj as evaluate

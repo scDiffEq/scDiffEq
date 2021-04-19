@@ -5,7 +5,7 @@ from torchdiffeq import odeint
 def _check_increasing_time_minibatch(minibatch, i):
 
     """I can't figure out why, but sometimes, after the window is generated, t still comes out with duplicates. This function will be a bandaid until I figure that out."""
-    if len(np.unique(minibatch[i].t)) == len(minibatch[i].t):
+    if len(np.unique(minibatch[i].t.cpu())) == len(minibatch[i].t.cpu()):
 
         return True
     

@@ -57,7 +57,7 @@ def load_development_libraries():
     import vintools as v
 
     
-    return odeint, torch, np, pd, plt, nn, a, os, time, optim, sp, PCA, 
+    return odeint, torch, np, pd, plt, nn, a, os, time, optim, sp, PCA, v
 
 
 
