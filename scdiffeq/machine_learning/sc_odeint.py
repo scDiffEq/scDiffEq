@@ -9,7 +9,7 @@ def _check_increasing_time_minibatch(minibatch, i):
 
         return True
     
-def sc_odeint(adata, minibatch, mode):
+def sc_odeint(adata, minibatch, mode, use_embedding):
     
     """
     The main ML function for the original neural ODEs pytorch implementation. 
@@ -35,14 +35,24 @@ def sc_odeint(adata, minibatch, mode):
     
     predicted_y_minibatch = []
     minibatch_y = []
-
-    for i in range(len(minibatch)):
+    
+    if use_embedding == True:
+        for i in range(len(minibatch)):
         
-        if _check_increasing_time_minibatch(minibatch, i) == True:
-                
-            predicted_y = odeint(adata.uns["odefunc"], minibatch[i].y0, minibatch[i].t, method="euler").to(adata.uns["device"])
-            predicted_y_minibatch.append(predicted_y)
-            minibatch_y.append(minibatch[i].y)
+            if _check_increasing_time_minibatch(minibatch, i) == True:
+
+                predicted_y = odeint(adata.uns["odefunc"], minibatch[i].emb[0], minibatch[i].t, method="euler").to(adata.uns["device"])
+                predicted_y_minibatch.append(predicted_y)
+                minibatch_y.append(minibatch[i].emb)
+        
+    else:
+        for i in range(len(minibatch)):
+
+            if _check_increasing_time_minibatch(minibatch, i) == True:
+
+                predicted_y = odeint(adata.uns["odefunc"], minibatch[i].y0, minibatch[i].t, method="euler").to(adata.uns["device"])
+                predicted_y_minibatch.append(predicted_y)
+                minibatch_y.append(minibatch[i].y)
         
     predicted_y_minibatch = torch.stack(predicted_y_minibatch)
     minibatch_y = torch.stack(minibatch_y)        

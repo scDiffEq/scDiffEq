@@ -8,7 +8,7 @@ from torchdiffeq import odeint
 from sklearn.decomposition import PCA
 from .error_metrics import calc_perc_error
 import torch
-
+import numpy as np
 
 def isolate_trajectory(data_object, trajectory_number):
 
@@ -56,7 +56,7 @@ def evaluate_test_traj(adata, device='cpu', data_subset="test", time_name="time"
         traj_df = isolate_trajectory(data_object_subset, i)
 
         y = torch.Tensor(
-            data_object_subset.data[traj_df.index.values.astype(int)]  # .toarray()
+            data_object_subset.emb[traj_df.index.values.astype(int)]  # .toarray()
         )
         y0 = torch.Tensor(y[0])
         t = torch.Tensor(traj_df.time.values)
@@ -65,12 +65,12 @@ def evaluate_test_traj(adata, device='cpu', data_subset="test", time_name="time"
             device = 'cuda:0'
         else:
             pass
-            
-
-        device=set_device(gpu='0')
-        predicted_y = odeint(adata.uns["odefunc"].to(device), y0.to(device), t.to(device)).to(device)
-        predictions.append(predicted_y)
-        true_y.append(y)
+        
+        if len(np.unique(t.cpu())) == len(t.cpu()):
+            device=set_device(gpu='0')
+            predicted_y = odeint(adata.uns["odefunc"].to(device), y0.to(device), t.to(device)).to(device)
+            predictions.append(predicted_y)
+            true_y.append(y)
             
 #         except:
 #             pass

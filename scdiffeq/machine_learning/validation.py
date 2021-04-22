@@ -9,7 +9,7 @@ from .get_minibatch import get_minibatch
 from .sc_odeint import sc_odeint
 from ..utilities.subsetting_functions import isolate_trajectory
     
-def check_loss_whole_trajectory(adata, validation_data_object):
+def check_loss_whole_trajectory(adata, validation_data_object, use_embedding):
     
     """"""
     
@@ -17,7 +17,7 @@ def check_loss_whole_trajectory(adata, validation_data_object):
     
     with torch.no_grad():
         validation_batch = get_minibatch(validation_data_object)
-        adata.uns["latest_validation_predictions"], validation_loss = sc_odeint(adata, validation_batch, mode="validation")
+        adata.uns["latest_validation_predictions"], validation_loss = sc_odeint(adata, validation_batch, mode="validation", use_embedding=use_embedding)
         
         training_error = calc_perc_error(adata, "training")
         validation_error = calc_perc_error(adata, "validation")

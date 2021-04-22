@@ -182,6 +182,7 @@ def train_model(
     device=set_device(),
     plot_training=False,
     plot_smoothing_factor=3,
+    use_embedding=False,
 ):
 
     """
@@ -242,14 +243,14 @@ def train_model(
         
         adata.uns["optimizer"].zero_grad()
         batch = get_minibatch(data_object.train)
-        adata.uns["latest_training_predictions"],training_loss = sc_odeint(adata, batch, mode="train")
+        adata.uns["latest_training_predictions"],training_loss = sc_odeint(adata, batch, mode="train", use_embedding=use_embedding)
         adata.uns["optimizer"].step()
         adata.uns["time_meter"].update(time.time() - t0)
         adata.uns["epoch_counter"] = range(1, epoch + 1)
 
         
         if epoch % validation_frequency == 0:
-            validation_loss = check_loss(adata, data_object.validation)
+            validation_loss = check_loss(adata, data_object.validation, use_embedding=use_embedding)
             save(adata, plot_training)
             
             t = time.time()
