@@ -48,7 +48,7 @@ def evaluate_test_traj(adata, device='cpu', data_subset="test", time_name="time"
     predictions = []
     true_y = []
 
-    data_object_subset = subset_adata(adata, data_subset, time_name="time")
+    data_object_subset = subset_adata(adata, data_subset, time_name=time_name)
     data_object_subset.obs = data_object_subset.obs.reset_index()
     trajectories = data_object_subset.obs.trajectory.unique()
 
@@ -56,7 +56,7 @@ def evaluate_test_traj(adata, device='cpu', data_subset="test", time_name="time"
         traj_df = isolate_trajectory(data_object_subset, i)
 
         y = torch.Tensor(
-            data_object_subset.emb[traj_df.index.values.astype(int)]  # .toarray()
+            data_object_subset.data[traj_df.index.values.astype(int)]  # .toarray()
         )
         y0 = torch.Tensor(y[0])
         t = torch.Tensor(traj_df.time.values)
@@ -72,9 +72,6 @@ def evaluate_test_traj(adata, device='cpu', data_subset="test", time_name="time"
             predictions.append(predicted_y)
             true_y.append(y)
             
-#         except:
-#             pass
-
     predictions_ = torch.stack(predictions)
     true_y = torch.stack(true_y)
     

@@ -67,8 +67,7 @@ def plot_predictions(adata, subset, savename):
             ),
             2,
         )
-        
-        
+
         presets(title="Predicted Trajectories", x_lab="$X$", y_lab="$Y$")
         plt.scatter( 
             subset_data.data[:, 0],
@@ -85,7 +84,7 @@ def plot_predictions(adata, subset, savename):
             s=2,
             zorder=2,
             alpha=1,
-            c="mediumpurple",
+            c="navy",
             label="Predicted Trajectory",
         )
 
@@ -95,7 +94,7 @@ def plot_predictions(adata, subset, savename):
             s=20,
             zorder=2,
             alpha=1,
-            c="palevioletred",
+            c="orange",
             label="y0",
         )
         
