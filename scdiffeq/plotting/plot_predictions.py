@@ -55,6 +55,7 @@ def plot_predictions(adata, subset, savename):
             c="palevioletred",
             label="y0",
         )
+        print("plotting low-dimensional projection of predictions...")
 
 
         

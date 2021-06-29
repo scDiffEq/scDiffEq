@@ -103,6 +103,8 @@ def randomly_subset_trajectories(adata, set_of_trajectories, subset):
         Sampled from the original set of trajectories
 
     """
+    
+    set_of_trajectories = adata.obs.trajectory.unique()
 
     size = int(round(subset * len(set_of_trajectories)))
     random_subset_of_trajectories = np.sort(

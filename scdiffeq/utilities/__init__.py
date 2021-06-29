@@ -17,7 +17,7 @@ from .subsetting_functions import subset_adata
 from .subsetting_functions import randomly_subset_trajectories
 from .subsetting_functions import isolate_trajectory
 
-from .split_test_train import split_test_train
+from ._split_test_train import split_test_train
 
 from .downsample_adata import downsample_adata
 
@@ -27,3 +27,12 @@ from .general_utility_functions import use_embedding
 from .save_adata import write_h5ad
 
 from .load_model import load_model
+
+from ._read_csv_to_anndata import _read_csv_to_anndata as read_csv_to_adata
+
+from ._kmeans import get_kmeans_inertia
+from ._kmeans import kmeans
+
+from ._add_noise import add_noise
+
+from ._preprocess import preprocess

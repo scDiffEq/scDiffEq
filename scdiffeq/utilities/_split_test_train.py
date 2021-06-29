@@ -195,6 +195,12 @@ def split_test_train(
         data class with three subsets of data: train, test, and validation
 
     """
+    
+    try:
+        adata.obs["trajectory"]
+
+    except:
+        adata.obs["trajectory"] = 0
 
     # ensure the data is not in sparse format
     util.ensure_array(adata)

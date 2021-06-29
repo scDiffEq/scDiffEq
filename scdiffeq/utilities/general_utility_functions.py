@@ -61,7 +61,7 @@ def load_development_libraries():
 
 
 
-from ..machine_learning.pca import principle_component_analysis as pca
+from ..tools._pca import pca
 
 def use_embedding(adata, emb="X_pca"):
 

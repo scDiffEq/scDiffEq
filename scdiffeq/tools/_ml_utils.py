@@ -78,3 +78,69 @@ def save_model_training_statistics(adata):
     _save_model(adata, results_folder)
         
     return training_loss_path, validation_loss_path, model_vector_field
+
+### training utilities
+
+def make_run_id_signature(signature_length=10):
+
+    user = getpass.getuser()
+    today = date.today().isoformat()
+    letters = string.ascii_uppercase
+    rand = ''.join(random.choice(letters) for i in range(signature_length))
+
+    signature = "nodescape_" + user + "_" + today + rand
+
+    return signature
+
+def add_run_id(adata, run_id):
+    
+    if run_id:
+        adata.uns["run_id"] = run_id
+    else:
+        adata.uns["run_id"] = make_run_id_signature()
+
+def preflight(adata, run_id, learning_rate, validation_frequency, plot_smoothing_factor, device):
+
+    """Adds various required components / formatting to adata object. Copies all metadata to AnnData to have one reference for future use"
+    
+    
+    Parameters:
+    -----------
+    adata
+        AnnData object
+        
+    Returns:
+    --------
+    
+    None
+        modifies AnnData object in place. 
+    """
+
+    print("Running preflight setup...")
+    
+    
+    if adata.uns["odefunc"]:
+        func = adata.uns["odefunc"]
+    else:
+        print("Please specify a neural network function to be trained")
+
+    # adds adata.uns["run_id"]
+    add_run_id(adata, run_id)
+    
+    adata.uns["number_of_timepoints"] = adata.obs.shape[0] / adata.obs.trajectory.nunique()
+    adata.uns["data_dimensionality"] = len(adata.var)
+    adata.uns["optimizer"] = optimizer = optim.RMSprop(
+        func.parameters(), lr=learning_rate
+    )
+
+    adata.uns["training_loss"] = np.array([])
+    adata.uns["validation_epoch_counter"] = []
+    adata.uns["validation_loss"] = np.array([])
+
+    adata.uns["validation_frequency"] = validation_frequency
+    adata.uns["plot_smoothing_factor"] = plot_smoothing_factor
+    adata.uns["epoch_counter"] = epoch_counter = 0
+    adata.uns["time_meter"] = time_meter = RunningAverageMeter(0.97)
+    adata.uns["loss_meter"] = loss_meter = RunningAverageMeter(0.97)
+
+    adata.uns["device"] = device

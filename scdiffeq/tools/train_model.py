@@ -13,17 +13,20 @@ import torch.optim as optim
 #### IMPORT INTERNAL FUNCTIONS
 from ..utilities.torch_device import set_device
 from ..utilities.save_adata import write_h5ad
-from .ml_utils import RunningAverageMeter
+from ._ml_utils import RunningAverageMeter
 from .validation import check_loss_whole_trajectory as check_loss
 from .get_minibatch import get_minibatch
 from .sc_odeint import sc_odeint
-from .ml_utils import save_model_training_statistics as save_model
+from ._ml_utils import save_model_training_statistics as save_model
 
 import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from ..plotting.plotting_presets import single_fig_presets as presets
+
+
+
 
 def running_mean(x, N):
     
@@ -104,7 +107,7 @@ def make_run_id_signature(signature_length=10):
     letters = string.ascii_uppercase
     rand = ''.join(random.choice(letters) for i in range(signature_length))
 
-    signature = "nodescape_" + user + "_" + today + rand
+    signature = "_".join(["scdiffeq", user, today, rand])
 
     return signature
 
@@ -171,10 +174,27 @@ def save(adata, plot_training):
             
     write_h5ad(adata)
     
+    
+def plot_each_gene(adata, columns=2):
+    
+    down = round(len(adata.var) / columns)
+    fig, axs = plt.subplots(columns, down)
+
+    count = 0
+
+    for i in range(columns):
+        for j in range(down):
+            gene_pred = adata.uns["latest_training_predictions"][:, :, count].T
+            gene_adata = adata[:, count]
+            axs[i, j].plot(gene_adata.X, c="blue")
+            axs[i, j].plot(gene_pred.detach().numpy(), c="orange")
+            count += 1
+            
+    plt.show()
+    
 def train_model(
     adata,
     data_object,
-    how="trajectory",
     run_id=None,
     learning_rate=1e-03,
     epochs=1,
@@ -199,9 +219,6 @@ def train_model(
     data_object
         Formatted using the function n.ml.split_test_train(adata)
     
-    how
-        trajectory
-        
     run_id
         identifier for savenames related to the experiment
         default=None
@@ -236,7 +253,9 @@ def train_model(
     preflight(adata, run_id, learning_rate, validation_frequency, plot_smoothing_factor, device)
     
     print("Preflight complete. Beginning training...")
-    
+    print("")
+    print("Epoch | Loss")
+    print("------|--------")
     t0 = time.time()
     
     for epoch in range(1, epochs + 1):
@@ -247,14 +266,27 @@ def train_model(
         adata.uns["optimizer"].step()
         adata.uns["time_meter"].update(time.time() - t0)
         adata.uns["epoch_counter"] = range(1, epoch + 1)
-
         
         if epoch % validation_frequency == 0:
-            validation_loss = check_loss(adata, data_object.validation, use_embedding=use_embedding)
-            save(adata, plot_training)
             
-            t = time.time()
-            current = (t - t0) / 3600
+            if epoch >= 1000:
+                print(epoch, " |", '{0:.4f}'.format(training_loss.item()))
+            elif epoch >= 100:
+                print(epoch, "  |", '{0:.4f}'.format(training_loss.item()))
+            else:
+                print(epoch, "   |", '{0:.4f}'.format(training_loss.item()))
+        
+        if epoch % 500 == 0:
+            plot_each_gene(adata)
+            
+            
+            
+#         if epoch % validation_frequency == 0:
+#             validation_loss = check_loss(adata, data_object.validation, use_embedding=use_embedding)
+#             save(adata, plot_training)
+            
+#             t = time.time()
+#             current = (t - t0) / 3600
 
-            print("Time elapsed:", str(current), "h")
-            print("Average time per epoch:", str(current / adata.uns["epoch_counter"][-1]), "h")
+#             print("Time elapsed:", str(current), "h")
+#             print("Average time per epoch:", str(current / adata.uns["epoch_counter"][-1]), "h")

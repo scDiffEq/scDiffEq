@@ -76,3 +76,40 @@ def dual_plot_presets(
 
     subplot_presets(ax1, left_x, left_y, x_lab_left, y_lab_left, size)
     subplot_presets(ax2, right_x, right_y, x_lab_right, y_lab_right, size)
+    
+    
+def annotate_scatterplot(
+    points_to_be_annotated,
+    labels,
+    magnitude=[1, 1],
+    direction=[1, 1],
+    point_offset=None,
+):
+
+    """
+    points_to_be_annotated
+        list of coordinate points to be annotated.
+    labels
+        list of str labels ordered to match the points to be annotated.
+        
+    magnitude (optional)
+    
+    direction (optional)
+        x,y tuple
+    """
+
+    for i, point in enumerate(points_to_be_annotated):
+
+        x, y = point[0] + point_offset, point[1] + point_offset
+
+        offset_x, offset_y = (
+            x + magnitude[i][0] * direction[i][0],
+            y + magnitude[i][1] * direction[i][1],
+        )
+
+        plt.annotate(
+            labels[i],
+            xy=(x, y),
+            xytext=(offset_x, offset_y),
+            arrowprops=dict(arrowstyle="-"),
+        )

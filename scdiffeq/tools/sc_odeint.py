@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from torchdiffeq import odeint
+from ._loss_functions import sinkhorn_loss as sinkhorn
 
 def _check_increasing_time_minibatch(minibatch, i):
 
@@ -56,8 +57,8 @@ def sc_odeint(adata, minibatch, mode, use_embedding):
         
     predicted_y_minibatch = torch.stack(predicted_y_minibatch)
     minibatch_y = torch.stack(minibatch_y)        
-    loss = torch.sum(torch.abs(predicted_y_minibatch - minibatch_y))
-    
+#     loss = torch.sum(torch.abs(predicted_y_minibatch - minibatch_y))
+    loss = sinkhorn(predicted_y_minibatch, minibatch_y)
     if mode == "train":
         loss.backward()
 

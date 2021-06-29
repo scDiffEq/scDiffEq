@@ -10,7 +10,12 @@ __email__ = ', '.join([
 
 from .sc_odeint import sc_odeint
 from .get_minibatch import get_minibatch
-from .ode_funcs import ode_func
+
+from ._diffeq_funcs import ode_func as ode
+from ._diffeq_funcs import sde_func as sde
+
 from .train_model import train_model
-from .pca import principle_component_analysis as pca
+
+from ._pca import pca
+
 from .evaluate import evaluate_test_traj as evaluate
