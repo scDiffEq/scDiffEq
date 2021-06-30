@@ -1,5 +1,5 @@
 
-from . import data_loader_utils as utils
+from . import _data_loader_utils as utils
 
 import os
 import scanpy as sc
@@ -32,5 +32,4 @@ def load_EMT_simulation(save_local=False):
     if save_local != False:
         adata.write(str(save_local) + "EMT_simulation.h5ad")
         
-
     return adata

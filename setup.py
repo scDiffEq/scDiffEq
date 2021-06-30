@@ -14,9 +14,10 @@ setup(
     description='scdiffeq: single cell dynamics using neural ODEs and variations thereof.',
     packages = [
         'scdiffeq',
-#        'scdiffeq.machine_learning',
-#        'scdiffeq.plotting',
-#        'scdiffeq.utilities',
+        'scdiffeq.tools',
+        'scdiffeq.plotting',
+        'scdiffeq.utilities',
+	'scdiffeq.data',
     ],
     install_requires=[
         "anndata>=0.7.1",
@@ -26,6 +27,7 @@ setup(
         "pandas>=1.1.2",
         "torchdiffeq>=0.2.1",
 	"scprep>=1.1.0",
+	"nb-black>=1.0.7",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",

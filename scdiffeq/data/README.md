@@ -1,4 +1,15 @@
-# Dataset API
+# Data and Dataset API
+
+To load the LARRY dataset, use the following command:
+```
+adata = sdq.data.load_LARRY()
+```
+
+To load the EMT simulation dataset, run the following command:
+```
+adata = sdq.data.load_EMT_simultion()
+```
+---
 
 Currently, there are four datasets we are currently interested in. The first dataset (**1**) is a simple, one-attractor, hyperparabola model defined by a set of two ordinary differential equations. The second dataset (**2**) is a simulation based on the biological phenomena, epithelial to mesenchymal transition (EMT), which has been studied for decades and accumulated a lot of empirical evidence such that simple to complex simulations have been created. The third dataset (**3**) is a real scRNA-seq dataset collected from a cell-line based model of EMT. The fourth dataset (**4**) is what will serve as a benchmark for this method; the lineages are traced using lentiviral barcodes, thus we know the ground truth for lineage prediction models. 
 

@@ -1,9 +1,21 @@
 
-import atexit
-import logging
-import os
 import shutil
 import tempfile
+import decorator
+import hashlib
+import logging
+import os
+import atexit
+import anndata as a
+import scanpy as sc
+
+
+"""
+Data Loader Utils
+--------------------
+Author: Michael E. Vinyard
+https://github.com/mvinyard
+"""
 
 log = logging.getLogger("scdiffeq")
 
@@ -39,12 +51,6 @@ def no_cleanup():
     """Don't delete temporary data files on exit."""
     atexit.unregister(_cleanup)
 
-import anndata
-import decorator
-import hashlib
-import logging
-import os
-import scanpy as sc
 
 log = logging.getLogger("scdiffeq")
 
@@ -74,13 +80,16 @@ def _cache_path(func, *args, **kwargs):
 
 @decorator.decorator
 def loader(func, *args, **kwargs):
-    """Decorate a data loader function."""
+    """
+    Decorate a data loader function.
+    Taken from SingleCellOpenProblems (https://github.com/SingleCellOpenProblems)
+    """
     filepath = _cache_path(func, *args, **kwargs)
     if os.path.isfile(filepath):
         log.debug(
             "Loading cached {}({}, {}) dataset".format(func.__name__, args, kwargs)
         )
-        adata = anndata.read_h5ad(filepath)
+        adata = a.read_h5ad(filepath)
         adata.__from_cache__ = True
         return adata
     else:
@@ -95,40 +104,71 @@ def loader(func, *args, **kwargs):
         return adata
 
 
-def filter_genes_cells(adata):
-    """Remove empty cells and genes."""
-    sc.pp.filter_genes(adata, min_cells=1)
-    sc.pp.filter_cells(adata, min_counts=2)
+def load_from_GCP_bucket(gcloud_path, save_destination="./", keep_local_copy=True):
+
+    """
+    Given a path to an object in a google bucket, this function downloads the
+    file and returns the file path to be passed onto a data reading function.
+    
+    Parameters:
+    -----------
+    gcloud_path
+        Path to google bucket item (i.e., gs://some/data)
+    
+    save_destination
+        Where the saved filed should go. 
+        
+    Returns:
+    --------
+    file
+        path to a file that was just downlaoded
+    """
+
+    file = "".join([save_destination, os.path.basename(gcloud_path)])
+
+    if os.path.exists(file) == True:
+        pass
+    else:
+        gsutil_command = "gsutil -m cp -r"
+        gcloud_download_command = " ".join(
+            [gsutil_command, gcloud_path, save_destination]
+        )
+        os.system(gcloud_download_command)
+
+    return file
 
 
-def subsample_even(adata, n_obs, even_obs):
+def load_adata_from_GCP_bucket(
+    gcloud_path, save_destination="./", keep_local_copy=True
+):
+
+    """
+    Loads AnnData from a Google Bucket location. Uses the general function, load_from_GCP_bucket which can grab any file from a bucket and reads it as AnnData.
+    
+    Parameters:
+    -----------
+    gcloud_path
+        Path to google bucket item (i.e., gs://some/data)
+    
+    save_destination
+        Where the saved filed should go. 
+    
+    keep_local_copy
+        If False, the file will be erased from disk once loaded into memory. 
+    
+    Returns:
+    --------
+    adata
+        AnnData object
     
     """
-    Subsample a dataset evenly across an obs.
-    Parameters
-    ----------
-    adata : AnnData
-    n_obs : int
-        Total number of cells to retain
-    even_obs : str
-        `adata.obs[even_obs]` to be subsampled evenly across partitions.
-    Returns
-    -------
-    adata : AnnData
-        Subsampled AnnData object
-    """
-    values = adata.obs[even_obs].unique()
-    adata_out = None
-    n_obs_per_value = n_obs // len(values)
-    for v in values:
-        adata_subset = adata[adata.obs[even_obs] == v].copy()
-        sc.pp.subsample(adata_subset, n_obs=min(n_obs_per_value, adata_subset.shape[0]))
-        if adata_out is None:
-            adata_out = adata_subset
-        else:
-            adata_out = adata_out.concatenate(adata_subset, batch_key="_obs_batch")
 
-    adata_out.uns = adata.uns
-    adata_out.varm = adata.varm
-    adata_out.varp = adata.varp
-    return adata_out
+    downloaded_file = load_from_GCP_bucket(
+        gcloud_path, save_destination, keep_local_copy
+    )
+    adata = a.read_h5ad(downloaded_file)
+    
+    if keep_local_copy == False:
+        os.remove(downloaded_file)
+
+    return adata
