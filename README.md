@@ -1,6 +1,6 @@
 # Single-Cell Neural Differential Equations
 
-![scdiffeq_logo](https://i.imgur.com/pwrobvs.png)
+![scdiffeq_logo](https://i.imgur.com/PS28s1o.png)
 
 * <a href="https://docs.google.com/document/d/1gCAEqp0lZsxt3LqhKeaeSIIqthrAg3IKkxWXP1sOvgs/edit#">**Manuscript in progress**</a>
 * <a href="https://github.com/pinellolab/sc-neural-ODEs/notebooks">**Example notebooks**</a>
