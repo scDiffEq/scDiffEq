@@ -19,3 +19,6 @@ from .train_model import train_model
 from ._pca import pca
 
 from .evaluate import evaluate_test_traj as evaluate
+
+from ._calculate_cell_metrics import _count_genes as count_genes
+from ._calculate_cell_metrics import _calculate_potency as calculate_potency
