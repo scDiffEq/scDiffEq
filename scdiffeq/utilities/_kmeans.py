@@ -1,9 +1,9 @@
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from ..plotting.plotting_presets import single_fig_presets as fig_presets
-from ..plotting.plotting_presets import annotate_scatterplot
+from ..plotting._plotting_presets import _single_fig_presets
+from ..plotting._plotting_presets import _annotate_scatterplot
 
-def get_kmeans_inertia(X, k_max=11):
+def _get_kmeans_inertia(X, k_max=11):
 
     """
     Calculates the inertia of various $k$-means clustering solutions at different values of $k$.
@@ -26,7 +26,7 @@ def get_kmeans_inertia(X, k_max=11):
         kmeans.fit(X)
         wcss.append(kmeans.inertia_)
 
-    fig_presets(
+    _single_fig_presets(
         title="$k$-means Clustering Elbow Method",
         x_lab="Number of clusters ($k$)",
         y_lab="Inertia (WCSS)",
@@ -35,7 +35,7 @@ def get_kmeans_inertia(X, k_max=11):
     plt.plot(range(1, k_max), wcss, lw="4", c="mediumpurple", alpha=0.5)
     plt.show()
     
-def kmeans(X, k, annotations, magnitude=[[1, 1], [1, 1], [1, 1]], direction=[[1, 1], [1, 1], [1, 1]],):
+def _kmeans(X, k, annotations, magnitude=[[1, 1], [1, 1], [1, 1]], direction=[[1, 1], [1, 1], [1, 1]],):
 
     """
     
@@ -75,7 +75,7 @@ def kmeans(X, k, annotations, magnitude=[[1, 1], [1, 1], [1, 1]], direction=[[1,
     legend_.legendHandles[0]._sizes = [60]
     legend_.legendHandles[1]._sizes = [60]
 
-    annotate_scatterplot(
+    _annotate_scatterplot(
         kmeans.cluster_centers_,
         annotations,
         magnitude,

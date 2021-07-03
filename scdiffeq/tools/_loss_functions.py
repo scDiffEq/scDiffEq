@@ -2,7 +2,7 @@
 import torch
 from geomloss import SamplesLoss
 
-sinkhorn_loss = SamplesLoss(
+_sinkhorn_loss = SamplesLoss(
     loss="sinkhorn",
     p=2,
     blur=0.05,

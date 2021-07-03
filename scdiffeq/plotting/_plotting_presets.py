@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def presets_for_plotting_multiple_trajectories(ax, title, x, y, xlab, ylab):
+def _presets_for_plotting_multiple_trajectories(ax, title, x, y, xlab, ylab):
 
     ax.set_xlabel(xlab, fontsize=15)
     ax.set_ylabel(ylab, fontsize=15)
@@ -16,7 +16,7 @@ def presets_for_plotting_multiple_trajectories(ax, title, x, y, xlab, ylab):
 
     return ax
 
-def single_fig_presets(title, x_lab, y_lab, size=(10,8), title_fontsize=20, title_adjustment_factor=1.1, axis_label_fontsize=15):
+def _single_fig_presets(title, x_lab, y_lab, size=(10,8), title_fontsize=20, title_adjustment_factor=1.1, axis_label_fontsize=15):
     
     """
     presets for one single figure to look nice
@@ -36,7 +36,7 @@ def single_fig_presets(title, x_lab, y_lab, size=(10,8), title_fontsize=20, titl
     
     return fig, ax
 
-def subplot_presets(ax, x, y, xlab, ylab, size, color, alpha):
+def _subplot_presets(ax, x, y, xlab, ylab, size, color, alpha):
 
     """"""
 
@@ -53,7 +53,7 @@ def subplot_presets(ax, x, y, xlab, ylab, size, color, alpha):
     return ax
 
 
-def dual_plot_presets(
+def _dual_plot_presets(
     title,
     left_x,
     left_y,
@@ -78,7 +78,7 @@ def dual_plot_presets(
     subplot_presets(ax2, right_x, right_y, x_lab_right, y_lab_right, size)
     
     
-def annotate_scatterplot(
+def _annotate_scatterplot(
     points_to_be_annotated,
     labels,
     magnitude=[1, 1],

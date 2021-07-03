@@ -20,10 +20,13 @@ scdiffeq/data/load_EMT_simulation.py
 scdiffeq/data/load_LARRY.py
 scdiffeq/data/simulate_trajectories.py
 scdiffeq/plotting/__init__.py
+scdiffeq/plotting/_plot_potency_metrics.py
+scdiffeq/plotting/_saveplot.py
 scdiffeq/plotting/plot_predictions.py
 scdiffeq/plotting/plot_vectorfield.py
 scdiffeq/plotting/plotting_presets.py
 scdiffeq/tools/__init__.py
+scdiffeq/tools/_calculate_cell_metrics.py
 scdiffeq/tools/_diffeq_funcs.py
 scdiffeq/tools/_doc.py
 scdiffeq/tools/_loss_functions.py

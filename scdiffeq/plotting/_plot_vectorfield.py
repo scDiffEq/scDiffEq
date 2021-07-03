@@ -1,16 +1,16 @@
-from .plotting_presets import single_fig_presets as presets
-from ..utilities.torch_device import set_device
+from ._plotting_presets import _single_fig_presets
+from ..utilities._torch_device import _set_device
 
 import torch
 import numpy as np
 from torchdiffeq import odeint
 import matplotlib.pyplot as plt
 
-def get_mgrid_dydt(odefunc):
+def _get_mgrid_dydt(odefunc):
 
     """Pass a mesh grid through the ODEFunc to obtain a vectorfield representing the transformation of the space once passed through the learned ODE."""
 
-    device = set_device()
+    device = _set_device()
 
     y, x = np.mgrid[-2:2:21j, -2:2:21j]
     dydt = odefunc(0, torch.Tensor(np.stack([x, y], -1).reshape(21 * 21, 2)).to(device))
@@ -24,10 +24,10 @@ def get_mgrid_dydt(odefunc):
     return x, y, dydt_cpu
 
 
-def plot_vectorfield(adata, savename):
+def _plot_vectorfield(adata, savename):
     
-    presets(title="Learned Vector Field", x_lab="$X$", y_lab="$Y$")
-    x, y, dydt = get_mgrid_dydt(adata.uns["odefunc"])
+    _single_fig_presets(title="Learned Vector Field", x_lab="$X$", y_lab="$Y$")
+    x, y, dydt = _get_mgrid_dydt(adata.uns["odefunc"])
     plt.streamplot(x, y, dydt[:, :, 0], dydt[:, :, 1], color="midnightblue")
     
     if savename != None:

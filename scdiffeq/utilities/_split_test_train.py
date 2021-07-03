@@ -1,8 +1,8 @@
 
 import numpy as np
-from . import general_utility_functions as util
-from .subsetting_functions import subset_adata
-from .subsetting_functions import randomly_subset_trajectories
+from . import _general_utility_functions as util
+from ._subsetting_functions import _group_adata_subset
+from ._subsetting_functions import _randomly_subset_trajectories
 
 """
 This module contains the forward-facing function for splitting a dataset into test, train, and validation
@@ -98,10 +98,10 @@ def _test_train_split_by_trajectory(
     # employ the randomly_subset_trajectories function twice to get trajectories for
     # first, training and validation, and then subset randomly from within that set
     # to get just the validation trajectories.
-    training_and_validation_trajectories = randomly_subset_trajectories(
+    training_and_validation_trajectories = _randomly_subset_trajectories(
         adata, all_trajectories, train_validation_percentage
     )
-    validation_trajectories = randomly_subset_trajectories(
+    validation_trajectories = _randomly_subset_trajectories(
         adata, training_and_validation_trajectories, proportion_validation
     )
 
@@ -127,9 +127,9 @@ def _test_train_split_by_trajectory(
 
     if return_data_subsets == True:
 
-        training = subset_adata(adata, "training", time_name=time_column)
-        validation = subset_adata(adata, "validation", time_name=time_column)
-        test = subset_adata(adata, "test", time_name=time_column)
+        training = _group_adata_subset(adata, "training", time_name=time_column)
+        validation = _group_adata_subset(adata, "validation", time_name=time_column)
+        test = _group_adata_subset(adata, "test", time_name=time_column)
 
         return training, validation, test
 
@@ -150,7 +150,7 @@ class _data_splitting:
         self.validation = validation
         self.test = test
 
-def split_test_train(
+def _split_test_train(
     adata,
     trajectory_column="trajectory",
     proportion_training=0.60,

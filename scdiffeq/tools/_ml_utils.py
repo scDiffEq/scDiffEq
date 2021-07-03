@@ -1,4 +1,4 @@
-class RunningAverageMeter(object):
+class _RunningAverageMeter(object):
 
     """Computes and stores the average and current value"""
 
@@ -65,7 +65,7 @@ def _save_model(adata, results_folder):
     model_save_name = results_folder + "/model/model_" + current_iteration
     torch.save(adata.uns["odefunc"].state_dict(), model_save_name)
 
-def save_model_training_statistics(adata):
+def _save_model_training_statistics(adata):
     
     results_folder = adata.uns["run_id"] + "_results"
     if len(adata.uns["validation_epoch_counter"]) == 1:
@@ -81,7 +81,7 @@ def save_model_training_statistics(adata):
 
 ### training utilities
 
-def make_run_id_signature(signature_length=10):
+def _make_run_id_signature(signature_length=10):
 
     user = getpass.getuser()
     today = date.today().isoformat()
@@ -92,14 +92,14 @@ def make_run_id_signature(signature_length=10):
 
     return signature
 
-def add_run_id(adata, run_id):
+def _add_run_id(adata, run_id):
     
     if run_id:
         adata.uns["run_id"] = run_id
     else:
         adata.uns["run_id"] = make_run_id_signature()
 
-def preflight(adata, run_id, learning_rate, validation_frequency, plot_smoothing_factor, device):
+def _preflight(adata, run_id, learning_rate, validation_frequency, plot_smoothing_factor, device):
 
     """Adds various required components / formatting to adata object. Copies all metadata to AnnData to have one reference for future use"
     

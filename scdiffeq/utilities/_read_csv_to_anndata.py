@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-def get_obs_and_vars(adata, df, var_names):
+def _get_obs_and_vars(adata, df, var_names):
 
     """Set adata.vars and adata.obs. Time column assumed to be the 0th column."""
 
@@ -21,12 +21,12 @@ def get_obs_and_vars(adata, df, var_names):
     return adata
 
 
-def make_adata(df, var_names):
+def _make_adata(df, var_names):
 
     # takes all columns after excluding the time column (0th column)
     adata = a.AnnData(np.array(df)[:, 1:-1])
 
-    adata = get_obs_and_vars(adata, df, var_names)
+    adata = _get_obs_and_vars(adata, df, var_names)
 
     return adata
 
@@ -71,7 +71,7 @@ def _read_csv_to_anndata(
         path, usecols=usecols, header=header, skiprows=skiprows, names=names
     )
     
-    adata = make_adata(df, var_names)
+    adata = _make_adata(df, var_names)
 
     print(adata)
 

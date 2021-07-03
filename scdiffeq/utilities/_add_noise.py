@@ -1,7 +1,7 @@
 
 import numpy as np
 
-def add_noise(adata, noise=0.05):
+def _add_noise(adata, noise=0.05):
 
     """
     Adds random noise to adata.X

@@ -1,17 +1,17 @@
-from ..utilities.subsetting_functions import subset_adata
-from .plotting_presets import single_fig_presets as presets
+from ..utilities._subsetting_functions import _group_adata_subset
+from ._plotting_presets import _single_fig_presets as presets
 import matplotlib.pyplot as plt
 
-def plot_predictions(adata, subset, savename):
+def _plot_predictions(adata, subset, savename):
 
     """"""
     
     if subset == "test":
-        subset_data = subset_adata(adata, "test", time_name="time")
+        subset_data = _group_adata_subset(adata, "test", time_name="time")
     elif subset == "training":
-        subset_data = subset_adata(adata, "training", time_name="time")
+        subset_data = _group_adata_subset(adata, "training", time_name="time")
     elif subset == "validation":
-        subset_data = subset_adata(adata, "validation", time_name="time")
+        subset_data = _group_adata_subset(adata, "validation", time_name="time")
     else:
         print("A valid subset was not provided.")
     

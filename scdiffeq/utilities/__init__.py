@@ -8,31 +8,35 @@ __email__ = ', '.join([
     'vinyard@g.harvard.edu',
 ])
 
-from .general_utility_functions import ensure_array
+from ._general_utility_functions import _ensure_array
 
-from .torch_device import set_device
-from .torch_device import torch_device
+from ._torch_device import _set_device as set_device
+from ._torch_device import _torch_device as torch_device
 
-from .subsetting_functions import subset_adata
-from .subsetting_functions import randomly_subset_trajectories
-from .subsetting_functions import isolate_trajectory
+from ._subsetting_functions import _group_adata_subset as group_adata_subset
+from ._subsetting_functions import _randomly_subset_trajectories as randomly_subset_trajectories
+from ._subsetting_functions import _isolate_trajectory as isolate_trajectory
+from ._subsetting_functions import _check_df as check_df
+from ._subsetting_functions import _get_subset_idx as get_subset_idx
+from ._subsetting_functions import _subset_df as subset_df
+from ._subsetting_functions import _subset_adata as subset_adata
 
-from ._split_test_train import split_test_train
+from ._split_test_train import _split_test_train as split_test_train
 
-from .downsample_adata import downsample_adata
+from ._downsample_adata import _downsample_adata as downsample_adata
 
-from .general_utility_functions import load_development_libraries as devlibs
-from .general_utility_functions import use_embedding
+from ._general_utility_functions import _load_development_libraries as devlibs
+from ._general_utility_functions import _use_embedding
 
-from .save_adata import write_h5ad
+from ._save_adata import _write_h5ad as write_h5ad
 
-from .load_model import load_model
+from ._load_model import _load_model as load_model
 
 from ._read_csv_to_anndata import _read_csv_to_anndata as read_csv_to_adata
 
-from ._kmeans import get_kmeans_inertia
-from ._kmeans import kmeans
+from ._kmeans import _get_kmeans_inertia as get_kmeans_inertia
+from ._kmeans import _kmeans as kmeans
 
-from ._add_noise import add_noise
+from ._add_noise import _add_noise as add_noise
 
 from ._preprocess import preprocess

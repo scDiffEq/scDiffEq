@@ -8,17 +8,17 @@ __email__ = ', '.join([
     'vinyard@g.harvard.edu',
 ])
 
-from .sc_odeint import sc_odeint
-from .get_minibatch import get_minibatch
+from ._sc_odeint import _sc_odeint
+from ._get_minibatch import _get_minibatch
 
-from ._diffeq_funcs import ode_func as ode
-from ._diffeq_funcs import sde_func as sde
+from ._diffeq_funcs import _ode_func as ode
+from ._diffeq_funcs import _sde_func as sde
 
-from .train_model import train_model
+from ._train_model import _train_model
 
 from ._pca import pca
 
-from .evaluate import evaluate_test_traj as evaluate
+from ._evaluate import _evaluate_test_traj as evaluate
 
 from ._calculate_cell_metrics import _count_genes as count_genes
 from ._calculate_cell_metrics import _calculate_potency as calculate_potency

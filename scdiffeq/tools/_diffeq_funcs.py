@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-class ode_func(nn.Module):
+class _ode_func(nn.Module):
     def __init__(self, data_dimensionality, layers=1, nodes=5):
         super(ode_func, self).__init__()
         
@@ -172,7 +172,7 @@ class ode_func(nn.Module):
         return self.net(y)  
     
     
-class sde_func(torch.nn.Module):
+class _sde_func(torch.nn.Module):
        
     # just start with fixed # of layers for now
     
