@@ -299,6 +299,10 @@ def _subset_adata(
         inverse_obs,
         inverse_idx,
     ]
+    
+    # if it's just one item (i.e., only returning adata), no need to return as a list
+    if np.all([return_inverse, return_obs, return_idx]) == False:
+        return subset_adata
 
     if return_inverse:
         return [
