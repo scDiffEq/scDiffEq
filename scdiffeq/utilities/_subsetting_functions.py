@@ -286,6 +286,8 @@ def _subset_adata(
 
     # perform subset of AnnData and separate obs and inverse DataFrames as well as obs and inverse indices
     subset_adata, inverse_adata = adata[_subset_obs[2][0]], adata[_subset_obs[2][1]]
+    print("Subset AnnData:")
+    print(subset_adata)
     subset_obs, inverse_obs = _subset_obs[0], _subset_obs[1]
     subset_idx, inverse_idx = _subset_obs[2][0], _subset_obs[2][1]
 
