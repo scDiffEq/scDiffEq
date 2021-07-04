@@ -140,8 +140,7 @@ def _isolate_trajectory(data_object, trajectory_number):
 def _check_df(df, column, subset):
 
     assert column in df.columns, "Column not found in df."
-    assert subset in df[column].unique(), "Subset value not found in selected column."
-
+    assert subset in df[column].unique().astype(type(subset)), "Subset value not found in selected column."
 
 def _get_subset_idx(df, column, subset=True, return_inverse=False):
 
@@ -169,11 +168,11 @@ def _get_subset_idx(df, column, subset=True, return_inverse=False):
 
     _check_df(df, column, subset)
 
-    subset_idx = df.loc[df[column] == subset].index.astype(int)
+    subset_idx = df.loc[df[column].astype(type(subset)) == subset].index.astype(int)
     try:
-        inverse_idx = df.loc[dfs[column] == subset].index.astype(int)
+        inverse_idx = df.loc[dfs[column].astype(type(subset)) == subset].index.astype(int)
     except:
-        inverse_idx = df.loc[df[column] != subset].index.astype(int)
+        inverse_idx = df.loc[df[column].astype(type(subset)) != subset].index.astype(int)
 
     if return_inverse == True:
         return [subset_idx, inverse_idx]
