@@ -140,7 +140,7 @@ def _isolate_trajectory(data_object, trajectory_number):
 def _check_df(df, column, subset):
 
     assert column in df.columns, "Column not found in df."
-    assert subset in df[column].unique().astype(type(subset)), "Subset value not found in selected column."
+#     assert subset in df[column].unique().astype(type(subset)), "Subset value not found in selected column."
 
 def _get_subset_idx(df, column, subset=True, return_inverse=False):
 
@@ -234,6 +234,7 @@ def _subset_adata(
     return_inverse=False,
     return_obs=False,
     return_idx=False,
+    print_statement=False,
 ):
 
     """
@@ -285,8 +286,9 @@ def _subset_adata(
 
     # perform subset of AnnData and separate obs and inverse DataFrames as well as obs and inverse indices
     subset_adata, inverse_adata = adata[_subset_obs[2][0]], adata[_subset_obs[2][1]]
-    print("Subset AnnData:")
-    print(subset_adata)
+    if print_statement == True:
+        print("Subset AnnData:")
+        print(subset_adata)
     subset_obs, inverse_obs = _subset_obs[0], _subset_obs[1]
     subset_idx, inverse_idx = _subset_obs[2][0], _subset_obs[2][1]
 
@@ -299,9 +301,9 @@ def _subset_adata(
         inverse_idx,
     ]
     
-    # if it's just one item (i.e., only returning adata), no need to return as a list
-    if np.all([return_inverse, return_obs, return_idx]) == False:
-        return subset_adata
+#     # if it's just one item (i.e., only returning adata), no need to return as a list
+#     if np.all([return_inverse, return_obs, return_idx]) == False:
+#         return subset_adata
 
     if return_inverse:
         return [
