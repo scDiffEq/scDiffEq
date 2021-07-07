@@ -8,6 +8,8 @@ __email__ = ', '.join([
     'vinyard@g.harvard.edu',
 ])
 
+from ._read_data import _read_h5ad as read_h5ad
+
 from ._general_utility_functions import _ensure_array
 
 from ._torch_device import _set_device as set_device
