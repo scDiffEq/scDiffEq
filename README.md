@@ -24,21 +24,20 @@ pip install -e .
 
 ## Usage principles
 
- #### 1. Data import 
-
+#### 1. Data import 
 
 ```python
 # load AnnData GEX object from standard preprocessing such as Scanpy
 adata = sdq.data.load_LARRY()
 ```
-
-> AnnData object with n_obs × n_vars = 130887 × 25289
-> 
->$\:\:\:\:\:\:\:\:\:$obs:$\:$ 'n_counts', 'Time_Point', 'Source', 'Well', 'mito_frac', 'time_info', 'state_info'
-$\:\:\:\:\:\:\:\:\:$var:$\:$ 'highly_variable'
-$\:\:\:\:\:\:\:\:\:$uns:$\:$ 'clonal_time_points', 'data_des', 'max_mito', 'min_tot', 'neighbors', 
-$\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$'state_info_colors', 'time_info_colors', 'time_ordering', 'umap'
-$\:\:\:\:\:\:\:\:\:$obsm:$\:$ 'X_clone', 'X_emb', 'X_pca', 'X_umap'
+```
+AnnData object with n_obs × n_vars = 130887 × 25289 
+   obs:  'n_counts', 'Time_Point', 'Source', 'Well', 'mito_frac', 'time_info', 'state_info'
+   var:  'highly_variable'
+   uns:  'clonal_time_points', 'data_des', 'max_mito', 'min_tot', 'neighbors', 
+         'state_info_colors', 'time_info_colors', 'time_ordering', 'umap'
+   obsm: 'X_clone',  'X_emb',  'X_pca',  'X_umap'
+```
 
 #### 2. Standard preprocessing 
 
@@ -54,7 +53,7 @@ In this case, a stochastic differential equation (SDE), an evolution of the orig
 
 (**2**) diffusion
 
-> $$ \frac{\partial (x,t)}{\partial t} = \nabla[ p(x,t) \nabla F(x)] + D\nabla^2 p(x,t) + R(x) p(x,t), $$
+![fokker-planck](https://i.imgur.com/QK92oLj.png)
 
 This framework for mathematical modelling of gene expression data is actually somewhat analagous to Fokker-Planck equation (i.e., Population Balance equation) that employed in PBA from *Weinreb and Klein* (2018).
 
@@ -87,25 +86,25 @@ class SDE(torch.nn.Module):
 ```python
 adata.uns['diffeq']
 ```
->sde_func(
-$\:\:\:\:\:\:\:\:\:\:\:\:$ (position_net_drift): Sequential(
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(0): Linear(in_features=2, out_features=10, bias=True)
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(1): ReLU()
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(2): Linear(in_features=10, out_features=2, bias=True)
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(3): ReLU()
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(4): Linear(in_features=2, out_features=10, bias=True)
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(5): ReLU()
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(6): Linear(in_features=10, out_features=2, bias=True)
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(7): ReLU()
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(8): Linear(in_features=2, out_features=10, bias=True)
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(9): ReLU()
-    $\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$(10): Linear(in_features=10, out_features=2, bias=True)
-$\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$  )
-$\:\:\:\:\:\:\:\:\:\:\:\:$  (position_net_diff): Sequential(
-$\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$ (0): Linear(in_features=2, 
-$\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$ out_features=2, bias=True)
-$\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$  )
-$\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:$)
+```
+SDE(
+  (position_net_drift): Sequential(
+    (0): Linear(in_features=2, out_features=10, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=10, out_features=2, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=2, out_features=10, bias=True)
+    (5): ReLU()
+    (6): Linear(in_features=10, out_features=2, bias=True)
+    (7): ReLU()
+    (8): Linear(in_features=2, out_features=10, bias=True)
+    (9): ReLU()
+    (10): Linear(in_features=10, out_features=2, bias=True)
+  )
+  (position_net_diff): Sequential(
+    (0): Linear(in_features=2, out_features=2, bias=True)
+  )
+```
 
 #### 4. Learn the dynamical gene expression on a training set of data
 
@@ -149,4 +148,3 @@ sdq.tl.sc_diffeqint(adata)
 ```
 
 The user need not worry about these functions. All parameters can be passed through **`sdq.tl.learn(adata)`**.
-
