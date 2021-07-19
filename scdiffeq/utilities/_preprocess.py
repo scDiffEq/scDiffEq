@@ -8,7 +8,7 @@ def _detect_time_annotation(adata):
 def _standardize_time_column(adata):
     
     current_time_column = _detect_time_annotation(adata)
-    adata.obs.rename({current_time_column: "time"})
+    adata.obs['time'] = adata.obs[current_time_column]
     
 def _standardize_time(adata):
     

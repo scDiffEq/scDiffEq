@@ -16,7 +16,7 @@ from ._diffeq_funcs import _sde_func as sde
 
 from ._train_model import _train_model
 
-from ._pca import pca
+from ._pca import _pca as pca
 
 from ._evaluate import _evaluate_test_traj as evaluate
 

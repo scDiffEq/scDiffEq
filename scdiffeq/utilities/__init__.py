@@ -8,9 +8,13 @@ __email__ = ', '.join([
     'vinyard@g.harvard.edu',
 ])
 
+from ._make_publication_plot import _make_publication_plot as pubplot
+
 from ._read_data import _read_h5ad as read_h5ad
 
 from ._general_utility_functions import _ensure_array
+from ._logging_functions import _initialize_logger as initialize_logger
+from ._logging_functions import _get_logger as get_logger
 
 from ._torch_device import _set_device as set_device
 from ._torch_device import _torch_device as torch_device

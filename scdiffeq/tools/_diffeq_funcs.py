@@ -5,7 +5,7 @@ import torch.nn as nn
 
 class _ode_func(nn.Module):
     def __init__(self, data_dimensionality, layers=1, nodes=5):
-        super(ode_func, self).__init__()
+        super(_ode_func, self).__init__()
         
         if layers == 1:
             self.net = nn.Sequential(
