@@ -1,14 +1,16 @@
 
 import logging, os
+from ._general_utility_functions import _create_random_signature
 
-def _initialize_logger(logname="debug.log", _return=False):
+
+def _initialize_logger(logname="nb.debug.log", _return=False):
     
     """
     Debugging logger.
     
     Parameters:
     -----------
-    logname [optional | default: "debug.log"]
+    logname [optional | default: "nb.debug.log"]
         save name. should be unique to avoid overlap and overwrite of previous logs. 
         
     _return [optional | default: False]
@@ -19,9 +21,10 @@ def _initialize_logger(logname="debug.log", _return=False):
     logger [optional | default: None]
         Logger object
     """
-    import os, logging
     
-    logdir="/home/mvinyard/scripts/.process_logs"
+    random_signature = _create_random_signature()
+    logdir="/home/mvinyard/scripts/.process_logs/" + random_signature
+    
     if not os.path.exists(logdir):
         os.mkdir(logdir)
     

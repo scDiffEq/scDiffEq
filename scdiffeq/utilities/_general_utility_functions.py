@@ -77,3 +77,14 @@ def _use_embedding(adata, emb="X_pca"):
     pca(bdata)
     
     return bdata
+
+def _create_random_signature(signature_length=5):
+    
+    """Creates a random string flanked by underscore characters."""
+    
+    import string, random
+    
+    characters = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    random_string = ''.join(random.choice(characters) for i in range(signature_length))
+
+    return random_string

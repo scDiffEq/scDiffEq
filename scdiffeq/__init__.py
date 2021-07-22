@@ -11,3 +11,6 @@ from . import data
 from . import tools as tl
 from . import plotting  as pl
 from . import utilities as ut
+
+import pandas as pd
+pd.set_option('display.max_columns', None)
