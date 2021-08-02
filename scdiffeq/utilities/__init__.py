@@ -40,3 +40,6 @@ from ._kmeans import _kmeans as kmeans
 from ._add_noise import _add_noise as add_noise
 
 from ._preprocess import preprocess
+
+from ._read_write._write_AnnData import _write_AnnData as write_adata
+from ._read_write._read_AnnData import _read_AnnData as read_adata
