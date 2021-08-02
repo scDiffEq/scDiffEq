@@ -45,4 +45,4 @@ from ._kmeans import _kmeans as kmeans
 
 from ._add_noise import _add_noise as add_noise
 
-from ._preprocess import preprocess
+from ._preprocess import _preprocess as preprocess

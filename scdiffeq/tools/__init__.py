@@ -24,3 +24,6 @@ from ._calculate_cell_metrics import _count_genes as count_genes
 from ._calculate_cell_metrics import _calculate_potency as calculate_potency
 
 from ._clonal_lineage_functions import _assign_clonal_lineages as assign_clonal_lineages
+from ._differential_equations import _create_ODE_AnnData as ODE
+
+from ._ml_utils import _RunningAverageMeter as RunningAverageMeter

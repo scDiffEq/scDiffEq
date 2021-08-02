@@ -1,5 +1,5 @@
 
-from ..utilities._preprocess import preprocess
+from ..utilities._preprocess import _preprocess
 
 def _pca_plot(adata, title, alpha, edgecolor, linewidths):
     
@@ -34,7 +34,7 @@ def _pca(adata, n_components=2, plot=False, title=None, preprocessing=False, alp
         pass
     
     if preprocessing == True:
-        preprocess(adata)
+        _preprocess(adata)
     
     pca = PCA(n_components=n_components)
     pcs = pca.fit_transform(adata.X)
