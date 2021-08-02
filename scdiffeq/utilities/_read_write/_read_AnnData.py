@@ -1,9 +1,8 @@
 from glob import glob
 import anndata as a
-import pickle
+import os, pickle
 
-
-def _read_AnnData():
+def _read_AnnData(label="testing_results", outpath="./", scdiffeq_outs_dir="scdiffeq_adata"):
 
     """
     Writes h5ad and pkl file for outputs of scdiffeq method.
