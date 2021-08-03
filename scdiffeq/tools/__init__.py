@@ -22,3 +22,5 @@ from ._evaluate import _evaluate_test_traj as evaluate
 
 from ._calculate_cell_metrics import _count_genes as count_genes
 from ._calculate_cell_metrics import _calculate_potency as calculate_potency
+
+from ._ml_utils import _RunningAverageMeter as RunningAverageMeter

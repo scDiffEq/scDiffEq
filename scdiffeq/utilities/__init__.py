@@ -8,8 +8,6 @@ __email__ = ', '.join([
     'vinyard@g.harvard.edu',
 ])
 
-from ._general_utility_functions import _ensure_array
-
 from ._torch_device import _set_device as set_device
 from ._torch_device import _torch_device as torch_device
 
@@ -20,10 +18,6 @@ from ._subsetting_functions import _check_df as check_df
 from ._subsetting_functions import _get_subset_idx as get_subset_idx
 from ._subsetting_functions import _subset_df as subset_df
 from ._subsetting_functions import _subset_adata as subset_adata
-
-from ._split_test_train import _split_test_train as split_test_train
-
-from ._downsample_adata import _downsample_adata as downsample_adata
 
 from ._general_utility_functions import _load_development_libraries as devlibs
 from ._general_utility_functions import _use_embedding
@@ -41,5 +35,15 @@ from ._add_noise import _add_noise as add_noise
 
 from ._preprocess import preprocess
 
-from ._read_write._write_AnnData import _write_AnnData as write_adata
-from ._read_write._read_AnnData import _read_AnnData as read_adata
+# AnnData handling functions
+from ._AnnData_handlers._read_write._write_AnnData import _write_AnnData as write_adata
+from ._AnnData_handlers._read_write._read_AnnData import _read_AnnData as read_adata
+from ._AnnData_handlers._split_AnnData_test_train_validation import _split_test_train as split_test_train
+
+
+
+# deprecated:
+# -----------
+# from ._general_utility_functions import _ensure_array
+# from ._split_test_train import _split_test_train as split_test_train
+# from ._downsample_adata import _downsample_adata as downsample_adata
