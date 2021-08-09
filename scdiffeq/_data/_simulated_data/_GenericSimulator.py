@@ -72,13 +72,15 @@ class _GenericSimulator:
         _print_verbose_function_documentation(
             self.distrubution_function, self.package, self.module, self.function
         )
+    def get_initial_conditions(self, plot=False, n_bins=20, **kwargs):
         
-    def get_initial_conditions(self, **kwargs):
-
         self.initial_conditions = _get_initial_conditions(
             self.distrubution_function, **kwargs
         )
         self.n_traj = len(self.initial_conditions)
+        
+        if plot:
+            v.pl.hist2d_component_plot(data=self.initial_conditions, n_bins=n_bins, suptitle="Initial conditions")
     
     
     def create_time_vector(self, time_span=10.0, n_samples=1000, noise_amplitude=0):
@@ -111,6 +113,11 @@ class _GenericSimulator:
         if plot:
             _plot(self, c='time', s=12, alpha=0.5, **kwargs)
             
-    def plot(self, c='time', s=12, alpha=0.5, **kwargs):
-        # do nothing
+    def plot_simulation(self, c='time', s=12, alpha=0.5, **kwargs):
+
         _plot(self, c=c, s=s, alpha=alpha, **kwargs)
+        
+    def plot_initial_conditions(self, n_bins=20, **kwargs):
+
+        v.pl.hist2d_component_plot(data=self.initial_conditions, n_bins=n_bins, suptitle="Initial conditions")
+    
