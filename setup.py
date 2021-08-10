@@ -28,6 +28,7 @@ setup(
         "torchdiffeq>=0.2.1",
 	"scprep>=1.1.0",
 	"nb-black>=1.0.7",
+	"vintools>=0.0.44",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
