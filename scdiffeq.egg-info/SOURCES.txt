@@ -20,6 +20,7 @@ scdiffeq/plotting/_plotting_presets.py
 scdiffeq/plotting/_saveplot.py
 scdiffeq/tools/__init__.py
 scdiffeq/tools/_calculate_cell_metrics.py
+scdiffeq/tools/_clonal_lineage_functions.py
 scdiffeq/tools/_diffeq_funcs.py
 scdiffeq/tools/_doc.py
 scdiffeq/tools/_error_metrics.py
@@ -33,11 +34,25 @@ scdiffeq/tools/_train_model.py
 scdiffeq/tools/_validation.py
 scdiffeq/utilities/__init__.py
 scdiffeq/utilities/_add_noise.py
+<<<<<<< HEAD
 scdiffeq/utilities/_general_utility_functions.py
 scdiffeq/utilities/_kmeans.py
 scdiffeq/utilities/_load_model.py
 scdiffeq/utilities/_preprocess.py
 scdiffeq/utilities/_read_csv_to_anndata.py
 scdiffeq/utilities/_save_adata.py
+=======
+scdiffeq/utilities/_downsample_adata.py
+scdiffeq/utilities/_general_utility_functions.py
+scdiffeq/utilities/_kmeans.py
+scdiffeq/utilities/_load_model.py
+scdiffeq/utilities/_logging_functions.py
+scdiffeq/utilities/_make_publication_plot.py
+scdiffeq/utilities/_preprocess.py
+scdiffeq/utilities/_read_csv_to_anndata.py
+scdiffeq/utilities/_read_data.py
+scdiffeq/utilities/_save_adata.py
+scdiffeq/utilities/_split_test_train.py
+>>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32
 scdiffeq/utilities/_subsetting_functions.py
 scdiffeq/utilities/_torch_device.py

@@ -28,7 +28,12 @@ setup(
         "torchdiffeq>=0.2.1",
 	"scprep>=1.1.0",
 	"nb-black>=1.0.7",
+<<<<<<< HEAD
 	"vintools>=0.0.44",
+=======
+	"geomloss>=0.2.4",
+	"torchsde",
+>>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",

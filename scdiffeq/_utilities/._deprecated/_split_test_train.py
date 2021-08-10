@@ -1,9 +1,8 @@
 
 import numpy as np
-from .._subsetting_functions import _group_adata_subset
-from .._subsetting_functions import _randomly_subset_trajectories
-from ._format_AnnData import _format_AnnData_mtx_as_numpy_array
-from ._check_overlap_bewteen_data_subsets import _check_overlap_bewteen_data_subsets
+from . import _general_utility_functions as util
+from ._subsetting_functions import _group_adata_subset
+from ._subsetting_functions import _randomly_subset_trajectories
 
 """
 This module contains the forward-facing function for splitting a dataset into test, train, and validation
@@ -11,7 +10,7 @@ by trajectory as well as all fuctions supporting it. The functions imported abov
 thereby contained in a seperate module. 
 """
 
-def _calculate_train_validation_percentages(proportion_train, proportion_validation):
+def _calculate_train_validation_percentages(proportion_training, proportion_validation):
 
     """
     Calculates the relative amount of the dataset reserved for training and validation.
@@ -35,7 +34,7 @@ def _calculate_train_validation_percentages(proportion_train, proportion_validat
 
     """
 
-    train_validation_percentage = proportion_train + proportion_validation
+    train_validation_percentage = proportion_training + proportion_validation
     proportion_validation = proportion_validation / train_validation_percentage
 
     return train_validation_percentage, proportion_validation
@@ -43,7 +42,7 @@ def _calculate_train_validation_percentages(proportion_train, proportion_validat
 
 def _test_train_split_by_trajectory(
     adata,
-    proportion_train,
+    proportion_training,
     proportion_validation,
     return_data_subsets,
     trajectory_column,
@@ -59,7 +58,7 @@ def _test_train_split_by_trajectory(
     adata
         AnnData object
 
-    proportion_train
+    proportion_training
         Relative amount of trajectories dedicated to training
         default: 0.60
 
@@ -93,7 +92,7 @@ def _test_train_split_by_trajectory(
         train_validation_percentage,
         proportion_validation,
     ) = _calculate_train_validation_percentages(
-        proportion_train, proportion_validation
+        proportion_training, proportion_validation
     )
 
     # employ the randomly_subset_trajectories function twice to get trajectories for
@@ -102,18 +101,9 @@ def _test_train_split_by_trajectory(
     training_and_validation_trajectories = _randomly_subset_trajectories(
         adata, all_trajectories, train_validation_percentage
     )
-#     validation_trajectories = _randomly_subset_trajectories(
-#         adata, training_and_validation_trajectories, proportion_validation
-#     )
-    
-    training_and_validation_trajectories = _randomly_subset_trajectories(
-        adata, all_trajectories, train_validation_percentage
+    validation_trajectories = _randomly_subset_trajectories(
+        adata, training_and_validation_trajectories, proportion_validation
     )
-    size_validation = int(round(proportion_validation * len(training_and_validation_trajectories)))
-    validation_trajectories = np.sort(
-        np.random.choice(training_and_validation_trajectories, size=size_validation, replace=False)
-    )
-
 
     # get training trajectories from the first subset by removing trajectories in the
     # validation subset
@@ -129,19 +119,19 @@ def _test_train_split_by_trajectory(
 
     # add boolean columns to adata.obs to indicate which group (test, training, or validation)
     # each trajectory and point within belongs to
-    adata.obs["train"] = adata.obs[trajectory_column].isin(training_trajectories)
+    adata.obs["training"] = adata.obs[trajectory_column].isin(training_trajectories)
     adata.obs["validation"] = adata.obs[trajectory_column].isin(validation_trajectories)
     adata.obs["test"] = adata.obs[trajectory_column].isin(test_trajectories)
 
     adata.obs.reset_index(drop=True, inplace=True)
 
-    if return_data_subsets:
+    if return_data_subsets == True:
 
-        train = _group_adata_subset(adata, "train", time_name=time_column)
+        training = _group_adata_subset(adata, "training", time_name=time_column)
         validation = _group_adata_subset(adata, "validation", time_name=time_column)
         test = _group_adata_subset(adata, "test", time_name=time_column)
 
-        return train, validation, test
+        return training, validation, test
 
 
 class _data_splitting:
@@ -163,15 +153,10 @@ class _data_splitting:
 def _split_test_train(
     adata,
     trajectory_column="trajectory",
-    proportion_train=0.60,
+    proportion_training=0.60,
     proportion_validation=0.20,
     return_data_subsets=True,
     time_column="time",
-<<<<<<< HEAD:scdiffeq/_utilities/_AnnData_handlers/_split_AnnData_test_train_validation.py
-    silent=False
-=======
-    return_split_data=False,
->>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32:scdiffeq/utilities/_split_test_train.py
 ):
 
     """
@@ -218,37 +203,24 @@ def _split_test_train(
         adata.obs["trajectory"] = 0
 
     # ensure the data is not in sparse format
-<<<<<<< HEAD:scdiffeq/_utilities/_AnnData_handlers/_split_AnnData_test_train_validation.py
-    _format_AnnData_mtx_as_numpy_array(adata, silent=silent)
-=======
-    util._ensure_array(adata)
->>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32:scdiffeq/utilities/_split_test_train.py
+    util.ensure_array(adata)
 
     #
     train, validation, test = _test_train_split_by_trajectory(
         adata,
-        proportion_train=proportion_train,
-        proportion_validation=proportion_validation,
-        return_data_subsets=True,
-        trajectory_column=trajectory_column,
-        time_column=time_column,
+        proportion_training,
+        proportion_validation,
+        return_data_subsets,
+        trajectory_column,
+        time_column,
     )
 
     split_data = _data_splitting(train, validation, test)
     adata.uns["data_split_keys"] = {
         "test": test,
         "train": train,
+        "training": train,
         "validation": validation,
     }
-    
-<<<<<<< HEAD:scdiffeq/_utilities/_AnnData_handlers/_split_AnnData_test_train_validation.py
-    print("\nChecking for overlap between test, train, and validation subsets...\n")
-    _check_overlap_bewteen_data_subsets(adata)
-    
-    if return_data_subsets:
-=======
-    adata.uns['split_data'] = split_data
-    
-    if return_split_data:
->>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32:scdiffeq/utilities/_split_test_train.py
-        return split_data
+
+    return split_data
