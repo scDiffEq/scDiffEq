@@ -157,6 +157,7 @@ def _split_test_train(
     proportion_validation=0.20,
     return_data_subsets=True,
     time_column="time",
+    return_split_data=False,
 ):
 
     """
@@ -203,7 +204,7 @@ def _split_test_train(
         adata.obs["trajectory"] = 0
 
     # ensure the data is not in sparse format
-    util.ensure_array(adata)
+    util._ensure_array(adata)
 
     #
     train, validation, test = _test_train_split_by_trajectory(
@@ -222,5 +223,8 @@ def _split_test_train(
         "training": train,
         "validation": validation,
     }
-
-    return split_data
+    
+    adata.uns['split_data'] = split_data
+    
+    if return_split_data:
+        return split_data

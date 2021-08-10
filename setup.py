@@ -28,6 +28,8 @@ setup(
         "torchdiffeq>=0.2.1",
 	"scprep>=1.1.0",
 	"nb-black>=1.0.7",
+	"geomloss>=0.2.4",
+	"torchsde",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",

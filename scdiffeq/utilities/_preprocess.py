@@ -8,14 +8,14 @@ def _detect_time_annotation(adata):
 def _standardize_time_column(adata):
     
     current_time_column = _detect_time_annotation(adata)
-    adata.obs.rename({current_time_column: "time"})
+    adata.obs['time'] = adata.obs[current_time_column]
     
 def _standardize_time(adata):
     
     _standardize_time_column(adata)
     adata.obs.time = adata.obs.time / adata.obs.time.max()
 
-def preprocess(adata, inplace=False):
+def _preprocess(adata, return_adata=False):
 
     """Scale data for PCA and subsequent neural diffeq learning. Typically executed before."""
 
@@ -31,5 +31,5 @@ def preprocess(adata, inplace=False):
     
     _standardize_time(adata)
     
-    if inplace == False:
+    if return_adata:
         return adata

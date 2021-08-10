@@ -60,8 +60,7 @@ def _load_development_libraries():
     return odeint, torch, np, pd, plt, nn, a, os, time, optim, sp, PCA, v
 
 
-
-from ..tools._pca import pca
+from ..tools._pca import _pca
 
 def _use_embedding(adata, emb="X_pca"):
 
@@ -70,7 +69,7 @@ def _use_embedding(adata, emb="X_pca"):
     try:
         adata.obsm["X_pca"]
     except:
-        pca(adata)
+        _pca(adata)
 
     bdata = a.AnnData(adata.obsm[emb])
     bdata.obs = adata.obs
@@ -78,3 +77,14 @@ def _use_embedding(adata, emb="X_pca"):
     pca(bdata)
     
     return bdata
+
+def _create_random_signature(signature_length=5):
+    
+    """Creates a random string flanked by underscore characters."""
+    
+    import string, random
+    
+    characters = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    random_string = ''.join(random.choice(characters) for i in range(signature_length))
+
+    return random_string
