@@ -167,8 +167,8 @@ def _split_test_train(
     proportion_validation=0.20,
     return_data_subsets=True,
     time_column="time",
-    silent=False
-    return_split_data=False,)
+    silent=False,
+    return_split_data=False,):
 
     """
     This is the user-facing function to split data into testing, training, and validation sets.
