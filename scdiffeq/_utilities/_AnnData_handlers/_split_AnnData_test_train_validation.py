@@ -167,12 +167,8 @@ def _split_test_train(
     proportion_validation=0.20,
     return_data_subsets=True,
     time_column="time",
-<<<<<<< HEAD:scdiffeq/_utilities/_AnnData_handlers/_split_AnnData_test_train_validation.py
     silent=False
-=======
-    return_split_data=False,
->>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32:scdiffeq/utilities/_split_test_train.py
-):
+    return_split_data=False,)
 
     """
     This is the user-facing function to split data into testing, training, and validation sets.
@@ -218,11 +214,7 @@ def _split_test_train(
         adata.obs["trajectory"] = 0
 
     # ensure the data is not in sparse format
-<<<<<<< HEAD:scdiffeq/_utilities/_AnnData_handlers/_split_AnnData_test_train_validation.py
     _format_AnnData_mtx_as_numpy_array(adata, silent=silent)
-=======
-    util._ensure_array(adata)
->>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32:scdiffeq/utilities/_split_test_train.py
 
     #
     train, validation, test = _test_train_split_by_trajectory(
@@ -240,15 +232,9 @@ def _split_test_train(
         "train": train,
         "validation": validation,
     }
-    
-<<<<<<< HEAD:scdiffeq/_utilities/_AnnData_handlers/_split_AnnData_test_train_validation.py
     print("\nChecking for overlap between test, train, and validation subsets...\n")
     _check_overlap_bewteen_data_subsets(adata)
-    
-    if return_data_subsets:
-=======
     adata.uns['split_data'] = split_data
     
     if return_split_data:
->>>>>>> 93f9d6c2d5aece01bdf92b3c286e1fd2a7107a32:scdiffeq/utilities/_split_test_train.py
         return split_data
