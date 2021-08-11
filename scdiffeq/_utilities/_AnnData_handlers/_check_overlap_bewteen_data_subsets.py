@@ -31,7 +31,7 @@ def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "
     for subset in subsets:
         for subset_check_against in subsets:
             if subset != subset_check_against:
-                print("\t", subset, subset_check_against)
+                print("\t{:<11} <-- --> {:>11}".format(subset, subset_check_against))
                 overlaps.append(
                     df.loc[df[subset] == True]
                     .loc[df[subset_check_against] == True]
