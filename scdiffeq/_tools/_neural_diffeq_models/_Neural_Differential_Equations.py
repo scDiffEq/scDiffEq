@@ -88,13 +88,16 @@ class scDiffEq:
             return_split_data=return_split_data,
         )
         
+        self.adata.uns['ODE'] = self.network
+        
 
     def learn(
         self,
         n_epochs=1500,
         learning_rate=False,
         validation_frequency=False,
-        plot_progress=True,
+        plot_progress=False,
+        plot_summary=True,
         smoothing_factor=3,
         visualization_frequency=False,
     ):
@@ -108,17 +111,14 @@ class scDiffEq:
             self.validation_frequency = validation_frequency
         if learning_rate:
             self.learning_rate = learning_rate
-        
-        self.adata.uns['ODE'] = self.network
-        
+               
         _learn_neural_ODE(
             self.adata,
             n_epochs=n_epochs,
             plot_progress=plot_progress,
+            plot_summary=plot_summary,
             smoothing_factor=smoothing_factor,
             visualization_frequency=self.visualization_frequency,
-            validation_frequency=self.validation_frequency,
-            lr=self.learning_rate,
         )
 
 
@@ -126,5 +126,5 @@ class scDiffEq:
 
         """"""
 
-    #     _evaluate()
+        self.test_accuracy = _evaluate(self.adata)
         _plot_predicted_test_data(self.adata)
