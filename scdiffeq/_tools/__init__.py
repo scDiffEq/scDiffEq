@@ -12,8 +12,8 @@ __email__ = ', '.join([
 from ._neural_diffeq_models._Neural_Differential_Equations import scDiffEq
 
 
-
-
+# ancilliary functions
+from ._machine_learning._check_torch_modules import _check_torch_modules as check_torch_module
 
 
 # from ._sc_odeint import _sc_odeint

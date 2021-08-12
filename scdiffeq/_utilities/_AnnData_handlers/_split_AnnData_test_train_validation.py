@@ -165,7 +165,6 @@ def _split_test_train(
     trajectory_column="trajectory",
     proportion_train=0.60,
     proportion_validation=0.20,
-    return_data_subsets=True,
     time_column="time",
     silent=False,
     return_split_data=False,):
