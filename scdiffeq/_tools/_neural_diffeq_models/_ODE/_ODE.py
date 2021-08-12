@@ -6,7 +6,6 @@ import torch.nn as nn
 # local imports #
 # ------------- #
 from ._supporting_functions._create_flexible_neural_network import _create_flexible_neural_network
-from ._supporting_functions._learn_ODE import learn
 
 class Neural_ODE(nn.Module):
 
