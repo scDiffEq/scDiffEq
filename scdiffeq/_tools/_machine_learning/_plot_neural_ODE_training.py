@@ -1,7 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from IPython import display
+# from IPython import display
 import vintools as v
 
 def _get_x_axis_plot_train_validation(adata, groupsize=1):
@@ -107,6 +107,7 @@ def _plot_smoothed_training(
         plt.grid(zorder=0)
 
     v.pl.legend(ax)
+    plt.show()
 
 
 def _plot_loss(adata, groupsize):
@@ -117,5 +118,5 @@ def _plot_loss(adata, groupsize):
         adata,
         groupsize=groupsize,
     )
-    display.clear_output(wait=True)
-    display.display(plt.gcf())
+#     display.clear_output(wait=True)
+#     display.display(plt.gcf())

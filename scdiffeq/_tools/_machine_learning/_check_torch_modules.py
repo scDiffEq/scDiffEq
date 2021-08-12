@@ -1,7 +1,8 @@
+
 # package imports #
 # --------------- #
 import vintools as v
-
+import torch.nn as nn
 
 def _enumerate_torchfunc_modules(
     self, torch_functions, silent=False, return_funcs=False
