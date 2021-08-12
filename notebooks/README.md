@@ -4,7 +4,8 @@ Example notebooks with useful code to reproduce specific analyses. Organized by 
 
 ## Simulated datasets
 
-* [**2-D simulations**](https://github.com/pinellolab/sc-neural-diffeqs/blob/main/notebooks/2d_toy_simulations.ipynb)
+* [**2-D simulations**](https://github.com/pinellolab/sc-neural-diffeqs/blob/main/notebooks/spiral_2d/2d_toy_simulations.ipynb)
+* [**2-D simulations**](https://github.com/pinellolab/sc-neural-diffeqs/blob/main/notebooks/spiral_2d/2d_toy_simulations.ipynb)
 * EMT simulation (**coming soon**)
 
 ## EMT scRNA-seq (+ CROP-seq)
