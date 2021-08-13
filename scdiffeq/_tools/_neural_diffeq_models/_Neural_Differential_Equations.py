@@ -2,6 +2,7 @@
 # package imports #
 # --------------- #
 import torch.nn as nn
+import os
 
 # local imports #
 # ------------- #
@@ -13,12 +14,14 @@ from .._machine_learning._learn_neural_ODE import _learn_neural_ODE
 from .._machine_learning._split_AnnData_test_train_validation import _split_test_train
 from .._machine_learning._plot_test_predictions import _plot_predicted_test_data
 from .._machine_learning._evaluate import _evaluate
+from .._machine_learning._save import _save
 
 class scDiffEq:
     
     def __init__(
         self,
         network_type="ODE",
+        outdir=False,
         in_dim=2,
         out_dim=2,
         n_layers=4,
@@ -31,6 +34,8 @@ class scDiffEq:
         """
         """
         
+        if outdir:
+            self.outdir = outdir
         self.available_network_types = ["SDE", "ODE"]
 
         assert network_type in self.available_network_types, print(
@@ -54,6 +59,7 @@ class scDiffEq:
     def preflight(
         self,
         adata,
+        outdir=False,
         validation_frequency=2,
         visualization_frequency=10,
         loss_function="MSELoss",
@@ -89,10 +95,13 @@ class scDiffEq:
         )
         
         self.adata.uns['ODE'] = self.network
+        if outdir:
+            self.outdir = outdir
         
 
     def learn(
         self,
+        n_batches=10,
         n_epochs=1500,
         learning_rate=False,
         validation_frequency=False,
@@ -100,11 +109,17 @@ class scDiffEq:
         plot_summary=True,
         smoothing_factor=3,
         visualization_frequency=False,
+        notebook=True,
+        save_frequency=5,
+        outdir=False,
+        
     ):
 
         """"""
 
         # make any necessary updates
+        if n_batches:
+            self.n_batches = n_batches
         if visualization_frequency:
             self.visualization_frequency = visualization_frequency
         if validation_frequency:
@@ -113,13 +128,17 @@ class scDiffEq:
             self.learning_rate = learning_rate
                
         _learn_neural_ODE(
-            self.adata,
+            self,
             n_epochs=n_epochs,
             plot_progress=plot_progress,
             plot_summary=plot_summary,
             smoothing_factor=smoothing_factor,
             visualization_frequency=self.visualization_frequency,
+            notebook=notebook,
+            save_frequency=save_frequency,
         )
+        if outdir:
+            self.outdir = outdir
 
 
     def evaluate(self,):
@@ -128,3 +147,28 @@ class scDiffEq:
 
         self.test_accuracy = _evaluate(self.adata)
         _plot_predicted_test_data(self.adata)
+
+
+    def save(self,
+             outdir=False,
+             pickle_dump_list = ["pca", "loss"], 
+             pass_keys = ["split_data", "data_split_keys", "RunningAverageMeter"]):
+
+        """"""
+        
+        if not outdir:
+            try:
+                self.outdir
+            except:
+                self.outdir = os.getcwd()
+            
+        try:
+            self.epoch = self.adata.uns['last_epoch']
+        except:
+            self.epoch = self.epoch
+        _save(
+            self,
+            outdir=self.outdir,
+            pickle_dump_list=pickle_dump_list,
+            pass_keys=pass_keys
+        )
