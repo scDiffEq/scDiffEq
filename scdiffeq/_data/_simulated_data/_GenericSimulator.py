@@ -2,6 +2,7 @@
 # package imports #
 # --------------- #
 import vintools as v
+import os
 
 # local imports #
 # ------------- #
@@ -19,6 +20,7 @@ from . import _simulation_state_equations as _sim_eqns
 class _GenericSimulator:
     def __init__(
         self,
+        save_dir=False,
     ):
         
         """
@@ -34,6 +36,13 @@ class _GenericSimulator:
         self.StateFuncEquationDict = {}
         self.StateFuncEquationDict['parabola_2d'] = _sim_eqns._parabola_2d_state_equation
         self.StateFuncEquationDict['four_attractor_2d'] = _sim_eqns._four_attractor_2d_state_equation
+        
+        if save_dir:
+            simulation_figure_path = os.path.join(save_dir, "Simulation_Figures")
+            v.ut.mkdir_flex(save_dir)
+            v.ut.mkdir_flex(simulation_figure_path)
+            self.simulation_plot_fig_path = os.path.join(simulation_figure_path, "Simulation.png")
+            self.simulation_init_fig_path = os.path.join(simulation_figure_path, "Simulation_InitialConditions.png")
             
     def set_initial_conditions_sampling_distribution(
         self,
@@ -72,7 +81,11 @@ class _GenericSimulator:
         _print_verbose_function_documentation(
             self.distrubution_function, self.package, self.module, self.function
         )
-    def get_initial_conditions(self, plot=False, n_bins=20, **kwargs):
+    def get_initial_conditions(self, 
+                               plot=False, 
+                               n_bins=20,
+                               savefigname=False,
+                               **kwargs):
         
         self.initial_conditions = _get_initial_conditions(
             self.distrubution_function, **kwargs
@@ -80,13 +93,22 @@ class _GenericSimulator:
         self.n_traj = len(self.initial_conditions)
         
         if plot:
-            v.pl.hist2d_component_plot(data=self.initial_conditions, n_bins=n_bins, suptitle="Initial conditions")
+            v.pl.hist2d_component_plot(data=self.initial_conditions, 
+                                       n_bins=n_bins, 
+                                       suptitle="Initial conditions",
+                                       save_path=self.simulation_init_fig_path,
+                                      )
     
     
     def create_time_vector(self, time_span=10.0, n_samples=1000, noise_amplitude=0):
         self.time_vector = _create_time_vector(time_span=time_span, n_samples=n_samples, noise_amplitude=noise_amplitude)
     
-    def simulate_ODE(self, state_function, to_adata=True, plot=True, **kwargs):
+    def simulate_ODE(self, 
+                     state_function, 
+                     to_adata=True, 
+                     plot=True,
+                     savefigname=False,
+                     **kwargs):
         
         """"""
         
@@ -111,13 +133,18 @@ class _GenericSimulator:
             self.adata = _simulation_to_AnnData(self, silent=False)
         
         if plot:
-            _plot(self, c='time', s=12, alpha=0.5, **kwargs)
+            _plot(self, c='time', s=12, alpha=0.5, savefigname=self.simulation_plot_fig_path, **kwargs)
             
-    def plot_simulation(self, c='time', s=12, alpha=0.5, **kwargs):
+            
+    def plot_simulation(self, savefigname=False, c='time', s=12, alpha=0.5, **kwargs):
 
-        _plot(self, c=c, s=s, alpha=alpha, **kwargs)
+        _plot(self, c=c, s=s, alpha=alpha, savefigname=self.simulation_plot_fig_path, **kwargs)
+        
         
     def plot_initial_conditions(self, n_bins=20, **kwargs):
 
-        v.pl.hist2d_component_plot(data=self.initial_conditions, n_bins=n_bins, suptitle="Initial conditions")
-    
+        v.pl.hist2d_component_plot(data=self.initial_conditions, 
+                                   n_bins=n_bins, 
+                                   suptitle="Initial conditions",
+                                   save_path=self.simulation_init_fig_path,)
+        

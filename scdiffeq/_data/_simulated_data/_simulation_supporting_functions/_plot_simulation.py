@@ -3,14 +3,14 @@
 # --------------- #
 import numpy as np
 import vintools as v
-# import matplotlib
+import matplotlib
 import matplotlib.pyplot as plt
-# import matplotlib.font_manager
+import matplotlib.font_manager
 
-# font = {"size": 12}
-# matplotlib.rc(font)
-# matplotlib.rcParams["font.sans-serif"] = "Arial"
-# matplotlib.rcParams["font.family"] = "sans-serif"
+font = {"size": 12}
+matplotlib.rc(font)
+matplotlib.rcParams["font.sans-serif"] = "Arial"
+matplotlib.rcParams["font.family"] = "sans-serif"
 
 def _simulation_plot_presets(
     x, y, plot_title="Simulation", x_lab="$x$", y_lab="$y$", title_fontsize=16, label_fontsize=14, figsize=(6, 5), **kwargs
@@ -32,10 +32,12 @@ def _simulation_plot_presets(
     ax.scatter(x, y, **kwargs)
     plt.grid(zorder=0, c="lightgrey", alpha=0.5)
     
-def _plot(self, c='time', **kwargs):
+def _plot(self, c='time', savefigname=None, **kwargs):
     
     X = self.adata.X
     if c=='time':
         c = self.adata.obs.time
         
     _simulation_plot_presets(X[:,0], X[:,1], c=c, **kwargs)
+    if savefigname:
+        out = plt.savefig(savefigname)
