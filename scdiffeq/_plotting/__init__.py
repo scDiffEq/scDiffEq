@@ -8,4 +8,3 @@ __email__ = ', '.join([
     'vinyard@g.harvard.edu',
 ])
 
-
