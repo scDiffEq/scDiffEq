@@ -22,7 +22,7 @@ def _save_uns_tensors(adata, path, uns_key):
     torch.save(obj=adata.uns[uns_key], f=f_path)
 
 
-def _save_torch_model(self, path):
+def _save_torch_model(self, path, tostring=False):
 
     """
     adata
@@ -41,9 +41,10 @@ def _save_torch_model(self, path):
 
     model = adata.uns["ODE"]
     optimizer = adata.uns["optimizer"]
-
-    adata.uns["optimizer"] = str(adata.uns["optimizer"])
-    adata.uns["ODE"] = str(adata.uns["ODE"])
+    
+    if tostring:
+        adata.uns["optimizer"] = str(adata.uns["optimizer"])
+        adata.uns["ODE"] = str(adata.uns["ODE"])
 
     latest_train_loss = adata.uns["loss"]["train_loss"][-1]
     latest_valid_loss = adata.uns["loss"]["valid_loss"][-1]
@@ -60,8 +61,6 @@ def _save_torch_model(self, path):
         )
         
 def _save_adata_uns(self, 
-                    parent_dir="scdiffeq_outs",
-                    uns_path="scdiffeq_outs/AnnData/uns",
                     pickle_dump_list = ["pca", "loss"], 
                     pass_keys = ["split_data", "data_split_keys", "RunningAverageMeter"]):
     
@@ -71,8 +70,7 @@ def _save_adata_uns(self,
     ------
     (1) if uns_key is in the predefined list of keys to pass or is an int, pass. these will be overlooked / deleted.
     """
-    
-    model_checkpoint_path = os.path.join(parent_dir, "model_checkpoints")
+    model_checkpoint_path = os.path.join(self._outs_path, "model_checkpoints")
     v.ut.mkdir_flex(model_checkpoint_path)
     
     self.backup_uns_dict = {}
@@ -94,18 +92,18 @@ def _save_adata_uns(self,
         
         ###### write dicts ######
         elif uns_key in pickle_dump_list:
-            _write_pickle_dict(adata=self.adata, path=uns_path, uns_key=uns_key)
+            _write_pickle_dict(adata=self.adata, path=self._uns_path, uns_key=uns_key)
         ###### write dicts ######
             
         ###### write tensors ######
         elif self.adata.uns[uns_key].__class__.__name__ == "Tensor":
-            _save_uns_tensors(adata=self.adata, path=uns_path, uns_key=uns_key)
+            _save_uns_tensors(adata=self.adata, path=self._uns_path, uns_key=uns_key)
         ###### write tensors ######
         
         ###### save model ######
         elif uns_key == "ODE" or "optimizer":
             path = os.path.join(model_checkpoint_path, "model_{}".format(self.epoch))
-            _save_torch_model(self, path=path)
+            _save_torch_model(self, path=path, tostring=True)
         ###### save model ######
         else:
             print("Undealt with: {}".format(uns_key))
