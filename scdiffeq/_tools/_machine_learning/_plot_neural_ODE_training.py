@@ -30,6 +30,7 @@ def _plot_smoothed_training(
     groupsize=5,
     silence_stdev=False,
     grid=True,
+    save_path=False,
 ):
 
     """
@@ -106,17 +107,21 @@ def _plot_smoothed_training(
     if grid:
         plt.grid(zorder=0)
 
-    v.pl.legend(ax)
+    v.pl.legend(ax, loc=1)
+    # save and display plot
+    if save_path:
+        fig.savefig(save_path, bbox_inches='tight') 
     plt.show()
 
 
-def _plot_loss(adata, groupsize):
+def _plot_loss(adata, groupsize, save_path):
 
     """"""
     
     _plot_smoothed_training(
         adata,
         groupsize=groupsize,
+        save_path=save_path, 
     )
 #     display.clear_output(wait=True)
 #     display.display(plt.gcf())
