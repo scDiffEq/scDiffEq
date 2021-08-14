@@ -38,8 +38,9 @@ class _GenericSimulator:
         self.StateFuncEquationDict['four_attractor_2d'] = _sim_eqns._four_attractor_2d_state_equation
         
         if save_dir:
-            simulation_figure_path = os.path.join(save_dir, "Simulation_Figures")
             v.ut.mkdir_flex(save_dir)
+            v.ut.mkdir_flex(os.path.join(save_dir, "scdiffeq_outs"))
+            simulation_figure_path = os.path.join(save_dir, "scdiffeq_outs" ,"simulation_figures")
             v.ut.mkdir_flex(simulation_figure_path)
             self.simulation_plot_fig_path = os.path.join(simulation_figure_path, "Simulation.png")
             self.simulation_init_fig_path = os.path.join(simulation_figure_path, "Simulation_InitialConditions.png")
