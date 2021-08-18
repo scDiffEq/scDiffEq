@@ -46,6 +46,7 @@ class scDiffEq:
         _create_outs_structure(self)
 
         self.available_network_types = ["SDE", "ODE"]
+        self.epoch = 0
 
         assert network_type in self.available_network_types, print(
             "Choose from available network types: {}".format(
