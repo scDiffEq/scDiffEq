@@ -3,7 +3,7 @@ import numpy as np
 from ..._utilities._subsetting_functions import _group_adata_subset
 from ..._utilities._subsetting_functions import _randomly_subset_trajectories
 from ..._utilities._AnnData_handlers._format_AnnData import _format_AnnData_mtx_as_numpy_array
-from ._forward_integration_functions._format_trajectories_into_batches import _check_overlap_bewteen_data_subsets
+from ._forward_integration_functions._individual_trajectories._format_trajectories_into_batches import _check_overlap_bewteen_data_subsets
 
 """
 This module contains the forward-facing function for splitting a dataset into test, train, and validation

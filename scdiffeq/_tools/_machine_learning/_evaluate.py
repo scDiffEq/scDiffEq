@@ -3,8 +3,8 @@
 # --------------- #
 import torch
 
-from ._forward_integration_functions._format_trajectories_into_batches import _format_trajectories
-from ._forward_integration_functions._forward_integrate_one_trajectory import _forward_integrate_one_trajectory
+from ._forward_integration_functions._individual_trajectories._format_trajectories_into_batches import _format_trajectories
+from ._forward_integration_functions._individual_trajectories._forward_integrate_one_trajectory import _forward_integrate_one_trajectory
 
 def _get_batch_outs_empty_tensor(batch_of_trajectories):
     

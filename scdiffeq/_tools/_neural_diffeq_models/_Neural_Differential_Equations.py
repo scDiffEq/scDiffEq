@@ -109,8 +109,10 @@ class scDiffEq:
 
     def learn(
         self,
-        n_batches=10,
+        n_batches=20,
         n_epochs=1500,
+        mode='parallel',
+        time_column='time',
         learning_rate=False,
         validation_frequency=False,
         plot_progress=True,
@@ -140,6 +142,9 @@ class scDiffEq:
         _learn_neural_ODE(
             self,
             n_epochs=n_epochs,
+            n_batches=self.n_batches,
+            mode='parallel',
+            time_column=time_column,
             plot_progress=plot_progress,
             plot_summary=plot_summary,
             smoothing_factor=smoothing_factor,
