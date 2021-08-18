@@ -6,7 +6,11 @@
 * <a href="https://github.com/pinellolab/sc-neural-ODEs/notebooks">**Example notebooks**</a>
 * <a href="https://github.com/pinellolab/sc-neural-ODEs/scdiffeq">**scdiffeq**</a> (development package)
 
+
 ## Install the development package:
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ```
 git clone git@github.com:pinellolab/sc-neural-ODEs.git
 
