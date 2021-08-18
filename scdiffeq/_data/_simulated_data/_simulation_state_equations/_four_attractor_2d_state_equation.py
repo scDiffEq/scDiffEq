@@ -1,7 +1,7 @@
-
 # package imports #
 # --------------- #
 import numpy as np
+
 
 def _four_attractor_2d_state_equation(state, time):
 

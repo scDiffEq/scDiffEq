@@ -1,8 +1,8 @@
-
 # package imports #
 # --------------- #
 import numpy as np
 import anndata
+
 
 def _format_simulation_data(simulated_trajectories):
 
@@ -31,11 +31,9 @@ def _simulation_to_AnnData(self, silent=False):
     X = self.X.reshape(-1, 2)
     adata = anndata.AnnData(X)
     adata.obs["time"] = np.tile(self.time_vector, self.n_traj)
-    adata.obs["trajectory"] = np.repeat(
-        range(self.n_traj), len(self.time_vector)
-    )
+    adata.obs["trajectory"] = np.repeat(range(self.n_traj), len(self.time_vector))
 
     if not silent:
-        print('\n', adata)
+        print("\n", adata)
 
     return adata

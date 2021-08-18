@@ -1,4 +1,3 @@
-
 # package imports #
 # --------------- #
 import torch
@@ -9,6 +8,7 @@ from collections import OrderedDict
 # local imports #
 # ------------- #
 from ._check_pytorch_activation_function import _check_pytorch_activation_function
+
 
 def _create_flexible_neural_network(
     in_dim=2,

@@ -1,12 +1,11 @@
-
 # package imports #
 # --------------- #
 import numpy as np
 import torch
 
+
 def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "test"]):
-    
-    
+
     """
     This function checks between data subsets within AnnData to see if there is any overlap between groups.
     
@@ -41,6 +40,7 @@ def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "
                     .shape[0]
                 )
     n_overlap = np.array(overlaps).sum()
+
 
 def _get_formatted_trajectory(data_object, trajectory):
 

@@ -1,12 +1,11 @@
-
 # package imports #
 # --------------- #
 import numpy as np
 import vintools as v
 
+
 def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "test"]):
-    
-    
+
     """
     This function checks between data subsets within AnnData to see if there is any overlap between groups.
     
@@ -38,4 +37,8 @@ def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "
                     .shape[0]
                 )
     n_overlap = np.array(overlaps).sum()
-    print('\nIdentified {} overlapping (leaking) datapoints.'.format(v.ut.format_pystring(str(n_overlap), ['BOLD', 'RED'])))
+    print(
+        "\nIdentified {} overlapping (leaking) datapoints.".format(
+            v.ut.format_pystring(str(n_overlap), ["BOLD", "RED"])
+        )
+    )

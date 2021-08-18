@@ -1,7 +1,7 @@
-
 # local imports #
 # ------------- #
 from ._enumerate_activation_functions import _enumerate_activation_functions
+
 
 def _check_pytorch_activation_function(activation_function):
 

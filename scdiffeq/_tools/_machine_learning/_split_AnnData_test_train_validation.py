@@ -1,15 +1,19 @@
-
 import numpy as np
 from ..._utilities._subsetting_functions import _group_adata_subset
 from ..._utilities._subsetting_functions import _randomly_subset_trajectories
-from ..._utilities._AnnData_handlers._format_AnnData import _format_AnnData_mtx_as_numpy_array
-from ._forward_integration_functions._individual_trajectories._format_trajectories_into_batches import _check_overlap_bewteen_data_subsets
+from ..._utilities._AnnData_handlers._format_AnnData import (
+    _format_AnnData_mtx_as_numpy_array,
+)
+from ._forward_integration_functions._individual_trajectories._format_trajectories_into_batches import (
+    _check_overlap_bewteen_data_subsets,
+)
 
 """
 This module contains the forward-facing function for splitting a dataset into test, train, and validation
 by trajectory as well as all fuctions supporting it. The functions imported above are more universal and 
 thereby contained in a seperate module. 
 """
+
 
 def _calculate_train_validation_percentages(proportion_train, proportion_validation):
 
@@ -92,9 +96,7 @@ def _test_train_split_by_trajectory(
     (
         train_validation_percentage,
         proportion_validation,
-    ) = _calculate_train_validation_percentages(
-        proportion_train, proportion_validation
-    )
+    ) = _calculate_train_validation_percentages(proportion_train, proportion_validation)
 
     # employ the randomly_subset_trajectories function twice to get trajectories for
     # first, training and validation, and then subset randomly from within that set
@@ -102,18 +104,21 @@ def _test_train_split_by_trajectory(
     training_and_validation_trajectories = _randomly_subset_trajectories(
         adata, all_trajectories, train_validation_percentage
     )
-#     validation_trajectories = _randomly_subset_trajectories(
-#         adata, training_and_validation_trajectories, proportion_validation
-#     )
-    
+    #     validation_trajectories = _randomly_subset_trajectories(
+    #         adata, training_and_validation_trajectories, proportion_validation
+    #     )
+
     training_and_validation_trajectories = _randomly_subset_trajectories(
         adata, all_trajectories, train_validation_percentage
     )
-    size_validation = int(round(proportion_validation * len(training_and_validation_trajectories)))
-    validation_trajectories = np.sort(
-        np.random.choice(training_and_validation_trajectories, size=size_validation, replace=False)
+    size_validation = int(
+        round(proportion_validation * len(training_and_validation_trajectories))
     )
-
+    validation_trajectories = np.sort(
+        np.random.choice(
+            training_and_validation_trajectories, size=size_validation, replace=False
+        )
+    )
 
     # get training trajectories from the first subset by removing trajectories in the
     # validation subset
@@ -160,6 +165,7 @@ class _data_splitting:
         self.validation = validation
         self.test = test
 
+
 def _split_test_train(
     adata,
     trajectory_column="trajectory",
@@ -168,7 +174,8 @@ def _split_test_train(
     return_data_subsets=True,
     time_column="time",
     silent=False,
-    return_split_data=False,):
+    return_split_data=False,
+):
 
     """
     This is the user-facing function to split data into testing, training, and validation sets.
@@ -206,7 +213,7 @@ def _split_test_train(
         data class with three subsets of data: train, test, and validation
 
     """
-    
+
     try:
         adata.obs["trajectory"]
 
@@ -234,7 +241,7 @@ def _split_test_train(
     }
     print("\nChecking for overlap between test, train, and validation subsets...\n")
     _check_overlap_bewteen_data_subsets(adata)
-    adata.uns['split_data'] = split_data
-    
+    adata.uns["split_data"] = split_data
+
     if return_split_data:
         return split_data

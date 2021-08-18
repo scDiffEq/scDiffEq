@@ -1,5 +1,5 @@
-
 import numpy as np
+
 
 def _add_noise(adata, noise=0.05, return_adata=False):
 
@@ -25,8 +25,8 @@ def _add_noise(adata, noise=0.05, return_adata=False):
     None
         adata is modified in place.
     """
-    
+
     adata.X = adata.X + np.random.normal(0, noise, adata.X.shape)
-        
+
     if return_adata:
         return adata

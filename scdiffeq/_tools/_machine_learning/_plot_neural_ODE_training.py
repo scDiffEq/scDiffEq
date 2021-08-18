@@ -1,8 +1,9 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
+
 # from IPython import display
 import vintools as v
+
 
 def _get_x_axis_plot_train_validation(adata, groupsize=1):
 
@@ -26,11 +27,7 @@ def _get_x_axis_plot_train_validation(adata, groupsize=1):
 
 
 def _plot_smoothed_training(
-    adata,
-    groupsize=5,
-    silence_stdev=False,
-    grid=True,
-    save_path=False,
+    adata, groupsize=5, silence_stdev=False, grid=True, save_path=False,
 ):
 
     """
@@ -110,18 +107,18 @@ def _plot_smoothed_training(
     v.pl.legend(ax, loc=1)
     # save and display plot
     if save_path:
-        fig.savefig(save_path, bbox_inches='tight') 
+        fig.savefig(save_path, bbox_inches="tight")
     plt.show()
 
 
 def _plot_loss(adata, groupsize, save_path):
 
     """"""
-    
+
     _plot_smoothed_training(
-        adata,
-        groupsize=groupsize,
-        save_path=save_path, 
+        adata, groupsize=groupsize, save_path=save_path,
     )
+
+
 #     display.clear_output(wait=True)
 #     display.display(plt.gcf())

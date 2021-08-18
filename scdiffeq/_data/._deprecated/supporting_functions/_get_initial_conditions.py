@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def gaussian_distribution(number_trajectories, variance=0.15):
 
     mean = 0
@@ -8,7 +9,7 @@ def gaussian_distribution(number_trajectories, variance=0.15):
 
 
 def random_distribution(number_trajectories):
-    
+
     """Generates a random distribution around zero."""
 
     distribution = np.random.random(number_trajectories) * 2 - 1
@@ -38,7 +39,7 @@ def axis_zeroed(number_trajectories):
 
 
 def get_initial_conditions(keywords, number_trajectories, variance=0.15):
-    
+
     initial_conditions = np.array([])
 
     for i in range(len(keywords)):
@@ -55,5 +56,5 @@ def get_initial_conditions(keywords, number_trajectories, variance=0.15):
         initial_conditions = np.append(distribution, initial_conditions)
 
     initial_conditions = initial_conditions.reshape(number_trajectories, len(keywords))
-    
+
     return initial_conditions

@@ -1,6 +1,9 @@
 import plotly.graph_objects as go
 
-def _plot_quasi_potential(self, cmap="viridis", surface_opacity=0.9, cell_color="azure", save_path=False):
+
+def _plot_quasi_potential(
+    self, cmap="viridis", surface_opacity=0.9, cell_color="azure", save_path=False
+):
 
     x_mesh, y_mesh = self.DensityDict["x_mesh"], self.DensityDict["y_mesh"]
     quasi_potential = self.quasi_potential
@@ -30,14 +33,9 @@ def _plot_quasi_potential(self, cmap="viridis", surface_opacity=0.9, cell_color=
         y=self.DensityDict["y"],
         z=self.cell_quasi_potential + 0.02,
         mode="markers",
-        marker=dict(
-            size=2,
-            color=cell_color,
-            opacity=1,
-        ),
+        marker=dict(size=2, color=cell_color, opacity=1,),
     )
     fig.show()
     # save plot
     if save_path:
         fig.write_html(save_path)
-    

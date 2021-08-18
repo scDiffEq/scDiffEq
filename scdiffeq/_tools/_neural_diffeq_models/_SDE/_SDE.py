@@ -1,9 +1,9 @@
-
 import torch
 import torch.nn as nn
 
+
 class Neural_SDE(nn.Module):
-           
+
     noise_type = "diagonal"
     sde_type = "ito"
 
@@ -15,10 +15,15 @@ class Neural_SDE(nn.Module):
         self.brownian_size = brownian_size
 
         self.drift_param = nn.Parameter(
-            torch.ones(self.batch_size, self.data_dimensionality) * 0.8, requires_grad=True
+            torch.ones(self.batch_size, self.data_dimensionality) * 0.8,
+            requires_grad=True,
         )
-        self.diff_constant = torch.ones(self.batch_size, self.data_dimensionality) * 0.000005
-        self.diff_constant2 = torch.ones(self.batch_size, self.data_dimensionality) * 0.08
+        self.diff_constant = (
+            torch.ones(self.batch_size, self.data_dimensionality) * 0.000005
+        )
+        self.diff_constant2 = (
+            torch.ones(self.batch_size, self.data_dimensionality) * 0.08
+        )
 
         self.position_net_drift = torch.nn.Sequential(
             nn.Linear(data_dimensionality, nodes),
@@ -34,7 +39,9 @@ class Neural_SDE(nn.Module):
             nn.Linear(nodes, data_dimensionality),
         )
 
-        self.position_net_diff = torch.nn.Sequential(nn.Linear(data_dimensionality, data_dimensionality))
+        self.position_net_diff = torch.nn.Sequential(
+            nn.Linear(data_dimensionality, data_dimensionality)
+        )
 
     # Drift Function
     def f(self, t, y):

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from ._torch_device import _set_device
 
+
 def _specify_func(data_dimensionality, layers, nodes):
 
     """Currently this function is only for a 1-layer network."""
@@ -9,7 +10,7 @@ def _specify_func(data_dimensionality, layers, nodes):
     class ODEFunc(nn.Module):
         def __init__(self, data_dimensionality, layers, nodes):
             super(ODEFunc, self).__init__()
-            
+
             if layers == 1:
                 self.net = nn.Sequential(
                     nn.Linear(data_dimensionality, nodes),

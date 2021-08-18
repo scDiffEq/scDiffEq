@@ -1,9 +1,9 @@
-
 import os
 import vintools as v
 from ._saveplot import _saveplot
 import matplotlib.pyplot as plt
-    
+
+
 def _subplot_fig_ax_presets(ax, title, x_lab, y_lab):
 
     ax.set_title(title, fontsize=15)
@@ -22,7 +22,9 @@ def _plot_potency_metrics(adata, save=False, plot_savename=None, size=(12, 5)):
     fig = plt.figure(figsize=size)
 
     ax1 = fig.add_subplot(1, 2, 1)
-    _subplot_fig_ax_presets(ax1, title="Potency Metrics", x_lab="Normalized Value", y_lab="Count")
+    _subplot_fig_ax_presets(
+        ax1, title="Potency Metrics", x_lab="Normalized Value", y_lab="Count"
+    )
     plt.subplot(1, 2, 1)
     a = plt.hist(
         adata.obs.gene_count / adata.obs.gene_count.max(),
@@ -60,11 +62,10 @@ def _plot_potency_metrics(adata, save=False, plot_savename=None, size=(12, 5)):
     )
     plt.tight_layout()
     plt.colorbar()
-    
+
     if save == True:
         if plot_savename == None:
             plot_savename = "gene_count_potency_histogram_dimensional_reduction.png"
         _saveplot(save_dir=os.getcwd(), save_name=plot_savename)
 
     plt.show()
-    

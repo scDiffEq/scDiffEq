@@ -1,7 +1,8 @@
 import torch
 
-def _set_device(gpu='0'):
-    
+
+def _set_device(gpu="0"):
+
     """
     Parameters:
     -----------
@@ -14,13 +15,14 @@ def _set_device(gpu='0'):
         object to which torch.Tensors can be sent to for calculations.
     
     """
-    
+
     device = torch.device("cuda:" + gpu if torch.cuda.is_available() else "cpu")
 
     return device
 
+
 def _torch_device(array, device=_set_device()):
-    
+
     """
     Parameters:
     -----------
@@ -36,7 +38,7 @@ def _torch_device(array, device=_set_device()):
         A torch.Tensor loaded onto the specified device.
     
     """
-    
+
     tensor = torch.Tensor(array).to(device)
 
     return tensor

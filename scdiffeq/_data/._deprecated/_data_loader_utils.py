@@ -1,4 +1,3 @@
-
 import shutil
 import tempfile
 import decorator
@@ -167,7 +166,7 @@ def load_adata_from_GCP_bucket(
         gcloud_path, save_destination, keep_local_copy
     )
     adata = a.read_h5ad(downloaded_file)
-    
+
     if keep_local_copy == False:
         os.remove(downloaded_file)
 

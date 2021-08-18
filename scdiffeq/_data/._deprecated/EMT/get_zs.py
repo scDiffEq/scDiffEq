@@ -1,5 +1,5 @@
 def get_z(gz, kmrgd, Mu0, Mu1, Mu2, Mu3, Mu4, Mu5, Mu6, kz):
-    
+
     z = (
         gz
         * kmrgd[1]
@@ -14,12 +14,12 @@ def get_z(gz, kmrgd, Mu0, Mu1, Mu2, Mu3, Mu4, Mu5, Mu6, kz):
         )
         / kz
     )
-    
+
     return z
 
+
 def get_s(gs, kmrgd, Mu20, Mu21, Mu22, ks):
-    
+
     s = gs * kmrgd[3] * (Mu20 + 0.6 * 2 * Mu21 + 0.3 * Mu22) / ks
-    
+
     return s
-    

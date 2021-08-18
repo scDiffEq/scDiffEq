@@ -15,5 +15,5 @@ def _find_cell_quasi_potential(self):
         h_xx, h_xy = np.unique(np.argmin(hx, axis=0)), np.unique(np.argmin(hx, axis=1))
         h_yx, h_yy = np.unique(np.argmin(hy, axis=0)), np.unique(np.argmin(hy, axis=1))
         cell_qp.append(self.quasi_potential[h_xx, h_yy][0])
-   
+
     self.cell_quasi_potential = np.array(cell_qp)

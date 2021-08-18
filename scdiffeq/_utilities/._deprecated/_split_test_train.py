@@ -1,4 +1,3 @@
-
 import numpy as np
 from . import _general_utility_functions as util
 from ._subsetting_functions import _group_adata_subset
@@ -9,6 +8,7 @@ This module contains the forward-facing function for splitting a dataset into te
 by trajectory as well as all fuctions supporting it. The functions imported above are more universal and 
 thereby contained in a seperate module. 
 """
+
 
 def _calculate_train_validation_percentages(proportion_training, proportion_validation):
 
@@ -150,6 +150,7 @@ class _data_splitting:
         self.validation = validation
         self.test = test
 
+
 def _split_test_train(
     adata,
     trajectory_column="trajectory",
@@ -195,7 +196,7 @@ def _split_test_train(
         data class with three subsets of data: train, test, and validation
 
     """
-    
+
     try:
         adata.obs["trajectory"]
 

@@ -16,25 +16,35 @@ def _presets_for_plotting_multiple_trajectories(ax, title, x, y, xlab, ylab):
 
     return ax
 
-def _single_fig_presets(title, x_lab, y_lab, size=(10,8), title_fontsize=20, title_adjustment_factor=1.1, axis_label_fontsize=15):
-    
+
+def _single_fig_presets(
+    title,
+    x_lab,
+    y_lab,
+    size=(10, 8),
+    title_fontsize=20,
+    title_adjustment_factor=1.1,
+    axis_label_fontsize=15,
+):
+
     """
     presets for one single figure to look nice
     """
-    
-    fig = plt.figure(figsize = size)
-    ax = fig.add_subplot(1,1,1)
-    ax.set_title(title, fontsize = title_fontsize, y=title_adjustment_factor)
-    ax.set_xlabel(x_lab, fontsize = axis_label_fontsize)
-    ax.set_ylabel(y_lab, fontsize = axis_label_fontsize)    
-    ax.spines['left'].set_linewidth(3)
-    ax.spines['bottom'].set_linewidth(3)
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    ax.yaxis.set_ticks_position('left')
-    ax.xaxis.set_ticks_position('bottom')
-    
+
+    fig = plt.figure(figsize=size)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_title(title, fontsize=title_fontsize, y=title_adjustment_factor)
+    ax.set_xlabel(x_lab, fontsize=axis_label_fontsize)
+    ax.set_ylabel(y_lab, fontsize=axis_label_fontsize)
+    ax.spines["left"].set_linewidth(3)
+    ax.spines["bottom"].set_linewidth(3)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.yaxis.set_ticks_position("left")
+    ax.xaxis.set_ticks_position("bottom")
+
     return fig, ax
+
 
 def _subplot_presets(ax, x, y, xlab, ylab, size, color, alpha):
 
@@ -49,7 +59,7 @@ def _subplot_presets(ax, x, y, xlab, ylab, size, color, alpha):
     ax.spines["top"].set_visible(False)
     ax.yaxis.set_ticks_position("left")
     ax.xaxis.set_ticks_position("bottom")
-   
+
     return ax
 
 
@@ -76,8 +86,8 @@ def _dual_plot_presets(
 
     subplot_presets(ax1, left_x, left_y, x_lab_left, y_lab_left, size)
     subplot_presets(ax2, right_x, right_y, x_lab_right, y_lab_right, size)
-    
-    
+
+
 def _annotate_scatterplot(
     points_to_be_annotated,
     labels,

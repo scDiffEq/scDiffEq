@@ -1,4 +1,3 @@
-
 # package imports #
 # --------------- #
 import vintools as v
@@ -6,6 +5,7 @@ import vintools as v
 # local imports #
 # ------------- #
 from ._print_verbose_function_documentation import _print_verbose_function_documentation
+
 
 def _get_numpy_distribution_function(
     function, module="random", package="numpy", print_verbose_documentation=False

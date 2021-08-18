@@ -1,7 +1,7 @@
-
 # package imports #
 # --------------- #
 import vintools as v
+
 
 def _print_verbose_function_documentation(imported_function, package, module, function):
 
@@ -39,12 +39,7 @@ def _print_verbose_function_documentation(imported_function, package, module, fu
 
     print(
         "{} {}".format(
-            v.ut.format_pystring(
-                preamble,
-                [
-                    "BOLD",
-                ],
-            ),
+            v.ut.format_pystring(preamble, ["BOLD",],),
             v.ut.format_pystring(function_name, ["BOLD", "RED"]),
         )
     )

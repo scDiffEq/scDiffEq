@@ -1,5 +1,5 @@
-
 import torchdiffeq
+
 
 def _forward_integrate_one_trajectory(func, formatted_trajectory):
 
@@ -31,7 +31,7 @@ def _forward_integrate_one_trajectory(func, formatted_trajectory):
     y = formatted_trajectory.y
     y0 = formatted_trajectory.y0
     t = formatted_trajectory.t
-    
+
     y_predicted = torchdiffeq.odeint(func, y0, t)
 
     return y_predicted, y

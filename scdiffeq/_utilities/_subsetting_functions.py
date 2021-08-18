@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 
@@ -6,6 +5,7 @@ import pandas as pd
 The functions in this module conveniently subset other data objects used by this package. 
 They are useful internally but also available to the user.
 """
+
 
 def _group_adata_subset(
     adata,
@@ -103,7 +103,7 @@ def _randomly_subset_trajectories(adata, set_of_trajectories, subset):
         Sampled from the original set of trajectories
 
     """
-    
+
     set_of_trajectories = adata.obs.trajectory.unique()
 
     size = int(round(subset * len(set_of_trajectories)))
@@ -112,6 +112,7 @@ def _randomly_subset_trajectories(adata, set_of_trajectories, subset):
     )
 
     return random_subset_of_trajectories
+
 
 def _isolate_trajectory(data_object, trajectory_number):
 
@@ -140,7 +141,10 @@ def _isolate_trajectory(data_object, trajectory_number):
 def _check_df(df, column, subset):
 
     assert column in df.columns, "Column not found in df."
+
+
 #     assert subset in df[column].unique().astype(type(subset)), "Subset value not found in selected column."
+
 
 def _get_subset_idx(df, column, subset=True, return_inverse=False):
 
@@ -170,9 +174,13 @@ def _get_subset_idx(df, column, subset=True, return_inverse=False):
 
     subset_idx = df.loc[df[column].astype(type(subset)) == subset].index.astype(int)
     try:
-        inverse_idx = df.loc[dfs[column].astype(type(subset)) == subset].index.astype(int)
+        inverse_idx = df.loc[dfs[column].astype(type(subset)) == subset].index.astype(
+            int
+        )
     except:
-        inverse_idx = df.loc[df[column].astype(type(subset)) != subset].index.astype(int)
+        inverse_idx = df.loc[df[column].astype(type(subset)) != subset].index.astype(
+            int
+        )
 
     if return_inverse == True:
         return [subset_idx, inverse_idx]
@@ -300,10 +308,10 @@ def _subset_adata(
         inverse_obs,
         inverse_idx,
     ]
-    
-#     # if it's just one item (i.e., only returning adata), no need to return as a list
-#     if np.all([return_inverse, return_obs, return_idx]) == False:
-#         return subset_adata
+
+    #     # if it's just one item (i.e., only returning adata), no need to return as a list
+    #     if np.all([return_inverse, return_obs, return_idx]) == False:
+    #         return subset_adata
 
     if return_inverse:
         return [

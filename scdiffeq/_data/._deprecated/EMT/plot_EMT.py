@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 def subplot_presets(
     ax, x, y, xlab, ylab, title, color, label, x_line=None, stability=None
 ):
@@ -29,30 +30,46 @@ def subplot_presets(
     return ax
 
 
-def plot_EMH(reaching_epithelial, reaching_mesenchymal, reaching_hybrid, mode="ZEB/miR200"):
-    
+def plot_EMH(
+    reaching_epithelial, reaching_mesenchymal, reaching_hybrid, mode="ZEB/miR200"
+):
+
     fig, axes = plt.subplots(1, 3, figsize=(16, 4))
-    
+
     epi, mes, hyb = axes[0], axes[1], axes[2]
-    
+
     if mode == "SNAIL/miR34":
-        
-        epi_pl1_value, mes_pl1_value, hyb_pl1_value = reaching_epithelial.miR34, reaching_mesenchymal.miR34, reaching_hybrid.miR34
-        epi_pl2_value, mes_pl2_value, hyb_pl2_value = reaching_epithelial.mSNAIL, reaching_mesenchymal.mSNAIL, reaching_hybrid.mSNAIL
-       
+
+        epi_pl1_value, mes_pl1_value, hyb_pl1_value = (
+            reaching_epithelial.miR34,
+            reaching_mesenchymal.miR34,
+            reaching_hybrid.miR34,
+        )
+        epi_pl2_value, mes_pl2_value, hyb_pl2_value = (
+            reaching_epithelial.mSNAIL,
+            reaching_mesenchymal.mSNAIL,
+            reaching_hybrid.mSNAIL,
+        )
+
         miR_label = "miR34"
         mRNA_label = "SNAIL"
-        
-        
+
     elif mode == "ZEB/miR200":
-        
-        epi_pl1_value, mes_pl1_value, hyb_pl1_value = reaching_epithelial.miR200, reaching_mesenchymal.miR200, reaching_hybrid.miR200
-        epi_pl2_value, mes_pl2_value, hyb_pl2_value = reaching_epithelial.mZEB, reaching_mesenchymal.mZEB, reaching_hybrid.mZEB
-        
+
+        epi_pl1_value, mes_pl1_value, hyb_pl1_value = (
+            reaching_epithelial.miR200,
+            reaching_mesenchymal.miR200,
+            reaching_hybrid.miR200,
+        )
+        epi_pl2_value, mes_pl2_value, hyb_pl2_value = (
+            reaching_epithelial.mZEB,
+            reaching_mesenchymal.mZEB,
+            reaching_hybrid.mZEB,
+        )
+
         miR_label = "miR200"
         mRNA_label = "ZEB"
-        
-        
+
     subplot_presets(
         epi,
         reaching_epithelial.time.values,
@@ -63,7 +80,7 @@ def plot_EMH(reaching_epithelial, reaching_mesenchymal, reaching_hybrid, mode="Z
         color="orange",
         label=miR_label,
         x_line=300,
-        )
+    )
 
     subplot_presets(
         epi,

@@ -13,9 +13,10 @@ from matplotlib.colorbar import Colorbar
 
 from .._tools._machine_learning._get_2d_meshgrid_dydt import _get_2d_meshgrid_dydt
 
+
 def _plot_meshgrid_vector_field(
     adata,
-    ODE_key='ODE',
+    ODE_key="ODE",
     figsize=(6, 5.5),
     title_y_adj=1.05,
     plot_title="Drift plot",
@@ -26,7 +27,7 @@ def _plot_meshgrid_vector_field(
 ):
 
     """"""
-    
+
     ODE = adata.uns[ODE_key]
 
     bounds = v.ut.get_data_bounds(adata.X)
@@ -54,15 +55,11 @@ def _plot_meshgrid_vector_field(
 
     #### colorbar ####
     cbax = fig.add_subplot(gridspec[0, 1])
-    cb = Colorbar(
-        ax=cbax,
-        mappable=stream.lines,
-        ticklocation="right",
-    )
+    cb = Colorbar(ax=cbax, mappable=stream.lines, ticklocation="right",)
     cb.outline.set_visible(False)
     cb.set_label("Velocity", rotation=0, labelpad=25)
-    
+
     # save and display plot
     if save_path:
-        fig.savefig(save_path, bbox_inches='tight') 
+        fig.savefig(save_path, bbox_inches="tight")
     plt.show()

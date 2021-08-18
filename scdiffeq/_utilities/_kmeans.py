@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from .._plotting._plotting_presets import _single_fig_presets
 from .._plotting._plotting_presets import _annotate_scatterplot
 
+
 def _get_kmeans_inertia(X, k_max=11):
 
     """
@@ -15,8 +16,6 @@ def _get_kmeans_inertia(X, k_max=11):
     k_max
         Max number of $k$ to try. 
     """
-
-    
 
     wcss = []
     for i in range(1, k_max):
@@ -34,8 +33,15 @@ def _get_kmeans_inertia(X, k_max=11):
     )
     plt.plot(range(1, k_max), wcss, lw="4", c="mediumpurple", alpha=0.5)
     plt.show()
-    
-def _kmeans(X, k, annotations, magnitude=[[1, 1], [1, 1], [1, 1]], direction=[[1, 1], [1, 1], [1, 1]],):
+
+
+def _kmeans(
+    X,
+    k,
+    annotations,
+    magnitude=[[1, 1], [1, 1], [1, 1]],
+    direction=[[1, 1], [1, 1], [1, 1]],
+):
 
     """
     
@@ -76,11 +82,7 @@ def _kmeans(X, k, annotations, magnitude=[[1, 1], [1, 1], [1, 1]], direction=[[1
     legend_.legendHandles[1]._sizes = [60]
 
     _annotate_scatterplot(
-        kmeans.cluster_centers_,
-        annotations,
-        magnitude,
-        direction,
-        point_offset=0,
+        kmeans.cluster_centers_, annotations, magnitude, direction, point_offset=0,
     )
 
     plt.show()

@@ -1,7 +1,7 @@
-
 import torch
 
 from ._forward_integrate_one_trajectory import _forward_integrate_one_trajectory
+
 
 def _get_batch_outs_empty_tensor(batch_of_trajectories):
 
@@ -10,8 +10,9 @@ def _get_batch_outs_empty_tensor(batch_of_trajectories):
     t_steps = traj_shape[0]
     n_dim = traj_shape[1]
 
-    return torch.zeros([batch_size, t_steps, n_dim]), torch.zeros(
-        [batch_size, t_steps, n_dim]
+    return (
+        torch.zeros([batch_size, t_steps, n_dim]),
+        torch.zeros([batch_size, t_steps, n_dim]),
     )
 
 
@@ -36,9 +37,9 @@ def _forward_integrate_batch(adata, batch_of_trajectories, validation=False):
     Notes:
     ------
     """
-       
+
     if not validation:
-        adata.uns['optimizer'].zero_grad()
+        adata.uns["optimizer"].zero_grad()
 
     y_pred, y_data = _get_batch_outs_empty_tensor(batch_of_trajectories)
 
@@ -47,17 +48,17 @@ def _forward_integrate_batch(adata, batch_of_trajectories, validation=False):
         if validation:
             with torch.no_grad():
                 y_pred[n_traj], y_data[n_traj] = _forward_integrate_one_trajectory(
-                    adata.uns['ODE'], trajectory
+                    adata.uns["ODE"], trajectory
                 )
         else:
             y_pred[n_traj], y_data[n_traj] = _forward_integrate_one_trajectory(
-                adata.uns['ODE'], trajectory
+                adata.uns["ODE"], trajectory
             )
-            
+
     batch_loss = adata.uns["loss_func"](y_pred, y_data)
 
     if not validation:
         batch_loss.backward()
-        adata.uns['optimizer'].step()
-        
+        adata.uns["optimizer"].step()
+
     return batch_loss

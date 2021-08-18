@@ -3,6 +3,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 from ...plotting._figure_presets import subplot_presets
 
+
 def get_index_all_y0(adata):
 
     """"""
@@ -57,9 +58,12 @@ def select_y0(adata, x_coord, y_coord, x_cut="<", y_cut=">"):
 
     return idx, y0_points, y0_subset
 
+
 def subset_adata_by_initial_condition(adata, x_coord, y_coord, x_cut="<", y_cut=">"):
 
-    subset_initial_conditions_idx, y0_points, y0_subset = select_y0(adata, -0.5, 0.45, x_cut="<", y_cut=">")
+    subset_initial_conditions_idx, y0_points, y0_subset = select_y0(
+        adata, -0.5, 0.45, x_cut="<", y_cut=">"
+    )
 
     adata = adata[
         adata.obs.loc[
@@ -68,19 +72,44 @@ def subset_adata_by_initial_condition(adata, x_coord, y_coord, x_cut="<", y_cut=
     ]
 
     print(adata)
-    
-    fig, axes = plt.subplots(
-        1, 2, figsize=(12, 6), facecolor="white"
-    )
 
-    fig.suptitle("Data subset", y=1.02, fontsize=20) # , fontweight="semibold")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6), facecolor="white")
+
+    fig.suptitle("Data subset", y=1.02, fontsize=20)  # , fontweight="semibold")
 
     ax1, ax2 = axes[0], axes[1]
-    subplot_presets(ax1, y0_points[:, 0], y0_points[:, 1], xlab=None, ylab=None, size=15, color="lightgrey", alpha=0.2)
-    subplot_presets(ax1, y0_subset[:, 0], y0_subset[:, 1], xlab="$X$", ylab="$Y$", size=15, color="orange", alpha=1.0)
-    subplot_presets(ax2, adata.X[:,0], adata.X[:,1], xlab="$X$", ylab="$Y$", size=15, color=adata.obs.timepoint, alpha=0.5)
+    subplot_presets(
+        ax1,
+        y0_points[:, 0],
+        y0_points[:, 1],
+        xlab=None,
+        ylab=None,
+        size=15,
+        color="lightgrey",
+        alpha=0.2,
+    )
+    subplot_presets(
+        ax1,
+        y0_subset[:, 0],
+        y0_subset[:, 1],
+        xlab="$X$",
+        ylab="$Y$",
+        size=15,
+        color="orange",
+        alpha=1.0,
+    )
+    subplot_presets(
+        ax2,
+        adata.X[:, 0],
+        adata.X[:, 1],
+        xlab="$X$",
+        ylab="$Y$",
+        size=15,
+        color=adata.obs.timepoint,
+        alpha=0.5,
+    )
     fig.tight_layout(pad=1.5)
-    
+
     adata.obs = adata.obs.reset_index()
 
     return adata

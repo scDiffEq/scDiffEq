@@ -1,19 +1,22 @@
 from vintools.utilities import pyGSUTILS
 import os, glob, pickle, vintools as v, anndata as a
-from .._utilities._AnnData_handlers._split_AnnData_test_train_validation import _split_test_train
+from .._utilities._AnnData_handlers._split_AnnData_test_train_validation import (
+    _split_test_train,
+)
 
 gsutil = pyGSUTILS()
 
+
 def _read_local_h5ad_adata(h5ad_path, adjacent_pkl=True):
-    
+
     dirname = os.path.dirname(h5ad_path)
     pkl = glob.glob(dirname + "/*.pkl")
-    
+
     print("Reading AnnData...")
     adata = a.read_h5ad(h5ad_path)
-    
+
     if len(pkl) == 1:
-        pkl=pkl[0]
+        pkl = pkl[0]
         try:
             adata.uns["pca"] = pickle.load(open(pkl, "rb"))
             print(".pkl file with PCA information saved to adata.uns['pca']")
@@ -23,12 +26,12 @@ def _read_local_h5ad_adata(h5ad_path, adjacent_pkl=True):
         print("More than one .pkl file detected...\n\n{}".format(pkl))
     else:
         print("Something went wrong...")
-    
+
     return adata
 
 
 def _get_LARRY_NM_subset(destination_path="./.scdiffeq_cache/", return_AnnData=False):
-    
+
     """
     Downloads to a cache dir *once*. If already available, loads and splits into test-train. 
 
@@ -100,19 +103,14 @@ def _get_LARRY_NM_subset(destination_path="./.scdiffeq_cache/", return_AnnData=F
             \ [0/1 files][  5.1 GiB/  8.1 GiB]  62% Done  52.2 MiB/s ETA 00:01:00           
 
     """
-    
+
     # gsutil paths:
-    _h5ad_path = (
-        "scdiffeq-data/LARRY_Neutrophil_Monocyte_Subset/LARRY.NM.subset.h5ad"
-    )
-    _pkl_path = (
-        "scdiffeq-data/LARRY_Neutrophil_Monocyte_Subset/LARRY.NM.subset.pca.pkl"
-    )
-    
+    _h5ad_path = "scdiffeq-data/LARRY_Neutrophil_Monocyte_Subset/LARRY.NM.subset.h5ad"
+    _pkl_path = "scdiffeq-data/LARRY_Neutrophil_Monocyte_Subset/LARRY.NM.subset.pca.pkl"
+
     # download
     path_to_data_h5ad = os.path.join(destination_path, os.path.basename(_h5ad_path))
     path_to_data_pkl = os.path.join(destination_path, os.path.basename(_pkl_path))
-
 
     if os.path.exists(path_to_data_h5ad):
         print(
@@ -131,15 +129,14 @@ def _get_LARRY_NM_subset(destination_path="./.scdiffeq_cache/", return_AnnData=F
         )
     else:
         gsutil.cp(_pkl_path, destination_path, verbose=True)
-    
+
     # read_cached or newly downloaded data
     adata = _read_local_h5ad_adata(h5ad_path=path_to_data_h5ad, adjacent_pkl=True)
 
     # split data into test_train_validation
-    data = _split_test_train(adata, time_column='cytoTIME')
+    data = _split_test_train(adata, time_column="cytoTIME")
 
     if return_AnnData:
         return data, adata
-    
-    return data
 
+    return data

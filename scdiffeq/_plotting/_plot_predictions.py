@@ -2,10 +2,11 @@ from ..utilities._subsetting_functions import _group_adata_subset
 from ._plotting_presets import _single_fig_presets as presets
 import matplotlib.pyplot as plt
 
+
 def _plot_predictions(adata, subset, savename):
 
     """"""
-    
+
     if subset == "test":
         subset_data = _group_adata_subset(adata, "test", time_name="time")
     elif subset == "training":
@@ -14,7 +15,7 @@ def _plot_predictions(adata, subset, savename):
         subset_data = _group_adata_subset(adata, "validation", time_name="time")
     else:
         print("A valid subset was not provided.")
-    
+
     try:
 
         reshaped_pca = adata.uns["predictions_pca"].reshape(
@@ -25,7 +26,7 @@ def _plot_predictions(adata, subset, savename):
             ),
             2,
         )
-        
+
         presets(title="Predicted Trajectories", x_lab="$PC-1$", y_lab="$PC-2$")
         plt.scatter(
             subset_data.data[:, 0],
@@ -57,8 +58,6 @@ def _plot_predictions(adata, subset, savename):
         )
         print("plotting low-dimensional projection of predictions...")
 
-
-        
     except:
         reshaped_predictions = adata.uns["predictions"].reshape(
             adata.uns["num_predicted_trajectories"],
@@ -70,7 +69,7 @@ def _plot_predictions(adata, subset, savename):
         )
 
         presets(title="Predicted Trajectories", x_lab="$X$", y_lab="$Y$")
-        plt.scatter( 
+        plt.scatter(
             subset_data.data[:, 0],
             subset_data.data[:, 1],
             c="lightgrey",
@@ -98,9 +97,7 @@ def _plot_predictions(adata, subset, savename):
             c="orange",
             label="y0",
         )
-        
-        
-        
+
     leg = plt.legend(markerscale=3, edgecolor="w", fontsize=14, handletextpad=None)
     leg.legendHandles[0]._sizes = [30]
     leg.legendHandles[1]._sizes = [30]

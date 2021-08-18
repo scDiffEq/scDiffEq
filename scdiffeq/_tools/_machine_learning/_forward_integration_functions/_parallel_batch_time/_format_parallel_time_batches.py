@@ -1,6 +1,6 @@
-
 import numpy as np
 import torch
+
 
 def _sort_data_into_batches(adata, batched_trajectory_keys):
 
@@ -31,7 +31,8 @@ def _sort_data_into_batches(adata, batched_trajectory_keys):
 
     return Batched_Data
 
-def _format_single_batch(batch, time_column='time_point'):
+
+def _format_single_batch(batch, time_column="time_point"):
 
     """
 
@@ -68,18 +69,21 @@ def _format_single_batch(batch, time_column='time_point'):
 
     return formatted_batch
 
+
 def _format_batched_parallel_data(BatchedData, mode, time_column):
-    
+
     formatted_BatchedData = {}
 
     for [key, batch] in BatchedData[mode].items():
         formatted_BatchedData[key] = _format_single_batch(batch, time_column)
-        
+
     return formatted_BatchedData
 
-def _format_parallel_time_batches(self, n_batches=20, time_column='time', verbose=False):
-    
-    
+
+def _format_parallel_time_batches(
+    self, n_batches=20, time_column="time", verbose=False
+):
+
     """
     Parameters:
     -----------
@@ -103,7 +107,7 @@ def _format_parallel_time_batches(self, n_batches=20, time_column='time', verbos
     ------
     batched_data.flatten() should always be less than len(unique_trajectories)
     """
-    
+
     DataObject_train = self.adata.uns["data_split_keys"]["train"]
     DataObject_valid = self.adata.uns["data_split_keys"]["validation"]
 
@@ -115,10 +119,10 @@ def _format_parallel_time_batches(self, n_batches=20, time_column='time', verbos
 
     batch_size_train = -1 + round(len(train_unique_trajectories) / n_batches)
     batch_size_valid = -1 + round(
-            batch_size_train
-            * (len(valid_unique_trajectories) / len(train_unique_trajectories))
-        )
-        
+        batch_size_train
+        * (len(valid_unique_trajectories) / len(train_unique_trajectories))
+    )
+
     if verbose:
         print(
             "Training data will be sorted into {} batches each consisting of {} trajectories.\n".format(
@@ -130,14 +134,13 @@ def _format_parallel_time_batches(self, n_batches=20, time_column='time', verbos
                 n_batches, batch_size_valid
             )
         )
-        
+
     batched_trajectory_keys_train = np.random.choice(
         train_unique_trajectories, replace=False, size=[n_batches, batch_size_train]
     )
     batched_trajectory_keys_valid = np.random.choice(
         valid_unique_trajectories, replace=False, size=[n_batches, batch_size_valid]
     )
-    
 
     BatchedData["train_batches"] = _sort_data_into_batches(
         self.adata, batched_trajectory_keys_train
@@ -145,8 +148,12 @@ def _format_parallel_time_batches(self, n_batches=20, time_column='time', verbos
     BatchedData["valid_batches"] = _sort_data_into_batches(
         self.adata, batched_trajectory_keys_valid
     )
-        
-    FormattedBatchedData['train'] = _format_batched_parallel_data(BatchedData, time_column=time_column, mode='train_batches')
-    FormattedBatchedData['valid'] = _format_batched_parallel_data(BatchedData, time_column=time_column, mode='valid_batches')
+
+    FormattedBatchedData["train"] = _format_batched_parallel_data(
+        BatchedData, time_column=time_column, mode="train_batches"
+    )
+    FormattedBatchedData["valid"] = _format_batched_parallel_data(
+        BatchedData, time_column=time_column, mode="valid_batches"
+    )
 
     return FormattedBatchedData

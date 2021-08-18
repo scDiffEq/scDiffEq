@@ -1,7 +1,8 @@
 import numpy as np
 
+
 def set_parameters(variance):
-    
+
     ### defaults:
 
     # Degradation rate:
@@ -26,13 +27,13 @@ def set_parameters(variance):
 
     class get_degredation:
         def __init__(self, ku200, kmz, kz, ku34, kms, ks, variance):
-            
+
             if variance != None:
                 variance = abs(np.random.normal(0, variance, 6) + 1)
-                
+
             else:
                 variance = np.ones(6)
-            
+
             self.ku200 = ku200 * variance[0]
             self.kmz = kmz * variance[1]
             self.kz = kz * variance[2]
@@ -42,12 +43,12 @@ def set_parameters(variance):
 
     class get_transcription_rate:
         def __init__(self, gu200, gmz, gz, gu34, gms, gs, variance):
-            
+
             if variance != None:
                 variance = abs(np.random.normal(0, variance, 6) + 1)
             else:
                 variance = np.ones(6)
-                
+
             self.gu200 = gu200 * variance[0]
             self.gmz = gmz * variance[1]
             self.gz = gz * variance[2]
@@ -74,7 +75,7 @@ def set_parameters(variance):
                 variance = abs(np.random.normal(0, variance, 10) + 1)
             else:
                 variance = np.ones(10)
-            
+
             self.z0u200 = z0u200 * variance[0]
             self.z0mz = z0mz * variance[1]
             self.s0u200 = s0u200 * variance[2]
@@ -101,12 +102,12 @@ def set_parameters(variance):
             ni2ms,
             variance,
         ):
-            
+
             if variance != None:
                 variance = abs(np.random.normal(0, variance, 10) + 1)
             else:
                 variance = np.ones(10)
-                
+
             self.nzu200 = nzu200 * variance[0]
             self.nsu200 = nsu200 * variance[1]
             self.nzmz = nzmz * variance[2]
@@ -135,7 +136,7 @@ def set_parameters(variance):
                 variance = abs(np.random.normal(0, variance, 8) + 1)
             else:
                 variance = np.ones(8)
-                
+
             self.lamdazu200 = lamdazu200 * variance[0]
             self.lamdasu200 = lamdasu200 * variance[1]
             self.lamdazmz = lamdazmz * variance[2]
@@ -163,6 +164,6 @@ def set_parameters(variance):
         lamdasms,
         lamdai2ms,
         variance,
-    )    
+    )
 
     return degredation, transcription_rate, hill_threshold, cooperativity, fold_change

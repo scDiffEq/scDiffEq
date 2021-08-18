@@ -4,12 +4,15 @@ import anndata as a
 from scipy.integrate import odeint
 from .supporting_functions._get_initial_conditions import get_initial_conditions
 from .supporting_functions._construct_time_vector import construct_time_vector
-from .supporting_functions.plot_simulated_trajectories import plot_simulated_trajectories
+from .supporting_functions.plot_simulated_trajectories import (
+    plot_simulated_trajectories,
+)
+
 
 def simulate_trajectories(
     state_eqn,
     ic_type=None,
-    distributions=["gaussian","gaussian"],
+    distributions=["gaussian", "gaussian"],
     time_span=10,
     number_time_samples=50,
     number_trajectories=20,
@@ -43,11 +46,11 @@ def simulate_trajectories(
     --------
     AnnData object of the simulation results.   
     """
-    
+
     if ic_type == "meshgrid":
         x = np.arange(-1, 1, 0.1)
         y = np.arange(-1, 1, 0.1)
-        initial_conditions = np.array(np.meshgrid(x, y)).T.reshape(400,2)
+        initial_conditions = np.array(np.meshgrid(x, y)).T.reshape(400, 2)
         number_dimensions = 2
         number_trajectories = 400
     else:
@@ -61,8 +64,6 @@ def simulate_trajectories(
     time_all_cells = np.array([])
     trajectory_count = np.array([])
     all_timepoints = np.array([])
-    
-    
 
     for count, i in enumerate(range(len(initial_conditions))):
 
@@ -71,7 +72,7 @@ def simulate_trajectories(
         trajectory = odeint(state_eqn, state0, time)
         all_points = np.append(all_points, trajectory)
         time_all_cells = np.append(time_all_cells, time)
-        all_timepoints=np.append(all_timepoints, np.arange(0, number_time_samples))
+        all_timepoints = np.append(all_timepoints, np.arange(0, number_time_samples))
         trajectory_count = np.append(
             trajectory_count, np.full((number_time_samples), int(count))
         )
@@ -83,13 +84,13 @@ def simulate_trajectories(
     adata = a.AnnData(
         simulated_data.reshape(simulated_data.shape[0] * simulated_data.shape[1], 2)
     )
-    
+
     adata.uns["number_of_timepoints"] = number_time_samples
     adata.uns["number_of_trajectories"] = number_trajectories
     adata.obs["time"] = time_all_cells
     adata.obs["trajectory"] = trajectory_count
     adata.obs["timepoint"] = pd.Categorical(all_timepoints)
-    
+
     if simulated_data.shape[2] <= 2:
         plot_simulated_trajectories(adata)
 

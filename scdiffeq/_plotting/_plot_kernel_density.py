@@ -11,16 +11,14 @@ matplotlib.rcParams["font.family"] = "sans-serif"
 
 import matplotlib.pyplot as plt
 
+
 def _gridspec_colorbar(fig, mappable, gridspec, label, label_rotation=0, labelpad=25):
 
     cbax = fig.add_subplot(gridspec)
-    cb = Colorbar(
-        ax=cbax,
-        mappable=mappable,
-        ticklocation="right",
-    )
+    cb = Colorbar(ax=cbax, mappable=mappable, ticklocation="right",)
     cb.outline.set_visible(False)
     cb.set_label(label, rotation=0, labelpad=labelpad)
+
 
 def _KernelDensity_plot_presets(
     DensityDict,

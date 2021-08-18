@@ -1,4 +1,3 @@
-
 from . import _data_loader_utils as utils
 
 import os
@@ -8,6 +7,7 @@ import tempfile
 
 # EMT-specific URL to figshare
 URL = "https://ndownloader.figshare.com/files/26712293"
+
 
 @utils.loader
 def load_EMT_simulation(save_local=False):
@@ -28,8 +28,8 @@ def load_EMT_simulation(save_local=False):
         scprep.io.download.download_url(URL, filepath)
         adata = sc.read(filepath)
         print(adata)
-        
+
     if save_local != False:
         adata.write(str(save_local) + "EMT_simulation.h5ad")
-        
+
     return adata

@@ -3,6 +3,7 @@ import numpy as np
 import glob, os, torch
 import vintools as v
 
+
 def _calculate_kernel_density_2d(data, nbins=200, bandwidth=1, widen=0):
 
     xbins = ybins = complex(0, nbins)
@@ -60,28 +61,32 @@ def _xy_3d_to_2d(array, silent=False):
 
     return reshaped_array
 
+
 from ..._plotting._plot_kernel_density import _KernelDensity_plot_presets
 
-def _calculate_KernelDensity(self, clear_DensityDict=False, figure_legend_loc=4, plot=True):
+
+def _calculate_KernelDensity(
+    self, clear_DensityDict=False, figure_legend_loc=4, plot=True
+):
 
     """
     Calculate and plot the 2D kernel density estimate (KDE) from predicted data.
     """
-    
+
     if clear_DensityDict:
         del self.DensityDict
-    
+
     try:
         self.DensityDict
         print("DensityDict identified... plotting.")
     except:
         self.DensityDict = {}
-        
+
         try:
             y_pred = _xy_3d_to_2d(
                 _read_uns_tensors(self, return_dict=True)["test_y_predicted"]
             ).numpy()
-        except: 
+        except:
             y_pred = _xy_3d_to_2d(self.adata.uns["test_y_predicted"]).numpy()
         self.DensityDict["x"], self.DensityDict["y"] = y_pred[:, 0], y_pred[:, 1]
         (
@@ -89,9 +94,8 @@ def _calculate_KernelDensity(self, clear_DensityDict=False, figure_legend_loc=4,
             self.DensityDict["y_mesh"],
             self.DensityDict["density"],
         ) = _calculate_kernel_density_2d(y_pred)
-    
+
     if plot:
         _KernelDensity_plot_presets(
-            self.DensityDict,
-            figure_legend_loc=figure_legend_loc,
+            self.DensityDict, figure_legend_loc=figure_legend_loc,
         )

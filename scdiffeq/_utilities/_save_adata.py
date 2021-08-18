@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import anndata as a
 
+
 def _save_pca_as_pkl(adata):
 
     """"""
@@ -40,12 +41,15 @@ def _fix_adata_for_writing(adata):
     except:
         pass
     try:
-        adata.uns["validation_loss"] = np.array(adata.uns["validation_loss"]).astype(str)
+        adata.uns["validation_loss"] = np.array(adata.uns["validation_loss"]).astype(
+            str
+        )
     except:
         pass
 
+
 def _write_h5ad(adata, path=None):
-    
+
     temp_func = adata.uns["odefunc"]
     temp_optim = adata.uns["optimizer"]
     temp_loss_meter = adata.uns["loss_meter"]
@@ -55,19 +59,19 @@ def _write_h5ad(adata, path=None):
     temp_l_val_p = adata.uns["latest_validation_predictions"]
     temp_l_train_t = adata.uns["latest_training_true_y"]
     temp_l_val_t = adata.uns["latest_validation_true_y"]
-    
+
     try:
         temp_l_test_p = adata.uns["latest_test_predictions"]
         temp_l_test_t = adata.uns["latest_test_true_y"]
     except:
         pass
-    
+
     if path == None:
         path = str(adata.uns["run_id"]) + ".h5ad"
 
     _fix_adata_for_writing(adata)
     adata.write_h5ad(path)
-    
+
     adata.uns["odefunc"] = temp_func
     adata.uns["optimizer"] = temp_optim
     adata.uns["loss_meter"] = temp_loss_meter
@@ -77,11 +81,11 @@ def _write_h5ad(adata, path=None):
     adata.uns["latest_validation_predictions"] = temp_l_val_p
     adata.uns["latest_training_true_y"] = temp_l_train_t
     adata.uns["latest_validation_true_y"] = temp_l_val_t
-    
+
     try:
         adata.uns["latest_test_predictions"] = temp_l_test_p
         adata.uns["latest_test_true_y"] = temp_l_test_t
     except:
         pass
-    
+
     print("AnnData object saved to", str(path))

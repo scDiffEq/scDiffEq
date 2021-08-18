@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 def _ensure_array(adata):
 
     """
@@ -20,10 +21,10 @@ def _ensure_array(adata):
         adata.X = adata.X.toarray()
     except:
         pass
-    
+
 
 def _load_development_libraries():
-    
+
     """
     Assigns global variables to packages used in the development of nodescape such that developing with common packages can be done cleanly.
     
@@ -57,7 +58,7 @@ def _load_development_libraries():
     global sp
     global PCA
     global v
-    
+
     import torch as torch
     from torchdiffeq import odeint
     import numpy as np
@@ -72,12 +73,11 @@ def _load_development_libraries():
     from sklearn.decomposition import PCA
     import vintools as v
 
-    
     return odeint, torch, np, pd, plt, nn, a, os, time, optim, sp, PCA, v
 
 
-
 # from .._tools._pca import pca
+
 
 def _use_embedding(adata, emb="X_pca"):
 
@@ -92,5 +92,5 @@ def _use_embedding(adata, emb="X_pca"):
     bdata.obs = adata.obs
     bdata.uns = adata.uns
     pca(bdata)
-    
+
     return bdata

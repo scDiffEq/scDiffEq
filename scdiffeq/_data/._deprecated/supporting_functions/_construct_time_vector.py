@@ -86,13 +86,13 @@ def get_single_time_vector(time_span=10.0, number_time_samples=1000):
 
 
 def construct_time_vector(number_trajectories, time_span, number_time_samples):
-    
+
     import numpy as np
-    
+
     time = np.array([])
 
     for i in range(number_trajectories):
         one_cell_time_vector = get_single_time_vector(time_span, number_time_samples)
         time = np.append(time, one_cell_time_vector)
-    
+
     return time

@@ -31,13 +31,11 @@ def _annotate_legend(
 
     legend_ax.set_xticks([])
     legend_ax.set_yticks([])
-    
-def _plot_predicted_test_data(adata, 
-                              x_label="$x$", 
-                              y_label="$y$",
-                              figsize=(6, 5.5),
-                              save_path=False,
-                             ):
+
+
+def _plot_predicted_test_data(
+    adata, x_label="$x$", y_label="$y$", figsize=(6, 5.5), save_path=False,
+):
 
     fig = plt.figure(figsize=figsize)
     gs = GridSpec(ncols=2, nrows=1, width_ratios=[1, 0.08], wspace=0.1, figure=fig)
@@ -50,8 +48,8 @@ def _plot_predicted_test_data(adata,
 
     y_pred = adata.uns["test_y_predicted"]
     y = adata.uns["test_y"]
-    
-    test_trajs = adata.uns['test_trajectories']
+
+    test_trajs = adata.uns["test_trajectories"]
 
     for [key, value] in test_trajs.items():
         t_len = len(test_trajs.get(key).t)
@@ -90,8 +88,8 @@ def _plot_predicted_test_data(adata,
         torch.vstack([y, y_pred])[:, :, 0],
         torch.vstack([y, y_pred])[:, :, 1],
     )
-    
+
     # save and display plot
     if save_path:
-        fig.savefig(save_path, bbox_inches='tight') 
+        fig.savefig(save_path, bbox_inches="tight")
     plt.show()

@@ -1,4 +1,3 @@
-
 # package imports #
 # --------------- #
 import torch.nn as nn
@@ -66,9 +65,9 @@ def _preflight(
     adata.uns["loss"]["train_loss"] = []
     adata.uns["loss"]["valid_loss"] = []
     self.loss = adata.uns["loss"]
-    
+
     # setup RunningAverageMeter
     adata.uns["RunningAverageMeter"] = _RunningAverageMeter(0.97)
-    
+
     # sync adata with class object
     self.adata = adata

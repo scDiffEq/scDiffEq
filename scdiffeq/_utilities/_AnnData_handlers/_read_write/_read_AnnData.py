@@ -5,6 +5,7 @@ import os, pickle
 from .._downsample_AnnData import _downsample_AnnData
 from .._split_AnnData_test_train_validation import _split_test_train
 
+
 def _choose_path_from_glob_list(glob_path_list):
 
     """"""
@@ -28,11 +29,11 @@ def _read_AnnData(
     downsample_n_trajectories=False,
     downsample_sort_on=["trajectory", "time"],
     split_data_test_train=True,
-    data_split_trajectory_column='trajectory',
+    data_split_trajectory_column="trajectory",
     data_split_proportion_training=0.6,
     data_split_proportion_validation=0.2,
     data_split_return_data_subsets=False,
-    data_split_time_column='time',
+    data_split_time_column="time",
     silence=False,
 ):
 
@@ -110,9 +111,13 @@ def _read_AnnData(
     if downsample_percent != 1:
         print("Downsampling AnnData...")
         adata = _downsample_AnnData(
-            adata, percent=downsample_percent, n_traj=downsample_n_trajectories, sort_on=downsample_sort_on, silence=True
+            adata,
+            percent=downsample_percent,
+            n_traj=downsample_n_trajectories,
+            sort_on=downsample_sort_on,
+            silence=True,
         )
-    
+
     if split_data_test_train:
         _split_test_train(
             adata,

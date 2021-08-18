@@ -1,8 +1,8 @@
-
 # package imports #
 # --------------- #
 import vintools as v
 import torch.nn as nn
+
 
 def _enumerate_torchfunc_modules(
     self, torch_functions, silent=False, return_funcs=False
@@ -57,9 +57,7 @@ class _check_torch_modules:
     check_torch_modules.loss()
     """
 
-    def __init__(
-        self,
-    ):
+    def __init__(self,):
 
         self.nn_activation_funcs = nn.modules.activation.__dir__()
         self.nn_loss_funcs = nn.modules.loss.__dir__()

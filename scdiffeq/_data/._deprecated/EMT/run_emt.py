@@ -4,6 +4,7 @@ import scipy
 from .EMT_funcs import EMT_dydt, parameterize
 from .utils import data_to_anndata, record_trajectory, remove_nan
 
+
 def EMT(kmrgd, t, parameters):
 
     # EMT functions are supplied in a supplementary script
@@ -12,20 +13,24 @@ def EMT(kmrgd, t, parameters):
 
     return dydt
 
+
 def simulate_emt(y0, t, variance):
-    
+
     "time and column names are predefined for this simulation. just provide y0 and variance, if chosen."
-    
-#     t = np.arange(0, 7200, 1)
+
+    #     t = np.arange(0, 7200, 1)
     colnames = ["time", "miR200", "mZEB", "miR34", "mSNAIL", "i2"]
     parameters = parameterize(variance)
 
     df = pd.DataFrame(
-        np.hstack([t[:, np.newaxis], scipy.integrate.odeint(EMT, y0, t, (parameters,))]),
+        np.hstack(
+            [t[:, np.newaxis], scipy.integrate.odeint(EMT, y0, t, (parameters,))]
+        ),
         columns=colnames,
     )
 
     return df
+
 
 def simulate_iteratively(
     initial_conditions, cols, parameter_variance=None, time_length=7200, time_scale=7200

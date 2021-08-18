@@ -21,12 +21,12 @@ def _create_outs_structure(self):
 
     v.ut.mkdir_flex(self.outdir)
     v.ut.mkdir_flex(self._outs_path)
-    v.ut.mkdir_flex(self._imgs_path )
+    v.ut.mkdir_flex(self._imgs_path)
     v.ut.mkdir_flex(self._AnnData_path)
     v.ut.mkdir_flex(self._uns_path)
-    
+
     print(
-    """
+        """
     Saved with the following structure:\n
     {}scdiffeq_outs/
     │
@@ -35,5 +35,7 @@ def _create_outs_structure(self):
     └── adata
         ├── uns/
         └── adata.h5ad
-    """.format(self.outdir)
+    """.format(
+            self.outdir
+        )
     )

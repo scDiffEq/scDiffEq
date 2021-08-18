@@ -1,10 +1,12 @@
 import numpy as np
 import anndata as a
 
+
 def grab_stable_state_conditions(
     df, timepoint, time_label="time", include=[1, 2, 3, 4, 5]
 ):
-    return df.loc[df[time_label] == timepoint].values[:, include][0,:]
+    return df.loc[df[time_label] == timepoint].values[:, include][0, :]
+
 
 def data_to_anndata(data, trajectories, cols, time_length):
 

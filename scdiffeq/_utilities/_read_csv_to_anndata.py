@@ -8,7 +8,7 @@ def _get_obs_and_vars(adata, df, var_names):
     """Set adata.vars and adata.obs. Time column assumed to be the 0th column."""
 
     # time column assumed to be the 0th column
-    adata.obs = pd.DataFrame(df[["time","i2"]])
+    adata.obs = pd.DataFrame(df[["time", "i2"]])
 
     # gives one the ability to "subset" all AnnData later
     adata.obs["all_data"] = True
@@ -70,7 +70,7 @@ def _read_csv_to_anndata(
     df = pd.read_csv(
         path, usecols=usecols, header=header, skiprows=skiprows, names=names
     )
-    
+
     adata = _make_adata(df, var_names)
 
     print(adata)

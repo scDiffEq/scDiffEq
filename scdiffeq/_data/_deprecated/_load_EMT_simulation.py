@@ -50,31 +50,37 @@ def _download_EMT_simulation(
     glob.glob(destination_path + "/*")
     if return_data_path:
         return [path_to_data_h5ad, path_to_data_pkl]
-    
+
+
 def _count_datapoints_per_trajectory(adata):
-    
+
     """"""
-    
+
     traj_lengths = np.array([])
 
     for i in adata.obs.trajectory.unique():
         traj_lengths = np.append(traj_lengths, _isolate_trajectory(adata, i).shape[0])
 
     mean_traj_length = traj_lengths.mean()
-    
-def _load_simulated_EMT_dataset(destination_path="./scdiffeq_data", downsample_n_trajectories=None, downsample_percent=1):
-    
-            
-    [h5ad_path, pkl_path] = _download_EMT_simulation(destination_path=destination_path, 
-                                                     silent=False, 
-                                                     return_data_path=True)
-    
-    adata = _read_AnnData(outpath="./", 
-                          scdiffeq_outs_dir=destination_path,
-                          label="EMT.simulation.500trajectories.AnnData", 
-                          downsample_n_trajectories=downsample_n_trajectories, 
-                          downsample_percent=downsample_percent)
-    adata.uns['n_datapoints_per_trajectory'] = _count_datapoints_per_trajectory(adata)
-    
+
+
+def _load_simulated_EMT_dataset(
+    destination_path="./scdiffeq_data",
+    downsample_n_trajectories=None,
+    downsample_percent=1,
+):
+
+    [h5ad_path, pkl_path] = _download_EMT_simulation(
+        destination_path=destination_path, silent=False, return_data_path=True
+    )
+
+    adata = _read_AnnData(
+        outpath="./",
+        scdiffeq_outs_dir=destination_path,
+        label="EMT.simulation.500trajectories.AnnData",
+        downsample_n_trajectories=downsample_n_trajectories,
+        downsample_percent=downsample_percent,
+    )
+    adata.uns["n_datapoints_per_trajectory"] = _count_datapoints_per_trajectory(adata)
+
     return adata
-    

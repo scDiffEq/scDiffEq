@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import vintools as v
 
+
 def _make_2d_meshgrid(data, bins=25, dim_1="x", dim_2="y"):
 
     """
@@ -23,6 +24,7 @@ def _make_2d_meshgrid(data, bins=25, dim_1="x", dim_2="y"):
     mgrid = torch.Tensor(np.stack([x, y], -1).reshape(bins * bins, 2))
 
     return mgrid, x, y
+
 
 def _get_2d_meshgrid_dydt(data, ODE, bins=25):
 

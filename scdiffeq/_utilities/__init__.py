@@ -1,18 +1,15 @@
-
 # utilities __init__.py
 
-__author__ = ', '.join([
-    'Michael E. Vinyard'
-])
-__email__ = ', '.join([
-    'vinyard@g.harvard.edu',
-])
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 from ._torch_device import _set_device as set_device
 from ._torch_device import _torch_device as torch_device
 
 from ._subsetting_functions import _group_adata_subset as group_adata_subset
-from ._subsetting_functions import _randomly_subset_trajectories as randomly_subset_trajectories
+from ._subsetting_functions import (
+    _randomly_subset_trajectories as randomly_subset_trajectories,
+)
 from ._subsetting_functions import _isolate_trajectory as isolate_trajectory
 from ._subsetting_functions import _check_df as check_df
 from ._subsetting_functions import _get_subset_idx as get_subset_idx
@@ -38,8 +35,9 @@ from ._preprocess import preprocess
 # AnnData handling functions
 from ._AnnData_handlers._read_write._write_AnnData import _write_AnnData as write_adata
 from ._AnnData_handlers._read_write._read_AnnData import _read_AnnData as read_adata
-from ._AnnData_handlers._split_AnnData_test_train_validation import _split_test_train as split_test_train
-
+from ._AnnData_handlers._split_AnnData_test_train_validation import (
+    _split_test_train as split_test_train,
+)
 
 
 # deprecated:

@@ -1,7 +1,7 @@
-
 # package imports #
 # --------------- #
 import numpy as np
+
 
 def _add_time_noise(time_vector, time_step_span, noise_amplitude=0.001):
 

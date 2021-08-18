@@ -1,11 +1,7 @@
 # data __init__.py
 
-__author__ = ', '.join([
-    'Michael E. Vinyard'
-])
-__email__ = ', '.join([
-    'vinyard@g.harvard.edu',
-])
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # from ._load_EMT_simulation import _load_simulated_EMT_dataset as load_EMT_simulation
 # from ._load_LARRY_NM_subset import _get_LARRY_NM_subset as load_LARRY_NM_subset

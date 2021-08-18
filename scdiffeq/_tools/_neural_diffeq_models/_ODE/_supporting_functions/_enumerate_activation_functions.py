@@ -1,8 +1,8 @@
-
 # package imports #
 # --------------- #
 import vintools as v
 import torch.nn as nn
+
 
 def _enumerate_activation_functions(return_funcs=True, silent=True):
 
@@ -40,6 +40,6 @@ def _enumerate_activation_functions(return_funcs=True, silent=True):
                 else:
                     if not silent:
                         print("{:<35}".format(func), end="\t")
-                        
+
     if return_funcs:
         return returned_activation_functions
