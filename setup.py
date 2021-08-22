@@ -28,7 +28,7 @@ setup(
         "torchdiffeq>=0.2.1",
         "scprep>=1.1.0",
         "nb-black>=1.0.7",
-        "vintools>=0.0.44",
+        "vintools>=0.0.5",
         "geomloss>=0.2.4",
         "torchsde",
     ],
