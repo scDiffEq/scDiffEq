@@ -32,7 +32,7 @@ def _sort_data_into_batches(adata, batched_trajectory_keys):
     return Batched_Data
 
 
-def _format_single_batch(batch, time_column="time_point"):
+def _format_single_batch(self, batch, time_column="time_point"):
 
     """
 
@@ -50,13 +50,13 @@ def _format_single_batch(batch, time_column="time_point"):
         trajectory (i.e., t0, t1, ..., tN, t0, t1, ..., tN, ...)
     """
 
-    t = torch.Tensor(np.sort(batch.obs[time_column].unique()))
+    t = torch.Tensor(np.sort(batch.obs[time_column].unique())).to(self.device)
     n_cells_batch, n_genes_batch = batch.shape[0], batch.shape[1]
     n_trajs_batch = int(n_cells_batch / len(t))
     batch_y = torch.Tensor(
         batch.X.toarray().reshape(n_trajs_batch, len(t), n_genes_batch)
-    )  # N_TRAJS x N_TIMEPOINTS x N_GENES
-    batch_y0 = batch_y[:, 0, :]  # N_TRAJS x N_GENES
+    ).to(self.device)  # N_TRAJS x N_TIMEPOINTS x N_GENES
+    batch_y0 = batch_y[:, 0, :].to(self.device)  # N_TRAJS x N_GENES
 
     class _format_parallel_batch:
         def __init__(self, batch_y, batch_y0, t):
@@ -70,12 +70,12 @@ def _format_single_batch(batch, time_column="time_point"):
     return formatted_batch
 
 
-def _format_batched_parallel_data(BatchedData, mode, time_column):
+def _format_batched_parallel_data(self, BatchedData, mode, time_column):
 
     formatted_BatchedData = {}
 
     for [key, batch] in BatchedData[mode].items():
-        formatted_BatchedData[key] = _format_single_batch(batch, time_column)
+        formatted_BatchedData[key] = _format_single_batch(self, batch, time_column)
 
     return formatted_BatchedData
 
@@ -150,10 +150,10 @@ def _format_parallel_time_batches(
     )
 
     FormattedBatchedData["train"] = _format_batched_parallel_data(
-        BatchedData, time_column=time_column, mode="train_batches"
+        self, BatchedData, time_column=time_column, mode="train_batches"
     )
     FormattedBatchedData["valid"] = _format_batched_parallel_data(
-        BatchedData, time_column=time_column, mode="valid_batches"
+        self, BatchedData, time_column=time_column, mode="valid_batches"
     )
 
     return FormattedBatchedData

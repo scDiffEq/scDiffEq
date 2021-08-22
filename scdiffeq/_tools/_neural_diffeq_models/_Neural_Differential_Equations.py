@@ -23,6 +23,16 @@ from .._general_tools._calculate_global_quasi_potential import (
 from .._general_tools._find_cell_quasi_potential import _find_cell_quasi_potential
 from ..._plotting._plot_quasi_potential import _plot_quasi_potential
 
+from ..._utilities._torch_device import _set_device
+
+def _employ_device(use_gpu, self):
+    
+    """"""
+    if use_gpu:
+        self.device = _set_device()
+    else:
+        self.device = 'cpu'
+    print("Using device: {}\n".format(self.device))
 
 class scDiffEq:
     def __init__(
@@ -36,6 +46,7 @@ class scDiffEq:
         nodes_m=50,
         activation_function=nn.Tanh(),
         silent=False,
+        use_gpu=False,
     ):
 
         """
@@ -62,7 +73,9 @@ class scDiffEq:
                 nodes_m=nodes_m,
                 activation_function=activation_function,
             )
-
+        
+        _employ_device(use_gpu, self)
+        
         if not silent:
             print(self.network)
 
@@ -72,6 +85,7 @@ class scDiffEq:
         outdir=False,
         validation_frequency=2,
         visualization_frequency=10,
+        use_gpu=True,
         loss_function="MSELoss",
         optimizer="RMSprop",
         learning_rate=1e-3,
@@ -84,6 +98,11 @@ class scDiffEq:
     ):
 
         """"""
+        
+        
+        _employ_device(use_gpu, self)
+            
+        self.time_column = time_column
 
         _preflight(
             self,
@@ -100,12 +119,12 @@ class scDiffEq:
             trajectory_column=trajectory_column,
             proportion_train=proportion_train,
             proportion_validation=proportion_validation,
-            time_column=time_column,
+            time_column=self.time_column,
             silent=silent,
             return_split_data=return_split_data,
         )
 
-        self.adata.uns["ODE"] = self.network
+        self.adata.uns["ODE"] = self.network.to(self.device)
         if outdir:
             self.outdir = outdir
 
@@ -114,7 +133,7 @@ class scDiffEq:
         n_batches=20,
         n_epochs=1500,
         mode="parallel",
-        time_column="time",
+        time_column=False,
         learning_rate=False,
         validation_frequency=False,
         plot_progress=True,
@@ -137,6 +156,8 @@ class scDiffEq:
             self.validation_frequency = validation_frequency
         if learning_rate:
             self.learning_rate = learning_rate
+        if time_column:
+            self.time_column = time_column
 
         fig_save_path = self._imgs_path + "epoch_{}_training_progress.png".format(
             self.epoch
@@ -147,7 +168,7 @@ class scDiffEq:
             n_epochs=n_epochs,
             n_batches=self.n_batches,
             mode="parallel",
-            time_column=time_column,
+            time_column=self.time_column,
             plot_progress=plot_progress,
             plot_summary=plot_summary,
             smoothing_factor=smoothing_factor,

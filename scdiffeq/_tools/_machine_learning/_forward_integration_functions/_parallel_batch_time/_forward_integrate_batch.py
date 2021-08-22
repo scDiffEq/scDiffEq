@@ -14,7 +14,7 @@ def _get_batch_outs_empty_tensor(batch):
     )
 
 
-def _forward_integrate_batch(adata, batch, validation=False):
+def _forward_integrate_batch(adata, batch, device, validation=False):
 
     """
     Forward integrates one batch for training / validation. 
@@ -37,16 +37,16 @@ def _forward_integrate_batch(adata, batch, validation=False):
     """
 
     y0 = batch.batch_y0.reshape(batch.batch_y0.shape[0], 1, batch.batch_y0.shape[1])
-
+        
     if not validation:
         adata.uns["optimizer"].zero_grad()
 
     if validation:
         with torch.no_grad():
-            y_pred = odeint(adata.uns["ODE"], y0, batch.t)
+            y_pred = odeint(adata.uns["ODE"], y0, batch.t).to(device)
 
     else:
-        y_pred = odeint(adata.uns["ODE"], y0, batch.t)
+        y_pred = odeint(adata.uns["ODE"], y0, batch.t).to(device)
 
     batch_loss = adata.uns["loss_func"](y_pred, batch.batch_y)
 
