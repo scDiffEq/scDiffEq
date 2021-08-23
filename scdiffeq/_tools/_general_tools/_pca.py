@@ -1,4 +1,4 @@
-from ..utilities._preprocess import preprocess
+from ..._utilities._preprocess import preprocess
 
 
 def pca(
