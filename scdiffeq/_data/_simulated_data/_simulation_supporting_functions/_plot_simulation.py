@@ -39,7 +39,7 @@ def _simulation_plot_presets(
     ax.set_ylabel("$y$", size=label_fontsize)
     ax.scatter(x, y, **kwargs)
     plt.grid(zorder=0, c="lightgrey", alpha=0.5)
-
+    plt.show()
 
 def _plot(self, c="time", savefigname=None, **kwargs):
 

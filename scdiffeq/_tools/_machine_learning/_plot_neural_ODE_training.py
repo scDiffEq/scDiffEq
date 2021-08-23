@@ -71,7 +71,15 @@ def _plot_smoothed_training(
     ax.set_xlabel("Epochs")
     ax.set_ylabel("MSELoss")
     ax.set_title("Training progress: {} epochs".format(str(len(train_loss))), y=1.05)
-
+    
+#     detached_train_loss = []
+#     detached_valid_loss = []
+#     for ti in train_loss:
+#         detached_train_loss.append(ti.cpu())
+#     for vl in valid_loss:
+#         detached_valid_loss.append(vl.cpu())
+        
+    
     smoothed_mean_train, smoothed_stdev_train = v.ut.smooth(
         unpartitioned_items=train_loss, groupsize=groupsize
     )
