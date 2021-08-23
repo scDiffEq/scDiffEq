@@ -23,7 +23,7 @@ from ._machine_learning._forward_integration_functions._parallel_batch_time._for
 
 # from ._train_model import _train_model
 
-# from ._pca import pca
+from ._general_tools._pca import pca
 
 # from ._evaluate import _evaluate_test_traj as evaluate
 
