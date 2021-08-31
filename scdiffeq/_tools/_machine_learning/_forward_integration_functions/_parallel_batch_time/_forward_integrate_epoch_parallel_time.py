@@ -31,12 +31,14 @@ def _forward_integrate_epoch_parallel_time(
         self, n_batches=n_batches, time_column=time_column, verbose=False
     )
 
-    n_train = FormattedBatchedData["train"][0].batch_y0.shape[0] * len(
-        FormattedBatchedData["train"].keys()
-    )
-    n_valid = FormattedBatchedData["valid"][0].batch_y0.shape[0] * len(
-        FormattedBatchedData["train"].keys()
-    )
+    n_train = FormattedBatchedData["train"][0].batch_y0.shape[0] 
+#     * len(
+#         FormattedBatchedData["train"].keys()
+#     )
+    n_valid = FormattedBatchedData["valid"][0].batch_y0.shape[0] 
+#     * len(
+#         FormattedBatchedData["valid"].keys()
+#     )
 
     epoch_train_loss, epoch_valid_loss = 0, 0
 
