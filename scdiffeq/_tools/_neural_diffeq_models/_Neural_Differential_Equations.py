@@ -94,11 +94,17 @@ class scDiffEq:
         proportion_validation=0.20,
         time_column="time",
         silent=False,
-        return_split_data=False,
+        return_split_data=False,        
+        rtol=1e-7,
+        atol=1e-9,
+        odeint_method='dopri5',
     ):
 
         """"""
         
+        self.rtol=rtol
+        self.atol=atol
+        self.odeint_method=odeint_method
         
         _employ_device(use_gpu, self)
             
@@ -133,6 +139,8 @@ class scDiffEq:
         n_batches=20,
         n_epochs=1500,
         mode="parallel",
+        plot_validation=True,
+        train_on='X',
         time_column=False,
         learning_rate=False,
         validation_frequency=False,
@@ -143,11 +151,24 @@ class scDiffEq:
         notebook=True,
         save_frequency=5,
         outdir=False,
+        verbose=False,
+        rtol=False,
+        atol=False,
+        odeint_method=False,
     ):
 
         """"""
 
         # make any necessary updates
+        if rtol:
+            self.rtol=rtol
+        if atol:
+            self.atol=atol
+        if odeint_method:
+            self.odeint_method=odeint_method
+
+        
+        
         if n_batches:
             self.n_batches = n_batches
         if visualization_frequency:
@@ -158,7 +179,9 @@ class scDiffEq:
             self.learning_rate = learning_rate
         if time_column:
             self.time_column = time_column
-
+        
+        self.train_on = train_on
+        print("Training on {}...".format(self.train_on))
         fig_save_path = self._imgs_path + "epoch_{}_training_progress.png".format(
             self.epoch
         )
@@ -168,6 +191,7 @@ class scDiffEq:
             n_epochs=n_epochs,
             n_batches=self.n_batches,
             mode="parallel",
+            plot_validation=plot_validation,
             time_column=self.time_column,
             plot_progress=plot_progress,
             plot_summary=plot_summary,
@@ -176,6 +200,7 @@ class scDiffEq:
             notebook=notebook,
             save_frequency=save_frequency,
             save_path=fig_save_path,
+            verbose=verbose,
         )
         if outdir:
             self.outdir = outdir

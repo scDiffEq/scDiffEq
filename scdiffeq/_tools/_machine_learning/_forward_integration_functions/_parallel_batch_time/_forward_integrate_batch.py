@@ -14,7 +14,7 @@ def _get_batch_outs_empty_tensor(batch):
     )
 
 
-def _forward_integrate_batch(adata, batch, device, validation=False):
+def _forward_integrate_batch(adata, batch, device, rtol=1e-7, atol=1e-9, method='dropri5', validation=False):
 
     """
     Forward integrates one batch for training / validation. 
@@ -43,7 +43,7 @@ def _forward_integrate_batch(adata, batch, device, validation=False):
 
     if validation:
         with torch.no_grad():
-            y_pred = odeint(adata.uns["ODE"], y0, batch.t).to(device)
+            y_pred = odeint(adata.uns["ODE"], y0, batch.t, rtol=rtol, atol=atol, method=method).to(device)
 
     else:
         y_pred = odeint(adata.uns["ODE"], y0, batch.t).to(device)

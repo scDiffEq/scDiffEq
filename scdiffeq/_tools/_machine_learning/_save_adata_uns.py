@@ -47,7 +47,10 @@ def _save_torch_model(self, path, tostring=False):
         adata.uns["ODE"] = str(adata.uns["ODE"])
 
     latest_train_loss = adata.uns["loss"]["train_loss"][-1]
-    latest_valid_loss = adata.uns["loss"]["valid_loss"][-1]
+    if self.valid:
+        latest_valid_loss = adata.uns["loss"]["valid_loss"][-1]
+    else:
+        latest_valid_loss = None
     if type(model) is not str:
         torch.save(
             {

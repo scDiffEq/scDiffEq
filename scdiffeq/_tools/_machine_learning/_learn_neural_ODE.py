@@ -18,6 +18,7 @@ def _learn_neural_ODE(
     n_batches=20,
     mode="parallel",
     time_column="time",
+    plot_validation=True,
     plot_progress=True,
     plot_summary=True,
     notebook=False,
@@ -25,6 +26,7 @@ def _learn_neural_ODE(
     visualization_frequency=5,
     save_frequency=5,
     save_path=False,
+    verbose=False,
 ):
 
     """"""
@@ -49,7 +51,7 @@ def _learn_neural_ODE(
 
         if mode == "parallel":
             _forward_integrate_epoch_parallel_time(
-                self, epoch, time_column=time_column, n_batches=n_batches
+                self, epoch, time_column=time_column, n_batches=n_batches, verbose=verbose,
             )
         else:
             _forward_integrate_epoch(self, epoch)
@@ -61,7 +63,7 @@ def _learn_neural_ODE(
                     + "epoch_{}_training_progress.png".format(self.epoch)
                 )
                 _plot_loss(
-                    self.adata, groupsize=smoothing_factor, save_path=test_predict_path
+                    self.adata, groupsize=smoothing_factor, save_path=test_predict_path, valid=self.valid, plot_validation=plot_validation,
                 )
                 torch_model_path = os.path.join(
                     model_checkpoint_path, "model_{}".format(self.epoch)
@@ -69,4 +71,4 @@ def _learn_neural_ODE(
                 _save_torch_model(self, torch_model_path)
 
     if plot_summary:
-        _plot_loss(self.adata, groupsize=smoothing_factor, save_path=save_path)
+        _plot_loss(self.adata, groupsize=smoothing_factor, save_path=save_path, valid=self.valid)

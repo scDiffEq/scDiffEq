@@ -39,7 +39,11 @@ def _format_single_batch(self, batch, time_column="time_point"):
     Parameters:
     -----------
     batch
-
+        AnnData
+    
+    train_on
+        [ 'X', adata.obms_keys() ]
+    
     Returns:
     --------
     formatted_batch
@@ -51,12 +55,26 @@ def _format_single_batch(self, batch, time_column="time_point"):
     """
 
     t = torch.Tensor(np.sort(batch.obs[time_column].unique())).to(self.device)
-    n_cells_batch, n_genes_batch = batch.shape[0], batch.shape[1]
+    n_cells_batch = batch.shape[0]
     n_trajs_batch = int(n_cells_batch / len(t))
-    batch_y = torch.Tensor(
-        batch.X.toarray().reshape(n_trajs_batch, len(t), n_genes_batch)
-    ).to(self.device)  # N_TRAJS x N_TIMEPOINTS x N_GENES
-    batch_y0 = batch_y[:, 0, :].to(self.device)  # N_TRAJS x N_GENES
+    
+    if self.train_on == "X":
+        n_genes_batch = batch.shape[1]
+        batch_y = torch.Tensor(
+            batch.X.toarray().reshape(n_trajs_batch, len(t), n_genes_batch)
+        ).to(
+            self.device
+        )  # N_TRAJS x N_TIMEPOINTS x N_GENES
+    else:
+        
+        n_genes_batch = batch.obsm[self.train_on].shape[1]
+        batch_y = torch.Tensor(
+            batch.obsm[self.train_on].toarray().reshape(n_trajs_batch, len(t), n_genes_batch)
+        ).to(
+            self.device
+        )  # N_TRAJS x N_TIMEPOINTS x N_DIMS (X_emb)
+        
+    batch_y0 = batch_y[:, 0, :].to(self.device)  # N_TRAJS x N_GENES    
 
     class _format_parallel_batch:
         def __init__(self, batch_y, batch_y0, t):
@@ -113,7 +131,12 @@ def _format_parallel_time_batches(
 
     train_unique_trajectories = DataObject_train.obs.trajectory.unique()
     valid_unique_trajectories = DataObject_valid.obs.trajectory.unique()
-
+    
+    if len(DataObject_valid.index) == 0:
+        valid = self.valid = False
+    else:
+        valid = self.valid = True
+    
     BatchedData = {}
     FormattedBatchedData = {}
 
@@ -129,31 +152,37 @@ def _format_parallel_time_batches(
                 n_batches, batch_size_train
             )
         )
-        print(
-            "Validation data will be sorted into {} batches each consisting of {} trajectories.\n".format(
-                n_batches, batch_size_valid
+        if valid:
+            print(
+                "Validation data will be sorted into {} batches each consisting of {} trajectories.\n".format(
+                    n_batches, batch_size_valid
+                )
             )
-        )
+        else:
+            print("Validation data not partitioned.")
 
     batched_trajectory_keys_train = np.random.choice(
         train_unique_trajectories, replace=False, size=[n_batches, batch_size_train]
     )
-    batched_trajectory_keys_valid = np.random.choice(
-        valid_unique_trajectories, replace=False, size=[n_batches, batch_size_valid]
-    )
+    if valid:
+        batched_trajectory_keys_valid = np.random.choice(
+            valid_unique_trajectories, replace=False, size=[n_batches, batch_size_valid]
+        )
 
     BatchedData["train_batches"] = _sort_data_into_batches(
         self.adata, batched_trajectory_keys_train
     )
-    BatchedData["valid_batches"] = _sort_data_into_batches(
-        self.adata, batched_trajectory_keys_valid
-    )
+    if valid:
+        BatchedData["valid_batches"] = _sort_data_into_batches(
+            self.adata, batched_trajectory_keys_valid
+        )
 
     FormattedBatchedData["train"] = _format_batched_parallel_data(
         self, BatchedData, time_column=time_column, mode="train_batches"
     )
-    FormattedBatchedData["valid"] = _format_batched_parallel_data(
-        self, BatchedData, time_column=time_column, mode="valid_batches"
-    )
+    if valid:
+        FormattedBatchedData["valid"] = _format_batched_parallel_data(
+            self, BatchedData, time_column=time_column, mode="valid_batches"
+        )
 
     return FormattedBatchedData

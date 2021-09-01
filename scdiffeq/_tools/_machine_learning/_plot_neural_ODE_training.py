@@ -5,29 +5,33 @@ import matplotlib.pyplot as plt
 import vintools as v
 
 
-def _get_x_axis_plot_train_validation(adata, groupsize=1):
+def _get_x_axis_plot_train_validation(adata, groupsize=1, valid=True):
 
     """ """
     len_train_loss = len(adata.uns["loss"]["train_loss"])
-    len_valid_loss = len(adata.uns["loss"]["valid_loss"])
-
-    validation_frequency = adata.uns["validation_frequency"]
+    if valid:
+        len_valid_loss = len(adata.uns["loss"]["valid_loss"])
+        validation_frequency = adata.uns["validation_frequency"]
 
     x_range_train = np.arange(groupsize, (len_train_loss + groupsize), groupsize)
-
-    x_range_valid = (
-        np.arange(groupsize, (len_valid_loss + groupsize), groupsize)
-        * validation_frequency
-    )
+    
+    if valid:
+        x_range_valid = (
+            np.arange(groupsize, (len_valid_loss + groupsize), groupsize)
+            * validation_frequency
+        )
 
     x_range_train_adjusted = np.linspace(1, x_range_train.max(), len(x_range_train))
-    x_range_valid_adjusted = np.linspace(1, x_range_valid.max(), len(x_range_valid))
+    if valid:
+        x_range_valid_adjusted = np.linspace(1, x_range_valid.max(), len(x_range_valid))
+    else:
+        x_range_valid_adjusted = None
 
     return x_range_train_adjusted, x_range_valid_adjusted
 
 
 def _plot_smoothed_training(
-    adata, groupsize=5, silence_stdev=False, grid=True, save_path=False,
+    adata, groupsize=5, silence_stdev=False, grid=True, save_path=False, valid=True, plot_validation=True,
 ):
 
     """
@@ -60,10 +64,11 @@ def _plot_smoothed_training(
     """
 
     train_loss = adata.uns["loss"]["train_loss"]
-    valid_loss = adata.uns["loss"]["valid_loss"]
+    if valid:
+        valid_loss = adata.uns["loss"]["valid_loss"]
 
     x_range_train, x_range_valid = _get_x_axis_plot_train_validation(
-        adata, groupsize=groupsize
+        adata, groupsize=groupsize, valid=valid,
     )
 
     fig, ax = plt.subplots()
@@ -83,9 +88,11 @@ def _plot_smoothed_training(
     smoothed_mean_train, smoothed_stdev_train = v.ut.smooth(
         unpartitioned_items=train_loss, groupsize=groupsize
     )
-    smoothed_mean_valid, smoothed_stdev_valid = v.ut.smooth(
-        unpartitioned_items=valid_loss, groupsize=groupsize
-    )
+    
+    if valid:
+        smoothed_mean_valid, smoothed_stdev_valid = v.ut.smooth(
+            unpartitioned_items=valid_loss, groupsize=groupsize
+        )
 
     # plot training loss
     plt.plot(x_range_train, smoothed_mean_train, c="navy", zorder=2, label="training")
@@ -97,17 +104,19 @@ def _plot_smoothed_training(
         plt.fill_between(x_range_train, hi, low, color="navy", alpha=0.1, zorder=1)
 
     # plot validation loss
-    plt.plot(
-        x_range_valid, smoothed_mean_valid, c="darkorange", zorder=2, label="validation"
-    )
-    if not silence_stdev:
-        hi, low = (
-            smoothed_mean_valid + smoothed_stdev_valid,
-            smoothed_mean_valid - smoothed_stdev_valid,
+    if plot_validation:
+        print(plot_validation)
+        plt.plot(
+            x_range_valid, smoothed_mean_valid, c="darkorange", zorder=2, label="validation"
         )
-        plt.fill_between(
-            x_range_valid, hi, low, color="darkorange", alpha=0.25, zorder=1
-        )
+        if not silence_stdev:
+            hi, low = (
+                smoothed_mean_valid + smoothed_stdev_valid,
+                smoothed_mean_valid - smoothed_stdev_valid,
+            )
+            plt.fill_between(
+                x_range_valid, hi, low, color="darkorange", alpha=0.25, zorder=1
+            )
 
     if grid:
         plt.grid(zorder=0)
@@ -119,12 +128,15 @@ def _plot_smoothed_training(
     plt.show()
 
 
-def _plot_loss(adata, groupsize, save_path):
+def _plot_loss(adata, groupsize, save_path, valid=True, plot_validation=True):
 
     """"""
+    
+    if valid == False:
+        plot_validation=False
 
     _plot_smoothed_training(
-        adata, groupsize=groupsize, save_path=save_path,
+        adata, groupsize=groupsize, save_path=save_path, valid=valid, plot_validation=plot_validation,
     )
 
 
