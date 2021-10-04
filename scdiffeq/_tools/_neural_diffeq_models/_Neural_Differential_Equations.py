@@ -190,7 +190,7 @@ class scDiffEq:
             self,
             n_epochs=n_epochs,
             n_batches=self.n_batches,
-            mode="parallel",
+            mode=mode,
             plot_validation=plot_validation,
             time_column=self.time_column,
             plot_progress=plot_progress,
