@@ -47,7 +47,7 @@ def _pca_array(array, n_components=30, preprocess=True):
     
     PrincipleComponents = {}
     
-    PrincipleComponents['pca'] = PCA(n_components=n_components)
+    PrincipleComponents['pca'] = pca = PCA(n_components=n_components)
     PrincipleComponents['pcs'] = pca.fit_transform(array)
 
     return PrincipleComponents

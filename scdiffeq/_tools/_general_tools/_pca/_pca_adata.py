@@ -1,4 +1,4 @@
-from ..._utilities._preprocess import preprocess
+from ...._utilities._preprocess import preprocess
 
 
 def _pca_adata(
@@ -18,6 +18,7 @@ def _pca_adata(
     Runs sklearn implementation of PCA. 
     
     Deletes any previous values stored at adata.obsm["X_pca"]. 
+    Incomplete as of right now. 
     """
 
     try:
@@ -34,9 +35,7 @@ def _pca_adata(
     adata.obsm["X_pca"] = pcs
 
     if plot == True:
-        import vintools as v
-
-        v.pl.presets(title, "PC-1", "PC-2")
+        
         plt.scatter(
             pcs[:, 0],
             pcs[:, 1],
