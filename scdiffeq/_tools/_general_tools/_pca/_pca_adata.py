@@ -1,7 +1,7 @@
 from ..._utilities._preprocess import preprocess
 
 
-def pca(
+def _pca_adata(
     adata,
     plot=False,
     title=None,
