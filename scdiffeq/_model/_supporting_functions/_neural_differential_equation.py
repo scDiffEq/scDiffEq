@@ -1,4 +1,3 @@
-
 # _neural_differential_equation.py
 __module_name__ = "_neural_differential_equation.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
@@ -93,8 +92,6 @@ class _Neural_Differential_Equation(torch.nn.Module):
     (3) Independent sizing of the hidden units for the drift and diffusion terms has not yet been implemented.
     """
 
-
-
     def __init__(
         self,
         drift=True,
@@ -111,7 +108,7 @@ class _Neural_Differential_Equation(torch.nn.Module):
     ):
 
         super().__init__()
-        
+
         self.noise_type = noise_type
         self.sde_type = sde_type
         self.drift = drift
@@ -122,7 +119,7 @@ class _Neural_Differential_Equation(torch.nn.Module):
         self.nodes = nodes
         self.brownian_size = brownian_size
         self.batch_size = batch_size
-        
+
         if self.drift:
             self.drift_net = _construct_flexible_neural_network(
                 in_dim=self.in_dim,
@@ -139,7 +136,7 @@ class _Neural_Differential_Equation(torch.nn.Module):
                 nodes=self.nodes,
                 activation_function=activation_function,
             )
-    
+
     def f(self, t, y):
 
         """
@@ -163,4 +160,4 @@ class _Neural_Differential_Equation(torch.nn.Module):
         if self.diffusion:
             return self.diffusion_net(y).view(
                 self.batch_size, self.in_dim, self.brownian_size
-               )
+            )

@@ -35,7 +35,7 @@ def _pca_adata(
     adata.obsm["X_pca"] = pcs
 
     if plot == True:
-        
+
         plt.scatter(
             pcs[:, 0],
             pcs[:, 1],

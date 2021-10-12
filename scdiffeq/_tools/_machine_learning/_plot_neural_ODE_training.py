@@ -14,7 +14,7 @@ def _get_x_axis_plot_train_validation(adata, groupsize=1, valid=True):
         validation_frequency = adata.uns["validation_frequency"]
 
     x_range_train = np.arange(groupsize, (len_train_loss + groupsize), groupsize)
-    
+
     if valid:
         x_range_valid = (
             np.arange(groupsize, (len_valid_loss + groupsize), groupsize)
@@ -31,7 +31,13 @@ def _get_x_axis_plot_train_validation(adata, groupsize=1, valid=True):
 
 
 def _plot_smoothed_training(
-    adata, groupsize=5, silence_stdev=False, grid=True, save_path=False, valid=True, plot_validation=True,
+    adata,
+    groupsize=5,
+    silence_stdev=False,
+    grid=True,
+    save_path=False,
+    valid=True,
+    plot_validation=True,
 ):
 
     """
@@ -76,19 +82,18 @@ def _plot_smoothed_training(
     ax.set_xlabel("Epochs")
     ax.set_ylabel("MSELoss")
     ax.set_title("Training progress: {} epochs".format(str(len(train_loss))), y=1.05)
-    
-#     detached_train_loss = []
-#     detached_valid_loss = []
-#     for ti in train_loss:
-#         detached_train_loss.append(ti.cpu())
-#     for vl in valid_loss:
-#         detached_valid_loss.append(vl.cpu())
-        
-    
+
+    #     detached_train_loss = []
+    #     detached_valid_loss = []
+    #     for ti in train_loss:
+    #         detached_train_loss.append(ti.cpu())
+    #     for vl in valid_loss:
+    #         detached_valid_loss.append(vl.cpu())
+
     smoothed_mean_train, smoothed_stdev_train = v.ut.smooth(
         unpartitioned_items=train_loss, groupsize=groupsize
     )
-    
+
     if valid:
         smoothed_mean_valid, smoothed_stdev_valid = v.ut.smooth(
             unpartitioned_items=valid_loss, groupsize=groupsize
@@ -107,7 +112,11 @@ def _plot_smoothed_training(
     if plot_validation:
         print(plot_validation)
         plt.plot(
-            x_range_valid, smoothed_mean_valid, c="darkorange", zorder=2, label="validation"
+            x_range_valid,
+            smoothed_mean_valid,
+            c="darkorange",
+            zorder=2,
+            label="validation",
         )
         if not silence_stdev:
             hi, low = (
@@ -131,12 +140,16 @@ def _plot_smoothed_training(
 def _plot_loss(adata, groupsize, save_path, valid=True, plot_validation=True):
 
     """"""
-    
+
     if valid == False:
-        plot_validation=False
+        plot_validation = False
 
     _plot_smoothed_training(
-        adata, groupsize=groupsize, save_path=save_path, valid=valid, plot_validation=plot_validation,
+        adata,
+        groupsize=groupsize,
+        save_path=save_path,
+        valid=valid,
+        plot_validation=plot_validation,
     )
 
 

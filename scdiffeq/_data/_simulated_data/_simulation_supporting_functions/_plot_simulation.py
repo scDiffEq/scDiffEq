@@ -41,6 +41,7 @@ def _simulation_plot_presets(
     plt.grid(zorder=0, c="lightgrey", alpha=0.5)
     plt.show()
 
+
 def _plot(self, c="time", savefigname=None, **kwargs):
 
     X = self.adata.X

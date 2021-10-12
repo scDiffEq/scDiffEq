@@ -1,4 +1,3 @@
-
 # scdiffeq __init__.py
 __module_name__ = "__init__.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
@@ -21,6 +20,7 @@ from . import _utilities as ut
 # pandas defaults #
 # --------------- #
 import pandas as pd
+
 pd.set_option("display.max_columns", None)
 
 

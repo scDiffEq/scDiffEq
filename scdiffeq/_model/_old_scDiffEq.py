@@ -1,4 +1,3 @@
-
 # package imports #
 # --------------- #
 import torch.nn as nn
@@ -24,14 +23,16 @@ from ..._plotting._plot_quasi_potential import _plot_quasi_potential
 
 from ..._utilities._torch_device import _set_device
 
+
 def _employ_device(use_gpu, self):
-    
+
     """"""
     if use_gpu:
         self.device = _set_device()
     else:
-        self.device = 'cpu'
+        self.device = "cpu"
     print("Using device: {}\n".format(self.device))
+
 
 class _scDiffEq:
     def __init__(
@@ -72,9 +73,9 @@ class _scDiffEq:
                 nodes_m=nodes_m,
                 activation_function=activation_function,
             )
-        
+
         _employ_device(use_gpu, self)
-        
+
         if not silent:
             print(self.network)
 
@@ -93,20 +94,20 @@ class _scDiffEq:
         proportion_validation=0.20,
         time_column="time",
         silent=False,
-        return_split_data=False,        
+        return_split_data=False,
         rtol=1e-7,
         atol=1e-9,
-        odeint_method='dopri5',
+        odeint_method="dopri5",
     ):
 
         """"""
-        
-        self.rtol=rtol
-        self.atol=atol
-        self.odeint_method=odeint_method
-        
+
+        self.rtol = rtol
+        self.atol = atol
+        self.odeint_method = odeint_method
+
         _employ_device(use_gpu, self)
-            
+
         self.time_column = time_column
 
         _preflight(
@@ -139,7 +140,7 @@ class _scDiffEq:
         n_epochs=1500,
         mode="parallel",
         plot_validation=True,
-        train_on='X',
+        train_on="X",
         time_column=False,
         learning_rate=False,
         validation_frequency=False,
@@ -160,14 +161,12 @@ class _scDiffEq:
 
         # make any necessary updates
         if rtol:
-            self.rtol=rtol
+            self.rtol = rtol
         if atol:
-            self.atol=atol
+            self.atol = atol
         if odeint_method:
-            self.odeint_method=odeint_method
+            self.odeint_method = odeint_method
 
-        
-        
         if n_batches:
             self.n_batches = n_batches
         if visualization_frequency:
@@ -178,7 +177,7 @@ class _scDiffEq:
             self.learning_rate = learning_rate
         if time_column:
             self.time_column = time_column
-        
+
         self.train_on = train_on
         print("Training on {}...".format(self.train_on))
         fig_save_path = self._imgs_path + "epoch_{}_training_progress.png".format(

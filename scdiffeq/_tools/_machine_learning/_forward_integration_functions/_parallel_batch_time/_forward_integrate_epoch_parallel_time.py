@@ -31,26 +31,38 @@ def _forward_integrate_epoch_parallel_time(
         self, n_batches=n_batches, time_column=time_column, verbose=verbose
     )
 
-    n_train = FormattedBatchedData["train"][0].batch_y0.shape[0] 
-#     * len(
-#         FormattedBatchedData["train"].keys()
-#     )
+    n_train = FormattedBatchedData["train"][0].batch_y0.shape[0]
+    #     * len(
+    #         FormattedBatchedData["train"].keys()
+    #     )
     if self.valid:
-        n_valid = FormattedBatchedData["valid"][0].batch_y0.shape[0] 
-#     * len(
-#         FormattedBatchedData["valid"].keys()
-#     )
+        n_valid = FormattedBatchedData["valid"][0].batch_y0.shape[0]
+    #     * len(
+    #         FormattedBatchedData["valid"].keys()
+    #     )
     epoch_train_loss, epoch_valid_loss = 0, 0
 
     for [label, batch] in FormattedBatchedData["train"].items():
         epoch_train_loss += _forward_integrate_batch(
-            self.adata, batch, device=self.device, rtol=self.rtol, atol=self.atol, method=self.odeint_method, validation=False
+            self.adata,
+            batch,
+            device=self.device,
+            rtol=self.rtol,
+            atol=self.atol,
+            method=self.odeint_method,
+            validation=False,
         )
     self.adata.uns["loss"]["train_loss"].append(epoch_train_loss.item() / n_train)
-    
+
     if (epoch) % self.adata.uns["validation_frequency"] == 0 and self.valid == True:
         for [label, batch] in FormattedBatchedData["valid"].items():
             epoch_valid_loss += _forward_integrate_batch(
-                self.adata, batch, device=self.device, rtol=self.rtol, atol=self.atol, method=self.odeint_method, validation=True
+                self.adata,
+                batch,
+                device=self.device,
+                rtol=self.rtol,
+                atol=self.atol,
+                method=self.odeint_method,
+                validation=True,
             )
         self.adata.uns["loss"]["valid_loss"].append(epoch_valid_loss / n_valid)

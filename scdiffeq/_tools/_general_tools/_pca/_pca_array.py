@@ -1,17 +1,19 @@
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 
+
 def _preprocess_for_PCA(array):
-    
+
     """Scale data for PCA."""
-    
+
     scaler = preprocessing.StandardScaler().fit(array)
     scaled_array = scaler.transform(array)
-    
+
     return scaled_array
 
+
 def _pca_array(array, n_components=30, preprocess=True):
-    
+
     """
     Run PCA
     
@@ -41,13 +43,13 @@ def _pca_array(array, n_components=30, preprocess=True):
             of the data to project it to a lower dimensional space. The input data is centered 
             but not scaled for each feature before applying the SVD.
     """
-    
+
     if preprocess:
         array = _preprocess_for_PCA(array)
-    
+
     PrincipleComponents = {}
-    
-    PrincipleComponents['pca'] = pca = PCA(n_components=n_components)
-    PrincipleComponents['pcs'] = pca.fit_transform(array)
+
+    PrincipleComponents["pca"] = pca = PCA(n_components=n_components)
+    PrincipleComponents["pcs"] = pca.fit_transform(array)
 
     return PrincipleComponents

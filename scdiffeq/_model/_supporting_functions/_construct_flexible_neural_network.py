@@ -1,4 +1,3 @@
-
 # _compose_neural_network.py
 __module_name__ = "_compose_neural_network.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
@@ -110,11 +109,7 @@ def _construct_hidden_layers(
 
 
 def _construct_flexible_neural_network(
-    in_dim=2,
-    out_dim=2,
-    layers=3,
-    nodes=5,
-    activation_function=nn.Tanh(),
+    in_dim=2, out_dim=2, layers=3, nodes=5, activation_function=nn.Tanh(),
 ):
 
     """

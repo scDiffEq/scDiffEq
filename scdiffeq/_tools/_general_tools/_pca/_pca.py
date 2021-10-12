@@ -1,6 +1,6 @@
-
 from ._pca_adata import _pca_adata
 from ._pca_array import _pca_array
+
 
 def _is_AnnData(data_object):
 
@@ -8,8 +8,9 @@ def _is_AnnData(data_object):
 
     return data_object.__class__.__name__ == "AnnData"
 
+
 def _pca(data, n_components=30, preprocess=False, plot=False):
-    
+
     """
     Run PCA. Accepts a numpy array or AnnData.
     
@@ -39,9 +40,17 @@ def _pca(data, n_components=30, preprocess=False, plot=False):
             of the data to project it to a lower dimensional space. The input data is centered 
             but not scaled for each feature before applying the SVD.
     """
-    
+
     if _is_AnnData(data):
-        return _pca_adata(data, plot, title="PCA", preprocessing=preprocess, alpha=1, edgecolor=None, linewidths=None,)
-    
+        return _pca_adata(
+            data,
+            plot,
+            title="PCA",
+            preprocessing=preprocess,
+            alpha=1,
+            edgecolor=None,
+            linewidths=None,
+        )
+
     else:
         return _pca_array(data, n_components, preprocess)
