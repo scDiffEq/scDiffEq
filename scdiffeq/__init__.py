@@ -1,20 +1,31 @@
-# scdiffeq __init__.py
 
+# scdiffeq __init__.py
+__module_name__ = "__init__.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
+# import model #
+# ------------ #
+from ._model._scDiffEq_model_module import _scDiffEq as scDiffEq
+
+
+# import sub-packages #
+# ------------------- #
 from . import _data as data
 from . import _tools as tl
 from . import _plotting as pl
 from . import _utilities as ut
 
-# pandas defaults
-import pandas as pd
 
+# pandas defaults #
+# --------------- #
+import pandas as pd
 pd.set_option("display.max_columns", None)
 
-# matplotlib defaults
+
+# matplotlib defaults #
+# ------------------- #
 import matplotlib
 import matplotlib.font_manager
 
