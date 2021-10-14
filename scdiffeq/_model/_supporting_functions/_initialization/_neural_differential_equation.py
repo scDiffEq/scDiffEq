@@ -1,3 +1,4 @@
+
 # _neural_differential_equation.py
 __module_name__ = "_neural_differential_equation.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
@@ -7,6 +8,8 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # package imports #
 # --------------- #
 import torch
+import torchsde
+import torchdiffeq
 
 
 # local imports #
@@ -92,9 +95,10 @@ class _Neural_Differential_Equation(torch.nn.Module):
     (3) Independent sizing of the hidden units for the drift and diffusion terms has not yet been implemented.
     """
 
+
+
     def __init__(
         self,
-        drift=True,
         diffusion=True,
         in_dim=2,
         out_dim=2,
@@ -108,10 +112,9 @@ class _Neural_Differential_Equation(torch.nn.Module):
     ):
 
         super().__init__()
-
+        
         self.noise_type = noise_type
         self.sde_type = sde_type
-        self.drift = drift
         self.diffusion = diffusion
         self.in_dim = in_dim
         self.out_dim = out_dim
@@ -119,15 +122,15 @@ class _Neural_Differential_Equation(torch.nn.Module):
         self.nodes = nodes
         self.brownian_size = brownian_size
         self.batch_size = batch_size
-
-        if self.drift:
-            self.drift_net = _construct_flexible_neural_network(
-                in_dim=self.in_dim,
-                out_dim=self.out_dim,
-                layers=self.layers,
-                nodes=self.nodes,
-                activation_function=activation_function,
-            )
+        
+        self.drift_net = _construct_flexible_neural_network(
+            in_dim=self.in_dim,
+            out_dim=self.out_dim,
+            layers=self.layers,
+            nodes=self.nodes,
+            activation_function=activation_function,
+        )
+            
         if self.diffusion:
             self.diffusion_net = _construct_flexible_neural_network(
                 in_dim=self.in_dim,
@@ -160,4 +163,66 @@ class _Neural_Differential_Equation(torch.nn.Module):
         if self.diffusion:
             return self.diffusion_net(y).view(
                 self.batch_size, self.in_dim, self.brownian_size
-            )
+               )
+        
+        
+def _choose_integration_function(diffusion):
+
+    """
+    If diffusion is not to be included (i.e., diffusion=False), returns odeint. Otherwise, sdeint is returned.
+
+    Parameters:
+    -----------
+    diffusion
+        indicator if diffusion is included
+        type: bool
+
+    Returns:
+    --------
+    integration_function
+
+    Notes:
+    ------
+    """
+
+    if diffusion:
+        return torchsde.sdeint
+    else:
+        return torchdiffeq.odeint
+
+
+def _formulate_network_model(diffusion, **kwargs):
+
+    """
+    Construct (and correspondingly reduce() the drift-(diffusion) equation. Inherently tied to
+    this formulation is the choice of integration implementation  (i.e., torchdiffeq.odeint or
+    torchsde.sdeint), which is also returned by this function.
+
+    Parameters:
+    -----------
+    DiffEq
+        Neural Differential Equation instantiated by `sdq.scDiffEq()`
+
+    Returns:
+    --------
+    None
+        Diffusion-related sub-classes are removed from the main `sdq.scDiffEq` class.
+
+    Notes:
+    ------
+    (1) Currently,  the easiest way to define the drift-diffusion equation and sub-compositions of
+        terms thereof is to insantiate the entire equation and then remove pieces (e.g., diffusion
+        term) that are not desired.
+
+    """
+
+    network_model = _Neural_Differential_Equation(diffusion, **kwargs)
+    if not diffusion:
+        try:
+            delattr(network_model.__class__, "g")
+        except:
+            pass
+        
+    integration_function = _choose_integration_function(diffusion)
+
+    return network_model, integration_function

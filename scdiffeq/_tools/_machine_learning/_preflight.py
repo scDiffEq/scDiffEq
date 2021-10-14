@@ -5,9 +5,9 @@ import torch.optim as optim
 
 # local imports #
 # ------------- #
-from .._machine_learning._choose_optimizer import _choose_optimizer
-from .._machine_learning._choose_loss_function import _choose_loss_function
-from .._machine_learning._RunningAverageMeter import _RunningAverageMeter
+from ._choose_optimizer import _choose_optimizer
+from ._choose_loss_function import _choose_loss_function
+from ._RunningAverageMeter import _RunningAverageMeter
 
 
 def _preflight(
