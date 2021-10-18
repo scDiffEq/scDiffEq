@@ -148,8 +148,7 @@ class _Neural_Differential_Equation(torch.nn.Module):
         ------
         (1) Shape of returned: (batch_size, state_size)
         """
-        if self.drift:
-            return self.drift_net(y)
+        return self.drift_net(y)
 
     def g(self, t, y):
 

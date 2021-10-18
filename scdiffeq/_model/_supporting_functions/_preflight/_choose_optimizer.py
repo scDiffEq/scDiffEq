@@ -30,7 +30,7 @@ def _choose_optimizer(network_model, optimizer_choice, learning_rate):
     
     Returns:
     --------
-    optimizer
+    optimizer_func
     
     Notes:
     ------

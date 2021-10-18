@@ -6,7 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import model #
 # ------------ #
-from ._model._scDiffEq_model_module import _scDiffEq as scDiffEq
+from ._model._scDiffEq_model import _scDiffEq as scDiffEq
 
 
 # import sub-packages #

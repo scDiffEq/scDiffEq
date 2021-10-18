@@ -16,7 +16,7 @@ class SmoothedAverage(object):
         if self.value is None:
             self.smoothed_average = value
         else:
-            self.smoothed_average = _calculate_smoothed_average(self.average, self.momentum, value)
+            self.smoothed_average = _calculate_smoothed_average(self.smoothed_average, self.momentum, value)
         self.value = value
 
 def _calculate_smoothed_average(average, momentum, new_value):
@@ -65,9 +65,13 @@ class _TrainingMonitor(object):
             self.train_loss.append(loss)
             self.smoothed_train_loss.update(loss)
             
-    def start_time(self):
+    def start_timer(self):
         
-        self.start_time = time.time()
+        try: 
+            self.backup_t0 = self.start_time
+            self.start_time = time.time()
+        except:
+            self.start_time = time.time()            
         
     def update_time(self, round_to=3):
 
