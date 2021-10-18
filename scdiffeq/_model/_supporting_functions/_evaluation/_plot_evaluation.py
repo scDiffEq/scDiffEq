@@ -38,6 +38,6 @@ def _plot_evaluation(evaluator, title_fontsize=12):
 
     ax_test.set_title("Test Data", fontsize=title_fontsize)
     ax_pred.set_title("Test Predictions", fontsize=title_fontsize)
-    ax_over.set_title("Prediction Overlay", fontsize=title_fontsize)
+    ax_over.set_title("Prediction Overlaid", fontsize=title_fontsize)
 
     plt.show()

@@ -27,7 +27,8 @@ def _calculate_smoothed_average(average, momentum, new_value):
 
 class _TrainingMonitor(object):
     def __init__(self, momentum=0.99):
-
+        
+        self.current_epoch = None
         self.train_loss = []
         self.valid_loss = []
         self.smoothed_train_loss = SmoothedAverage(momentum)
@@ -57,7 +58,7 @@ class _TrainingMonitor(object):
             default: False
             type: bool
         """
-        
+                
         if validation:
             self.valid_loss.append(loss)
             self.smoothed_valid_loss.update(loss)

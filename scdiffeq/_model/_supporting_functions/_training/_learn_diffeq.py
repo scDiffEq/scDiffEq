@@ -96,8 +96,17 @@ class Learner:
         self.optimizer.step()
         self.TrainingMonitor.update_loss(loss.item())
         
-        
-def _learn_diffeq(adata, network_model, diffusion, integration_function, HyperParameters, TrainingMonitor):
+from IPython.display import clear_output        
+from ._validation import _validate
+
+def _learn_diffeq(adata, 
+                  network_model, 
+                  diffusion, 
+                  integration_function, 
+                  HyperParameters, 
+                  TrainingMonitor,
+                  plot,
+                  valid_plot_savepath):
 
     """"""
     
@@ -115,7 +124,16 @@ def _learn_diffeq(adata, network_model, diffusion, integration_function, HyperPa
         learner.forward_integrate()
         learner.calculate_loss()
         TrainingMonitor.update_time()
+        TrainingMonitor.current_epoch = epoch_n
         
-        if epoch_n % HyperParameters.visualization_frequency == 0:
-            plt.plot(TrainingMonitor.train_loss)
-            plt.show()
+        
+        if epoch_n % HyperParameters.validation_frequency == 0:
+            clear_output(wait=True)
+            _validate(adata, 
+                      network_model, 
+                      diffusion, 
+                      integration_function, 
+                      HyperParameters, 
+                      TrainingMonitor,
+                      plot,
+                      valid_plot_savepath)

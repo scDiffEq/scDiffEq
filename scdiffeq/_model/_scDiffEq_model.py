@@ -102,15 +102,11 @@ class _scDiffEq:
         Notes:
         ------
         """
-        
-        
-        
-        
-        
+                
         self.hyper_parameters, self.ux_preferences, self._InvalidKwargs =  _preflight_parameters(self.network_model, **kwargs)
         self.adata = _split_adata(adata, self.hyper_parameters, self.ux_preferences)
     
-    def learn(self):
+    def learn(self, plot=True, valid_plot_savepath=False):
         
         self.TrainingMonitor = _TrainingMonitor(self.hyper_parameters.smoothing_momentum)
         _learn_diffeq(self.adata, 
@@ -118,7 +114,9 @@ class _scDiffEq:
                       self.diffusion,
                       self.integration_function,
                       self.hyper_parameters, 
-                      self.TrainingMonitor
+                      self.TrainingMonitor,
+                      plot,
+                      valid_plot_savepath,
                      )
         
     def evaluate(self, plot=True):
