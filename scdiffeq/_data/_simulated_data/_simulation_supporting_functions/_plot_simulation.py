@@ -37,9 +37,9 @@ def _simulation_plot_presets(
     ax.set_title(plot_title, y=1.05, fontsize=title_fontsize)
     ax.set_xlabel("$x$", size=label_fontsize)
     ax.set_ylabel("$y$", size=label_fontsize)
-    ax.scatter(x, y, **kwargs)
+    ax.scatter(x, y, zorder=10, **kwargs)
     plt.grid(zorder=0, c="lightgrey", alpha=0.5)
-    plt.show()
+    
 
 
 def _plot(self, c="time", savefigname=None, **kwargs):
@@ -51,3 +51,4 @@ def _plot(self, c="time", savefigname=None, **kwargs):
     _simulation_plot_presets(X[:, 0], X[:, 1], c=c, **kwargs)
     if savefigname:
         out = plt.savefig(savefigname)
+    plt.show()

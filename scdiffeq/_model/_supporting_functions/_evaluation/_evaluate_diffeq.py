@@ -48,6 +48,15 @@ def _fetch_data(adata, use="X", time_key="time"):
 
     return y, y0, t
 
+def _shape_compatible(pred_y):
+    
+    """"""
+    
+    reshaped_outs = []
+    for i in range(pred_y.shape[1]):
+        reshaped_outs.append(pred_y[:, i, :])
+        
+    return torch.stack(reshaped_outs)
 
 class Evaluator:
     def __init__(self, network_model, diffusion, integration_function, loss_function):
@@ -70,13 +79,14 @@ class Evaluator:
                 )
 
     def calculate_loss(self):
-
+        
+        self.pred_y = _shape_compatible(self.pred_y)
         self.test_loss = self.loss_function(
             self.pred_y, self.y.reshape(self.pred_y.shape)
         ).item()
 
 
-def _evaluate_diffeq(DiffEq, plot=True):
+def _evaluate_diffeq(DiffEq, plot, save_path):
 
     """"""
 
@@ -92,8 +102,11 @@ def _evaluate_diffeq(DiffEq, plot=True):
     evaluator.calculate_loss()
 
     if plot:
-        _plot_evaluation(evaluator)
+        _plot_evaluation(evaluator, 
+                         title_fontsize=16, 
+                         save_path=save_path, 
+                         TrainingMonitor=DiffEq.TrainingMonitor)
 
-    print("Test loss: {:.4f}".format(evaluator.test_loss))
+    print("Test loss: {:.6f}".format(evaluator.test_loss))
 
     return evaluator

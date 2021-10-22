@@ -61,19 +61,28 @@ def _fetch_data(adata, use="X", time_key="time"):
 
     return y, y0, t
 
+def _shape_compatible(pred_y):
+    
+    """"""
+    
+    reshaped_outs = []
+    for i in range(pred_y.shape[1]):
+        reshaped_outs.append(pred_y[:, i, :])
+        
+    return torch.stack(reshaped_outs)
 
 def _format_valid_predictions_for_plotting(evaluator, group):
 
     x, y = evaluator.y[group].detach().numpy()[:, 0].T, evaluator.y[group].detach().numpy()[:, 1].T
     x_, y_ = (
-        evaluator.pred_y[group].detach().numpy()[:, :, 0].T,
-        evaluator.pred_y[group].detach().numpy()[:, :, 1].T,
+        evaluator.pred_y[group].detach().numpy()[:, :, 0],
+        evaluator.pred_y[group].detach().numpy()[:, :, 1],
     )
 
     return [x, y, x_, y_]
 
 def _tile_time(time, pred):
-    return np.tile(time, pred.shape[1])
+    return np.tile(time, pred.shape[0])
 
 def _size_adjust_loss_values(loss_vector, GroupSizesDict, group):
     return np.array(loss_vector)*100 / GroupSizesDict[group]
@@ -132,6 +141,7 @@ import time
 def _plot_validation(validator, TrainingMonitor, HyperParameters, binsize, title_fontsize, save_path):
     
 #     plot_time_start = time.time()
+    scatter_size = 10
     
     plot = v.pl.ScatterPlot()
     plot.construct_layout(nplots=8, ncols=4, grid_hspace=0.4, width_ratios=np.ones(4), figsize_height=1.4, figsize_width=1)
@@ -153,19 +163,19 @@ def _plot_validation(validator, TrainingMonitor, HyperParameters, binsize, title
     t_valid = _tile_time(validator.t, validator.pred_y['valid'])
     t_train = _tile_time(validator.t, validator.pred_y['train'])
     
-    ax_train.scatter(xt, yt, c=t_train, zorder=1)
-    ax_train_predicted.scatter(xt_, yt_, c=t_train, zorder=1)
-    ax_train_overlaid.scatter(xt, yt, c="lightgrey", alpha=0.75, zorder=1)
-    ax_train_overlaid.scatter(xt_, yt_, c=t_train, zorder=2)
+    ax_train.scatter(xt, yt, s=scatter_size, c=t_train, zorder=1)
+    ax_train_predicted.scatter(xt_, yt_, s=scatter_size, c=t_train, zorder=1)
+    ax_train_overlaid.scatter(xt, yt, s=scatter_size, c="lightgrey", alpha=0.75, zorder=1)
+    ax_train_overlaid.scatter(xt_, yt_, s=scatter_size, c=t_train, zorder=2)
     
     ax_train.set_title("Training Data", fontsize=title_fontsize, y=1.06)
     ax_train_predicted.set_title("Training Predictions", fontsize=title_fontsize, y=1.06)
     ax_train_overlaid.set_title("Training Predictions Overlaid", fontsize=title_fontsize, y=1.06)
     
-    ax_valid.scatter(x, y, c=t_valid, zorder=1)
-    ax_valid_predicted.scatter(x_, y_, c=t_valid, zorder=1)
-    ax_valid_overlaid.scatter(x, y, c="lightgrey", alpha=0.75, zorder=1)
-    ax_valid_overlaid.scatter(x_, y_, c=t_valid, zorder=2)
+    ax_valid.scatter(x, y, s=scatter_size, c=t_valid, zorder=1)
+    ax_valid_predicted.scatter(x_, y_, s=scatter_size, c=t_valid, zorder=1)
+    ax_valid_overlaid.scatter(x, y, s=scatter_size, c="lightgrey", alpha=0.75, zorder=1)
+    ax_valid_overlaid.scatter(x_, y_, s=scatter_size, c=t_valid, zorder=2)
     
     ax_loss_curve.set_title("Training and Validation Loss", fontsize=title_fontsize, y=1.06)
     
@@ -212,8 +222,8 @@ def _plot_validation(validator, TrainingMonitor, HyperParameters, binsize, title
         v.ut.mkdir_flex(save_path)
         img_save_path = os.path.join(save_path, "{}.png".format(TrainingMonitor.current_epoch))
         plt.savefig(img_save_path, bbox_inches="tight")
-#     plt.show()
-    display(plt.gcf())
+    plt.show()
+#     display(plt.gcf())
     
 #     plot_time_stop = time.time() - plot_time_start
 #     print("Plotting time: {:.5f}".format(plot_time_stop))
@@ -252,7 +262,10 @@ class Validator:
                 )
 
     def calculate_loss(self):
-
+        
+        self.pred_y['train'] = _shape_compatible(self.pred_y['train'])
+        self.pred_y['valid'] = _shape_compatible(self.pred_y['valid'])
+        
         self.train_loss = self.loss_function(
             self.pred_y['train'], self.y['train'].reshape(self.pred_y['train'].shape)
         ).item()
@@ -292,4 +305,4 @@ def _validate(adata,
                          title_fontsize=16, 
                          save_path=plot_savepath)
 
-    print("Validation loss: {:.4f}".format(validator.valid_loss))
+#     print("Validation loss: {:.4f}".format(validator.valid_loss))

@@ -61,7 +61,7 @@ class _GenericSimulator:
                 simulation_figure_path, "Simulation.png"
             )
             self.simulation_init_fig_path = os.path.join(
-                simulation_figure_path, "Simulation_InitialConditions.png"
+                simulation_figure_path, "Simulation_InitialConditions.pdf"
             )
 
     def set_initial_conditions_sampling_distribution(
@@ -160,7 +160,12 @@ class _GenericSimulator:
             )
 
     def plot_simulation(self, savefigname=False, c="time", s=12, alpha=0.5, **kwargs):
-
+        
+        if savefigname:
+            self.simulation_plot_fig_path = savefigname
+        else:
+            self.simulation_plot_fig_path = "./sim.png"
+        
         _plot(
             self,
             c=c,

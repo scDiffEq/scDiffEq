@@ -48,6 +48,16 @@ def _fetch_data(adata, use="X", time_key="time"):
 
     return y, y0, t
 
+def _shape_compatible(pred_y):
+    
+    """"""
+    
+    reshaped_outs = []
+    for i in range(pred_y.shape[1]):
+        reshaped_outs.append(pred_y[:, i, :])
+        
+    return torch.stack(reshaped_outs)
+
 
 class Learner:
 
@@ -83,14 +93,15 @@ class Learner:
         self.optimizer.zero_grad()
         if self.parallel and self.diffusion:
             print("Training neural SDE in parallel time mode.")
-
+                
         if self.parallel and not self.diffusion:
             self.pred_y = self.integration_function(
                 self.network_model.f, self.y0, self.t
-            )
+            ) # .reshape([3, 50, 2])
 
     def calculate_loss(self):
-
+        
+        self.pred_y = _shape_compatible(self.pred_y)
         loss = self.loss_function(self.pred_y, self.y.reshape(self.pred_y.shape))
         loss.backward()
         self.optimizer.step()
@@ -105,6 +116,7 @@ def _learn_diffeq(adata,
                   integration_function, 
                   HyperParameters, 
                   TrainingMonitor,
+                  validation_status,
                   plot,
                   valid_plot_savepath):
 
@@ -119,15 +131,16 @@ def _learn_diffeq(adata,
                       HyperParameters,
                       TrainingMonitor,
                      )
-
-    for epoch_n in tqdm(range(int(HyperParameters.n_epochs))):
+    
+    for epoch_n in tqdm(range(1, int(HyperParameters.n_epochs + 1))):
         learner.forward_integrate()
         learner.calculate_loss()
         TrainingMonitor.update_time()
-        TrainingMonitor.current_epoch = epoch_n
+        TrainingMonitor.current_epoch += 1
         
         
-        if epoch_n % HyperParameters.validation_frequency == 0:
+        if validation_status and (epoch_n % HyperParameters.validation_frequency == 0):
+            print("Elapsed training time: {}s".format(TrainingMonitor.elapsed_time))
             clear_output(wait=True)
             _validate(adata, 
                       network_model, 
@@ -137,3 +150,6 @@ def _learn_diffeq(adata,
                       TrainingMonitor,
                       plot,
                       valid_plot_savepath)
+            
+    print("Total training time: {}s".format(TrainingMonitor.elapsed_time))
+    return learner

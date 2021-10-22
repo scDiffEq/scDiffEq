@@ -10,6 +10,11 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # --------------- #
 import numpy as np
 
+
+from ...._utilities._Messages_Module import _Messages_
+messages = _Messages_()
+
+
 def _shuffle_assignment_indices(DataSplitDict, idx):
 
     """
@@ -82,7 +87,8 @@ class SplitData:
 def _split_adata(
     adata,
     hyper_parameters,
-    preferences
+    preferences,
+    overfit,
 ):
     
     """
@@ -92,7 +98,19 @@ def _split_adata(
     (1) This function takes the strategy of annotating test/train/validation group assignments within
         the `adata.obs` table. 
     """
-
+    
+    single_trajectory = adata.obs["trajectory"].nunique() == 1
+    
+    if single_trajectory or overfit:
+        hyper_parameters.train_proportion = 1
+        validation_status = False
+        if not single_trajectory:
+            messages.overfit()
+        else:
+            messages.single_trajectory()
+    else:
+        validation_status = True
+    
     split = SplitData(adata, 
                       hyper_parameters.train_proportion, 
                       hyper_parameters.valid_proportion, 
@@ -104,4 +122,4 @@ def _split_adata(
     if not preferences.silent:
         print(adata)
     
-    return split.adata
+    return split.adata, validation_status
