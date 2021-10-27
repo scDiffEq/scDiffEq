@@ -1,4 +1,4 @@
-# ![scdiffeq-logo](docs/imgs/scdiffeq.logo2.svg)
+# ![scdiffeq-logo](docs/imgs/scdiffeq.logo.svg)
 
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
 [![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
