@@ -38,7 +38,13 @@ DiffEq.learn()
 DiffEq.evaluate()
 ```
 
-**5**. Compute and interpret the [quasi-potential landscape](https://royalsocietypublishing.org/doi/10.1098/rsif.2012.0434).
+**5**. Compute and interpret the [quasi-potential landscape](https://royalsocietypublishing.org/doi/10.1098/rsif.2012.0434)<sup>**1**</sup>.
 ```python
 DiffEq.compute_landscape()
 ```
+
+---
+
+**References**:
+
+**1**. [Zhou Joseph Xu, _et al_](https://scholar.google.com/citations?user=cMBBPisAAAAJ&hl=en)., [Quasi-potential landscape in complex multi-stable systems](https://royalsocietypublishing.org/doi/10.1098/rsif.2012.0434?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed). *J. R. Soc. Interface*. (**2012**). [DOI](http://doi.org/10.1098/rsif.2012.0434).
