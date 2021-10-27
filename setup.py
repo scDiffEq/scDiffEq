@@ -5,7 +5,7 @@ import sys
 
 setup(
     name="scdiffeq",
-    python_requires=">3.6.0",
+    python_requires=">3.8.0",
     author="Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard",
     author_email="mvinyard@broadinstitute.org",
     url="https://github.com/pinellolab/sc-neural-ODEs",
@@ -34,7 +34,7 @@ setup(
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
