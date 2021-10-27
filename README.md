@@ -1,19 +1,17 @@
-# Single-Cell Neural Differential Equations
+# ![scdiffeq-logo](docs/imgs/scdiffeq.logo2.svg)
 
-![scdiffeq_logo](https://i.imgur.com/EOJ6W9R.png)
-
-* <a href="https://docs.google.com/document/d/1gCAEqp0lZsxt3LqhKeaeSIIqthrAg3IKkxWXP1sOvgs/edit#">**Manuscript in progress**</a>
-* <a href="https://github.com/pinellolab/sc-neural-ODEs/notebooks">**Example notebooks**</a>
-* <a href="https://github.com/pinellolab/sc-neural-ODEs/scdiffeq">**scdiffeq**</a> (development package)
-
-
-## Install the development package:
-
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
+[![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+An analysis framework for modeling dynamical single-cell data with **stochastic neural differential equations**.
+
+### Install the development package:
 
 ```
 git clone git@github.com:pinellolab/sc-neural-ODEs.git
 
 pip install -e .
 ```
+
 
