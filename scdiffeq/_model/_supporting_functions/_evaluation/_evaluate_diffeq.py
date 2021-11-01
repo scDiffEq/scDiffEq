@@ -1,112 +1,62 @@
 
+# _evaluate_diffeq.py
+__module_name__ = "_evaluate_diffeq.py"
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["vinyard@g.harvard.edu",])
+
+
+# package imports #
+# --------------- #
+import vintools as v
+import time
+
+# local imports #
+# ------------- #
 from ._plot_evaluation import _plot_evaluation
-    
-import torch
-import numpy as np
+from .._common_functions._IntegratorModule import _Integrator
 
-def _get_y0_idx(df, time_key):
+
+def _evaluate_diffeq(DiffEq, n_batches, device, plot, plot_save_path, use, time_key, plot_title_fontsize):
 
     """"""
-
-    y0_idx = df.index[np.where(df[time_key] == df[time_key].min())]
-
-    return y0_idx
-
-
-def _get_adata_y0(adata, time_key):
-
-    y0_idx = _get_y0_idx(adata.obs, time_key)
-    adata_y0 = adata[y0_idx].copy()
-
-    return adata_y0
-
-
-def _get_y0(adata, use, time_key):
-
-    adata_y0 = _get_adata_y0(adata, time_key)
-
-    if use == "X":
-        return torch.Tensor(adata_y0.X)
-
-    elif use in adata.obsm_keys():
-        return torch.Tensor(adata_y0.obsm[use])
-
-    else:
-        print("y0 not properly defined!")
-
-
-def _fetch_data(adata, use="X", time_key="time"):
-
-    """
-
-    Assumes parallel time.
-    """
-
-    y = torch.Tensor(adata.X)
-    y0 = _get_y0(adata, use, time_key)
-    t = torch.Tensor(adata.obs[time_key].unique())
-
-    return y, y0, t
-
-def _shape_compatible(pred_y):
-    
-    """"""
-    
-    reshaped_outs = []
-    for i in range(pred_y.shape[1]):
-        reshaped_outs.append(pred_y[:, i, :])
         
-    return torch.stack(reshaped_outs)
-
-class Evaluator:
-    def __init__(self, network_model, diffusion, integration_function, loss_function):
-
-        self.parallel = True
-        self.network_model = network_model
-        self.diffusion = diffusion
-        self.integration_function = integration_function
-        self.loss_function = loss_function
-
-    def forward_integrate(self, adata, use="X", time_key="time"):
-
-        self.y, self.y0, self.t = _fetch_data(adata, use, time_key)
-
-        with torch.no_grad():
-            if self.parallel and not self.diffusion:
-
-                self.pred_y = self.integration_function(
-                    self.network_model.f, self.y0, self.t
-                )
-
-    def calculate_loss(self):
-        
-        self.pred_y = _shape_compatible(self.pred_y)
-        self.test_loss = self.loss_function(
-            self.pred_y, self.y.reshape(self.pred_y.shape)
-        ).item()
-
-
-def _evaluate_diffeq(DiffEq, plot, save_path):
-
-    """"""
-
-    test_adata = DiffEq.adata[DiffEq.adata.obs["test"]]
-    evaluator = Evaluator(
-        DiffEq.network_model,
-        DiffEq.diffusion,
-        DiffEq.integration_function,
-        DiffEq.hyper_parameters.loss_function,
+    evaluator = _Integrator(mode  = 'test',
+                            network_model = DiffEq.network_model,
+                            device=device,
+                            diffusion = DiffEq.diffusion,
+                            integration_function = DiffEq.integration_function,
+                            HyperParameters = DiffEq.hyper_parameters,
+                            TrainingMonitor = DiffEq.TrainingMonitor,
+                            use=use, 
+                            time_key=time_key,
     )
+    
+    batch_start = time.time()
+    print("Creating Batches....", end = "\r")
+    evaluator.batch_data(DiffEq.adata, n_batches)
+    print("Creating Batches.... {:.3f}s elapsed.".format(time.time() - batch_start))
+    
+    int_start = time.time()
+    print("Forward integration.... ", end = "\r")
+    evaluator.forward_integrate()
+    print("Forward integration.... {:.3f}s elapsed.".format(time.time() - int_start))
 
-    evaluator.forward_integrate(test_adata)
+    loss_start = time.time()
+    print("Loss calculation.... ", end = "\r")
     evaluator.calculate_loss()
-
+    print("Loss calculation.... {:.3f}s elapsed.".format(time.time() - loss_start))
+    
+    
+    plot_start = time.time()
+    print("Plotting.... ", end = "\r")
     if plot:
         _plot_evaluation(evaluator, 
-                         title_fontsize=16, 
-                         save_path=save_path, 
+                         title_fontsize=plot_title_fontsize, 
+                         save_path=plot_save_path, 
                          TrainingMonitor=DiffEq.TrainingMonitor)
-
-    print("Test loss: {:.6f}".format(evaluator.test_loss))
+    print("Plotting.... {:.3f}s elapsed.".format(time.time() - plot_start))
+    msg = v.ut.format_pystring("Test loss:", ['BOLD', 'CYAN'])
+    print("{} {:.6f}".format(msg, evaluator.test_loss))
+    
 
     return evaluator

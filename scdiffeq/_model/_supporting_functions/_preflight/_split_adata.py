@@ -103,13 +103,13 @@ def _split_adata(
     
     if single_trajectory or overfit:
         hyper_parameters.train_proportion = 1
-        validation_status = False
+        perform_validation = False
         if not single_trajectory:
             messages.overfit()
         else:
             messages.single_trajectory()
     else:
-        validation_status = True
+        perform_validation = True
     
     split = SplitData(adata, 
                       hyper_parameters.train_proportion, 
@@ -122,4 +122,4 @@ def _split_adata(
     if not preferences.silent:
         print(adata)
     
-    return split.adata, validation_status
+    return split.adata, perform_validation

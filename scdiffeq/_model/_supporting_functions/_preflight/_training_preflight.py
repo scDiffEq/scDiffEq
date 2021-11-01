@@ -55,6 +55,11 @@ class UX_Preferences(object):
     def __init__(self):
         
         self.silent=False
+        self.plot_title_fontsize=9
+        self.plot_ticks_fontsize=6
+        self.plot_axis_label_fontsize=8
+        self.validation_plot_savepath = "/imgs/validation/"
+        self.evaluation_plot_savepath = "/imgs/evaluation/"
         
     def update(self, PreferencesDict):
         

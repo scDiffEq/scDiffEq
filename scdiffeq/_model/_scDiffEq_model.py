@@ -18,6 +18,7 @@ from .._utilities._reset_scDiffEq import _reset_scDiffEq
 
 # 1. initialization
 from ._supporting_functions._initialization._neural_differential_equation import _formulate_network_model
+from ._supporting_functions._model_output._ModelOutput import _ModelOutput
 
 # 2. training preflight
 from ._supporting_functions._preflight._training_preflight import _preflight_parameters
@@ -35,7 +36,7 @@ from ._supporting_functions._evaluation._evaluate_diffeq import _evaluate_diffeq
 # --------------------------------------- #
 
 class _scDiffEq:
-    def __init__(self, diffusion=True, **kwargs):
+    def __init__(self, diffusion=True, run_name=False, device=False, outpath=False, **kwargs):
         
         """
         Main class for representation of partial differential equation akin to a Fokker-Planck / Drift-Diffusion
@@ -87,15 +88,25 @@ class _scDiffEq:
             step. I should find a more efficient way to do this eventually. It is run again in the next step to update 
             any parameters.
         """
+        if device:
+            self.device = device
+        else:
+            self.device=v.ut.set_device()
+            
+        if run_name:
+            self.run_name = run_name
+            
+            
+        self.ModelOuts = _ModelOutput(outpath)
         
         self.diffusion = diffusion
-        self.network_model, self.integration_function = _formulate_network_model(diffusion, **kwargs)
+        self.network_model, self.integration_function = _formulate_network_model(diffusion, self.device, **kwargs)
         self.hyper_parameters, self.ux_preferences, self._InvalidKwargs =  _preflight_parameters(self.network_model)
         self.TrainingMonitor = _TrainingMonitor(self.hyper_parameters.smoothing_momentum)
         model_instantiation_msg = "Neural DiffEq defined as:"
         print("{}\n\n {}".format(v.ut.format_pystring(model_instantiation_msg, ["BOLD", "CYAN"]), self.network_model))
         
-    def preflight(self, adata, overfit=False, **kwargs):
+    def preflight(self, adata, n_batches=50, overfit=False, use='X', time_key='time', **kwargs):
         
         """
         Ensure that all data is formatted properly for training and all necessary parameters 
@@ -113,34 +124,83 @@ class _scDiffEq:
         ------
         """
         
+        self.n_batches=n_batches
+        self.use = use
         self.overfit = overfit
+        self.time_key = time_key
         self.hyper_parameters, self.ux_preferences, self._InvalidKwargs =  _preflight_parameters(self.network_model, **kwargs)
-        self.adata, self.validation_status = _split_adata(adata, self.hyper_parameters, self.ux_preferences, self.overfit)       
+        self.adata, self.perform_validation = _split_adata(adata, self.hyper_parameters, self.ux_preferences, self.overfit)       
         
-    def learn(self, plot=True, valid_plot_savepath=False):
+    def learn(self, use=False, time_key=False, plot=True, **kwargs):
         
-#         try:
-#             self.TrainingMonitor
-#         except:
-#              self.TrainingMonitor = _TrainingMonitor(self.hyper_parameters.smoothing_momentum)
+        """
+        Parameters:
+        -----------
+        use
+        
+        time_key
+        
+        plot
+                
+        Returns:
+        --------
+        None: self.Learner is updated
+        
+        Notes:
+        ------
+        (1)
+        """
+        
+        self.hyper_parameters, self.ux_preferences, self._InvalidKwargs =  _preflight_parameters(self.network_model, **kwargs)
+            
+        if use:
+            self.use = use
+        if time_key:
+            self.time_key = time_key
             
         self.Learner = _learn_diffeq(self.adata, 
-                      self.network_model, 
-                      self.diffusion,
-                      self.integration_function,
-                      self.hyper_parameters, 
-                      self.TrainingMonitor,
-                      self.validation_status,
-                      plot,
-                      valid_plot_savepath,
-                     )
+                                     self.network_model,
+                                     self.n_batches,
+                                     self.device,
+                                     self.diffusion,
+                                     self.integration_function,
+                                     self.hyper_parameters, 
+                                     self.TrainingMonitor,
+                                     self.perform_validation,
+                                     self.use,
+                                     self.time_key,
+                                     plot,
+                                    )
         
-    def evaluate(self, plot=True, save_path=False):
+    def evaluate(self, use=False, time_key=False, plot_evaluation=True, plot_save_path=False):
         
-        if not self.validation_status:
+        """
+        Evaluate the instantiated model.
+        
+        Notes:
+        ------
+        (1) Model can be trained or untrained to run this function. 
+        
+        """
+                
+        if use:
+            self.use = use
+        if time_key:
+            self.time_key = time_key
+        
+        self.plot_save_path = plot_save_path
+        
+        if not self.perform_validation:
             self.adata.obs["test"] = True
         
-        self.Evaluator = _evaluate_diffeq(self, plot, save_path)
+        self.Evaluator = _evaluate_diffeq(self,
+                                          n_batches=self.n_batches,
+                                          device=self.device,
+                                          plot=plot_evaluation,
+                                          plot_save_path=plot_save_path,
+                                          use=self.use,
+                                          time_key=self.time_key,
+                                          plot_title_fontsize=self.ux_preferences.plot_title_fontsize)
         
     def reset(self):
 

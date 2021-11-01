@@ -95,8 +95,9 @@ class _Neural_Differential_Equation(torch.nn.Module):
     (3) Independent sizing of the hidden units for the drift and diffusion terms has not yet been implemented.
     """
 
-
-
+    noise_type = 'general'
+    sde_type = 'ito'
+    
     def __init__(
         self,
         diffusion=True,
@@ -105,7 +106,7 @@ class _Neural_Differential_Equation(torch.nn.Module):
         layers=2,
         nodes=5,
         activation_function=torch.nn.Tanh(),
-        batch_size=10,
+        batch_size=1,
         brownian_size=1,
         noise_type="general",
         sde_type="ito",
@@ -190,7 +191,7 @@ def _choose_integration_function(diffusion):
         return torchdiffeq.odeint
 
 
-def _formulate_network_model(diffusion, **kwargs):
+def _formulate_network_model(diffusion, device, **kwargs):
 
     """
     Construct (and correspondingly reduce() the drift-(diffusion) equation. Inherently tied to
@@ -215,7 +216,7 @@ def _formulate_network_model(diffusion, **kwargs):
 
     """
 
-    network_model = _Neural_Differential_Equation(diffusion, **kwargs)
+    network_model = _Neural_Differential_Equation(diffusion, **kwargs).to(device)
     if not diffusion:
         try:
             delattr(network_model.__class__, "g")
