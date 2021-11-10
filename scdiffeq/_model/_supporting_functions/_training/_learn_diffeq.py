@@ -53,13 +53,17 @@ def _learn_diffeq(adata,
         learner.calculate_loss()
         TrainingMonitor.update_time()
         TrainingMonitor.current_epoch += 1
+#         print("Elapsed training time: {}s | Training Loss: {}".format(TrainingMonitor.elapsed_time,
+#                                                                       TrainingMonitor.train_loss[-1]))
         
         if validation_status and (epoch_n % HyperParameters.validation_frequency == 0):
-#             print("Elapsed training time: {}s".format(TrainingMonitor.elapsed_time))
+            
 #             clear_output(wait=True)
             validator.batch_data(adata, n_batches)
             validator.forward_integrate()
             validator.calculate_loss()
+            print("Epoch: {} | Elapsed training time: {}s | Validation Loss: {}".format(epoch_n, TrainingMonitor.elapsed_time, 
+                                                                 TrainingMonitor.valid_loss[-1]))
         
     print("Total training time: {}s".format(TrainingMonitor.elapsed_time))
     return learner

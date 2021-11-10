@@ -77,22 +77,21 @@ class _Integrator:
         self.parallel = True
         
     def batch_data(self, adata, n_batches):
-        adata_group = adata[adata.obs[self.mode]]
-        
-        print("Grouped AnnData:", adata_group)
-        
+        adata_group = adata[adata.obs[self.mode]].copy()
+        adata_group.obs = adata_group.obs.reset_index(drop=True)
+                
         self.BatchAssignments = _create_batches(adata_group, n_batches)
         self.BatchedData = {}
-        
+            
         for batch in self.BatchAssignments.keys():
-            self.BatchedData[batch] = {}
-
-            self.BatchedData[batch]["adata"] = adata[
-                adata.obs.loc[
-                    adata.obs.trajectory.isin(self.BatchAssignments[batch])
+            self.BatchedData[batch] = {}            
+            self.BatchedData[batch]["adata"] = adata_group[
+                adata_group.obs.loc[
+                    adata_group.obs.trajectory.isin(self.BatchAssignments[batch])
                 ].index.astype(int)
             ]
-            
+            self.BatchedData[batch]["adata"].obs = self.BatchedData[batch]["adata"].obs.reset_index(drop=True)
+
             if self.BatchedData[batch]["adata"].shape[0] > 0:
                 
                 (
@@ -106,8 +105,7 @@ class _Integrator:
                                  self.use, 
                                  self.time_key
                 )
-                print(self.BatchedData[batch]["batch_size"])
-
+                
     def forward_integrate(self):
         
         
@@ -140,22 +138,18 @@ class _Integrator:
                 )
 
     def calculate_loss(self):
-        
-        self.BatchedLoss = {}
+                
+        self.loss = torch.zeros(len(self.BatchedData.keys()))
         
         for batch in self.BatchedData.keys():
             self.network_model.batch_size = self.BatchedData[batch]["batch_size"]
             
             self.BatchedPredictions[batch] = _reshape_compatible(self.BatchedPredictions[batch])
-            self.BatchedLoss[batch] = self.loss_function(
+            self.loss[batch] = self.loss_function(
                     self.BatchedPredictions[batch], self.BatchedData[batch]['y'].reshape(self.BatchedPredictions[batch].shape)
                 )
         
-        LossList = []
-        for batch, loss_val in self.BatchedLoss.items():
-            LossList.append(loss_val)
-        
-        self.loss = torch.Tensor(LossList).sum()
+        self.loss = self.loss.sum()
                     
         if self.mode == "valid":
             self.TrainingMonitor.update_loss(self.loss.item(), validation=True)

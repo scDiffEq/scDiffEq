@@ -46,23 +46,10 @@ def _fetch_data(adata, use="X", time_key="time"):
 
     return y, y0, t
 
-# def _get_n_by_training_group(adata, trajectory_key="trajectory"):
-
-#     GroupSizes = {}
-
-#     for group in ["train", "valid", "test"]:
-#         GroupSizes[group] = adata.obs.loc[adata.obs[group] == True][
-#             trajectory_key
-#         ].nunique()
-
-#     return GroupSizes
-
 def _fetch_adata(adata_group, network_model, device, use, time_key):
 
     """"""
     
-    print("Fetch step: {} {}".format(adata_group.shape[0], adata_group.obs[time_key].nunique()))
-
     batch_size = int(
         adata_group.shape[0] / adata_group.obs[time_key].nunique()
     )

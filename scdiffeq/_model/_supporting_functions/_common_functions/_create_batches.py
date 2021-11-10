@@ -12,15 +12,9 @@ def _create_batches(adata, n_batches):
     """
 
     n_trajs = adata.obs.trajectory.nunique()
-    if n_trajs % n_batches != 0:
-        n_batches_adj = n_batches + 1
-    else:
-        n_batches_adj = n_batches
-    # to fit in all trajectories (last batch is modulo of the divisor)
-
     batched = np.random.choice(
-        np.arange(n_trajs),
-        [n_batches_adj, np.floor(n_trajs / n_batches_adj).astype(int)],
+        adata.obs.trajectory.unique(),
+        [n_batches, np.floor(n_trajs / n_batches).astype(int)],
         replace=False,
     )
 
@@ -29,9 +23,6 @@ def _create_batches(adata, n_batches):
         BatchAssignments[batch] = batched[batch]
 
     if n_trajs % n_batches != 0:
-        if n_trajs % n_batches_adj != 0:
-            BatchAssignments[batch + 1] = np.setdiff1d(
-                np.arange(n_trajs), batched.flatten()
-            )
+        BatchAssignments[batch + 1] = np.setdiff1d(adata.obs.trajectory.unique(), batched.flatten())
 
     return BatchAssignments
