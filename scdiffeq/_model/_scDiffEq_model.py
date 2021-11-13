@@ -4,17 +4,13 @@ __module_name__ = "_scDiffEq_model.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
-import vintools as v
-
-# package imports #
-# --------------- #
-# import torch
 
 
 # local imports (5 steps / module groups) #
 # --------------------------------------- #
 
 from .._utilities._reset_scDiffEq import _reset_scDiffEq
+from .._utilities._format_string_printing_font import _format_string_printing_font
 
 # 1. initialization
 from ._supporting_functions._initialization._neural_differential_equation import _formulate_network_model
@@ -104,7 +100,7 @@ class _scDiffEq:
         self.hyper_parameters, self.ux_preferences, self._InvalidKwargs =  _preflight_parameters(self.network_model)
         self.TrainingMonitor = _TrainingMonitor(self.hyper_parameters.smoothing_momentum)
         model_instantiation_msg = "Neural DiffEq defined as:"
-        print("{}\n\n {}".format(v.ut.format_pystring(model_instantiation_msg, ["BOLD", "CYAN"]), self.network_model))
+        print("{}\n\n {}".format(_format_string_printing_font(model_instantiation_msg, ["BOLD", "CYAN"]), self.network_model))
         
     def preflight(self, adata, n_batches=50, overfit=False, use='X', time_key='time', **kwargs):
         

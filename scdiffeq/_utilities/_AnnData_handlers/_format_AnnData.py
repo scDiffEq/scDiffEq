@@ -1,4 +1,30 @@
-import vintools as v
+
+from .._format_string_printing_font import _format_string_printing_font
+
+def _check_if_scipy_sparse_mtx(array):
+
+    """
+    Checks if input array is 'coo' or 'csr' sparse matrix. Outputs string indicating status.
+    
+    Parameters:
+    -----------
+    array
+        dtype is ambiguous before running this function. 
+    Returns:
+    --------
+    scipy.sparse type information
+        ['csr','coo','not_scipy.sparse']
+    """
+
+    try:
+        if array.getformat() == "csr":
+            return "csr"
+
+        if array.getformat() == "coo":
+            return "coo"
+
+    except:
+        return "not_scipy.sparse"
 
 
 def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
@@ -23,20 +49,20 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
     array_is_not_status_list = ["\nadata.X is not:"]
 
     # check if adata.X is a scipy sparse matrix of some sort
-    scipy_status = v.sc.check_if_scipy_sparse_mtx(adata.X)
+    scipy_status = _check_if_scipy_sparse_mtx(adata.X)
     if scipy_status in ["coo", "csr"]:
         out_message = "scipy.sparse.{}_matrix".format(scipy_status)
         if not silent:
             print(
                 "adata.X was of dtype: {}.".format(
-                    v.ut.format_pystring(out_message, ["RED", "BOLD"])
+                    _format_string_printing_font(out_message, ["RED", "BOLD"])
                 )
             )
         adata.X = adata.X.toarray()
         if not silent:
             print(
                 "adata.X has been converted to dtype: {}.".format(
-                    v.ut.format_pystring("numpy.ndarray", ["RED", "BOLD"])
+                    _format_string_printing_font("numpy.ndarray", ["RED", "BOLD"])
                 )
             )
         return None
@@ -50,7 +76,7 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
             out_message = "adata.X"
             print(
                 "{} is already of dtype: numpy.ndarray".format(
-                    v.ut.format_pystring(out_message, ["RED", "BOLD"])
+                    _format_string_printing_font(out_message, ["RED", "BOLD"])
                 )
             )
     else:
@@ -60,7 +86,7 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
             if not silent:
                 print(
                     "{} converted to dtype: numpy.ndarray".format(
-                        v.ut.format_pystring(out_message, ["RED", "BOLD"])
+                        _format_string_printing_font(out_message, ["RED", "BOLD"])
                     )
                 )
         except:
@@ -71,7 +97,7 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
                 if i != 0:
                     if not silent:
                         print(
-                            "\n\t{}".format(v.ut.format_pystring(term, ["BOLD", "RED"]))
+                            "\n\t{}".format(_format_string_printing_font(term, ["BOLD", "RED"]))
                         )
                 else:
                     print(term)

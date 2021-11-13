@@ -1,0 +1,7 @@
+torch>=1.1.0
+numpy>=1.19.2
+pandas>=1.1.2
+torchdiffeq>=0.2.1
+nb-black>=1.0.7
+geomloss>=0.2.4
+torchsde

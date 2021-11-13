@@ -1,6 +1,5 @@
 
 import matplotlib.pyplot as plt
-import vintools as v
 import numpy as np
 import os
 

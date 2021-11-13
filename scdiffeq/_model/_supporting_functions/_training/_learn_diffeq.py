@@ -2,7 +2,7 @@
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
-from tqdm.notebook import tqdm as tqdm
+from tqdm import tqdm_notebook as tqdm
 from IPython.display import clear_output
 
 from ._validation import _validate

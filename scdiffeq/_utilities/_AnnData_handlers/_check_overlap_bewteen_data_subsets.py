@@ -1,8 +1,8 @@
 # package imports #
 # --------------- #
 import numpy as np
-import vintools as v
 
+from .._format_string_printing_font import _format_string_printing_font
 
 def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "test"]):
 
@@ -39,6 +39,6 @@ def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "
     n_overlap = np.array(overlaps).sum()
     print(
         "\nIdentified {} overlapping (leaking) datapoints.".format(
-            v.ut.format_pystring(str(n_overlap), ["BOLD", "RED"])
+            _format_string_printing_font(str(n_overlap), ["BOLD", "RED"])
         )
     )

@@ -1,6 +1,5 @@
 # package imports #
 # --------------- #
-import vintools as v
 import os
 
 # local imports #
@@ -23,6 +22,9 @@ from ._simulation_supporting_functions._plot_simulation import _plot
 # # import pre-defined state functions #
 # # ---------------------------------- #
 from . import _simulation_state_equations as _sim_eqns
+
+from ..._utilities._format_string_printing_font import _format_string_printing_font
+from ..._utilities._flexible_multilevel_mkdir import _flexible_multilevel_mkdir
 
 
 class _GenericSimulator:
@@ -51,12 +53,12 @@ class _GenericSimulator:
         ] = _sim_eqns._four_attractor_2d_state_equation
 
         if save_dir:
-            v.ut.mkdir_flex(save_dir)
-            v.ut.mkdir_flex(os.path.join(save_dir, "scdiffeq_outs"))
+            _flexible_multilevel_mkdir(save_dir)
+            _flexible_multilevel_mkdir(os.path.join(save_dir, "scdiffeq_outs"))
             simulation_figure_path = os.path.join(
                 save_dir, "scdiffeq_outs", "simulation_figures"
             )
-            v.ut.mkdir_flex(simulation_figure_path)
+            _flexible_multilevel_mkdir(simulation_figure_path)
             self.simulation_plot_fig_path = os.path.join(
                 simulation_figure_path, "Simulation.png"
             )
@@ -84,8 +86,8 @@ class _GenericSimulator:
 
         print(
             "{} {}".format(
-                v.ut.format_pystring("Initial conditions sampling function:", ["BOLD"]),
-                v.ut.format_pystring(func, ["BOLD", "RED"]),
+                _format_string_printing_font("Initial conditions sampling function:", ["BOLD"]),
+                _format_string_printing_font(func, ["BOLD", "RED"]),
             )
         )
 
@@ -106,13 +108,13 @@ class _GenericSimulator:
         )
         self.n_traj = len(self.initial_conditions)
 
-        if plot:
-            v.pl.hist2d_component_plot(
-                data=self.initial_conditions,
-                n_bins=n_bins,
-                suptitle="Initial conditions",
-                save_path=self.simulation_init_fig_path,
-            )
+#         if plot:
+#             v.pl.hist2d_component_plot(
+#                 data=self.initial_conditions,
+#                 n_bins=n_bins,
+#                 suptitle="Initial conditions",
+#                 save_path=self.simulation_init_fig_path,
+#             )
 
     def create_time_vector(self, time_span=10.0, n_samples=1000, noise_amplitude=0):
         self.time_vector = _create_time_vector(
@@ -129,7 +131,7 @@ class _GenericSimulator:
 
         assert state_function in self.StateFuncEquationDict.keys(), print(
             "\nPlease choose from: {}".format(
-                v.ut.format_pystring(self.StateFuncEquationDict.keys(), ["BOLD"])
+                _format_string_printing_font(self.StateFuncEquationDict.keys(), ["BOLD"])
             )
         )
 
@@ -176,10 +178,12 @@ class _GenericSimulator:
         )
 
     def plot_initial_conditions(self, n_bins=20, **kwargs):
+        
+        ...
 
-        v.pl.hist2d_component_plot(
-            data=self.initial_conditions,
-            n_bins=n_bins,
-            suptitle="Initial conditions",
-            save_path=self.simulation_init_fig_path,
-        )
+#         v.pl.hist2d_component_plot(
+#             data=self.initial_conditions,
+#             n_bins=n_bins,
+#             suptitle="Initial conditions",
+#             save_path=self.simulation_init_fig_path,
+#         )

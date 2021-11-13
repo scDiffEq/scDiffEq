@@ -7,13 +7,13 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # package imports #
 # --------------- #
-import vintools as v
 import time
 
 # local imports #
 # ------------- #
-from ._plot_evaluation import _plot_evaluation
+# from ._plot_evaluation import _plot_evaluation
 from .._common_functions._IntegratorModule import _Integrator
+from ...._utilities._format_string_printing_font import _format_string_printing_font
 
 
 def _evaluate_diffeq(DiffEq, n_batches, device, plot, plot_save_path, use, time_key, plot_title_fontsize):
@@ -49,13 +49,13 @@ def _evaluate_diffeq(DiffEq, n_batches, device, plot, plot_save_path, use, time_
     
     plot_start = time.time()
     print("Plotting.... ", end = "\r")
-    if plot:
-        _plot_evaluation(evaluator, 
-                         title_fontsize=plot_title_fontsize, 
-                         save_path=plot_save_path, 
-                         TrainingMonitor=DiffEq.TrainingMonitor)
+#     if plot:
+#         _plot_evaluation(evaluator, 
+#                          title_fontsize=plot_title_fontsize, 
+#                          save_path=plot_save_path, 
+#                          TrainingMonitor=DiffEq.TrainingMonitor)
     print("Plotting.... {:.3f}s elapsed.".format(time.time() - plot_start))
-    msg = v.ut.format_pystring("Test loss:", ['BOLD', 'CYAN'])
+    msg = _format_string_printing_font("Test loss:", ['BOLD', 'CYAN'])
     print("{} {:.6f}".format(msg, evaluator.test_loss))
     
 

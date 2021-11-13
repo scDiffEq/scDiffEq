@@ -1,0 +1,69 @@
+Metadata-Version: 2.1
+Name: scdiffeq
+Version: 0.0.0
+Summary: scdiffeq: single cell dynamics using neural ODEs and variations thereof.
+Home-page: https://github.com/pinellolab/sc-neural-ODEs
+Author: Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard
+Author-email: mvinyard@broadinstitute.org
+License: MIT
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >3.8.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# ![scdiffeq-logo](docs/imgs/scdiffeq.logo.svg)
+
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
+[![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+An analysis framework for modeling dynamical single-cell data with **stochastic neural differential equations**.
+
+## Install the development package:
+
+```
+git clone git@github.com:pinellolab/sc-neural-ODEs.git
+
+pip install -e .
+```
+
+## General workflow:
+
+**1**. Instantiate a neural differential equation compatible with scRNA-seq data formatted as [**`AnnData`**](https://anndata.readthedocs.io/en/stable/).
+```python
+import scdiffeq as sdq
+
+DiffEq = sdq.scDiffEq()
+```
+
+**2**. Pass **`adata`** to the model and define any "preflight" parameters. **`adata`** is split between **test** / **train** / **validation** sets.
+```python
+DiffEq.preflight(adata)
+```
+
+**3**. Forward integrate through the dataset to learn the dynamics governing the latent (or passed) variable.
+```python
+DiffEq.learn()
+```
+
+**4**. Evaluate the model with the partitioned test data.
+```python
+DiffEq.evaluate()
+```
+
+**5**. Compute and interpret the [quasi-potential landscape](https://royalsocietypublishing.org/doi/10.1098/rsif.2012.0434)<sup>**1**</sup>.
+```python
+DiffEq.compute_landscape()
+```
+
+---
+
+**References**:
+
+**1**. [Zhou Joseph Xu, _et al_](https://scholar.google.com/citations?user=cMBBPisAAAAJ&hl=en)., [Quasi-potential landscape in complex multi-stable systems](https://royalsocietypublishing.org/doi/10.1098/rsif.2012.0434?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed). *J. R. Soc. Interface*. (**2012**). [DOI](http://doi.org/10.1098/rsif.2012.0434).
+
+

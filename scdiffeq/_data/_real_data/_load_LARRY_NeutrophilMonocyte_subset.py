@@ -1,6 +1,7 @@
 import os, glob, torch, tqdm
 import numpy as np
-import vintools as v
+
+from ..._utilities._flexible_multilevel_mkdir import _flexible_multilevel_mkdir
 
 
 def _check_files(path):
@@ -17,7 +18,7 @@ def _report_differences(value, array):
 
 def _gdown(gdrive_file_id, output_data_dir):
 
-    v.ut.mkdir_flex(output_data_dir)
+    _flexible_multilevel_mkdir(output_data_dir)
     before_download = _check_files(output_data_dir)
     executable = "gdown https://drive.google.com/uc?id={} --output {}".format(
         gdrive_file_id, output_data_dir
@@ -82,7 +83,7 @@ def _load_LARRY_NeutrophilMonocyte_subset(cache_datadir=os.getcwd()):
         DataDict = _load_previously_cached_LARRY_NM_subset_data(cached_data_path)
 
     else:
-        v.ut.mkdir_flex(os.path.dirname(os.path.dirname(cached_data_path)))
+        _flexible_multilevel_mkdir(os.path.dirname(os.path.dirname(cached_data_path)))
         print("Downloading LARRY neutrophil/monocyte data subset...\n")
         print(
             "This will take ~15s depending on internet connection. Download only occurs once.\n"

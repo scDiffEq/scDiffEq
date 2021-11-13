@@ -1,8 +1,7 @@
 
-# package imports #
-# --------------- #
-import vintools as v
+# local imports #
 
+from ...._utilities._format_string_printing_font import _format_string_printing_font
 
 def _choose_loss_function(loss_function):
 
@@ -26,7 +25,7 @@ def _choose_loss_function(loss_function):
         flexibly return an optimizer.
     """
 
-    imported_torch_loss_func = v.ut.import_from_string(
+    imported_torch_loss_func = _format_string_printing_font(
         package="torch", module="nn", function=loss_function
     )()
 

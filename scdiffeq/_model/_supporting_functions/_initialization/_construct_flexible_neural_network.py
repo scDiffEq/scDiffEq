@@ -1,5 +1,6 @@
-# _compose_neural_network.py
-__module_name__ = "_compose_neural_network.py"
+
+# _construct_flexible_neural_network.py
+__module_name__ = "_construct_flexible_neural_network.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
@@ -8,8 +9,10 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # --------------- #
 import torch
 import torch.nn as nn
-import vintools as v
 from collections import OrderedDict
+
+
+from ...._utilities._format_string_printing_font import _format_string_printing_font
 
 
 def _enumerate_activation_functions(return_funcs=True, silent=True):

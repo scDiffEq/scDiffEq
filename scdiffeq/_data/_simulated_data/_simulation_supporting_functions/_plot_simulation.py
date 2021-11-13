@@ -1,7 +1,6 @@
 # package imports #
 # --------------- #
 import numpy as np
-import vintools as v
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
@@ -27,12 +26,12 @@ def _simulation_plot_presets(
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(1, 1, 1)
 
-    spines = v.pl.ax_spines(ax)
-    spines.set_color("grey")
-    spines.delete(select_spines=["top", "right"])
-    spines.set_position(position_type="axes", amount=-0.05)
+#     spines = v.pl.ax_spines(ax)
+#     spines.set_color("grey")
+#     spines.delete(select_spines=["top", "right"])
+#     spines.set_position(position_type="axes", amount=-0.05)
 
-    v.pl.set_minimal_ticks(ax, x, y)
+#     v.pl.set_minimal_ticks(ax, x, y)
 
     ax.set_title(plot_title, y=1.05, fontsize=title_fontsize)
     ax.set_xlabel("$x$", size=label_fontsize)

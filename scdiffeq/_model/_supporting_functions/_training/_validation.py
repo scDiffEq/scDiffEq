@@ -1,11 +1,10 @@
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-import vintools as v
 import os
 from IPython.display import display
 
-from ._plot_training_validation import _plot_validation_training_update
+# from ._plot_training_validation import _plot_validation_training_update
 from .._common_functions._IntegratorModule import _Integrator
 
 def _validate(adata, 

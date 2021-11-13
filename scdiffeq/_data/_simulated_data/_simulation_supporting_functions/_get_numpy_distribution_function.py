@@ -1,11 +1,10 @@
 # package imports #
 # --------------- #
-import vintools as v
 
 # local imports #
 # ------------- #
 from ._print_verbose_function_documentation import _print_verbose_function_documentation
-
+from ...._utilities._dynamical_import_of_function_from_string import _dynamical_import_of_function_from_string
 
 def _get_numpy_distribution_function(
     function, module="random", package="numpy", print_verbose_documentation=False

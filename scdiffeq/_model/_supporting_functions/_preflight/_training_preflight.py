@@ -10,7 +10,8 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 from ._choose_optimizer import _choose_optimizer
 from ._choose_loss_function import _choose_loss_function
 
-import vintools as v
+from ...._utilities._format_string_printing_font import _format_string_printing_font
+
 
 class Training_HyperParameters(object):
     def __init__(self, network_model):
@@ -46,8 +47,8 @@ class Training_HyperParameters(object):
         
         for parameter, value in ParamDict.items():
             self._update_parameter(parameter, value)
-            message1 = v.ut.format_pystring("Parameter adjusted: ", ["BOLD", "RED"])
-            message2 = v.ut.format_pystring("{} = {}\n".format(parameter, value), ["BOLD"])
+            message1 = _format_string_printing_font("Parameter adjusted: ", ["BOLD", "RED"])
+            message2 = _format_string_printing_font("{} = {}\n".format(parameter, value), ["BOLD"])
             print(message1, message2)
         
 class UX_Preferences(object):
@@ -69,8 +70,8 @@ class UX_Preferences(object):
         
         for preference, value in PreferencesDict.items():
             self.preference = value
-            message1 = v.ut.format_pystring("Preference added: ", ["BOLD", "CYAN"])
-            message2 = v.ut.format_pystring("{} = {}\n".format(preference, value), ["BOLD"])
+            message1 = _format_string_printing_font("Preference added: ", ["BOLD", "CYAN"])
+            message2 = _format_string_printing_font("{} = {}\n".format(preference, value), ["BOLD"])
             print(message1, message2)
                           
 def _catch_and_sort_preflight_kwargs(training_params, ux_preferences, **kwargs):
@@ -88,7 +89,7 @@ def _catch_and_sort_preflight_kwargs(training_params, ux_preferences, **kwargs):
         elif key in ux_preferences_keys:
             PreferencesUpdateDict[key] = value
         else:
-            message = v.ut.format_pystring("Keyword: {} not found.".format(key), ["BOLD", "RED"])
+            message = _format_string_printing_font("Keyword: {} not found.".format(key), ["BOLD", "RED"])
             print(
                 "{}\nKey-value argument pair stored as: {} : {} in DiffEq._InvalidKwargs.".format(
                     message, key, value
