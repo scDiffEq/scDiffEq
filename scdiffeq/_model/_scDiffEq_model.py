@@ -29,6 +29,10 @@ from ._supporting_functions._evaluation._evaluate_diffeq import _evaluate_diffeq
 
 # 5. analysis
 
+
+
+from .._utilities._torch_device import _set_device
+
 # --------------------------------------- #
 
 class _scDiffEq:
@@ -87,7 +91,7 @@ class _scDiffEq:
         if device:
             self.device = device
         else:
-            self.device=v.ut.set_device()
+            self.device=_set_device()
             
         if run_name:
             self.run_name = run_name

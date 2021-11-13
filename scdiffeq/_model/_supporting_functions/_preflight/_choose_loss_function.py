@@ -1,7 +1,7 @@
 
 # local imports #
 
-from ...._utilities._format_string_printing_font import _format_string_printing_font
+from ...._utilities._dynamical_import_of_function_from_string import _dynamical_import_of_function_from_string
 
 def _choose_loss_function(loss_function):
 
@@ -25,7 +25,7 @@ def _choose_loss_function(loss_function):
         flexibly return an optimizer.
     """
 
-    imported_torch_loss_func = _format_string_printing_font(
+    imported_torch_loss_func = _dynamical_import_of_function_from_string(
         package="torch", module="nn", function=loss_function
     )()
 

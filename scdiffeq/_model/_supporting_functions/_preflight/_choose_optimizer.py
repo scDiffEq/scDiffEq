@@ -4,7 +4,7 @@ __module_name__ = "_choose_optimizer.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
-from ...._utilities._format_string_printing_font import _format_string_printing_font
+from ...._utilities._dynamical_import_of_function_from_string import _dynamical_import_of_function_from_string
 
 def _choose_optimizer(network_model, optimizer_choice, learning_rate):
     
@@ -34,7 +34,7 @@ def _choose_optimizer(network_model, optimizer_choice, learning_rate):
         flexibly return an optimizer.
     """
 
-    optimizer_func = _format_string_printing_font("torch", "optim", optimizer_choice,)
+    optimizer_func = _dynamical_import_of_function_from_string("torch", "optim", optimizer_choice,)
     optimizer = optimizer_func(network_model.parameters(), lr=learning_rate)
 
     return optimizer
