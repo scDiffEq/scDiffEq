@@ -20,10 +20,8 @@ setup(
         "scdiffeq._data",
     ],
     install_requires=[
-        anndata,
-        sklearn,
-        matplotlib,
-        anndata,
+        "matplotlib",
+        "anndata",
         "torch>=1.1.0",
         "numpy>=1.19.2",
         "pandas>=1.1.2",
