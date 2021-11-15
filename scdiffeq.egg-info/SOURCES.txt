@@ -21,6 +21,9 @@ scdiffeq/_utilities/_Messages_Module.py
 scdiffeq/_utilities/__init__.py
 scdiffeq/_utilities/_add_noise.py
 scdiffeq/_utilities/_clear_training_monitor.py
+scdiffeq/_utilities/_dynamical_import_of_function_from_string.py
+scdiffeq/_utilities/_flexible_multilevel_mkdir.py
+scdiffeq/_utilities/_format_string_printing_font.py
 scdiffeq/_utilities/_general_utility_functions.py
 scdiffeq/_utilities/_kmeans.py
 scdiffeq/_utilities/_load_model.py
