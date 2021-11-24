@@ -39,6 +39,8 @@ from ._AnnData_handlers._split_AnnData_test_train_validation import (
     _split_test_train as split_test_train,
 )
 
+from ._flexible_multilevel_mkdir import _flexible_multilevel_mkdir as mkdir_flex
+
 
 # deprecated:
 # -----------

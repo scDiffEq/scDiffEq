@@ -17,6 +17,8 @@ from . import _plotting as pl
 from . import _utilities as ut
 
 
+from ._model._supporting_functions._training._OptimalTransportLoss import _OptimalTransportLoss as OTLoss
+
 # pandas defaults #
 # --------------- #
 import pandas as pd

@@ -123,7 +123,8 @@ class _Integrator:
                                                  self.BatchedData[batch]["y0"],
                                                  self.BatchedData[batch]["t"],
                                                  self.device,
-            )
+                )
+                # we need to do loss.backwards() here. we need to think about how to restructure this module. 
         else:
             with torch.no_grad():
                 self.BatchedPredictions = {}

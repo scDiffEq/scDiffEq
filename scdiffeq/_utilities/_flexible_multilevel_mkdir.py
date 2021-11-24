@@ -1,6 +1,6 @@
 
-# _flexible_mkdir.py
-__module_name__ = "_flexible_mkdir.py"
+# _flexible_multilevel_mkdir.py
+__module_name__ = "_flexible_multilevel_mkdir.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
