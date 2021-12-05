@@ -7,3 +7,5 @@ from ._simulated_data._GenericSimulator import _GenericSimulator as GenericSimul
 from ._real_data._load_LARRY_NeutrophilMonocyte_subset import (
     _load_LARRY_NeutrophilMonocyte_subset as LARRY_NM_subset,
 )
+
+from ._real_data._Weinreb2020Predictions import _Weinreb2020Predictions as Weinreb2020Predictions
