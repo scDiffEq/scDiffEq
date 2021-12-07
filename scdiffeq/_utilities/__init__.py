@@ -3,8 +3,8 @@
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
-from ._torch_device import _set_device as set_device
-from ._torch_device import _torch_device as torch_device
+# from ._torch_device import _set_device as set_device
+# from ._torch_device import _torch_device as torch_device
 
 from ._subsetting_functions import _group_adata_subset as group_adata_subset
 from ._subsetting_functions import (
@@ -39,7 +39,7 @@ from ._AnnData_handlers._split_AnnData_test_train_validation import (
     _split_test_train as split_test_train,
 )
 
-from ._flexible_multilevel_mkdir import _flexible_multilevel_mkdir as mkdir_flex
+# from ._flexible_multilevel_mkdir import _flexible_multilevel_mkdir as mkdir_flex
 
 
 # deprecated:
