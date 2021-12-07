@@ -19,8 +19,8 @@ The authors of the PRESCIENT model provided several notebooks for replicating th
 
 #### (planned) Visualized results
 
-* Components of a main figure focused on LARRY
-* Supplementary figure focused on the interpolation task
+**Supplementary figure focused on the interpolation task**
+![interpolation.suppl.fig](figures/larry.interpolation.suppfig.png)
 
 ### 2. Fate prediction task
 
