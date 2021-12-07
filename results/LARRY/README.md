@@ -2,6 +2,9 @@
 
 Planned results will occupy 1-2 main figures and 2 or more supplementary figures. 
 
+**Main figure**.
+[LARRY.mainfigure](/figures/LARRY.mainfigure.png)
+
 ### 1. Interpolation Task
 
 We used the framework proposed alongside the publication of the LARRY dataset, which has also been used to evaluate PRESCIENT, which has an overlapping goal and framework for modelling single-cell data to the method we propse here. 
