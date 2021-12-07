@@ -3,7 +3,7 @@
 Planned results will occupy 1-2 main figures and 2 or more supplementary figures. 
 
 **Main figure**.
-[LARRY.mainfigure](/figures/LARRY.mainfigure.png)
+![LARRY.mainfigure](figures/LARRY.mainfigure.png)
 
 ### 1. Interpolation Task
 
