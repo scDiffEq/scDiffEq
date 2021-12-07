@@ -1,8 +1,9 @@
 ## LARRY dataset-derived experiments
 
-Planned results will occupy 1-2 main figures and 2 or more supplementary figures. 
+Planned results will occupy 1-2 main figures. The first planned main figure will focus on a the application of the model as a black-box. The second figure will attempt to explore the ability of the model as a means to extract network insights from the data. For each task, there will be 1-2 supplementary figures to better describe the results of each group of experiments. 
 
-**Main figure**.
+**Main figure 1. black box dynamical modelling of lineage tracing data**.
+
 ![LARRY.mainfigure](figures/LARRY.mainfigure.png)
 
 ### 1. Interpolation Task
