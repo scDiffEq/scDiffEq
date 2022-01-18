@@ -1,5 +1,5 @@
 
-from .._format_string_printing_font import _format_string_printing_font
+import licorice
 
 def _check_if_scipy_sparse_mtx(array):
 
@@ -55,14 +55,14 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
         if not silent:
             print(
                 "adata.X was of dtype: {}.".format(
-                    _format_string_printing_font(out_message, ["RED", "BOLD"])
+                    licorice.font_format(out_message, ["RED", "BOLD"])
                 )
             )
         adata.X = adata.X.toarray()
         if not silent:
             print(
                 "adata.X has been converted to dtype: {}.".format(
-                    _format_string_printing_font("numpy.ndarray", ["RED", "BOLD"])
+                    licorice.font_format("numpy.ndarray", ["RED", "BOLD"])
                 )
             )
         return None
@@ -76,7 +76,7 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
             out_message = "adata.X"
             print(
                 "{} is already of dtype: numpy.ndarray".format(
-                    _format_string_printing_font(out_message, ["RED", "BOLD"])
+                    licorice.font_format(out_message, ["RED", "BOLD"])
                 )
             )
     else:
@@ -86,7 +86,7 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
             if not silent:
                 print(
                     "{} converted to dtype: numpy.ndarray".format(
-                        _format_string_printing_font(out_message, ["RED", "BOLD"])
+                        licorice.font_format(out_message, ["RED", "BOLD"])
                     )
                 )
         except:
@@ -97,7 +97,7 @@ def _format_AnnData_mtx_as_numpy_array(adata, silent=False):
                 if i != 0:
                     if not silent:
                         print(
-                            "\n\t{}".format(_format_string_printing_font(term, ["BOLD", "RED"]))
+                            "\n\t{}".format(licorice.font_format(term, ["BOLD", "RED"]))
                         )
                 else:
                     print(term)

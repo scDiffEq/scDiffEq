@@ -1,5 +1,5 @@
 
-from ...._utilities._format_string_printing_font import _format_string_printing_font
+import licorice
 
 def _print_verbose_function_documentation(imported_function, package, module, function):
 
@@ -37,8 +37,8 @@ def _print_verbose_function_documentation(imported_function, package, module, fu
 
     print(
         "{} {}".format(
-            _format_string_printing_font(preamble, ["BOLD",],),
-            _format_string_printing_font(function_name, ["BOLD", "RED"]),
+            licorice.font_format(preamble, ["BOLD",],),
+            licorice.font_format(function_name, ["BOLD", "RED"]),
         )
     )
     print(imported_function.__doc__)

@@ -1,8 +1,7 @@
 # package imports #
 # --------------- #
+import licorice
 import numpy as np
-
-from .._format_string_printing_font import _format_string_printing_font
 
 def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "test"]):
 
@@ -39,6 +38,6 @@ def _check_overlap_bewteen_data_subsets(adata, subsets=["train", "validation", "
     n_overlap = np.array(overlaps).sum()
     print(
         "\nIdentified {} overlapping (leaking) datapoints.".format(
-            _format_string_printing_font(str(n_overlap), ["BOLD", "RED"])
+            licorice.font_format(str(n_overlap), ["BOLD", "RED"])
         )
     )

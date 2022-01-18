@@ -1,9 +1,9 @@
-matplotlib
-anndata
+matplotlib>=3.5.0
+anndata>=0.7.8
 torch>=1.1.0
-numpy>=1.19.2
-pandas>=1.1.2
-torchdiffeq>=0.2.1
-nb-black>=1.0.7
+pandas>=1.3.5
 geomloss>=0.2.4
-torchsde
+torchdiffeq>=0.2.1
+torchsde>=0.2.5
+umap-learn>=0.5.2
+scikit-learn>=1.0.2

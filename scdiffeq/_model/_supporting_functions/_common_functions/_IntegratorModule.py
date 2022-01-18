@@ -7,6 +7,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu"])
 
 # package imports #
 # --------------- #
+import licorice
 import torch
 
 
@@ -16,7 +17,6 @@ from ._fetch_data_from_adata import _fetch_adata
 from ._reshape_compatible import _reshape_compatible
 from ._create_batches import _create_batches
 
-from ...._utilities._format_string_printing_font import _format_string_printing_font
 
 def _forward_integrate(integration_function, parallel, diffusion, network_model, y0, t, device):
 
@@ -29,7 +29,7 @@ def _forward_integrate(integration_function, parallel, diffusion, network_model,
     elif parallel and diffusion:
         pred_y = integration_function(network_model, y0, t).to(device)
     else:
-        print(_format_string_printing_font("Invalid network_model passed.", ["BOLD", "RED"]))
+        print(licorice.font_format("Invalid network_model passed.", ["BOLD", "RED"]))
 
     return pred_y
 

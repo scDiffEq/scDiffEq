@@ -7,13 +7,10 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # package imports #
 # --------------- #
+import licorice
 import torch
 import torch.nn as nn
 from collections import OrderedDict
-
-
-from ...._utilities._format_string_printing_font import _format_string_printing_font
-
 
 def _enumerate_activation_functions(return_funcs=True, silent=True):
 
@@ -47,7 +44,7 @@ def _enumerate_activation_functions(return_funcs=True, silent=True):
     activ_funcs = nn.modules.activation.__dir__()
     if not silent:
         print(
-            v.ut.format_pystring("Available activation functions:\n", ["BOLD", "RED"])
+            licorice.font_format("Available activation functions:\n", ["BOLD", "RED"])
         )
 
     returned_activation_functions = []

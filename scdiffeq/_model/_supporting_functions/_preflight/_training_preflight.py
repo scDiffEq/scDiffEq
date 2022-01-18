@@ -5,13 +5,12 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
+import licorice
+
 # local imports #
 # ------------- #
 from ._choose_optimizer import _choose_optimizer
 from ._choose_loss_function import _choose_loss_function
-
-from ...._utilities._format_string_printing_font import _format_string_printing_font
-
 
 class Training_HyperParameters(object):
     def __init__(self, network_model):
@@ -47,8 +46,8 @@ class Training_HyperParameters(object):
         
         for parameter, value in ParamDict.items():
             self._update_parameter(parameter, value)
-            message1 = _format_string_printing_font("Parameter adjusted: ", ["BOLD", "RED"])
-            message2 = _format_string_printing_font("{} = {}\n".format(parameter, value), ["BOLD"])
+            message1 = licorice.font_format("Parameter adjusted: ", ["BOLD", "RED"])
+            message2 = licorice.font_format("{} = {}\n".format(parameter, value), ["BOLD"])
             print(message1, message2)
         
 class UX_Preferences(object):
@@ -70,8 +69,8 @@ class UX_Preferences(object):
         
         for preference, value in PreferencesDict.items():
             self.preference = value
-            message1 = _format_string_printing_font("Preference added: ", ["BOLD", "CYAN"])
-            message2 = _format_string_printing_font("{} = {}\n".format(preference, value), ["BOLD"])
+            message1 = licorice.font_format("Preference added: ", ["BOLD", "CYAN"])
+            message2 = licorice.font_format("{} = {}\n".format(preference, value), ["BOLD"])
             print(message1, message2)
                           
 def _catch_and_sort_preflight_kwargs(training_params, ux_preferences, **kwargs):
@@ -89,7 +88,7 @@ def _catch_and_sort_preflight_kwargs(training_params, ux_preferences, **kwargs):
         elif key in ux_preferences_keys:
             PreferencesUpdateDict[key] = value
         else:
-            message = _format_string_printing_font("Keyword: {} not found.".format(key), ["BOLD", "RED"])
+            message = licorice.font_format("Keyword: {} not found.".format(key), ["BOLD", "RED"])
             print(
                 "{}\nKey-value argument pair stored as: {} : {} in DiffEq._InvalidKwargs.".format(
                     message, key, value

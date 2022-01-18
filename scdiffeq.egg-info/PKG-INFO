@@ -8,14 +8,14 @@ Author-email: mvinyard@broadinstitute.org
 License: MIT
 Platform: UNKNOWN
 Classifier: Development Status :: 2 - Pre-Alpha
-Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.7
 Classifier: Intended Audience :: Science/Research
 Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
-Requires-Python: >3.8.0
+Requires-Python: >3.7.0
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
-# ![scdiffeq-logo](docs/imgs/scdiffeq.logo.svg)
+# ![scdiffeq-logo](docs/images/scdiffeq.logo.svg)
 
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
 [![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)

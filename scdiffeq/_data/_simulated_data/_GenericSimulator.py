@@ -1,5 +1,7 @@
 # package imports #
 # --------------- #
+import licorice
+import pyrequisites as pyrex
 import os
 
 # local imports #
@@ -22,9 +24,6 @@ from ._simulation_supporting_functions._plot_simulation import _plot
 # # import pre-defined state functions #
 # # ---------------------------------- #
 from . import _simulation_state_equations as _sim_eqns
-
-from ..._utilities._format_string_printing_font import _format_string_printing_font
-from ..._utilities._flexible_multilevel_mkdir import _flexible_multilevel_mkdir
 
 
 class _GenericSimulator:
@@ -53,12 +52,12 @@ class _GenericSimulator:
         ] = _sim_eqns._four_attractor_2d_state_equation
 
         if save_dir:
-            _flexible_multilevel_mkdir(save_dir)
-            _flexible_multilevel_mkdir(os.path.join(save_dir, "scdiffeq_outs"))
+            pyrex.mkdir_flex(save_dir)
+            pyrex.mkdir_flex(os.path.join(save_dir, "scdiffeq_outs"))
             simulation_figure_path = os.path.join(
                 save_dir, "scdiffeq_outs", "simulation_figures"
             )
-            _flexible_multilevel_mkdir(simulation_figure_path)
+            pyrex.mkdir_flex(simulation_figure_path)
             self.simulation_plot_fig_path = os.path.join(
                 simulation_figure_path, "Simulation.png"
             )
@@ -86,8 +85,8 @@ class _GenericSimulator:
 
         print(
             "{} {}".format(
-                _format_string_printing_font("Initial conditions sampling function:", ["BOLD"]),
-                _format_string_printing_font(func, ["BOLD", "RED"]),
+                licorice.font_format("Initial conditions sampling function:", ["BOLD"]),
+                licorice.font_format(func, ["BOLD", "RED"]),
             )
         )
 
@@ -131,7 +130,7 @@ class _GenericSimulator:
 
         assert state_function in self.StateFuncEquationDict.keys(), print(
             "\nPlease choose from: {}".format(
-                _format_string_printing_font(self.StateFuncEquationDict.keys(), ["BOLD"])
+                licorice.font_format(self.StateFuncEquationDict.keys(), ["BOLD"])
             )
         )
 

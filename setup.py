@@ -23,10 +23,12 @@ setup(
         "matplotlib>=3.5.0",
         "anndata>=0.7.8",
         "torch>=1.1.0",
-        "pandas>=1.1.2",
+        "pandas>=1.3.5",
         "geomloss>=0.2.4",
         "torchdiffeq>=0.2.1",
         "torchsde>=0.2.5",
+	"umap-learn>=0.5.2",
+	"scikit-learn>=1.0.2",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
