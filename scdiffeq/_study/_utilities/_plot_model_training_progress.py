@@ -2,7 +2,7 @@ import os
 import vinplots
 import pandas as pd
 
-from ._get_best_model_path import _get_best_model_path
+from ._get_best_model import _get_best_model
 
 def _build_model_training_plot():
 

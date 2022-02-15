@@ -35,7 +35,7 @@ from .._utilities._torch_device import _set_device
 # --------------------------------------- #
 
 class _scDiffEq:
-    def __init__(self, diffusion=True, run_name=False, device=False, outpath=False, **kwargs):
+    def __init__(self, diffusion=True, run_name=False, device=False, outpath=False, silent=True, **kwargs):
         
         """
         Main class for representation of partial differential equation akin to a Fokker-Planck / Drift-Diffusion
@@ -102,8 +102,9 @@ class _scDiffEq:
         self.network_model, self.integration_function = _formulate_network_model(diffusion, self.device, **kwargs)
         self.hyper_parameters, self.ux_preferences, self._InvalidKwargs =  _preflight_parameters(self.network_model)
         self.TrainingMonitor = _TrainingMonitor(self.hyper_parameters.smoothing_momentum)
-        model_instantiation_msg = "Neural DiffEq defined as:"
-        print("{}\n\n {}".format(licorice.font_format(model_instantiation_msg, ["BOLD", "CYAN"]), self.network_model))
+        if not silent:
+            model_instantiation_msg = "Neural DiffEq defined as:"
+            print("{}\n\n {}".format(licorice.font_format(model_instantiation_msg, ["BOLD", "CYAN"]), self.network_model))
         
     def preflight(self, adata, n_batches=50, overfit=False, use='X', time_key='time', **kwargs):
         

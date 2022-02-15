@@ -16,7 +16,7 @@ from . import _tools as tl
 from . import _plotting as pl
 from . import _utilities as ut
 from . import _study as study
-
+from . import _io as io
 
 from ._model._supporting_functions._training._OptimalTransportLoss import _OptimalTransportLoss as OTLoss
 

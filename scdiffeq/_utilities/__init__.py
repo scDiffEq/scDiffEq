@@ -3,6 +3,9 @@
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
+
+from ._count_network_parameters import _count_network_parameters as count_network_parameters
+
 # from ._torch_device import _set_device as set_device
 # from ._torch_device import _torch_device as torch_device
 

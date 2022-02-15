@@ -33,11 +33,12 @@ class _OptimalTransportLoss():
         LF(a, b)
     """
     
-    def __init__(self):
+    def __init__(self, device):
         
         """"""
         
-        self.device = _set_device()
+        self.device=device
+#         self.device = _set_device()
         self._OT_solver = SamplesLoss("sinkhorn", debias=True)
         
     def __call__(self, vector_a, vector_b, weight_a=None, weight_b=None, requires_grad=True):
