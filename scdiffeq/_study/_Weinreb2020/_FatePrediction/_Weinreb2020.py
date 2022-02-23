@@ -86,7 +86,7 @@ class _Weinreb2020:
         pca_components=50,
         umap_components=2,
         umap_metric="euclidean",
-        umap_verbosity=True,
+        umap_verbosity=False,
         plot=True,
         figsize=1.5,
         plot_savedir="./",

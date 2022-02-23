@@ -15,7 +15,7 @@ BasenameDict['WOT_predictions'] = "WOT_predictions.npy"
 BasenameDict['early_cells'] = "early_cells.npy"
 BasenameDict['heldout_mask'] = "heldout_mask.npy"
 BasenameDict['clonal_fate_matrix'] = "clonal_fate_matrix.npy"
-
+BasenameDict['outliers'] = "outliers_in_SPRING_plot.npy"
 
 def _calculate_percent_neutrophil_monocyte(
     adata,
