@@ -2,8 +2,7 @@
 import numpy as np
 import os
 import pandas as pd
-import pyrequisites as pyrex
-
+import pydk
 
 BasenameDict = {}
 BasenameDict['Time point'] = "timepoints.npy"
@@ -86,8 +85,8 @@ def _adata_obs_loc(adata, column, criteria):
     
     """only considers == criteria, not yet .isin() or other similar examples."""
     
-    cols = pyrex.to_list(column)
-    crit = pyrex.to_list(criteria)
+    cols = pydk.to_list(column)
+    crit = pydk.to_list(criteria)
     
     assert len(cols) == len(crit), print("passed columns and criteria must be of equal length!")
     
@@ -167,13 +166,13 @@ def _annotate_adata_with_Weinreb2020_Fig5_predictions(adata):
     
     pass_list = ['clonal_fates', 'clonal_fate_matrix', '_BasenameDict']
     
-    for attr_i in pyrex.class_attributes(Fig5_Annotations):
+    for attr_i in pydk.class_attributes(Fig5_Annotations):
         attribute = Fig5_Annotations.__getattribute__(attr_i)
         if len(attribute) == adata.shape[0]:
             adata.obs[attr_i] = attribute
             pass_list.append(attr_i)
             
-    for attr_i in pyrex.class_attributes(Fig5_Annotations):
+    for attr_i in pydk.class_attributes(Fig5_Annotations):
         
         if attr_i in pass_list:
             continue

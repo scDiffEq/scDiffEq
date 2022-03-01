@@ -28,8 +28,8 @@ from ._load_model import _load_model as load_model
 
 from ._read_csv_to_anndata import _read_csv_to_anndata as read_csv_to_adata
 
-from ._kmeans import _get_kmeans_inertia as get_kmeans_inertia
-from ._kmeans import _kmeans as kmeans
+# from ._kmeans import _get_kmeans_inertia as get_kmeans_inertia
+# from ._kmeans import _kmeans as kmeans
 
 from ._add_noise import _add_noise as add_noise
 

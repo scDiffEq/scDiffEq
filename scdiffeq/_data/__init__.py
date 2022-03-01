@@ -3,7 +3,5 @@
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
-from ._simulated._GenericSimulator import _GenericSimulator as GenericSimulator
-
-from ._measured._Weinreb2020._Weinreb2020_Figure5_Annotations import _Weinreb2020_Figure5_Annotations
-from ._measured._Weinreb2020._load_Weinreb2020_preprocessed import _load_Weinreb2020_preprocessed as Weinreb2020_preprocessed
+from ._Weinreb2020._Weinreb2020_DatasetModule import _Weinreb2020_Dataset as Weinreb2020_Dataset
+from ._Weinreb2020._Weinreb2020_DatasetModule import _load_preprocessed_Weinreb2020_Dataset as Weinreb2020_preprocessed
