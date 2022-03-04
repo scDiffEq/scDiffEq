@@ -3,6 +3,7 @@
 # --------------- #
 import anndata as a
 import cell_tools as cell
+import matplotlib.pyplot as plt
 import os
 
 
@@ -92,7 +93,7 @@ class _Weinreb2020_Dataset:
     
     def annotate_predictions(self):
         
-        _annotate_adata_with_Weinreb2020_Fig5_predictions(self._adata)
+        self._adata = _annotate_adata_with_Weinreb2020_Fig5_predictions(self._adata)
     
     class Preprocessing:
 
@@ -213,7 +214,7 @@ def _load_preprocessed_Weinreb2020_Dataset(
     Weinreb2020.annotate_predictions()
     
     if verbose:
-        print("\n".format(Weinreb2020._adata))
+        print("\n{}".format(Weinreb2020._adata))
     
     return Weinreb2020._adata
     

@@ -76,7 +76,7 @@ def _calculate_percent_neutrophil_monocyte(
         adata.obs[column] = _tmp_vector
 
     has_fate_mask_idx = adata.obs.loc[adata.obs["has_fate_mask"] == 1].index.astype(int)
-    _tmp_vector = np.full(len(adata), -1)
+    _tmp_vector = np.full(len(adata), -1, dtype=float)
     _tmp_vector[has_fate_mask_idx] = neu_vs_mo_percent
     adata.obs["neu_vs_mo_percent"] = _tmp_vector
     

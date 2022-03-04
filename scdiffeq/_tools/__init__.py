@@ -24,6 +24,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # from ._train_model import _train_model
 
 from ._general_tools._pca._pca import _pca as pca
+from ._VAE import _VAE as VAE
 
 # from ._evaluate import _evaluate_test_traj as evaluate
 

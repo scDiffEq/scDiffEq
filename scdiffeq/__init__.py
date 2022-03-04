@@ -11,6 +11,7 @@ from ._model._scDiffEq_model import _scDiffEq as scDiffEq
 
 # import sub-packages #
 # ------------------- #
+from . import _clonal as clonal
 from . import _data as data
 from . import _tools as tl
 from . import _plotting as pl
