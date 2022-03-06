@@ -10,6 +10,7 @@ import os
 # local imports #
 # ------------- #
 from ._io._download_preprocessed_data import _download_preprocessed_anndata_from_GCP
+from ._io._download_preprocessed_data import _list_downloaded_files
 from ._io._read_downloaded_data import _read_downloaded_data
 
 from ._analyses._Weinreb2020_Figure5_Annotations import _annotate_adata_with_Weinreb2020_Fig5_predictions
@@ -25,7 +26,7 @@ from ._preprocessing._ClonalAnnData import _ClonalAnnData
 class _Weinreb2020_Dataset:
     def __init__(
         self,
-        destination_path="./scdiffeq_data/",
+        destination_path="./scdiffeq_data/Weinreb2020_preprocessed/",
         preprocessed_data_bucket="scdiffeq-data/Weinreb2020/preprocessed_adata/*",
         verbose=True,
     ):
@@ -69,20 +70,31 @@ class _Weinreb2020_Dataset:
         self._CytoTRACE_df_path = os.path.join(
             self._destination_path, "LARRY.CytoTRACE.DataFrame.csv"
         )
+        self._just_downloaded = False
 
     def download_preprocessed(self, force=False):
-
+        
+        self._force = force
         self._downloaded_files = _download_preprocessed_anndata_from_GCP(
             self._destination_path, self._preprocessed_data_bucket, force, self._verbose
         )
+        self._just_downloaded = True
 
-    def read_preprocessed(self, return_adata=False):
-
+    def read_preprocessed(self, return_adata=False, force_redownload=False):
+        
+        self._force = force_redownload
+        
+        # this step at least lists what's available in case something goes wrong in the next step.
+        if not self._downloaded_files:
+            self._downloaded_files = _list_downloaded_files(self._destination_path,
+                                                        self._verbose,
+                                                        after_download=self._just_downloaded)
+        
         if not self._downloaded_files:
             self._downloaded_files = _download_preprocessed_anndata_from_GCP(
                 self._destination_path,
                 self._preprocessed_data_bucket,
-                force,
+                self._force,
                 self._verbose,
             )
         self._adata = _read_downloaded_data(
@@ -198,7 +210,7 @@ class _Weinreb2020_Dataset:
 
 
 def _load_preprocessed_Weinreb2020_Dataset(
-    destination_path="./scdiffeq_data/",
+    destination_path="./scdiffeq_data/Weinreb2020_preprocessed/",
     preprocessed_data_bucket="scdiffeq-data/Weinreb2020/preprocessed_adata/*",
     force_redownload=False,
     verbose=True,

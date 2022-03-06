@@ -1,10 +1,16 @@
+
+import adata_sdk
 from collections import OrderedDict
 from IPython import display
 import matplotlib.pyplot as plt
+import licorice
 import numpy as np
+import os
 import torch
 import umap
 import vinplots
+import pydk
+from .._utilities._save_torch_model import _save_torch_model
 
 def _power_space(start, stop, n, power):
     
@@ -56,7 +62,7 @@ def live_loss_plot(loss_vals):
     ax.hlines(y=0, xmin=0, xmax=len(loss_vals), ls="--", color="dimgrey", alpha=0.5)
     plt.show()
     
-def _epoch(self):
+def _epoch(self, plot, outpath, verbose):
     
     self._optimizer.zero_grad()
     X_latent = self._encoder(self._X.to(self._device))
@@ -65,11 +71,15 @@ def _epoch(self):
     self._loss_tracker.append(loss.item())
     loss.backward()
     self._optimizer.step()
-    live_loss_plot(self._loss_tracker)
+    if plot:
+        live_loss_plot(self._loss_tracker)
     
     if min(self._loss_tracker) == self._loss_tracker[-1]:
         self._X_latent = X_latent
         self._best_epoch = len(self._loss_tracker)
+        _save_VAE(self._encoder, self._decoder, outpath, verbose)
+        
+    self._epoch_counter += 1
         
 
 def _embed(adata, X_latent):
@@ -81,7 +91,7 @@ def _embed(adata, X_latent):
     
     return adata
     
-def _build_plot(figsize=1.5):
+def _build_plot(figsize=1.7):
     
     fig = vinplots.Plot()
     fig.construct(nplots=1, ncols=1, figsize=figsize)
@@ -92,30 +102,60 @@ def _build_plot(figsize=1.5):
     
     return fig, ax
 
-def _plot_umap_embedding(adata):
+def _plot_umap_embedding(adata, groupby="Annotation"):
     
     """"""
-    c = vinplots.palettes.Weinreb2020()
-    fig, ax = _build_plot(figsize=1.5)
-    grouped_by = adata.obs.groupby('Annotation')
+    
+    fig, ax = _build_plot(figsize=1.7)
+    grouped_by = adata.obs.groupby(groupby)
     umap = adata.obsm['X_vae_umap']
-
-    for annot in c.keys():
-        try:
-            annot_df = grouped_by.get_group(annot)
-            idx = annot_df.index.astype(int)
-            if annot == 'undiff':
+    cmap = vinplots.palettes.Weinreb2020()
+    c = list(cmap.values())
+    if groupby == "Annotation":
+        iterable = list(cmap.keys())
+    else:
+        iterable = list(grouped_by.groups.keys())
+        
+    for n, group in enumerate(iterable):
+        group_df = grouped_by.get_group(group)
+        idx = group_df.index.astype(int)
+        if type(group) is int or  type(group) is float:
+            if group == min(iterable):
                 zorder = 0
             else:
-                zorder= 10
-            ax.scatter(umap[idx,0], umap[idx,1], label=annot, color=c[annot], zorder=zorder, s=5)
-        except:
-            continue
+                zorder = 10
+        elif group == 'undiff' or group == min(iterable):
+            zorder = 0
+        else:
+            zorder= 10
+        ax.scatter(umap[idx,0], umap[idx,1], label=group, color=c[n], zorder=zorder, s=5)
+    
     plt.legend(edgecolor='white', markerscale=2)
     
+def _save_VAE(encoder, decoder, outpath, verbose=False):
+    
+    outdir = os.path.join(outpath, "VAE")
+    pydk.mkdir_flex(outdir)
+    encoder_outpath = os.path.join(outdir, "best.encoder")
+    decoder_outpath = os.path.join(outdir, "best.decoder")
+    
+    if verbose:
+        # not a very helpful message until the end.
+        msg = licorice.font_format("Saving to", ['BOLD'])
+        print("{}: {}".format(msg, outdir))
+        print("\t   {}".format(encoder_outpath))
+        print("\t   {}".format(decoder_outpath))
+    
+    _save_torch_model(encoder, encoder_outpath)
+    _save_torch_model(decoder, decoder_outpath)
+    
+    return encoder_outpath, decoder_outpath
+
 class _VAE:
-    def __init__(self, adata, n_latent_dims=20, n_layers=5, power=2, dropout=0.1, device=0):
+    def __init__(self, adata, n_latent_dims=20, n_layers=5, power=2, dropout=0.1, device=0, lr=1e-3):
         
+        self._lr = lr
+        self._epoch_counter = 0
         self._X = torch.Tensor(adata.X.toarray())
         self._adata = adata
         self._n_features = self._adata.shape[1]
@@ -129,23 +169,37 @@ class _VAE:
         self._decoder.to(self._device)
         self._LossFunc = torch.nn.MSELoss()
         self._model_params = list(self._encoder.parameters()) + list(self._decoder.parameters())
-        self._optimizer = torch.optim.Adam(self._model_params, lr=0.001)
+        self._optimizer = torch.optim.Adam(self._model_params, lr=self._lr)
         self._loss_tracker = []
         
-    def learn(self, n_epochs=200):
+    def learn(self, n_epochs=200, lr=False, plot=True, outpath="./", verbose=False):
+                
+        self._outpath = outpath
         
-        """"""
+        if lr:
+            self._lr = lr
+            self._optimizer = torch.optim.Adam(self._model_params, lr=self._lr)
 
         for epoch in range(n_epochs):
-            _epoch(self)
-        
-    def embed(self, inplace=True, plot=True):
+            _epoch(self, plot, outpath, verbose)
+                
+    def embed(self, inplace=True):
+
         self._adata = _embed(self._adata, self._X_latent)
-        if plot:
-            _plot_umap_embedding(self._adata)
-        
+
         if inplace:
             adata = self._adata
         else:
             return self._adata
+
+    def plot_umap(self, groupby="Annotation"):
+
+        _plot_umap_embedding(self._adata, groupby)
         
+        
+    def save(self, verbose=True):
+        
+        _save_VAE(encoder, decoder, self._outpath, verbose=False)
+        
+        adata.obsm['X_vae'] = adata.obsm['X_vae'].cpu().detach().numpy()
+        adata_sdk.write_loaded_h5ad(adata, os.path.join(self._outpath, "vae_adata"))
