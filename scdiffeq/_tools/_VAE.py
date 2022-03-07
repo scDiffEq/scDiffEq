@@ -37,7 +37,7 @@ def _compose_multilayered_nn_sequential(nodes_by_layer, dropout):
             
     return torch.nn.Sequential(neural_net)
 
-def _build_encoder_decoder(input_dim, output_dim, layers, power, dropout):
+def _build_encoder_decoder(input_dim, output_dim, layers, power, dropout, verbose):
     
     """"""
     
@@ -47,7 +47,17 @@ def _build_encoder_decoder(input_dim, output_dim, layers, power, dropout):
     encoder = _compose_multilayered_nn_sequential(encoder_nodes_by_layer, dropout)
     decoder = _compose_multilayered_nn_sequential(decoder_nodes_by_layer, dropout)
     
+    if verbose:
+        _print_model(encoder, decoder)
+    
     return encoder, decoder
+
+def _print_model(encoder, decoder):
+    
+    licorice.underline("Encoder:")
+    print(encoder)
+    licorice.underline("Decoder:")
+    print(decoder)
 
 def live_loss_plot(loss_vals):
     
@@ -60,6 +70,8 @@ def live_loss_plot(loss_vals):
     ax.set_ylim(-0.5, np.round(max(loss_vals))+1)
     ax.plot(loss_vals, color='darkred')
     ax.hlines(y=0, xmin=0, xmax=len(loss_vals), ls="--", color="dimgrey", alpha=0.5)
+    ax.set_xlabel("epochs")
+    ax.set_ylabel("MSELoss()")
     plt.show()
     
 def _epoch(self, plot, outpath, verbose):
@@ -144,7 +156,7 @@ def _save_VAE(encoder, decoder, outpath, verbose=False):
         msg = licorice.font_format("Saving to", ['BOLD'])
         print("{}: {}".format(msg, outdir))
         print("\t   {}".format(encoder_outpath))
-        print("\t   {}".format(decoder_outpath))
+        print("\t   {}\n".format(decoder_outpath))
     
     _save_torch_model(encoder, encoder_outpath)
     _save_torch_model(decoder, decoder_outpath)
@@ -152,9 +164,9 @@ def _save_VAE(encoder, decoder, outpath, verbose=False):
     return encoder_outpath, decoder_outpath
 
 class _VAE:
-    def __init__(self, adata, n_latent_dims=20, n_layers=5, power=2, dropout=0.1, device=0, lr=1e-3):
+    def __init__(self, adata, outpath="./", n_latent_dims=20, n_layers=5, power=2, dropout=0.1, device=0, lr=1e-3, verbose=True):
         
-        self._lr = lr
+        self._lr = pydk.to_list(lr)
         self._epoch_counter = 0
         self._X = torch.Tensor(adata.X.toarray())
         self._adata = adata
@@ -164,24 +176,37 @@ class _VAE:
         self._device = device
         self._power = power
         self._dropout = dropout
-        self._encoder, self._decoder = _build_encoder_decoder(self._n_features, self._n_latent_dims, self._n_layers, power, dropout)
+        self._encoder, self._decoder = _build_encoder_decoder(self._n_features,
+                                                              self._n_latent_dims,
+                                                              self._n_layers,
+                                                              power,
+                                                              dropout,
+                                                              verbose,
+                                                             )
         self._encoder.to(self._device)
         self._decoder.to(self._device)
         self._LossFunc = torch.nn.MSELoss()
         self._model_params = list(self._encoder.parameters()) + list(self._decoder.parameters())
-        self._optimizer = torch.optim.Adam(self._model_params, lr=self._lr)
         self._loss_tracker = []
-        
-    def learn(self, n_epochs=200, lr=False, plot=True, outpath="./", verbose=False):
-                
         self._outpath = outpath
         
+    def learn(self, n_epochs=200, lr=False, plot=True, outpath=False, verbose=False):
+                
+        if outpath:
+            self._outpath = outpath
+        
         if lr:
-            self._lr = lr
-            self._optimizer = torch.optim.Adam(self._model_params, lr=self._lr)
-
-        for epoch in range(n_epochs):
-            _epoch(self, plot, outpath, verbose)
+            self._lr = pydk.to_list(lr)
+        self._n_epochs = pydk.to_list(n_epochs)
+        assert len(self._n_epochs) == len(self._lr), "Provide a learning-rate schedule with corresponding # of epochs for each learning rate."
+        n_schedules = len(self._n_epochs)
+        
+        for n in range(n_schedules):
+            _lr = self._lr[n]
+            n_epochs = self._n_epochs[n]
+            self._optimizer = torch.optim.Adam(self._model_params, lr=_lr)
+            for epoch in range(n_epochs):
+                _epoch(self, plot, self._outpath, verbose)
                 
     def embed(self, inplace=True):
 
@@ -197,9 +222,8 @@ class _VAE:
         _plot_umap_embedding(self._adata, groupby)
         
         
-    def save(self, verbose=True):
+    def save(self, adata_name="vae_adata", verbose=True):
         
-        _save_VAE(encoder, decoder, self._outpath, verbose=False)
-        
-        adata.obsm['X_vae'] = adata.obsm['X_vae'].cpu().detach().numpy()
-        adata_sdk.write_loaded_h5ad(adata, os.path.join(self._outpath, "vae_adata"))
+        _save_VAE(self._encoder, self._decoder, self._outpath, verbose)
+        self._adata.obsm['X_vae'] = self._adata.obsm['X_vae'].cpu().detach().numpy()
+        adata_sdk.write_loaded_h5ad(self._adata, os.path.join(self._outpath, adata_name))
