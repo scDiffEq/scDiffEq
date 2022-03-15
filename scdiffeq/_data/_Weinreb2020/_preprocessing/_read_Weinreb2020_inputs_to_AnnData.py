@@ -18,5 +18,6 @@ def _read_Weinreb2020_inputs_to_AnnData(PathDict):
         adata.shape[0], 2
     )
     adata.obsm["X_clone"] = scipy.sparse.load_npz(PathDict["clonal"]).tocsc()
+    adata.raw = adata
 
     return adata
