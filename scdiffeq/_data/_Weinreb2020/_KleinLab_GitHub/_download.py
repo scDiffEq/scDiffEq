@@ -109,12 +109,19 @@ def _download_LARRY_files_from_GitHub(
     
     DownloadedFiles = {}
     download_count = 0
+    
     for file in file_basenames:
         download_filename = os.path.basename(
             "_".join([base_path, os.path.basename(file)])
         )
         name = file.split(".")[0]
-        download_filename = _affix_mtx_npz_suffix(destination, file, download_filename)
+        modified_download_filename = _affix_mtx_npz_suffix(destination, file, download_filename)
+        modified_download_filename = os.path.basename(
+            "_".join([base_path, os.path.basename(modified_download_filename)])
+        )
+#         if not os.path.exists(modified_download_filename):
+#             modified_download_filename = download_filename
+        
         if not os.path.exists(download_filename):
             DownloadedFiles, download_count = _download_file(
                 base_path, file, DownloadedFiles, name, download_count, verbose
@@ -124,7 +131,7 @@ def _download_LARRY_files_from_GitHub(
                 base_path, file, DownloadedFiles, name, download_count, verbose
             )
         else:
-            DownloadedFiles[name] = download_filename
+            DownloadedFiles[name] = modified_download_filename
             continue
 
     if download_count == 0:
@@ -133,4 +140,4 @@ def _download_LARRY_files_from_GitHub(
         message = licorice.font_format("For more information, see:", ["BOLD"])
         print("\n{} {}\n".format(message, GitHub_repo))
 
-    return DownloadedFiles
+    return DownloadedFiles, download_count

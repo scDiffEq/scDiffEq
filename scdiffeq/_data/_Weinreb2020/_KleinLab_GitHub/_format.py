@@ -6,6 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import packages #
 # --------------- #
+import licorice
 import os
 import scipy.io
 import scipy.sparse
@@ -42,7 +43,7 @@ def _save_as_npz(outpath, file_object, silent=False):
         print(" - saving to {}...".format(outpath), end=" ")
     scipy.sparse.save_npz(outpath, file_object)
     if not silent:
-        print(" - done.")
+        print(licorice.font_format("done.", ["BOLD"]))
 
 
 def _convert_mtx_to_npz(downloaded_files, outpath, silent):
@@ -76,17 +77,16 @@ def _convert_mtx_to_npz(downloaded_files, outpath, silent):
     for file, path in downloaded_files.items():
         _outpath = os.path.join(outpath, file + ".npz")
         if os.path.exists(_outpath):
-            ConvertedDataDict[file] = None
-            continue
+            ConvertedDataDict[file] = _outpath
         else:
             if path.endswith("mtx.gz"):
                 if not silent:
                     print(" - reading {}...".format(path), end=" ")
                 ConvertedDataDict[file] = scipy.io.mmread(path).tocsc()
                 if not silent:
-                    print(" - done.")
-                _save_as_npz(outpath, ConvertedDataDict[file], silent)
+                    print(licorice.font_format("done.", ["BOLD"]))
+                _save_as_npz(_outpath, ConvertedDataDict[file], silent)
             else:
-                continue
+                ConvertedDataDict[file] = False
 
     return ConvertedDataDict
