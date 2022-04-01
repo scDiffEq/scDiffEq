@@ -13,9 +13,21 @@ from . import _io as io
 from . import _metrics as metrics
 from . import _model as model
 from . import _plotting as pl
+<<<<<<< HEAD
 from . import _preprocessing as pp
 from . import _tools as tl
 from . import _utilities as ut
+=======
+from . import _tools as tl
+from . import _utilities as ut
+
+
+# from . import _clonal as clonal
+# from . import _study as study
+>>>>>>> bd2e6c546905b2372e0e4d9443e0957793613823
+
+### ------------------------------------------------- DEFAULTS ------------------------------------------------- ###
+
 
 ### ------------------------------------------------- DEFAULTS ------------------------------------------------- ###
 
