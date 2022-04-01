@@ -13,6 +13,7 @@ import os
 # ---------------------- #
 from ._download import _download_LARRY_files_from_GitHub
 from ._format import _convert_mtx_to_npz
+from ._io import _check_available_files
 from ._io import _read_files_downloaded_from_GitHub
 from ._io import _to_adata
 
@@ -21,9 +22,10 @@ class _AllonKleinLab_GitHub_LARRY_Dataset:
     def __init__(self, verbose=True, force=False):
 
         """Initialize class with a few set parameters / paths."""
-
-        self._verbose = True
-        self._force = False
+        
+        self._download_count = 0
+        self._verbose = verbose
+        self._force = force
         self._base_path = "https://kleintools.hms.harvard.edu/paper_websites/state_fate2020/stateFate_inVitro"
         self._GitHub_repo = "https://github.com/AllonKleinLab/paper-data/blob/master/Lineage_tracing_on_transcriptional_landscapes_links_state_to_fate_during_differentiation/"
         self._file_basenames = [
@@ -41,7 +43,7 @@ class _AllonKleinLab_GitHub_LARRY_Dataset:
         
         self._destination = destination
 
-        self._downloaded_files = _download_LARRY_files_from_GitHub(
+        self._downloaded_files, self._download_count = _download_LARRY_files_from_GitHub(
             self._base_path,
             self._GitHub_repo,
             self._file_basenames,
@@ -53,7 +55,12 @@ class _AllonKleinLab_GitHub_LARRY_Dataset:
     def convert_to_npz(self, silent=False):
 
         """Convert .mtx to .npz for faster loading"""
-
+        
+        if self._download_count == 0:
+            self._downloaded_files = _check_available_files(
+                self._file_basenames, self._base_path, self._destination
+            )
+    
         self._ConvertedDict = _convert_mtx_to_npz(
             self._downloaded_files, self._destination, silent
         )
@@ -122,7 +129,7 @@ def _Weinreb2020_AllonKleinLab_GitHub(
     destination=False,
     silent=False,
     verbose=True,
-    force=False,
+    force_download=False,
     write=True,
     h5ad_outpath="adata.Weinreb2020.AllonKleinLab_GitHub.h5ad",
     return_adata=True,
@@ -145,7 +152,7 @@ def _Weinreb2020_AllonKleinLab_GitHub(
         default: True
         type: bool
         
-    force
+    force_download
         default: False
         type: bool
         
@@ -175,7 +182,7 @@ def _Weinreb2020_AllonKleinLab_GitHub(
     if not destination:
         destination = os.getcwd()
 
-    data = _AllonKleinLab_GitHub_LARRY_Dataset(verbose, force)
+    data = _AllonKleinLab_GitHub_LARRY_Dataset(verbose, force_download)
     data.download(destination)
     data.convert_to_npz(silent)
     data.read_data()
