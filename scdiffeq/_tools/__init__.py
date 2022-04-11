@@ -1,2 +1,3 @@
 
 from ._OptimalTransportLoss import _OptimalTransportLoss as OTLoss
+from ._forward_integrate import _forward_integrate as forward_integrate

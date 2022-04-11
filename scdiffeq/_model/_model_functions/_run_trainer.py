@@ -14,11 +14,7 @@ import pydk
 import time
 import torch
 
-# import local dependencies #
-# ------------------------- #
 from ..._tools._OptimalTransportLoss import _OptimalTransportLoss
-from ..._utilities._filter_fragmented_lineages import _filter_fragmented_lineages
-from .._model_utilities._log import _update_logfile
 
 loss_func = _OptimalTransportLoss(0)
 

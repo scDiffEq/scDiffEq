@@ -9,13 +9,18 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 import numpy as np
 import torch
 
-
 # import local dependencies #
 # ------------------------- #
+from .._tools._OptimalTransportLoss import _OptimalTransportLoss
+from .._preprocessing._format_lineage_data_for_model_input import _format_lineage_data_for_model_input
+
 from ._model_functions._formulate_network_model import _formulate_network_model
 from ._model_functions._run_trainer import _run_trainer
 from ._model_utilities._organize_run_info import _organize_run_info
 from ._model_utilities._log import _setup_logfile
+
+from ._model_utilities._test_bool import _test_bool
+from ._model_functions._run_epoch import _run_epoch
 
 class _scDiffEq_Model:
 
@@ -37,10 +42,12 @@ class _scDiffEq_Model:
         seed=1992,
         dt=False,
         diffusion=True,
+        test_frequency=5,
         device="cpu",
         use_key="X_pca",
         lineage_index_key="clone_idx",
         time_key="Time point",
+        groupby='dt_type',
         layers=2,
         nodes=5,
         activation_function=torch.nn.Tanh(),
@@ -48,6 +55,7 @@ class _scDiffEq_Model:
         brownian_size=1,
         noise_type="general",
         sde_type="ito",
+        format_lineages=False,
         evaluate_only=False,
         notebook=True,
         verbose=False,
@@ -113,8 +121,10 @@ class _scDiffEq_Model:
         self._optimizer = torch.optim.RMSprop(self._nn_func.parameters(), lr=self._lr)
         self._device = device
         self._batch_size = self._nn_func.batch_size = batch_size
+        self._nn_func.to(self._device)
         self._best_loss = np.inf
         self._evaluate_only = evaluate_only
+        self._test_frequency = test_frequency
 
         self._RunInfo = _organize_run_info(
             self._outdir,
@@ -130,17 +140,22 @@ class _scDiffEq_Model:
             self._verbose,
         )
         
+        self._LossFunction = _OptimalTransportLoss(self._device)
         self._notebook = notebook
         self._LossTracker = {}
         if not self._evaluate_only:
             self._status_file = _setup_logfile(self._RunInfo.run_outdir,
-                                               columns=["epoch", "d2", "d4", "d6", "total"])
+                                               columns=["epoch", "d2", "d4", "d6", "total", "mode"])
+        
+        if format_lineages:
+            self._FormattedData = _format_lineage_data_for_model_input(adata,
+                                                                       use_key=use_key,
+                                                                       lineage_key=lineage_index_key,
+                                                                       groupby=groupby,
+                                                                       time_key=time_key,
+                                                                      )
 
-<<<<<<< HEAD
     def train(self, epochs=25000, batch_size=False, lr=False):
-=======
-    def train(self, epochs, batch_size=False, lr=False):
->>>>>>> bd2e6c546905b2372e0e4d9443e0957793613823
 
         """
         Iteratively train the scDiffEq model.
@@ -161,19 +176,24 @@ class _scDiffEq_Model:
             
         self._run_count += 1
         self._LossTracker[self._run_count] = []
-        _run_trainer(self._RunInfo.run_outdir, 
-                     epochs,
-                     self._adata,
-                     self._X_data,
-                     self._nn_func,
-                     self._int_func, 
-                     self._optimizer,
-                     self._LossTracker,
-                     self._status_file,
-                     self._epoch_counter,
-                     notebook=self._notebook,
-                    )
-                
+        
+        for epoch in range(1, epochs+1):
+            self._X_pred, self._loss_df = _run_epoch(
+                       FormattedData=self._FormattedData,
+                       func=self._nn_func,
+                       optimizer=self._optimizer,
+                       status_file=self._status_file,
+                       test=_test_bool(epoch, self._test_frequency),
+                       loss_function=self._LossFunction,
+                       silent=self._silent,
+                       epoch=epoch,
+                       device=self._device,
+                      )
+            
+            if (epoch % 10) == 0:
+                    torch.save(self._nn_func.state_dict(),
+                               "{}/model/{}_epochs.model".format(self._RunInfo.run_outdir, epoch))
+        
     def save(self):
 
         """Saves model and working adata"""

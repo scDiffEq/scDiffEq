@@ -152,5 +152,7 @@ def _organize_run_info(
         pydk.update_class(run_info, "run_outdir", run_outdir)
         pydk.mkdir_flex(rungroup_outdir, verbose=verbose)
         pydk.mkdir_flex(run_outdir, verbose=verbose)
+        pydk.mkdir_flex(os.path.join(run_outdir, "img"), verbose=verbose)
+        pydk.mkdir_flex(os.path.join(run_outdir, "model"), verbose=verbose)
 
     return run_info
