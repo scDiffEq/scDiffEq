@@ -136,11 +136,8 @@ class _scDiffEq_Model:
             self._status_file = _setup_logfile(self._RunInfo.run_outdir,
                                                columns=["epoch", "d2", "d4", "d6", "total"])
 
-<<<<<<< HEAD
+
     def train(self, epochs=25000, batch_size=False, lr=False):
-=======
-    def train(self, epochs, batch_size=False, lr=False):
->>>>>>> bd2e6c546905b2372e0e4d9443e0957793613823
 
         """
         Iteratively train the scDiffEq model.
