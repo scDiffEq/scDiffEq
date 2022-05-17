@@ -6,7 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import packages #
 # --------------- #
-import licorice
+import licorice_font as font
 import os
 import scipy.io
 import scipy.sparse
@@ -43,7 +43,7 @@ def _save_as_npz(outpath, file_object, silent=False):
         print(" - saving to {}...".format(outpath), end=" ")
     scipy.sparse.save_npz(outpath, file_object)
     if not silent:
-        print(licorice.font_format("done.", ["BOLD"]))
+        print(font.font_format("done.", ["BOLD"]))
 
 
 def _convert_mtx_to_npz(downloaded_files, outpath, silent):
@@ -84,7 +84,7 @@ def _convert_mtx_to_npz(downloaded_files, outpath, silent):
                     print(" - reading {}...".format(path), end=" ")
                 ConvertedDataDict[file] = scipy.io.mmread(path).tocsc()
                 if not silent:
-                    print(licorice.font_format("done.", ["BOLD"]))
+                    print(font.font_format("done.", ["BOLD"]))
                 _save_as_npz(_outpath, ConvertedDataDict[file], silent)
             else:
                 ConvertedDataDict[file] = False

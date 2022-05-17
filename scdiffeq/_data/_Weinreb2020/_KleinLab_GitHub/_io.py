@@ -8,7 +8,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # --------------- #
 from anndata import AnnData
 import glob
-import licorice
+import licorice_font as font
 import numpy as np
 import os
 import pandas as pd

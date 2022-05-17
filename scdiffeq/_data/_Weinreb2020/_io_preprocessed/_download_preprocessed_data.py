@@ -1,7 +1,7 @@
 # _download_preprocessed_data.py
 
 import glob
-import licorice
+import licorice_font as font
 import os
 import pydk
 
@@ -20,7 +20,7 @@ def _list_downloaded_files(destination_path, verbose, after_download=False):
             msg = "{} files have been previously downloaded to:".format(n_files)
         else:
             msg = "{} files downloaded to:".format(n_files)
-    msg = licorice.font_format(
+    msg = font.font_format(
         msg, ["BOLD", "BLUE"]
     )
     if n_files > 0:
@@ -84,7 +84,7 @@ def _download_preprocessed_anndata_from_GCP(
 
     if not download_complete or force:
         if force:
-            print(licorice.font_format("\nForcing re-download...", ["BOLD", "RED"]))
+            print(font.font_format("\nForcing re-download...", ["BOLD", "RED"]))
         print("Downloading...")
         os.system(gcp_command)
     

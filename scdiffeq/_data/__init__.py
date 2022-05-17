@@ -10,3 +10,4 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 from ._Weinreb2020._KleinLab_GitHub._Dataset import _AllonKleinLab_GitHub_LARRY_Dataset as _AllonKleinLab_GitHub_LARRY_Dataset
 from ._Weinreb2020._KleinLab_GitHub._Dataset import _Weinreb2020_AllonKleinLab_GitHub as Weinreb2020_KleinLab_GitHub
 from ._Weinreb2020._RetrieveData import _RetrieveData as RetrieveSubset
+from ._Weinreb2020._TestSet import _TestSet as TestSet

@@ -6,7 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import packages #
 # --------------- #
-import licorice
+import licorice_font as font
 import os
 
 # import local functions #
@@ -115,7 +115,7 @@ class _AllonKleinLab_GitHub_LARRY_Dataset:
             if not silent:
                 print(
                     "\n{} {}\n".format(
-                        licorice.font_format("Writing to:", ["BOLD"]), h5ad_outpath
+                        font.font_format("Writing to:", ["BOLD"]), h5ad_outpath
                     )
                 )
 

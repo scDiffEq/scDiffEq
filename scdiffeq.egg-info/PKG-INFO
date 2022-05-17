@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: scdiffeq
 Version: 0.0.0
-Summary: scdiffeq: single cell dynamics using neural ODEs and variations thereof.
+Summary: scDiffEq: single cell dynamics using neural ODEs.
 Home-page: https://github.com/pinellolab/sc-neural-ODEs
 Author: Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard
 Author-email: mvinyard@broadinstitute.org

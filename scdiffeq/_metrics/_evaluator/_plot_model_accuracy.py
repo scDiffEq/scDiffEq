@@ -1,5 +1,5 @@
 
-import licorice
+import licorice_font as font
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -128,7 +128,7 @@ def _save_fig(savename, outpath, layers, nodes, N, seed):
     save_prefix = os.path.join(outpath, save_prefix)
     if savename:
         savename = _make_savename(save_prefix, savename)
-        print("\n\n{}: {}\n".format(licorice.font_format("Saving evaluation plot to", ["BOLD"]), savename))
+        print("\n\n{}: {}\n".format(font.font_format("Saving evaluation plot to", ["BOLD"]), savename))
         plt.savefig(savename)
 
 def _plot_model_accuracy(

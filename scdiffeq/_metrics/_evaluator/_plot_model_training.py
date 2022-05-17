@@ -1,5 +1,5 @@
 
-import licorice
+import licorice_font as font
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -32,7 +32,7 @@ def _save_fig(savename, outpath, layers, nodes, seed):
     
     if savename:
         savename = _make_savename(save_prefix, savename)
-        print("\n{}: {}\n".format(licorice.font_format("Saving training plot to", ["BOLD"]), savename))
+        print("\n{}: {}\n".format(font.font_format("Saving training plot to", ["BOLD"]), savename))
         plt.savefig(savename)
 
 def _mkfig(figsize=1.5):

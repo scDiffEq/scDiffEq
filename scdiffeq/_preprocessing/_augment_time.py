@@ -3,7 +3,7 @@ import pandas as pd
 
 def _augment_time(adata,
                   TimeConvDict={2: 0, 4: 0.01, 6: 0.02},
-                  time_key="Time Key",
+                  time_key="Time point",
                   key_added="t",
                  ):
 

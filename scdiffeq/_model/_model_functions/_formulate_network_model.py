@@ -7,7 +7,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # import packages #
 # --------------- #
 from collections import OrderedDict
-import licorice
+import licorice_font as font
 import torch
 import torchsde
 import torchdiffeq
@@ -87,7 +87,7 @@ def _check_pytorch_activation_function(activation_function):
 
 
 def _construct_hidden_layers(
-    neural_net, activation_function, hidden_layers, hidden_nodes
+    neural_net, activation_function, hidden_layers, hidden_nodes, dropout,
 ):
 
     neural_net[
@@ -95,6 +95,8 @@ def _construct_hidden_layers(
     ] = activation_function
     for n in range(0, hidden_layers):
         neural_net["hidden_layer_{}".format(n)] = torch.nn.Linear(hidden_nodes, hidden_nodes)
+        if dropout:
+            neural_net["dropout_{}".format(n)] = torch.nn.Dropout(dropout)
         if n != (hidden_layers - 1):
             neural_net[
                 "{}_{}".format(str(activation_function).strip("()"), n)
@@ -108,7 +110,7 @@ def _construct_hidden_layers(
 
 
 def _construct_flexible_neural_network(
-    in_dim=2, out_dim=2, layers=3, nodes=5, activation_function=torch.nn.Tanh(),
+    in_dim=2, out_dim=2, layers=3, nodes=5, activation_function=torch.nn.Tanh(), dropout=0.1
 ):
 
     """
@@ -146,7 +148,7 @@ def _construct_flexible_neural_network(
     _check_pytorch_activation_function(activation_function)
     neural_net = OrderedDict()    
     neural_net["input_layer"] = torch.nn.Linear(in_dim, nodes)
-    neural_net = _construct_hidden_layers(neural_net, torch.nn.Tanh(), layers, nodes)
+    neural_net = _construct_hidden_layers(neural_net, activation_function, layers, nodes, dropout)
     neural_net["output_layer"] = torch.nn.Linear(nodes, out_dim)
 
     return torch.nn.Sequential(neural_net)
@@ -240,6 +242,7 @@ class Neural_Differential_Equation(torch.nn.Module):
         layers=2,
         nodes=5,
         activation_function=torch.nn.Tanh(),
+        dropout=0.1,
         batch_size=1,
         brownian_size=1,
         noise_type="general",
@@ -264,6 +267,7 @@ class Neural_Differential_Equation(torch.nn.Module):
             layers=self.layers,
             nodes=self.nodes,
             activation_function=activation_function,
+            dropout=dropout
         )
             
         if self.diffusion:
@@ -332,6 +336,7 @@ def _formulate_network_model(
     out_dim=2,
     layers=2,
     nodes=5,
+    dropout=0.1,
     activation_function=torch.nn.Tanh(),
     batch_size=1,
     brownian_size=1,
@@ -372,6 +377,7 @@ def _formulate_network_model(
                                                   out_dim=out_dim,
                                                   layers=layers,
                                                   nodes=nodes,
+                                                  dropout=dropout,
                                                   activation_function=activation_function,
                                                   batch_size=batch_size,
                                                   brownian_size=brownian_size,
@@ -387,7 +393,7 @@ def _formulate_network_model(
             pass
             
     if not silent:
-        licorice.underline("Neural Differential Equation:", ["BOLD", "BLUE"])
+        font.underline("Neural Differential Equation:", ["BOLD", "BLUE"])
         print(network_model)
 
     integration_function = _choose_integration_function(diffusion)

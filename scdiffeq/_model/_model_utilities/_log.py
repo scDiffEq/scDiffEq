@@ -2,7 +2,7 @@
 import os
 
 def _setup_logfile(outdir, columns=["epoch", "d2", "d4", "d6", "total", "mode"]):
-
+    
     status_file = open(os.path.join(outdir, "status.log"), "w")
     header = "\t".join(columns) + "\n"
     status_file.write(header)

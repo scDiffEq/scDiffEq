@@ -85,5 +85,5 @@ def _annotate_lineage_resolved_time(
     obs_df = adata.obs.merge(lineage_df_filt, on=lineage_key, how="outer")
     obs_df.index = obs_df.index.astype(str)
     adata.obs = obs_df
-
-    return adata
+    
+    adata.uns['LineageDict'] = LineageDict

@@ -6,7 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import packages #
 # --------------- #
-import licorice
+import licorice_font as font
 import os
 import wget
 
@@ -119,8 +119,6 @@ def _download_LARRY_files_from_GitHub(
         modified_download_filename = os.path.basename(
             "_".join([base_path, os.path.basename(modified_download_filename)])
         )
-#         if not os.path.exists(modified_download_filename):
-#             modified_download_filename = download_filename
         
         if not os.path.exists(download_filename):
             DownloadedFiles, download_count = _download_file(
@@ -137,7 +135,7 @@ def _download_LARRY_files_from_GitHub(
     if download_count == 0:
         print("All files already downloaded.")
     if verbose:
-        message = licorice.font_format("For more information, see:", ["BOLD"])
+        message = font.font_format("For more information, see:", ["BOLD"])
         print("\n{} {}\n".format(message, GitHub_repo))
 
     return DownloadedFiles, download_count

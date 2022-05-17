@@ -6,7 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import packages #
 # --------------- #
-import licorice
+import licorice_font as font
 import torch
 
 
@@ -38,7 +38,7 @@ def _check_for_cuda_device(verbose=False):
         if verbose:
             print(
                 " - Selected Cuda device: {} available.".format(
-                    licorice.font_format(device, ["BOLD"])
+                    font.font_format(device, ["BOLD"])
                 )
             )
         device = "cuda" + str(device)
@@ -47,7 +47,7 @@ def _check_for_cuda_device(verbose=False):
         if verbose:
             print(
                 " - Cuda is not available. Defaulting to {}.".format(
-                    licorice.font_format(device, ["BOLD"])
+                    font.font_format(device, ["BOLD"])
                 )
             )
 
@@ -87,7 +87,7 @@ def _assign_cuda_device(device=False, verbose=False):
         if verbose:
             print(
                 " - Selected device: {}. \n - For large datasets, performance may be dramatically improved with the use of a GPU.".format(
-                    licorice.font_format(device, ["BOLD"])
+                    font.font_format(device, ["BOLD"])
                 )
             )
 

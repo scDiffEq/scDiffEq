@@ -22,7 +22,7 @@ setup(
         "geomloss>=0.2.4",
         "matplotlib>=3.5.0",
         "pandas>=1.3.5",
-        "licorice>=0.0.2",
+        "licorice_font>=0.0.3",
         "torch>=1.1.0",
         "torchdiffeq>=0.2.1",
         "torchsde>=0.2.5",

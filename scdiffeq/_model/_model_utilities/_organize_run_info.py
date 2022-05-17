@@ -18,6 +18,7 @@ def _build_run_signature(
     lr,
     device,
     seed,
+    dry=True
 ):
 
     """
@@ -89,7 +90,7 @@ class RunInfo:
 
 
 def _organize_run_info(
-    outdir, evaluate_only, run_group, name, version, nodes, layers, lr, device, seed, verbose,
+    outdir, evaluate_only, run_group, name, version, nodes, layers, lr, device, seed, verbose, dry,
 ):
 
     """
@@ -134,6 +135,7 @@ def _organize_run_info(
         lr,
         device,
         seed,
+        dry,
     )
 
     run_info = RunInfo()
@@ -150,7 +152,13 @@ def _organize_run_info(
         run_outdir = os.path.join(rungroup_outdir, run_signature)
         pydk.update_class(run_info, "rungroup_outdir", rungroup_outdir)
         pydk.update_class(run_info, "run_outdir", run_outdir)
-        pydk.mkdir_flex(rungroup_outdir, verbose=verbose)
-        pydk.mkdir_flex(run_outdir, verbose=verbose)
+        
+        if not dry:
+            pydk.mkdir_flex(rungroup_outdir, verbose=verbose)
+            pydk.mkdir_flex(run_outdir, verbose=verbose)
+            pydk.mkdir_flex(os.path.join(run_outdir, "img"), verbose=verbose)
+            pydk.mkdir_flex(os.path.join(run_outdir, "model"), verbose=verbose)
+        else:
+            print(" - NOTE: DRY RUN - NOTHING WILL BE SAVED.")
 
     return run_info
