@@ -1,2 +1,0 @@
-
-from ._plot_histogram_neu_mo_fate_bias import _plot_histogram_neu_mo_fate_bias as fate_bias_histogram
