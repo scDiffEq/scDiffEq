@@ -42,7 +42,7 @@ class _scDiffEq_Model:
 
     def __init__(
         self,
-        adata,
+        adata=False,
         lr=1e-4,
         outdir="./",
         run_name="test",
@@ -174,7 +174,7 @@ class _scDiffEq_Model:
                                                                       )
 
             
-    def train(self, use_lineages=True, epochs=25000, batch_size=False, lr=False, plot=True):
+    def train(self, lineage_key=None, epochs=25000, batch_size=False, lr=False, plot=True):
 
         """
         Iteratively train the scDiffEq model.
@@ -197,7 +197,27 @@ class _scDiffEq_Model:
             self._batch_size = batch_size
             
             
-        if not use_lineages:
+        if lineage_key:
+            for epoch in range(1, epochs+1):
+                self._X_pred, self._loss_df = _run_epoch(
+                           FormattedData=self._FormattedData,
+                           func=self._nn_func,
+                           optimizer=self._optimizer,
+                           status_file=self._LogFile,
+                           test=_test_bool(epoch, self._test_frequency),
+                           loss_function=self._LossFunction,
+                           dry=self._dry,
+                           silent=self._silent,
+                           epoch=epoch,
+                           device=self._device,
+                          )
+
+                if (epoch % 10) == 0 and not self._dry:
+                    _save_model_checkpoint(self._nn_func, epoch, self._RunInfo.run_outdir, silent=self._silent)
+        
+        
+        else:
+            
             X_train, t_train = _prepare_data_no_lineages(self._adata)
             if not batch_size:
                 self._batch_size = 2000
@@ -220,24 +240,7 @@ class _scDiffEq_Model:
                 if (epoch % 10) == 0 and not self._dry:
                     _save_model_checkpoint(self._nn_func, self._epoch_counter, self._RunInfo.run_outdir, silent=self._silent)
                 self._epoch_counter += 1
-        else:
-            for epoch in range(1, epochs+1):
-                self._X_pred, self._loss_df = _run_epoch(
-                           FormattedData=self._FormattedData,
-                           func=self._nn_func,
-                           optimizer=self._optimizer,
-                           status_file=self._LogFile,
-                           test=_test_bool(epoch, self._test_frequency),
-                           loss_function=self._LossFunction,
-                           dry=self._dry,
-                           silent=self._silent,
-                           epoch=epoch,
-                           device=self._device,
-                          )
-
-                if (epoch % 10) == 0 and not self._dry:
-                    _save_model_checkpoint(self._nn_func, epoch, self._RunInfo.run_outdir, silent=self._silent)
-        
+            
     def view(self, plot=True):
         
         """ Check the status of a run based on what's written to the log file"""
