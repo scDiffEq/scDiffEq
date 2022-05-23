@@ -73,6 +73,7 @@ def _pca(adata, n_components=50, preprocess=True):
     Parameters:
     -----------
     adata
+        AnnData object.
         type: anndata._core.anndata.AnnData
 
     n_components
