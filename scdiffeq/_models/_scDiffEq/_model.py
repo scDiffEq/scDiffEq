@@ -3,13 +3,16 @@ __module_name__ = "_model.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
+
 # import packages #
 # --------------- #
 
 
 # import local dependencies #
 # ------------------------- #
-from _ModelManager import _ModelManager
+from ._ancilliary._ModelManager import _ModelManager
+from ._ancilliary._Learner import _Learner
+import ._ancilliary._model_functions as funcs
 
 
 class _scDiffEq:
