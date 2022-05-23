@@ -12,8 +12,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # ------------------------- #
 from ._ancilliary._ModelManager import _ModelManager
 from ._ancilliary._Learner import _Learner
-import ._ancilliary._model_functions as funcs
-
+from ._ancilliary import _model_functions as funcs
 
 class _scDiffEq:
     def __init__(self, adata=None):

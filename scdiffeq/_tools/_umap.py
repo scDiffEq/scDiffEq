@@ -3,8 +3,14 @@ __module_name__ = "_umap.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
+
+# import packages #
+# --------------- #
+import umap
+
+
 def _umap(
-    adata, use_key="X_pca", key_added="X_umap", n_components=2, n_neighbors=20, **kwargs
+    adata, use_key="X_pca", key_added="X_umap", n_components=2, n_neighbors=20, silent=False, **kwargs
 ):
 
     """
@@ -37,14 +43,23 @@ def _umap(
         be in the range 2 to 100.
         default: 20
         type: int
+        
+    silent
+        If True, function does not print user messages.
+        default: False
+        type: bool
 
     Returns:
     --------
-    umap_model
+    None, adata is modified in place with:
+    
+    adata.obsm["X_umap"]
+        Dimensionally-reduced umap embedding coordinates.
+        type: numpy.ndarray
+        
+    adata.uns["umap"]
         A umap.UMAP() model fit to the input data using the input parameters.
         type: umap.umap_.UMAP
-
-    adata is modified in-place.
 
     kwargs:
     -------
@@ -94,7 +109,10 @@ def _umap(
         https://umap-learn.readthedocs.io/en/latest/basic_usage.html
     """
 
-    umap_model = umap.UMAP(n_components=2, n_neighbors=20, **kwargs)
+    adata.uns["umap"] = umap_model = umap.UMAP(n_components=2, n_neighbors=20, **kwargs)
     adata.obsm[key_added] = umap_model.fit_transform(adata.obsm[use_key])
-
-    return umap_model
+    
+    if not silent:
+        print(" - Added: adata.obsm['{}']".format(key_added))
+        print(" - Added: adata.uns['umap']")
+        

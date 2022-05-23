@@ -65,7 +65,7 @@ def _ensure_numpy_array(X):
         return X.toarray()
 
 
-def _pca(adata, n_components=50, preprocess=True):
+def _pca(adata, n_components=50, preprocess=True, key_added="X_pca", silent=False):
 
     """
     PCA-transform adata.X
@@ -85,20 +85,32 @@ def _pca(adata, n_components=50, preprocess=True):
         Indicates if the adata.X matrix should be preprocessed using sklearn.preprocessing.StandardScaler
         default: True
         type: bool
-
+    
+    silent
+        If True, function does not print user messages.
+        default: False
+        type: bool
+        
     Returns:
     --------
-    pca
-        PCA model object
-        type: sklearn.decomposition._pca.PCA
+    None, adata is modified in place with:
 
+        adata.obsm["X_pca"]
+            pca-transformed matrix
+            shape: [M, n_pcs].
+            type: numpy.ndarray
+
+        adata.uns["pca"]
+            PCA model object
+            type: sklearn.decomposition._pca.PCA
+            
+        adata.layers["scaled"]
+            preprocessed, scaled input matrix
+            type: numpy.ndarray
 
     Notes:
     ------
-    (1) adata is modified with the pca-transformed matrix as:
-        adata.obsm["X_pca"] with shape: [M, n_pcs].
-
-    (2) Documentation for sklearn.decomposition.PCA can be found here:
+    (1) Documentation for sklearn.decomposition.PCA can be found here:
         https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
     """
 
@@ -109,8 +121,10 @@ def _pca(adata, n_components=50, preprocess=True):
     X_ = _ensure_numpy_array(adata.X)
 
     if preprocess:
-        X_scaled = _preprocess_for_pca(X_)
-        adata.layers["scaled"] = X_scaled
+        adata.layers["scaled"] = X_scaled = _preprocess_for_pca(X_)
+        if not silent:
+            print(" - Added: adata.layers[{}]".format("scaled"))
+        
     else:
         X_scaled = X_
 
@@ -118,9 +132,10 @@ def _pca(adata, n_components=50, preprocess=True):
     # PCA transform
     # ------------------------------------- #
 
-    pca = PCA(n_components=n_components)
-    X_pca = pca.fit_transform(X_scaled)
+    adata.uns["pca"] = pca = PCA(n_components=n_components)
+    adata.obsm[key_added] = pca.fit_transform(X_scaled)
 
-    adata.obsm["X_pca"] = X_pca
-
-    return pca
+    if not silent:
+        print(" - Added: adata.obsm['{}']".format(key_added))
+        print(" - Added: adata.uns['pca']")
+        
