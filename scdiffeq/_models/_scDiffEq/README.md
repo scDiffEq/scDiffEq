@@ -16,6 +16,16 @@ model.preflight()
 model.train()
 ```
 
+#### Generatively simulate data
+
+Optionally, this returns a `simulation` object, which can then be studied using other ancilliary functions such as `sdq.tl.pca`, `sdq.tl.umap`, `sdq.tl.quantify_dynamics`, and visualized  using `sdq.pl.pca`, `sdq.pl.umap`, `sdq.pl.dynamics`, `sdq.pl.drift`, or `sdq.pl.diffusion`.
+
+This function is identical to `sdq.tl.simulate`
+
+```python
+simulation = model.simulate()
+```
+
 #### Pass data to the model independent of the training program.
 
 ```python
