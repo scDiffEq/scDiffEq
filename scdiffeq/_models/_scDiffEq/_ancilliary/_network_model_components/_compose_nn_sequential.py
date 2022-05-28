@@ -19,7 +19,7 @@ def _parse_activation_function_dict(activation_function_dict):
     return name, func
 
 
-def _compose_multilayered_nn_sequential(
+def _compose_nn_sequential(
     nodes_by_layer, activation_function_dict, dropout
 ):
 

@@ -13,7 +13,7 @@ import torch
 
 # import local dependencies #
 # ------------------------- #
-from .._compose_multilayered_nn_sequential import _compose_multilayered_nn_sequential
+from .._compose_nn_sequential import _compose_nn_sequential
 from ._VAE_utilities import _no_transform
 
 def _power_space(start, stop, n, power):
@@ -82,10 +82,10 @@ def _build_encoder_decoder(
         data_dim, latent_dim, hidden_layers, power
     ).astype(int)
 
-    encoder = _compose_multilayered_nn_sequential(
+    encoder = _compose_nn_sequential(
         encoder_nodes_by_layer, activation_function_dict, dropout
     )
-    decoder = _compose_multilayered_nn_sequential(
+    decoder = _compose_nn_sequential(
         decoder_nodes_by_layer, activation_function_dict, dropout
     )
 

@@ -18,7 +18,7 @@ def _tqdm(notebook):
         return tqdm_cli
 
 
-def progress_bar(TrainingProgram, epoch_count):
+def _progress_bar(TrainingProgram, epoch_count):
     
     """
     Return an epoch-ranged progress bar wrapped by tqdm (notebook or cli version).

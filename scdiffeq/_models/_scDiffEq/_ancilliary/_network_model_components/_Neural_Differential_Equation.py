@@ -1,5 +1,5 @@
 
-__module_name__ = "Neural_Differential_Equation.py"
+__module_name__ = "_Neural_Differential_Equation.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
@@ -10,7 +10,7 @@ import flexinet
 import torch
 
 
-class Neural_Differential_Equation(torch.nn.Module):
+class _Neural_Differential_Equation(torch.nn.Module):
 
     noise_type = "general"
     sde_type = "ito"

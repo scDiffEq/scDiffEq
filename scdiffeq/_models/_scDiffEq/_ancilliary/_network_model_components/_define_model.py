@@ -11,8 +11,9 @@ import licorice_font
 
 # import local dependencies #
 # ------------------------- #
-from ._VariationalAutoEncoder._LinearVAE import _LinearVAE
-from ._Neural_Differential_Equation import Neural_Differential_Equation
+from .. import _neural_networks as nn
+# from ._VariationalAutoEncoder._LinearVAE import _LinearVAE
+# from ._Neural_Differential_Equation import Neural_Differential_Equation
 
 
 def _group_model_hyper_params(
@@ -93,9 +94,10 @@ def _instantiate_model(VAE_Params, NDE_Params, device, silent=False):
 
     """
 
+
     if VAE_Params != None:
 
-        VAE = _LinearVAE(
+        VAE = nn.LinearVAE(
             X_dim=VAE_Params["X_dim"],
             latent_dim=VAE_Params["latent_dim"],
             hidden_layers=VAE_Params["hidden_layers"],
@@ -119,7 +121,7 @@ def _instantiate_model(VAE_Params, NDE_Params, device, silent=False):
         NDE_out_dim = NDE_Params["out_dim"]
         VAE = None
 
-    NDE = Neural_Differential_Equation(
+    NDE = nn.NeuralDiffEq(
         diffusion=NDE_Params["diffusion"],
         in_dim=NDE_in_dim,
         out_dim=NDE_out_dim,
@@ -147,6 +149,7 @@ def _define_model(
     silent,
     use_key,
     use_layer,
+    optimization_func,
     VAE,
     VAE_latent_dim,
     VAE_hidden_layers,
@@ -162,6 +165,8 @@ def _define_model(
     diffusion_dropout,
     batch_size,
     brownian_size,
+    reconstruction_loss_function,
+    reparameterization_loss_function,
 ):
     ModelHyperParams = _group_model_hyper_params(
         X_data=X_data,
@@ -190,5 +195,14 @@ def _define_model(
         device=device,
         silent=silent,
     )
+    
+    Model = {"NeuralDiffEq":NeuralDiffEq, 
+             "VAE": VAE,
+             "params": parameters,
+             "HyperParams":ModelHyperParams,
+             "optim":optimization_func,
+             "reconst_loss_func":reconstruction_loss_function,
+             "reparam_loss_func":reparameterization_loss_function,
+            }
 
-    return VAE, NeuralDiffEq, parameters, ModelHyperParams
+    return Model

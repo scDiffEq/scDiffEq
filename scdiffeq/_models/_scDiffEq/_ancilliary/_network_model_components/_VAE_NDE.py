@@ -1,5 +1,5 @@
 
-__module_name__ = "_LinearVAE.py"
+__module_name__ = "_VAE_SDE.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
@@ -17,7 +17,7 @@ from ._build_encoder_decoder import _build_encoder_decoder
 from ._reparameterize import _reparameterize
 
 
-class _LinearVAE(torch.nn.Module):
+class _VAE_SDE(torch.nn.Module):
     def __init__(
         self,
         X_dim=None,

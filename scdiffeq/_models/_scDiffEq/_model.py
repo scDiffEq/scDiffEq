@@ -22,9 +22,15 @@ class _scDiffEq:
         self,
         adata,
         device=0,
+        lr=1e-3,
+        batch_size=200,
         silent=False,
         use_key="X",
+        time_key=None,
+        TimeAugmentDict={2: 0, 4: 0.01, 6: 0.02},
+        lineage_key=None,
         use_layer=None,
+        optimization_func=torch.optim.RMSprop,
         VAE=True,
         VAE_latent_dim=10,
         VAE_hidden_layers=2,
@@ -40,32 +46,45 @@ class _scDiffEq:
         diffusion_activation_function=torch.nn.Tanh(),
         drift_dropout=0.1,
         diffusion_dropout=0.1,
-        batch_size=1,
         brownian_size=1,
+        reconstruction_loss_function=torch.nn.MSELoss(),
+        reparameterization_loss_function=torch.nn.KLDivLoss(),
+        save=False,
+        save_path="X_train.pt",
     ):
 
         """ """
-
+        
+        self._reconstruction_loss_function = reconstruction_loss_function
+        self._reparameterization_loss_function = reparameterization_loss_function
+        
         self._adata = adata
         self._use_key = use_key
+        self._batch_size = batch_size
         self._use_layer = use_layer
         self._device = funcs.get_device(device)
         self._silent = silent
         self._X_data = funcs.determine_input_data(
             self._adata, use_key=use_key, layer=use_layer
         )
-
-        (
-            self._VAE,
-            self._NeuralDiffEq,
-            self._parameters,
-            self._Model_HyperParams,
-        ) = funcs.define_model(
+        self._lr = lr
+        self._time_key = time_key
+        self._save = save
+        self._save_path = save_path
+        self._silent = silent
+        
+        if time_key:
+            self._time_key = time_key
+            self._TimeAugmentDict = TimeAugmentDict
+            funcs.augment_time(self._adata, self._time_key, "t_augmented", self._TimeAugmentDict)
+        
+        self._Model = funcs.define_model(
             X_data=self._X_data,
             device=self._device,
             silent=self._silent,
             use_key=use_key,
             use_layer=use_layer,
+            optimization_func=optimization_func,
             VAE=VAE,
             VAE_latent_dim=VAE_latent_dim,
             VAE_hidden_layers=VAE_hidden_layers,
@@ -81,18 +100,46 @@ class _scDiffEq:
             diffusion_dropout=diffusion_dropout,
             batch_size=batch_size,
             brownian_size=brownian_size,
+            reconstruction_loss_function=self._reconstruction_loss_function,
+            reparameterization_loss_function=self._reparameterization_loss_function,
         )
         
         self._ModelManager = _ModelManager(self._Model)
-        self._Learner = _Learner(self._Model)
+        self._Learner = _Learner(self._Model,
+                                 lr=self._lr,
+                                 batch_size=self._batch_size,
+                                 device=self._device,
+                                )
+        
+        # pass attributes from the Learner and the ModelManager back to the main model class for convenient access
+        funcs.transfer_attributes(self._ModelManager, self)
+        funcs.transfer_attributes(self._Learner, self)
 
-    def train(self, training_args):
-
-        _training_program(self._Model,
-                          self._ModelManager,
-                          self._Learner,
-                          training_args,
-                         )
+    def train(self,
+              t=torch.Tensor([0, 0.01, 0.02]),
+              epochs=5,
+              learning_rate=1e-3,
+              validation_frequency=5,
+              checkpoint_frequency=20,
+              notebook=True,
+             ):
+        
+        
+        self._TrainingProgram = funcs.define_training_program(epochs,
+                                                        learning_rate,
+                                                        validation_frequency,
+                                                        checkpoint_frequency,
+                                                        notebook,
+                                                       )
+        
+        self._X_data, self._t =  funcs.prepare_data_no_lineages(self._adata,
+                                  self._time_key,
+                                  self._use_key,
+                                  self._save,
+                                  self._save_path,
+                                  self._silent,
+                                 )
+        funcs.training_procedure(self, self._X_data, self._t)
 
     def evaluate(self):
         
