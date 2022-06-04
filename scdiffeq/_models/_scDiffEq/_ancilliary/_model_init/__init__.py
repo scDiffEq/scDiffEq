@@ -4,3 +4,4 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 from ._define_model import _define_model as define_model
+from ._ModelManager import _ModelManager as ModelManager

@@ -1,5 +1,5 @@
 
-__module_name__ = "_utilities.py"
+__module_name__ = "_transfer_attributes.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
@@ -7,18 +7,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # import packages #
 # --------------- #
 import numpy as np
-import torch
 
-
-def _get_device(device=0):
-
-    cuda = torch.cuda.is_available()
-
-    if cuda:
-        return "cuda:{}".format(device)
-    else:
-        return "cpu"
-    
     
 def _transfer_attributes(fetch, transfer_to):
     

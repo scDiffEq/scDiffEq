@@ -2,25 +2,26 @@
 import numpy as np
 import torch
 
+from .. import _loss_functions as loss_funcs
 
-def _pass_to_VAE_scDiffEq_model(model, X0, t):
+def _pass_to_VAE_scDiffEq_model(model, NeuralDiffEq, X0, t):
 
     model.encode(X0)
     model.reparameterize()
-    model.forward_int(t)
+    model.forward_integrate(NeuralDiffEq, t)
 
     return model.decode(), model._mu, model._log_var
 
 
 def _pass_to_scDiffEq_model(model, X0, t):
 
-    return model.forward_int(X0, t)
+    return model.forward_integrate(X0, t), None, None
 
 
 def _pass_to_model(model, X0, t):
 
     if not model['VAE'] == None:
-        return _pass_to_VAE_scDiffEq_model(model["VAE"], X0, t)
+        return _pass_to_VAE_scDiffEq_model(model["VAE"], model["NeuralDiffEq"], X0, t)
     else:
         return _pass_to_scDiffEq_model(model["NeuralDiffEq"], X0, t)
 
@@ -30,8 +31,8 @@ def _model_forward(Model, X, t, reconst_loss_func, reparam_loss_func, device):
     X0 = X[0]
 
     X_pred, mu, log_var = _pass_to_model(Model, X0, t)
-    loss = _calculate_loss(
-        X_pred, mu, log_var, reconst_loss_func, reparam_loss_func, device
+    loss = loss_funcs.calculate_loss(
+        X_pred, X, mu, log_var, reconst_loss_func, reparam_loss_func, device
     )
 
     return X_pred, loss
@@ -49,6 +50,7 @@ def _batched_no_grad_model_pass(
     batched_loss = []
     with torch.no_grad():
         for X_batch in batched_data:
+            
             X_pred, loss = _model_forward(
                 self._model,
                 X_batch,
@@ -119,9 +121,12 @@ def _batched_training_model_pass(
 ):
     
     batched_data = _fetch_batched_data_no_lineages(X_data, batch_size=batch_size)
+    
+    print(batched_data.shape)
+    
         
-    for X_batch in batched_data:
-        print("batch...")
+    for i in range(batched_data.shape[1]):
+        X_batch = batched_data[:, i, :, :]
         X_pred, loss = _model_forward(
             Model,
             X_batch,
@@ -130,8 +135,8 @@ def _batched_training_model_pass(
             reparam_loss_func,
             device,
         )
-        loss.sum().backward()
+        loss.total_loss.sum().backward()
         optimizer.step()
-        loss = loss.detach().cpu()
+        loss = loss.total_loss.detach().cpu()
 
         return X_pred, loss.item()

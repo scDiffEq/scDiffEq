@@ -16,11 +16,13 @@ class _Loss:
         self._reparam_loss = self._ReparamLoss(mu, log_var)
 
     def total(self):
-        self._total_loss = self._reconst_loss + self._reparam_loss
+        self.total_loss = self._reconst_loss + self._reparam_loss
 
 
-def _calculate_loss(X_pred, mu, log_var, reconst_loss_func, reparam_loss_func, device):
-
+def _calculate_loss(X_pred, X, mu, log_var, reconst_loss_func, reparam_loss_func, device):
+    
+    print(X_pred.shape, X.shape)
+    
     loss = _Loss(reconst_loss_func, reparam_loss_func, device)
     loss.Reconstruction(X_pred, X)
 

@@ -1,5 +1,5 @@
 
-__module_name__ = "_progress_bar.py"
+__module_name__ = "_define_training_procedure.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
@@ -52,3 +52,19 @@ def _progress_bar(TrainingProgram, epoch_count):
     final_epoch = TrainingProgram["epochs"] + 1
 
     return tqdm(range(start_epoch, final_epoch))
+
+
+def _execute_training_program(X, t, Learner, ModelManager, TrainingProgram):
+    
+    progress_bar = _progress_bar(TrainingProgram, Learner._training_epoch_count)
+    
+    for epoch in progress_bar:
+        print("epoch: {}".format(epoch))
+        Learner.pass_train(X, t)
+        
+#         if epoch % TrainingProgram["validation_frequency"]:
+#             Learner.validate()
+        
+    
+    
+

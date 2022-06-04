@@ -11,10 +11,9 @@ import torch
 
 # import local dependencies #
 # ------------------------- #
-from ._loss_functions._OptimalTransportLoss import _OptimalTransportLoss as OTLoss
-from ._loss_functions._KL_Divergence import _KL_Divergence as KLDivLoss
-from . import _run_model_functions as funcs
-
+# from .. import _loss_functions as loss_funcs
+from ._pass_to_model import _batched_no_grad_model_pass
+from ._pass_to_model import _batched_training_model_pass
 
 class _Learner:
     def __init__(
@@ -33,6 +32,7 @@ class _Learner:
                 
         self._LossTracker = {"training":[], "validation":[]}
         self._training_epoch_count = 0
+        self._training_loss = []
 
     def pass_train(self, X, t): #  X, t
         
@@ -40,21 +40,21 @@ class _Learner:
 
 
         self._optimizer.zero_grad()
-        loss = funcs.batched_training_model_pass(X,
-                                                 self._Model,
-                                                 self._optimizer,
-                                                 t,
-                                                 self._Model["reconst_loss_func"],
-                                                 self._Model["reparam_loss_func"],
-                                                 self._batch_size,
-                                                 self._device,
-                                                )
+        loss = _batched_training_model_pass(X,
+                                            self._Model,
+                                            self._optimizer,
+                                            t,
+                                            self._Model["reconst_loss_func"],
+                                            self._Model["reparam_loss_func"],
+                                            self._batch_size,
+                                            self._device,
+                                           )
         self._training_loss.append(loss)
         self._training_epoch_count += 1
 
     def pass_validation(self, X, t):
 
-        loss = funcs.batched_no_grad_model_pass(
+        loss = _batched_no_grad_model_pass(
             Model, X, t, reconst_loss_func, reparam_loss_func, device
         )
 
@@ -62,6 +62,6 @@ class _Learner:
 
     def pass_evaluation(self, X, t):
 
-        self._test_loss = funcs.batched_no_grad_model_pass(
+        self._test_loss = _batched_no_grad_model_pass(
             X, model, t, VAE, reconst_loss_func, reparam_loss_func, device
         )
