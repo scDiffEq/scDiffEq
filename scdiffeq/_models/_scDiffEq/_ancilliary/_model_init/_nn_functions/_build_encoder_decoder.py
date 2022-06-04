@@ -13,8 +13,8 @@ import torch
 
 # import local dependencies #
 # ------------------------- #
-from .._compose_nn_sequential import _compose_nn_sequential
-from ._VAE_utilities import _no_transform
+from ._compose_nn_sequential import _compose_nn_sequential
+from ._no_transform import _no_transform
 
 def _power_space(start, stop, n, power):
 

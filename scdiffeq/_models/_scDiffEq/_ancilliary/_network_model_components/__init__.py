@@ -1,2 +1,0 @@
-
-from ._VariationalNeuralDiffEq import _Neural_Differential_Equation as NeuralDiffEq

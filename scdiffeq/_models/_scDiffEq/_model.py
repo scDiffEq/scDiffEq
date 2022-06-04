@@ -10,11 +10,11 @@ import torch
 
 # import local dependencies #
 # ------------------------- #
-from ._ancilliary._ModelManager import _ModelManager
-from ._ancilliary._Learner import _Learner
+# from ._ancilliary._ModelManager import _ModelManager
+# from ._ancilliary._Learner import _Learner
 
-from ._ancilliary import _model_functions as funcs
-from ._ancilliary import _loss_functions as loss_funcs
+from . import _ancilliary as funcs
+# from ._ancilliary import _loss_functions as loss_funcs
 
 
 class _scDiffEq:
@@ -62,9 +62,9 @@ class _scDiffEq:
         self._use_key = use_key
         self._batch_size = batch_size
         self._use_layer = use_layer
-        self._device = funcs.get_device(device)
+        self._device = funcs.ut.get_device(device)
         self._silent = silent
-        self._X_data = funcs.determine_input_data(
+        self._X_data = funcs.data.determine_input_data(
             self._adata, use_key=use_key, layer=use_layer
         )
         self._lr = lr
@@ -76,9 +76,9 @@ class _scDiffEq:
         if time_key:
             self._time_key = time_key
             self._TimeAugmentDict = TimeAugmentDict
-            funcs.augment_time(self._adata, self._time_key, "t_augmented", self._TimeAugmentDict)
+            funcs.data.augment_time(self._adata, self._time_key, "t_augmented", self._TimeAugmentDict)
         
-        self._Model = funcs.define_model(
+        self._Model = funcs.init.define_model(
             X_data=self._X_data,
             device=self._device,
             silent=self._silent,
@@ -104,16 +104,16 @@ class _scDiffEq:
             reparameterization_loss_function=self._reparameterization_loss_function,
         )
         
-        self._ModelManager = _ModelManager(self._Model)
-        self._Learner = _Learner(self._Model,
-                                 lr=self._lr,
-                                 batch_size=self._batch_size,
-                                 device=self._device,
-                                )
+#         self._ModelManager = _ModelManager(self._Model)
+#         self._Learner = _Learner(self._Model,
+#                                  lr=self._lr,
+#                                  batch_size=self._batch_size,
+#                                  device=self._device,
+#                                 )
         
-        # pass attributes from the Learner and the ModelManager back to the main model class for convenient access
-        funcs.transfer_attributes(self._ModelManager, self)
-        funcs.transfer_attributes(self._Learner, self)
+#         # pass attributes from the Learner and the ModelManager back to the main model class for convenient access
+#         funcs.transfer_attributes(self._ModelManager, self)
+#         funcs.transfer_attributes(self._Learner, self)
 
     def train(self,
               t=torch.Tensor([0, 0.01, 0.02]),
@@ -124,40 +124,42 @@ class _scDiffEq:
               notebook=True,
              ):
         
+        print("Train...")
         
-        self._TrainingProgram = funcs.define_training_program(epochs,
-                                                        learning_rate,
-                                                        validation_frequency,
-                                                        checkpoint_frequency,
-                                                        notebook,
-                                                       )
         
-        self._X_data, self._t =  funcs.prepare_data_no_lineages(self._adata,
-                                  self._time_key,
-                                  self._use_key,
-                                  self._save,
-                                  self._save_path,
-                                  self._silent,
-                                 )
-        funcs.training_procedure(self, self._X_data, self._t)
+#         self._TrainingProgram = funcs.define_training_program(epochs,
+#                                                         learning_rate,
+#                                                         validation_frequency,
+#                                                         checkpoint_frequency,
+#                                                         notebook,
+#                                                        )
+        
+#         self._X_data, self._t =  funcs.prepare_data_no_lineages(self._adata,
+#                                   self._time_key,
+#                                   self._use_key,
+#                                   self._save,
+#                                   self._save_path,
+#                                   self._silent,
+#                                  )
+#         funcs.training_procedure(self, self._X_data, self._t)
 
-    def evaluate(self):
+#     def evaluate(self):
         
-        _evaluate(self._Learner)
+#         _evaluate(self._Learner)
 
         
-    def load_run(self, path):
+#     def load_run(self, path):
         
-        self._path = path
-        self._Model, self._ModelManager, self._Learner = _load_run(self._path)
+#         self._path = path
+#         self._Model, self._ModelManager, self._Learner = _load_run(self._path)
     
-    def load_model(self, path):
+#     def load_model(self, path):
         
-        self._path = path
-        self._Model = _load_model(self._path)
+#         self._path = path
+#         self._Model = _load_model(self._path)
 
 
-    def save(self, path):
+#     def save(self, path):
 
-        self._ModelManager.save()
+#         self._ModelManager.save()
         

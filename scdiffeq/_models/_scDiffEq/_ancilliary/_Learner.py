@@ -13,8 +13,7 @@ import torch
 # ------------------------- #
 from ._loss_functions._OptimalTransportLoss import _OptimalTransportLoss as OTLoss
 from ._loss_functions._KL_Divergence import _KL_Divergence as KLDivLoss
-
-from . import _model_functions as funcs
+from . import _run_model_functions as funcs
 
 
 class _Learner:
@@ -55,7 +54,7 @@ class _Learner:
 
     def pass_validation(self, X, t):
 
-        loss = _pass_to_model_no_grad(
+        loss = funcs.batched_no_grad_model_pass(
             Model, X, t, reconst_loss_func, reparam_loss_func, device
         )
 
@@ -63,6 +62,6 @@ class _Learner:
 
     def pass_evaluation(self, X, t):
 
-        self._test_loss = _pass_to_model_no_grad(
+        self._test_loss = funcs.batched_no_grad_model_pass(
             X, model, t, VAE, reconst_loss_func, reparam_loss_func, device
         )

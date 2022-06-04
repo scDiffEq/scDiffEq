@@ -11,10 +11,8 @@ import licorice_font
 
 # import local dependencies #
 # ------------------------- #
-from .. import _neural_networks as nn
-# from ._VariationalAutoEncoder._LinearVAE import _LinearVAE
-# from ._Neural_Differential_Equation import Neural_Differential_Equation
-
+from ._NeuralDiffEq import _NeuralDiffEq as NeuralDiffEq
+from ._VAE_NeuralDiffEq import _VAE_NeuralDiffEq as VAE_NeuralDiffEq
 
 def _group_model_hyper_params(
     X_data,
@@ -97,7 +95,7 @@ def _instantiate_model(VAE_Params, NDE_Params, device, silent=False):
 
     if VAE_Params != None:
 
-        VAE = nn.LinearVAE(
+        VAE = VAE_NeuralDiffEq(
             X_dim=VAE_Params["X_dim"],
             latent_dim=VAE_Params["latent_dim"],
             hidden_layers=VAE_Params["hidden_layers"],
@@ -121,7 +119,7 @@ def _instantiate_model(VAE_Params, NDE_Params, device, silent=False):
         NDE_out_dim = NDE_Params["out_dim"]
         VAE = None
 
-    NDE = nn.NeuralDiffEq(
+    NDE = NeuralDiffEq(
         diffusion=NDE_Params["diffusion"],
         in_dim=NDE_in_dim,
         out_dim=NDE_out_dim,

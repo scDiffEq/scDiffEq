@@ -14,8 +14,10 @@ setup(
     description="scDiffEq: single cell dynamics using neural ODEs.",
     packages=[
         "scdiffeq",
-        "scdiffeq._utilities",
-        "scdiffeq._data",
+        "scdiffeq._io",
+        "scdiffeq._models",
+	"scdiffeq._plotting",
+	"scdiffeq._tools",
     ],
     install_requires=[
         "anndata>=0.7.8",

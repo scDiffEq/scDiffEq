@@ -12,12 +12,12 @@ import torchsde
 
 # import local dependencies #
 # ------------------------- #
-from ._VAE_utilities import _no_transform
-from ._build_encoder_decoder import _build_encoder_decoder
-from ._reparameterize import _reparameterize
+from ._nn_functions._no_transform import _no_transform
+from ._nn_functions._build_encoder_decoder import _build_encoder_decoder
+from ._nn_functions._reparameterize import _reparameterize
 
 
-class _VAE_SDE(torch.nn.Module):
+class _VAE_NeuralDiffEq(torch.nn.Module):
     def __init__(
         self,
         X_dim=None,
@@ -28,7 +28,7 @@ class _VAE_SDE(torch.nn.Module):
         activation_function_dict={"LeakyReLU": torch.nn.LeakyReLU()},
         device=0,
     ):
-        super(_LinearVAE, self).__init__()
+        super(_VAE_NeuralDiffEq, self).__init__()
         
         self._X_dim = X_dim
         self._latent_dim = latent_dim

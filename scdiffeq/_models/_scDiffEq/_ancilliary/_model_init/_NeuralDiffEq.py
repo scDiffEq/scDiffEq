@@ -10,7 +10,7 @@ import flexinet
 import torch
 
 
-class _Neural_Differential_Equation(torch.nn.Module):
+class _NeuralDiffEq(torch.nn.Module):
 
     noise_type = "general"
     sde_type = "ito"
