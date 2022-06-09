@@ -44,7 +44,7 @@ class _scDiffEq:
         drift_dropout=0.1,
         diffusion_dropout=0.1,
         brownian_size=1,
-        reconstruction_loss_function=torch.nn.MSELoss(),
+        reconstruction_loss_function=funcs.loss.OTLoss("cpu"), # torch.nn.MSELoss(),
         reparameterization_loss_function=torch.nn.KLDivLoss(),
         save=False,
         save_path="X_train.pt",
@@ -118,6 +118,7 @@ class _scDiffEq:
     def train(self,
               t=torch.Tensor([0, 0.01, 0.02]),
               epochs=5,
+              pretrain_VAE_epochs=15,
               learning_rate=1e-3,
               validation_frequency=5,
               checkpoint_frequency=20,
@@ -127,6 +128,7 @@ class _scDiffEq:
         print("Train...")
         
         self._TrainingProgram = funcs.train.define_training_program(epochs,
+                                                                    pretrain_VAE_epochs,
                                                                     learning_rate,
                                                                     validation_frequency,
                                                                     checkpoint_frequency,

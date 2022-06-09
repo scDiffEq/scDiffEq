@@ -7,4 +7,5 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 from . import _io as io
 from . import _models as models
 from . import _plotting as pl
+from . import _preprocessing as pp
 from . import _tools as tl

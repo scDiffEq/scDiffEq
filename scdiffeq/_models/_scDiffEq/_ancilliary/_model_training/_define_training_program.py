@@ -6,6 +6,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 def _define_training_program(
     epochs,
+    pretrain_VAE_epochs,
     lr_schedule,
     validation_frequency,
     checkpoint_frequency,
@@ -17,6 +18,7 @@ def _define_training_program(
 
     return {
         "epochs": epochs,
+        "pretrain_VAE_epochs":pretrain_VAE_epochs,
         "lr_schedule": lr_schedule,
         "validation_frequency": validation_frequency,
         "checkpoint_frequency": checkpoint_frequency,
