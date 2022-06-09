@@ -35,7 +35,7 @@ class _OptimalTransportLoss:
     def __init__(self, device):
 
         self.device = device
-        self._OT_solver = SamplesLoss("sinkhorn", debias=True)
+        self._OT_solver = SamplesLoss("sinkhorn", backend="online", debias=True)
 
     def __call__(
         self, vector_a, vector_b, weight_a=None, weight_b=None, requires_grad=True
@@ -60,5 +60,6 @@ class _OptimalTransportLoss:
             )
             return loss
         else:
+#             print(self.vector_a.shape, self.vector_b.shape)
             loss = self._OT_solver(self.vector_a, self.vector_b)
             return loss

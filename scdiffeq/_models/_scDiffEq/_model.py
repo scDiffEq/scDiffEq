@@ -44,8 +44,9 @@ class _scDiffEq:
         drift_dropout=0.1,
         diffusion_dropout=0.1,
         brownian_size=1,
-        reconstruction_loss_function=torch.nn.MSELoss(),
+        reconstruction_loss_function=funcs.loss.OTLoss("cpu"), # torch.nn.MSELoss(),
         reparameterization_loss_function=torch.nn.KLDivLoss(),
+        augment_dim=None,
         save=False,
         save_path="X_train.pt",
     ):
@@ -64,6 +65,17 @@ class _scDiffEq:
         self._X_input_data = funcs.data.determine_input_data(
             self._adata, use_key=use_key, layer=use_layer
         )
+        
+        if augment_dim:
+            print(augment_dim)
+            self._adata, self._X_input_data = funcs.data.augment_X_input(self._adata,
+                                                                         self._use_key,
+                                                                         self._X_input_data,
+                                                                         augment_dim,
+                                                                        )
+        
+        print(self._X_input_data.shape)
+        
         self._lr = lr
         self._time_key = time_key
         self._save = save
@@ -118,6 +130,7 @@ class _scDiffEq:
     def train(self,
               t=torch.Tensor([0, 0.01, 0.02]),
               epochs=5,
+              pretrain_VAE_epochs=15,
               learning_rate=1e-3,
               validation_frequency=5,
               checkpoint_frequency=20,
@@ -127,6 +140,7 @@ class _scDiffEq:
         print("Train...")
         
         self._TrainingProgram = funcs.train.define_training_program(epochs,
+                                                                    pretrain_VAE_epochs,
                                                                     learning_rate,
                                                                     validation_frequency,
                                                                     checkpoint_frequency,

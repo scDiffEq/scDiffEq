@@ -57,10 +57,22 @@ def _progress_bar(TrainingProgram, epoch_count):
 def _execute_training_program(X, t, Learner, ModelManager, TrainingProgram):
     
     progress_bar = _progress_bar(TrainingProgram, Learner._training_epoch_count)
-    
+
+    try:
+        pretrain_VAE_epochs = TrainingProgram['pretrain_VAE_epochs']
+    except:
+        pretrain_VAE_epochs = 0
+            
+#     print("Using {} pretraining epochs".format(pretrain_VAE_epochs))
+            
     for epoch in progress_bar:
-        print("epoch: {}".format(epoch))
-        Learner.pass_train(X, t)
+        print(" - Epoch: {:<5}".format(epoch), end='')
+        
+        if epoch < pretrain_VAE_epochs:
+            Learner.pass_train(X, t, pretrain_VAE=True)
+        else:
+            Learner.pass_train(X, t, pretrain_VAE=False)
+        
         
 #         if epoch % TrainingProgram["validation_frequency"]:
 #             Learner.validate()

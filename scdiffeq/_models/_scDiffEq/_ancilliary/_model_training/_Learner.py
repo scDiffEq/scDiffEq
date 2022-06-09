@@ -32,24 +32,26 @@ class _Learner:
                 
         self._LossTracker = {"training":[], "validation":[]}
         self._training_epoch_count = 0
-        self._training_loss = []
 
-    def pass_train(self, X, t): #  X, t
-        
-        print("running learner.train()")
+    def pass_train(self, X, t, pretrain_VAE): #  X, t
 
-
-        self._optimizer.zero_grad()
-        loss = _batched_training_model_pass(X,
+        self._optimizer.zero_grad()        
+        self._X_pred, self._loss = _batched_training_model_pass(X,
                                             self._Model,
                                             self._optimizer,
                                             t,
                                             self._Model["reconst_loss_func"],
                                             self._Model["reparam_loss_func"],
                                             self._batch_size,
+                                            pretrain_VAE,
                                             self._device,
                                            )
-        self._training_loss.append(loss)
+        self._loss = self._loss.mean(0)
+        sum_loss = self._loss.sum().item()
+        print("| Training Loss: | d4: {:.3f} d6: {:.3f} | Total: {:.3f}".format(self._loss[0].item(),
+                                                                 self._loss[1].item(),
+                                                                 sum_loss))
+        self._LossTracker["training"].append(self._loss)
         self._training_epoch_count += 1
 
     def pass_validation(self, X, t):
