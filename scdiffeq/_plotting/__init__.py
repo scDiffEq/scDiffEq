@@ -1,2 +1,6 @@
 
-from ._plot_histogram_neu_mo_fate_bias import _plot_histogram_neu_mo_fate_bias as fate_bias_histogram
+__module_name__ = "__init__.py"
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["vinyard@g.harvard.edu",])
+
+from ._utils import _build_plot as _build
