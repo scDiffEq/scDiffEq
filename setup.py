@@ -24,7 +24,7 @@ setup(
         "geomloss>=0.2.4",
         "matplotlib>=3.5.0",
         "pandas>=1.3.5",
-	"pydk>=0.0.5",
+	"pydk>=0.0.51",
         "licorice_font>=0.0.3",
         "torch>=1.1.0",
         "torchdiffeq>=0.2.1",
