@@ -13,3 +13,8 @@ git clone https://github.com/mvinyard/sc-neural-diffeqs.git; cd ./sc-neural-diff
 
 pip install -e .
 ```
+
+```python
+# key functionalities
+
+```
