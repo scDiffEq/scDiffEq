@@ -6,8 +6,8 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import local dependencies #
 # ------------------------- #
-from .._model_utilities._count_model_params import _count_model_params
-from .._model_utilities._transfer_attributes import _transfer_attributes
+from .._model_utils._count_model_params import _count_model_params
+from .._model_utils._transfer_attributes import _transfer_attributes
 
 
 class _ModelManager:
