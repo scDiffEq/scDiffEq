@@ -1,6 +1,35 @@
-
 # Models
 
-### Explanation of organization
+```python
+import scdiffeq as sdq
+```
 
-This sub-package is designed to contain all "models". Hypothetically other models could be placed within this sub-package and the structure would remain hierarchical wherein each model has its own sub-package directory (e.g., scDiffEq). For now, there is a single model in the models sub-package (scDiffEq). This may be found in its own sub-package directory, "_scDiffEq". Within this sub-package is the main module ("model") as well as the ancilliary functions required for use of the model. 
+The organizational goal of this module is to give a user/developer the ability to setup models in four ways:
+
+1. The primary model we propose: `scDiffEq`
+
+```python
+model = sdq.models.scDiffEq()
+model.fit()
+```
+
+2. The contemporary model: `PRESCIENT` implemented using pytorch-lightning.
+
+```python
+model = sdq.models.PRESCIENT()
+model.fit()
+```
+
+3. A custom model class that can be defined through arguments passed through: 
+
+```python
+model = sdq.models.build(**model_kwargs)
+model.fit()
+```
+
+4. The base class, named `BaseModel`, from which all other models may be constructed. This is the class that is called underneath the other three.
+
+```python
+model = sdq.models.build(**model_kwargs)
+model.fit()
+```

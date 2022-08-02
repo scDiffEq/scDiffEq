@@ -15,24 +15,9 @@ scdiffeq/_io/__init__.py
 scdiffeq/_io/_read_h5ad.py
 scdiffeq/_models/README.md
 scdiffeq/_models/__init__.py
-scdiffeq/_models/_scDiffEq/README.md
-scdiffeq/_models/_scDiffEq/_model.py
-scdiffeq/_models/_scDiffEq/_ancilliary/README.md
-scdiffeq/_models/_scDiffEq/_ancilliary/_data_functions/__init__.py
-scdiffeq/_models/_scDiffEq/_ancilliary/_data_functions/_augment_time.py
-scdiffeq/_models/_scDiffEq/_ancilliary/_data_functions/_determine_input_data.py
-scdiffeq/_models/_scDiffEq/_ancilliary/_data_functions/_fetch_batched_data_no_lineages.py
-scdiffeq/_models/_scDiffEq/_ancilliary/_loss_functions/_Loss.py
-scdiffeq/_models/_scDiffEq/_ancilliary/_loss_functions/_OptimalTransportLoss.py
-scdiffeq/_models/_scDiffEq/_ancilliary/_loss_functions/__init__.py
+scdiffeq/_models/_scDiffEq.py
 scdiffeq/_plotting/README.md
 scdiffeq/_plotting/__init__.py
-<<<<<<< HEAD
-scdiffeq/_tools/__init__.py
-scdiffeq/_utilities/__init__.py
-scdiffeq/_utilities/_cuda_device.py
-scdiffeq/_utilities/_filter_fragmented_lineages.py
-=======
 scdiffeq/_plotting/_diffusion.py
 scdiffeq/_plotting/_drift.py
 scdiffeq/_plotting/_dynamics.py
@@ -44,4 +29,3 @@ scdiffeq/_tools/__init__.py
 scdiffeq/_tools/_pca.py
 scdiffeq/_tools/_quantify_dynamics.py
 scdiffeq/_tools/_umap.py
->>>>>>> 9b3c4201bd94b285a9532e4da9a3c22f8e1cdb66

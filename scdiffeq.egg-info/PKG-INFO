@@ -6,7 +6,6 @@ Home-page: https://github.com/pinellolab/sc-neural-ODEs
 Author: Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard
 Author-email: mvinyard@broadinstitute.org
 License: MIT
-Platform: UNKNOWN
 Classifier: Development Status :: 2 - Pre-Alpha
 Classifier: Programming Language :: Python :: 3.7
 Classifier: Intended Audience :: Science/Research
@@ -15,8 +14,8 @@ Requires-Python: >3.7.0
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
-# ![scdiffeq-logo](docs/images/scdiffeq.logo.svg)
-
+# <a href=""><img src=docs/images/scdiffeq.logo.svg alt="scdiffeq-logo" width="320"/>
+  
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
 [![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -31,4 +30,7 @@ git clone https://github.com/mvinyard/sc-neural-diffeqs.git; cd ./sc-neural-diff
 pip install -e .
 ```
 
+```python
+# key functionalities
 
+```

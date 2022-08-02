@@ -31,6 +31,7 @@ setup(
         "torchsde>=0.2.5",
         "scikit-learn>=1.0.2",
         "umap-learn>=0.5.2",
+	"pytorch_lightning>=1.6.5",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
