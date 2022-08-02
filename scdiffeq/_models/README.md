@@ -23,13 +23,13 @@ model.fit()
 3. A custom model class that can be defined through arguments passed through: 
 
 ```python
-model = sdq.models.build(**model_kwargs)
+model = sdq.models.build_custom(**model_kwargs)
 model.fit()
 ```
 
 4. The base class, named `BaseModel`, from which all other models may be constructed. This is the class that is called underneath the other three.
 
 ```python
-model = sdq.models.build(**model_kwargs)
+model = sdq.models.BaseModel()
 model.fit()
 ```
