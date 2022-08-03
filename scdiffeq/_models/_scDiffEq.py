@@ -1,6 +1,11 @@
 
-__module_name__ = "__init__.py"
+__module_name__ = "_scDiffEq.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
-# from ._utils import _build_plot as _build
+
+class scDiffEq:
+    
+    def __init__(self):
+        
+        ...
