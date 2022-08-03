@@ -19,7 +19,7 @@ from ._ancilliary._shape_tools import _restack_x
 loss_func = WassersteinDistance() # this will eventually be modularized / removed
 
 class BaseModel(LightningModule):
-    def __init__(self, func, t=torch.Tensor([2, 4, 6]), dt=0.5, lr=1e-3):
+    def __init__(self, func, train_t, test_t, dt=0.5, lr=1e-3):
         
         """
         Parameters:
@@ -33,11 +33,12 @@ class BaseModel(LightningModule):
 
         self.func = func
         self._lr = lr
-        self._t = t
+        self._train_t = train_t
+        self._test_t = test_t
         self._dt = dt
         self._test_loss_list = []
-
-    def forward(self, x):
+        
+    def forward(self, x, t):
 
         """
         Parameters:
@@ -54,8 +55,8 @@ class BaseModel(LightningModule):
         """
 
         x0 = x[:, 0, :]
-        x_hat = torchsde.sdeint(self.func, x0, self._t, dt=self._dt)
-        x_obs = _restack_x(x, self._t)
+        x_hat = torchsde.sdeint(self.func, x0, t, dt=self._dt)
+        x_obs = _restack_x(x, t)
 
         return x_hat, x_obs
 
@@ -71,12 +72,14 @@ class BaseModel(LightningModule):
         (1) Required method of the pytorch_lightning.LightningModule subclass.
         """
 
-        x_hat, x_obs = self.forward(x)
-        xy_loss = loss_func.compute(x_hat, x_obs, self._t)
-
-        self.log("train_loss_4", xy_loss.detach()[0])
-        self.log("train_loss_6", xy_loss.detach()[1])
-
+        x_hat, x_obs = self.forward(x, self._train_t)
+        xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
+        if xy_loss.shape[0] > 1:
+            self.log("train_loss_4", xy_loss.detach()[0])
+            self.log("train_loss_6", xy_loss.detach()[1])
+        else:
+            self.log("train_loss_6", xy_loss.detach()[0])
+            
         return xy_loss.sum()
 
     def validation_step(self, x, idx):
@@ -92,14 +95,17 @@ class BaseModel(LightningModule):
         (1) Currently the callback_metrics are very brittle. This must be generalized.
         """
         torch.set_grad_enabled(True)
-        x_hat, x_obs = self.forward(x)
-        xy_loss = loss_func.compute(x_hat, x_obs, self._t)
-        self.log("val_loss_4", xy_loss.detach()[0])
-        self.log("val_loss_6", xy_loss.detach()[1])
-
+        x_hat, x_obs = self.forward(x, self._train_t)
+        xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
+        if xy_loss.shape[0] > 1:
+            self.log("val_loss_4", xy_loss.detach()[0])
+            self.log("val_loss_6", xy_loss.detach()[1])
+        else:
+            self.log("val_loss_6", xy_loss.detach()[0])
+            
         return xy_loss.sum()
 
-    def test_step(self, x, idx1):
+    def test_step(self, x, idx):
 
         """
         
@@ -111,8 +117,8 @@ class BaseModel(LightningModule):
             We need to make a more general forward function for these. 
         """
         torch.set_grad_enabled(True)
-        self.x_hat, self.x_obs = self.forward(x)
-        xy_loss = loss_func.compute(self.x_hat, self.x_obs, self._t)
+        self.x_hat, self.x_obs = self.forward(x, self._test_t)
+        xy_loss = loss_func.compute(self.x_hat, self.x_obs, self._test_t)
         self.log("test_loss", xy_loss.detach())
 
         return xy_loss

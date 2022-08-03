@@ -7,6 +7,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # import packages #
 # --------------- #
 from pytorch_lightning import Trainer, utilities, loggers
+import numpy as np
 import torch
 
 
@@ -18,8 +19,12 @@ from ._core._BaseModel import BaseModel
 class CustomModel(BaseModel):
     def __init__(
         self,
+        adata,
         func,
+        lr=1e-3,
+        dt=0.5,
         epochs=2500,
+        time_key="Time point",
         gpus=torch.cuda.device_count(),
         log_path="./",
         flush_logs_every_n_steps=1,
@@ -27,7 +32,17 @@ class CustomModel(BaseModel):
         logger_kwargs={},
         trainer_kwargs={},
     ):
-        super(CustomModel, self).__init__(func)
+        train_adata = adata[adata.obs['train']]
+        test_adata  = adata[adata.obs['test']]
+        
+        train_t = torch.Tensor(np.sort(train_adata.obs[time_key].unique()))
+        test_t  = torch.Tensor(np.sort(test_adata.obs[time_key].unique()))
+                
+        super(CustomModel, self).__init__(func,
+                                          train_t=train_t,
+                                          test_t=test_t,
+                                          dt=dt,
+                                          lr=lr)
 
         logger = loggers.CSVLogger(
             log_path, flush_logs_every_n_steps=flush_logs_every_n_steps, **logger_kwargs

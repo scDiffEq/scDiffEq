@@ -25,6 +25,7 @@ setup(
 	"pydk>=0.0.51",
         "licorice_font>=0.0.3",
         "torch>=1.12.0",
+	"neural-diffeqs>=0.0.31",
         "torchdiffeq>=0.2.1",
         "torchsde>=0.2.5",
 	"torch-adata>=0.0.2",
