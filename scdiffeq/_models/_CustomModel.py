@@ -15,6 +15,8 @@ import torch
 # ------------------------- #
 from ._core._BaseModel import BaseModel
 
+from ._core._lightning_callbacks import SaveHyperParamsYAML
+
 
 class CustomModel(BaseModel):
     def __init__(
@@ -22,6 +24,7 @@ class CustomModel(BaseModel):
         adata,
         func,
         lr=1e-3,
+        seed=0,
         dt=0.5,
         epochs=2500,
         time_key="Time point",
@@ -42,7 +45,9 @@ class CustomModel(BaseModel):
                                           train_t=train_t,
                                           test_t=test_t,
                                           dt=dt,
-                                          lr=lr)
+                                          lr=lr,
+                                          seed=seed,
+                                         )
 
         logger = loggers.CSVLogger(
             log_path, flush_logs_every_n_steps=flush_logs_every_n_steps, **logger_kwargs
@@ -52,6 +57,7 @@ class CustomModel(BaseModel):
             max_epochs=epochs,
             gpus=gpus,
             log_every_n_steps=log_every_n_steps,
+            callbacks=[SaveHyperParamsYAML()],
             **trainer_kwargs
         )
 

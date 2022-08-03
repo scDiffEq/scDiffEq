@@ -105,5 +105,6 @@ def _lazy_LARRY(
         val_batch_size,
         test_batch_size,
     )
+    dataset["task"] = task
 
     return adata, dataset

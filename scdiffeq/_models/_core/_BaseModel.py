@@ -16,10 +16,12 @@ import torch
 from ._ancilliary._WassersteinDistance import WassersteinDistance
 from ._ancilliary._shape_tools import _restack_x
 
+
 loss_func = WassersteinDistance() # this will eventually be modularized / removed
 
+
 class BaseModel(LightningModule):
-    def __init__(self, func, train_t, test_t, dt=0.5, lr=1e-3):
+    def __init__(self, func, train_t, test_t, dt=0.5, lr=1e-3, seed=0):
         
         """
         Parameters:
@@ -30,6 +32,10 @@ class BaseModel(LightningModule):
         """
         
         super(BaseModel, self).__init__()
+        self._seed = seed
+        torch.manual_seed(self._seed)
+        
+        self.hparams.update({"seed": self._seed})
 
         self.func = func
         self._lr = lr
@@ -37,6 +43,7 @@ class BaseModel(LightningModule):
         self._test_t = test_t
         self._dt = dt
         self._test_loss_list = []
+        
         
     def forward(self, x, t):
 
@@ -94,6 +101,7 @@ class BaseModel(LightningModule):
         ------
         (1) Currently the callback_metrics are very brittle. This must be generalized.
         """
+                
         torch.set_grad_enabled(True)
         x_hat, x_obs = self.forward(x, self._train_t)
         xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
@@ -135,5 +143,6 @@ class BaseModel(LightningModule):
         ------
         (1) Required method of the pytorch_lightning.LightningModule subclass.
         """
+        
         optimizer = torch.optim.RMSprop(self.parameters(), lr=self._lr)
         return optimizer
