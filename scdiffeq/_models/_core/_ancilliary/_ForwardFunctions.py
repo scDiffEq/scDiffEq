@@ -6,6 +6,11 @@ import torch
 
 class ForwardFunctions:
     
+    """
+    Not sure if this is the best solution, but we can add the PRESCIENT forward
+    functions to this as well.
+    """
+    
     def __init__(self, func, t_scale=0.02):
         
         self.t_scale = t_scale
