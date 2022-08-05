@@ -28,7 +28,7 @@ class CustomModel(BaseModel):
         lr=1e-3,
         seed=0,
         dt=0.5,
-        t_scale=None,
+        t_scale=0.02,
         epochs=2500,
         optimizer=torch.optim.RMSprop,
         time_key="Time point",

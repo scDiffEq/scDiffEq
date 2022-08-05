@@ -24,10 +24,10 @@ class ForwardFunctions:
         else:
             print("must define a drift func")
 
-    def step(self, func, x0, t, **kwargs):
+    def step(self, func, x0, t, kwargs):
                 
         if self.require_dt:
-            return self.int(func, x0, t, kwargs['dt'])
+            return self.int(func, x0, t, **kwargs)
         else:
             device = torch.get_device(x0)
             _t = (pydk.min_max_normalize(t)*self.t_scale).to(device)

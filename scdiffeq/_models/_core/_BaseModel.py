@@ -50,11 +50,11 @@ class BaseModel(LightningModule):
         self.hparam_dict = {}
         self.hparam_dict["seed"] = self._seed
         self.func = func
-        
-        if t_scale:
-            self._t_scale = t_scale
+        self._t_scale = t_scale
+        if not (func.mu and func.sigma):
             self.hparam_dict['t_scale'] = self._t_scale
-            self.ForwardFunc = ForwardFunctions(self.func, self._t_scale)
+        
+        self.ForwardFunc = ForwardFunctions(self.func, self._t_scale)
             
         self._lr = lr
         self._train_t = train_t
@@ -91,7 +91,7 @@ class BaseModel(LightningModule):
         """
 
         x0 = x[:, 0, :]
-        x_hat = self.ForwardFunc.step(self.func, x0, t,  **{"dt":self._dt})
+        x_hat = self.ForwardFunc.step(self.func, x0, t, {"dt":self._dt})
         x_obs = _restack_x(x, t)
 
         return x_hat, x_obs
