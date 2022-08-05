@@ -28,7 +28,8 @@ class BaseModel(LightningModule):
                  train_t,
                  test_t,
                  optimizer=torch.optim.RMSprop,
-                 dt=0.5,
+                 dt=0.1,
+                 burn_in_steps=100,
                  t_scale=0.02,
                  lr=1e-3,
                  seed=0):
@@ -44,7 +45,9 @@ class BaseModel(LightningModule):
         """
         
         super(BaseModel, self).__init__()
-        
+                
+            
+        self._tau = 1e-6
         self._seed = seed
         torch.manual_seed(self._seed)
         self.hparam_dict = {}
@@ -63,6 +66,7 @@ class BaseModel(LightningModule):
         self._test_loss_list = []
         
         self._optimizer = optimizer
+        
         
         for key, value in count_params(self).items():
             self.hparam_dict[key]=value
@@ -96,6 +100,25 @@ class BaseModel(LightningModule):
 
         return x_hat, x_obs
 
+    def _fit_regularizer(self, x):
+
+        x_final = self._X_final["X"].to(self.device)
+        n_final = self._X_final["n_cells"]
+        xf = x[:, -1, :]
+        size_factor = n_final / xf.shape[0]
+
+        burn_t_span = self._burn_t_final - self._X_final["t"]
+        burn_dt = dt = burn_t_span / self._burn_in_steps
+        burn_t = torch.Tensor([self._X_final["t"], self._burn_t_final])
+
+        X_burn = self.ForwardFunc.step(self.func, xf, burn_t, {"dt": burn_dt})[-1]
+        burn_psi = size_factor * self.func.psi_mu(X_burn).sum()
+        final_psi = -1 * self.func.psi_mu(x_final).sum()
+
+        reg_psi = (final_psi + burn_psi) * self._tau
+
+        return reg_psi
+
     def training_step(self, x):
 
         """
@@ -115,8 +138,13 @@ class BaseModel(LightningModule):
             self.log("train_loss_d6", xy_loss.detach()[1])
         else:
             self.log("train_loss_d6", xy_loss.detach()[0])
-        
-        return xy_loss.sum()
+            
+        if self._regularize:
+            reg_loss = self._fit_regularizer(x)
+            total_loss = reg_loss + xy_loss.sum()
+            return total_loss
+        else:
+            return xy_loss.sum()
 
     def validation_step(self, x, idx):
 

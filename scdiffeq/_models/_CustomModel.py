@@ -20,6 +20,22 @@ from ._core._lightning_callbacks import SaveHyperParamsYAML, timepoint_recovery_
 
 #### ------------------- ####
 
+
+
+def _get_t_final(adata, device, time_key="Time point", use_key="X_pca"):
+
+    df = adata.obs.copy()
+
+    time_cell_counts = df[time_key].value_counts()
+    t_final = time_cell_counts.idxmax()
+    n_cells_t_final = time_cell_counts.max()
+    X = torch.Tensor(
+        adata[df.loc[df[time_key] == t_final].index].obsm[use_key]
+    )
+
+    return {"X": X, "n_cells": n_cells_t_final, "t": t_final}
+
+
 class CustomModel(BaseModel):
     def __init__(
         self,
@@ -29,6 +45,7 @@ class CustomModel(BaseModel):
         seed=0,
         dt=0.5,
         t_scale=0.02,
+        regularize=False,
         epochs=2500,
         optimizer=torch.optim.RMSprop,
         time_key="Time point",
@@ -79,6 +96,11 @@ class CustomModel(BaseModel):
             callbacks=self._callback_list,
             **trainer_kwargs
         )
+        
+        self._regularize = regularize
+        self._burn_t_final=16
+        self._burn_in_steps=2
+        self._X_final = _get_t_final(train_adata, self.device, time_key="Time point", use_key="X_pca")
 
     def fit(self, dataset):
 
