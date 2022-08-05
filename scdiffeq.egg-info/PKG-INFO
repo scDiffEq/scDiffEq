@@ -1,11 +1,12 @@
 Metadata-Version: 2.1
 Name: scdiffeq
 Version: 0.0.0
-Summary: scDiffEq: single cell dynamics using neural ODEs.
-Home-page: https://github.com/pinellolab/sc-neural-ODEs
+Summary: scDiffEq: modelling single-cell dynamics using neural differential equations.
+Home-page: https://github.com/mvinyard/sc-neural-diffeqs
 Author: Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard
 Author-email: mvinyard@broadinstitute.org
 License: MIT
+Platform: UNKNOWN
 Classifier: Development Status :: 2 - Pre-Alpha
 Classifier: Programming Language :: Python :: 3.7
 Classifier: Intended Audience :: Science/Research
@@ -34,3 +35,5 @@ pip install -e .
 # key functionalities
 
 ```
+
+
