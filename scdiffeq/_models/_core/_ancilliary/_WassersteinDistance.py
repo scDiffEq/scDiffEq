@@ -54,13 +54,13 @@ class WassersteinDistance:
     def __call__(
         self, vector_a, vector_b, weight_a=None, weight_b=None, requires_grad=True
     ):
-
+        
         self.vector_a = vector_a.float().to(self.device)
         self.vector_b = vector_b.float().to(self.device)
 
         if requires_grad:
             vector_a.requires_grad_()
-
+        
         if weight_a != None and weight_b != None:
             self.weight_a = weight_a.float().to(self.device)
             self.weight_b = weight_b.float().to(self.device)
@@ -68,7 +68,6 @@ class WassersteinDistance:
             if requires_grad:
                 self.weight_a.requires_grad_()
                 self.weight_b.requires_grad_()
-
             loss = self._OT_solver(
                 self.weight_a, self.vector_a, self.weight_b, self.vector_b
             )
@@ -78,6 +77,7 @@ class WassersteinDistance:
             return loss
 
     def compute(self, x_hat, x_obs, t):
+        
         return torch.stack(
             [self.__call__(x_hat[i], x_obs[i]) for i in range(1, len(t))]
         )

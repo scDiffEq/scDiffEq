@@ -20,7 +20,8 @@ from ._core._lightning_callbacks import SaveHyperParamsYAML, timepoint_recovery_
 
 #### ------------------- ####
 
-
+def _timespan(t):
+    return (t.max() - t.min()).item()
 
 def _get_t_final(adata, device, time_key="Time point", use_key="X_pca"):
 
@@ -43,7 +44,8 @@ class CustomModel(BaseModel):
         func,
         lr=1e-3,
         seed=0,
-        dt=0.5,
+        dt=0.1,
+        alpha=0.5,
         t_scale=0.02,
         regularize=False,
         epochs=2500,
@@ -59,7 +61,6 @@ class CustomModel(BaseModel):
         checkpoint_kwargs={},
     ):
         
-#         log_path = os.path.join(log_path) # , "lightning_logs")
         pydk.mkdir_flex(log_path)
         
         train_adata = adata[adata.obs['train']]
@@ -102,9 +103,13 @@ class CustomModel(BaseModel):
             **trainer_kwargs
         )
         
+        self._alpha = alpha
         self._regularize = regularize
         self._burn_t_final=16
         self._burn_in_steps=2
+        self._tspan = {}
+        self._tspan['train'] = _timespan(self._train_t)
+        self._tspan['test']  = _timespan(self._test_t)
         self._X_final = _get_t_final(train_adata, self.device, time_key="Time point", use_key="X_pca")
 
     def fit(self, dataset):

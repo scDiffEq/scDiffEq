@@ -89,7 +89,9 @@ def _lazy_LARRY(
     
     
     if task == "fate_prediction":
+        pp.annotate_train_test(adata)
         pp.annotate_unique_test_train_lineages(adata)
+        adata.obs.index = adata.obs.index.astype(str)
     elif task == "timepoint_recovery":
         _annotate_timepoint_recovery_train_test(adata)
     else:

@@ -10,6 +10,7 @@ from pytorch_lightning import LightningModule
 import torchsde # will be removed eventually
 import torch
 import time
+import numpy as np
 
 
 # import local dependencies #
@@ -21,6 +22,17 @@ from ._ancilliary._ForwardFunctions import ForwardFunctions
 
 
 loss_func = WassersteinDistance() # this will eventually be modularized / removed
+
+def _initialize_potential_param(net):
+    potential_param = list(net.parameters())[-1].data
+    potential_param = torch.zeros(potential_param.shape)
+            
+def _configure_psi(func):
+    if hasattr(func, "psi_mu"):
+        return func.psi_mu
+    else:
+        _initialize_potential_param(func)
+        return func
 
 class BaseModel(LightningModule):
     def __init__(self,
@@ -54,7 +66,8 @@ class BaseModel(LightningModule):
         self.hparam_dict["seed"] = self._seed
         self.func = func
         self._t_scale = t_scale
-        if not (func.mu and func.sigma):
+        
+        if not (hasattr(func, "mu") and hasattr(func, "sigma")):
             self.hparam_dict['t_scale'] = self._t_scale
         
         self.ForwardFunc = ForwardFunctions(self.func, self._t_scale)
@@ -64,6 +77,8 @@ class BaseModel(LightningModule):
         self._test_t = test_t
         self._dt = dt
         self._test_loss_list = []
+        
+        self.psi = _configure_psi(self.func)
         
         self._optimizer = optimizer
         
@@ -78,7 +93,7 @@ class BaseModel(LightningModule):
             self.hparam_dict['device'] = 'cpu'
         
         
-    def forward(self, x, t):
+    def forward(self, x0, t, dt, tspan):
 
         """
         Parameters:
@@ -94,11 +109,14 @@ class BaseModel(LightningModule):
         (1) Add other forward-stepping functions: odeint, prescient.forward_step()
         """
 
-        x0 = x[:, 0, :]
-        x_hat = self.ForwardFunc.step(self.func, x0, t, {"dt":self._dt})
-        x_obs = _restack_x(x, t)
-
-        return x_hat, x_obs
+        return self.ForwardFunc.step(self.func,
+                                     x0,
+                                     t,
+                                     dt,
+                                     stdev=self._alpha,
+                                     tspan=tspan,
+                                     device=self.device,
+                                    )
 
     def _fit_regularizer(self, x):
 
@@ -110,10 +128,10 @@ class BaseModel(LightningModule):
         burn_t_span = self._burn_t_final - self._X_final["t"]
         burn_dt = dt = burn_t_span / self._burn_in_steps
         burn_t = torch.Tensor([self._X_final["t"], self._burn_t_final])
-
-        X_burn = self.ForwardFunc.step(self.func, xf, burn_t, {"dt": burn_dt})[-1]
-        burn_psi = size_factor * self.func.psi_mu(X_burn).sum()
-        final_psi = -1 * self.func.psi_mu(x_final).sum()
+        
+        X_burn = self.forward(xf, burn_t, burn_dt, burn_t_span)
+        burn_psi = size_factor * self.psi(X_burn).sum()
+        final_psi = -1 * self.psi(x_final).sum()
 
         reg_psi = (final_psi + burn_psi) * self._tau
 
@@ -131,7 +149,9 @@ class BaseModel(LightningModule):
         (1) Required method of the pytorch_lightning.LightningModule subclass.
         """
 
-        x_hat, x_obs = self.forward(x, self._train_t)
+        x0 = x[:, 0, :]
+        x_obs = _restack_x(x, self._train_t)
+        x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
         xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
         if xy_loss.shape[0] > 1:
             self.log("train_loss_d4", xy_loss.detach()[0])
@@ -160,7 +180,9 @@ class BaseModel(LightningModule):
         """
                 
         torch.set_grad_enabled(True)
-        x_hat, x_obs = self.forward(x, self._train_t)
+        x0 = x[:, 0, :]
+        x_obs = _restack_x(x, self._train_t)
+        x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
         xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
         if xy_loss.shape[0] > 1:
             self.log("val_loss_d4", xy_loss.detach()[0])
@@ -183,8 +205,10 @@ class BaseModel(LightningModule):
         """
         
         torch.set_grad_enabled(True)
-        self.x_hat, self.x_obs = self.forward(x, self._test_t)
-        xy_loss = loss_func.compute(self.x_hat, self.x_obs, self._test_t)
+        x0 = x[:, 0, :]
+        x_obs = _restack_x(x, self._test_t)
+        x_hat = self.forward(x0, self._test_t, self._dt, self._tspan['test'])
+        xy_loss = loss_func.compute(x_hat, x_obs, self._test_t)
         self.log("test_loss", xy_loss.detach())
 
         return xy_loss
