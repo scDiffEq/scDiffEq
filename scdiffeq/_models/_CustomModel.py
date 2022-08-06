@@ -88,10 +88,15 @@ class CustomModel(BaseModel):
             model_checkpoint = timepoint_recovery_checkpoint(ckpt_path, **checkpoint_kwargs)
             self._callback_list.append(model_checkpoint)
             
+        accelerator = None
+        if torch.cuda.is_available():
+            accelerator = "gpu"
+            
         self.trainer = Trainer(
             logger=self._logger,
             max_epochs=epochs,
-            gpus=gpus,
+            accelerator=accelerator,
+            devices=1,
             log_every_n_steps=log_every_n_steps,
             callbacks=self._callback_list,
             **trainer_kwargs

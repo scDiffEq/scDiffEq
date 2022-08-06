@@ -122,3 +122,101 @@ def _get_best_epoch(summary):
         return best_epoch, best_epoch_path
     except:
         return None, None
+    
+#### ------------------------------------------------------------------------ ####
+    
+import ast
+import torch
+from neural_diffeqs import neural_diffeq
+from collections import OrderedDict
+
+
+def _filter_empty_str_lines(lines):
+    [lines.remove("") for i in range(lines.count(""))]
+
+
+def _get_model_dict(lines):
+    model_dict = {}
+    for l in lines:
+        if l.startswith(tuple(("mu", "sigma"))):
+            name = l.split("=")
+            key = name[0].strip(" ").strip(",")
+            val = name[1].strip(" ").strip(",")
+            if key != val:
+                if "dropout" in key:
+                    model_dict[key] = int(val)
+                elif "activation" in key:
+                    model_dict[key] = getattr(
+                        torch.nn, val.strip("torch.nn").strip("()")
+                    )()
+                else:
+                    model_dict[key] = ast.literal_eval(val)
+    return model_dict
+
+
+class File:
+    def __init__(self, path=None):
+        self._file_dict = {}
+        self._path = path
+        self._f = open(self._path)
+        self._readlines = self._f.readlines()
+        self._f.close()
+        self._lines = []
+        for line in self._readlines:
+            self._lines.append(line.strip("\n"))
+
+        _filter_empty_str_lines(self._lines)
+
+    def filter_startswith(self, skip_keys=("#", "import", "from", "for")):
+        """
+        clean up the available lines, skipping those that you know you do not want
+
+        Even though we could fetch the lines we actually want based on keywords like "mu"
+        and "sigma", I like including this step separately because I am anticipating future
+        debugging of this perhaps fragile function.
+        """
+
+        lines = []
+        for line in self._lines:
+            if not line.startswith(tuple(skip_keys)):
+                lines.append(line.strip(" "))
+        self._lines = lines
+
+    def model_dict(self):
+        """
+        builds a dictionary of the arguments used to construct the model.
+
+        These are meant to be passed as **kwargs to the neural_diffeq package.
+        """
+        return _get_model_dict(self._lines)
+
+
+def _reconstruct_model_kwargs_from_script(path):
+    f = File(path)
+    f.filter_startswith()
+    return f.model_dict()
+
+
+def _rename_state_dict_keys(state_dict, prefix="func."):
+
+    revised_dict = {}
+    for key in state_dict.keys():
+        revised_dict[key.strip(prefix)] = state_dict[key]
+    return OrderedDict(revised_dict)
+
+from ..._models import build_custom
+
+def _load_ckpt_state(adata, src_path, ckpt_path, device):
+    
+    """returns a lightning model"""
+
+    model_kwargs = _reconstruct_model_kwargs_from_script(src_path)
+    model = neural_diffeq(**model_kwargs)
+
+    state = torch.load(ckpt_path, map_location=device)
+    state_dict = _rename_state_dict_keys(state["state_dict"])
+    model.load_state_dict(state_dict)
+    
+    return build_custom(adata, model)
+
+#### ------------------------------------------------------------------------ ####

@@ -1,7 +1,7 @@
 
 import torch
 
-def _test_model(model):
+def test_model(model):
     
     """
     assumes model already has the attribute:
