@@ -37,11 +37,14 @@ def _plot_training_metrics(model_path, seed=0, smooth=0):
 
     train_loss = metrics_df["train_loss_d6"]
     val_loss = metrics_df["val_loss_d6"]
+    
+    ceil = metrics_df[['train_loss_d6', 'val_loss_d6']].values.max()
 
     if smooth:
         train_loss = pydk.smooth(train_loss, smooth, smooth)
         val_loss = pydk.smooth(val_loss, smooth, smooth)
 
+    ax.set_ylim(0, ceil)
     ax.plot(train_loss, label="Training Loss", zorder=3, lw=2, alpha=1, color="#540d6e")
     ax.plot(val_loss, label="Validation Loss", zorder=4, lw=3, alpha=1, color="#ffba49")
     ax.fill_between(
@@ -52,6 +55,7 @@ def _plot_training_metrics(model_path, seed=0, smooth=0):
         color="#540d6e",
         zorder=2,
     )
+    ax.set_title(model_path)
 
     try:
         train_summary = _read_training_summary(model_path, seed=seed)
@@ -206,17 +210,25 @@ def _rename_state_dict_keys(state_dict, prefix="func."):
 
 from ..._models import build_custom
 
-def _load_ckpt_state(adata, src_path, ckpt_path, device):
+def _load_ckpt_state(adata, src_path, ckpt_path, alpha=0.5, use_gpus=None):
     
     """returns a lightning model"""
-
-    model_kwargs = _reconstruct_model_kwargs_from_script(src_path)
-    model = neural_diffeq(**model_kwargs)
-
-    state = torch.load(ckpt_path, map_location=device)
-    state_dict = _rename_state_dict_keys(state["state_dict"])
-    model.load_state_dict(state_dict)
     
-    return build_custom(adata, model)
+    
+    if use_gpus != None:
+        device = "cuda:{}".format(min(use_gpus))
+    else:
+        device = "cpu"
+        
+    model_kwargs = _reconstruct_model_kwargs_from_script(src_path)
+    func = neural_diffeq(**model_kwargs)
+    print("loading to device: {}".format(device))
+    state = torch.load(ckpt_path, map_location=device)
+#     state_dict = _rename_state_dict_keys(state["state_dict"])
+    
+    model = build_custom(adata, func, alpha=alpha, use_gpus=use_gpus)
+    model.load_state_dict(state['state_dict'])
+    
+    return model
 
 #### ------------------------------------------------------------------------ ####

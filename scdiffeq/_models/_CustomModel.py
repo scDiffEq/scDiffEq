@@ -17,6 +17,7 @@ import pydk
 # ------------------------- #
 from ._core._BaseModel import BaseModel
 from ._core._lightning_callbacks import SaveHyperParamsYAML, timepoint_recovery_checkpoint, TrainingSummary
+from ._core._ancilliary._SinkhornDivergence import SinkhornDivergence
 
 #### ------------------- ####
 
@@ -36,6 +37,21 @@ def _get_t_final(adata, device, time_key="Time point", use_key="X_pca"):
 
     return {"X": X, "n_cells": n_cells_t_final, "t": t_final}
 
+#### ------------------------------------ ####
+
+loss_func = SinkhornDivergence()
+
+def _format_test_data_predictions(test_results):
+    x_obs = torch.hstack([torch.Tensor(xi) for xi in test_results["x_obs"]])
+    x_hat = torch.hstack([torch.Tensor(xi) for xi in test_results["x_hat"]])
+    return x_obs, x_hat
+
+def _compute_test_loss(test_results, test_t):
+    
+    x_obs, x_hat = _format_test_data_predictions(test_results)
+    return loss_func.compute(x_obs, x_hat, test_t)
+
+#### ------------------------------------ ####
 
 class CustomModel(BaseModel):
     def __init__(
@@ -43,8 +59,10 @@ class CustomModel(BaseModel):
         adata,
         func,
         lr=1e-3,
+        use_gpus=[0],
         seed=0,
         dt=0.1,
+        tau=1e-6,
         alpha=0.5,
         t_scale=0.02,
         regularize=False,
@@ -69,7 +87,9 @@ class CustomModel(BaseModel):
         train_t = torch.Tensor(np.sort(train_adata.obs[time_key].unique()))
         test_t  = torch.Tensor(np.sort(test_adata.obs[time_key].unique()))
                 
-        super(CustomModel, self).__init__(func,
+        super(CustomModel, self).__init__(func=func,
+                                          tau=tau,
+                                          alpha=alpha,
                                           train_t=train_t,
                                           test_t=test_t,
                                           optimizer=optimizer,
@@ -78,7 +98,7 @@ class CustomModel(BaseModel):
                                           lr=lr,
                                           seed=seed,
                                          )
-        
+                
         self._callback_list = [SaveHyperParamsYAML(), TrainingSummary()]
         
         self._logger = loggers.CSVLogger(
@@ -90,20 +110,22 @@ class CustomModel(BaseModel):
             self._callback_list.append(model_checkpoint)
             
         accelerator = None
+        _use_gpus=None
         if torch.cuda.is_available():
             accelerator = "gpu"
+            _use_gpus = use_gpus
+            
             
         self.trainer = Trainer(
             logger=self._logger,
             max_epochs=epochs,
             accelerator=accelerator,
-            devices=1,
+            devices=_use_gpus,
             log_every_n_steps=log_every_n_steps,
             callbacks=self._callback_list,
             **trainer_kwargs
         )
         
-        self._alpha = alpha
         self._regularize = regularize
         self._burn_t_final=16
         self._burn_in_steps=2
@@ -117,6 +139,36 @@ class CustomModel(BaseModel):
         self._dataset = dataset
         self.trainer.fit(self, self._dataset["train"], self._dataset["val"])
 
+    def evaluate_retain_grad(self, dataset=None, accelerator=None, use_gpus=[0]):
+        
+        if dataset:
+            self._dataset = dataset
+            
+            
+        accelerator = None
+        _use_gpus=None
+        if torch.cuda.is_available():
+            accelerator = "gpu"
+            _use_gpus = use_gpus
+            
+        if not accelerator:
+            if torch.cuda.is_available():
+                accelerator = "gpu"
+            
+            
+#         print(" -- Using accelerator: {}".format(accelerator))
+        self.trainer = Trainer(max_epochs=0, 
+                               accelerator=accelerator,
+                               devices=use_gpus,
+                               num_sanity_val_steps = -1,
+                              )
+    
+        self._testing = True
+        if self._testing:
+            self._test_results = {"x_hat": [], "x_obs": [], "batch_loss": []}
+        self.trainer.fit(self, self._dataset['train'], self._dataset['test'])
+        self._TestLoss = _compute_test_loss(self._test_results, self._test_t)
+                
     def evaluate(self):
 
         self.test_loss = self.trainer.test(self, self._dataset["test"], verbose=False)

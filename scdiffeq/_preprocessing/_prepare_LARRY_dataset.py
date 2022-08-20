@@ -17,6 +17,8 @@ def _prepare_LARRY_dataset(
 ):
 
     """returns the LARRY dataset prepared for the FATE PREDICTION task."""
+    
+    adata.X = adata.X.toarray()
 
     complete_dataset = TimeResolvedAnnDataset(adata)
 

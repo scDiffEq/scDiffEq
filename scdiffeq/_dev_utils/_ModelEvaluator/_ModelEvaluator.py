@@ -16,9 +16,9 @@ class ModelEvaluator:
     def __init__(self,
                  model_name,
                  seed=0,
-                 h5ad_path="/home/mvinyard/data/Weinreb2020.adata.h5ad",
-                 model_outs_basename="/home/mvinyard/notebooks/benchmark/outs/",
-                 base_src_path = "/home/mvinyard/notebooks/benchmark/src/",
+                 h5ad_path="/home/mvinyard/benchmark/data/Weinreb2020.adata.h5ad",
+                 model_outs_basename="/home/mvinyard/benchmark/outs/",
+                 base_src_path = "/home/mvinyard/benchmark/src/",
                  task="timepoint_recovery",
                  device="cuda:0",
                 ):
@@ -40,17 +40,23 @@ class ModelEvaluator:
             self._best_score = float(summary_dict["best_model_score"])
         except:
             pass
+        
+        if not os.path.exists(self._best_epoch_path):
+            p1 = "/home/mvinyard/benchmark"
+            p2 = "/".join(self._best_epoch_path.split("benchmark")[-1].split("/")[1:])
+            self._best_epoch_path = os.path.join(p1, p2)
 
     def plot(self, smooth=5):
 
         _plot_training_metrics(self._model_path, seed=self._seed, smooth=smooth)
         
-    def load_best_ckpt(self):
+    def load_best_ckpt(self, alpha):
                 
         self._adata, self._dataset = lazy_LARRY(self._h5ad_path, self._task)
         self.best_model = _load_ckpt_state(self._adata,
                          self._src_script_path,
                          self._best_epoch_path,
+                         alpha,
                          self._device,
                         )
         self.best_model._dataset = self._dataset

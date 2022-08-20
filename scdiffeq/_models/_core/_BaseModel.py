@@ -15,13 +15,13 @@ import numpy as np
 
 # import local dependencies #
 # ------------------------- #
-from ._ancilliary._WassersteinDistance import WassersteinDistance
+from ._ancilliary._SinkhornDivergence import SinkhornDivergence
 from ._ancilliary._shape_tools import _restack_x
 from ._ancilliary._count_params import count_params
 from ._ancilliary._ForwardFunctions import ForwardFunctions
 
 
-loss_func = WassersteinDistance() # this will eventually be modularized / removed
+loss_func = SinkhornDivergence() # this will eventually be modularized / removed
 
 def _initialize_potential_param(net):
     potential_param = list(net.parameters())[-1].data
@@ -33,13 +33,16 @@ def _configure_psi(func):
     else:
         _initialize_potential_param(func)
         return func
-
+    
 class BaseModel(LightningModule):
     def __init__(self,
                  func,
+                 tau,
+                 alpha,
                  train_t,
                  test_t,
                  optimizer=torch.optim.RMSprop,
+                 lr_scheduler=torch.optim.lr_scheduler.StepLR,
                  dt=0.1,
                  burn_in_steps=100,
                  t_scale=0.02,
@@ -58,8 +61,8 @@ class BaseModel(LightningModule):
         
         super(BaseModel, self).__init__()
                 
-            
-        self._tau = 1e-6
+        
+        self._tau = tau
         self._seed = seed
         torch.manual_seed(self._seed)
         self.hparam_dict = {}
@@ -73,15 +76,19 @@ class BaseModel(LightningModule):
         self.ForwardFunc = ForwardFunctions(self.func, self._t_scale)
             
         self._lr = lr
+        self._testing = False
         self._train_t = train_t
         self._test_t = test_t
         self._dt = dt
-        self._test_loss_list = []
-        
+        self._test_loss_list = []        
+        if alpha == "auto":
+            print (" -- alpha will be parameterized -- ")
+            self._alpha = torch.nn.Parameter(torch.ones(1, requires_grad=True)*0.5).to(self.device)
+        else:
+            self._alpha = alpha
         self.psi = _configure_psi(self.func)
-        
         self._optimizer = optimizer
-        
+        self._lr_scheduler = lr_scheduler
         
         for key, value in count_params(self).items():
             self.hparam_dict[key]=value
@@ -110,7 +117,7 @@ class BaseModel(LightningModule):
         """
 
         return self.ForwardFunc.step(self.func,
-                                     x0,
+                                     x0.requires_grad_(),
                                      t,
                                      dt,
                                      stdev=self._alpha,
@@ -148,7 +155,7 @@ class BaseModel(LightningModule):
         ------
         (1) Required method of the pytorch_lightning.LightningModule subclass.
         """
-
+        
         x0 = x[:, 0, :]
         x_obs = _restack_x(x, self._train_t)
         x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
@@ -161,7 +168,8 @@ class BaseModel(LightningModule):
             
         if self._regularize:
             reg_loss = self._fit_regularizer(x)
-            total_loss = reg_loss + xy_loss.sum()
+            self.log("train_reg_loss", reg_loss.item())
+            total_loss = reg_loss.abs() + xy_loss.sum()
             return total_loss
         else:
             return xy_loss.sum()
@@ -178,8 +186,16 @@ class BaseModel(LightningModule):
         ------
         (1) Currently the callback_metrics are very brittle. This must be generalized.
         """
-                
+                        
         torch.set_grad_enabled(True)
+        
+        if self._testing:
+            t = self._test_t
+#             print("using TEST  t: {}".format(t))
+        else:
+            t = self._train_t
+#             print("using TRAIN t: {}".format(t))
+        
         x0 = x[:, 0, :]
         x_obs = _restack_x(x, self._train_t)
         x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
@@ -190,7 +206,23 @@ class BaseModel(LightningModule):
         else:
             self.log("val_loss_d6", xy_loss.detach()[0])
             
+        if self._testing:
+            self._TestLoss = xy_loss
+            self._test_results['x_hat'].append(x_hat.detach().cpu().numpy())
+            self._test_results['x_obs'].append(x_obs.detach().cpu().numpy())
+            self._test_results['batch_loss'].append(xy_loss.detach().cpu().numpy())
+            
         return xy_loss.sum()
+    
+    def predict_step(self, x0):
+        
+        """
+        
+        """
+        
+        x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
+        
+        return 
 
     def test_step(self, x, idx):
 
@@ -205,13 +237,18 @@ class BaseModel(LightningModule):
         """
         
         torch.set_grad_enabled(True)
+        self.train()
         x0 = x[:, 0, :]
         x_obs = _restack_x(x, self._test_t)
-        x_hat = self.forward(x0, self._test_t, self._dt, self._tspan['test'])
+        x_hat = self.forward(x0.requires_grad_(), self._test_t, self._dt, self._tspan['test'])
         xy_loss = loss_func.compute(x_hat, x_obs, self._test_t)
-        self.log("test_loss", xy_loss.detach())
+        if xy_loss.shape[0] > 1:
+            self.log("test_loss_d4", xy_loss.detach()[0])
+            self.log("test_loss_d6", xy_loss.detach()[1])
+        else:
+            self.log("test_loss_d6", xy_loss.detach()[0])
 
-        return xy_loss
+        return xy_loss.sum()
 
     def configure_optimizers(self):
         """
@@ -226,4 +263,7 @@ class BaseModel(LightningModule):
         """
         
         optimizer = self._optimizer(self.parameters(), lr=self._lr)
-        return optimizer
+        scheduler = self._lr_scheduler(optimizer, step_size = 100, gamma = 0.9)
+        
+#         optimizer.add_param_group({'params':self._alpha}); ValueError: some parameters appear in more than one parameter group
+        return [optimizer], [scheduler]

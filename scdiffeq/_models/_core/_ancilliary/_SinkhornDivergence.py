@@ -1,5 +1,5 @@
 
-__module_name__ = "_WassersteinDistance.py"
+__module_name__ = "_SinkhornDivergence.py"
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
@@ -10,7 +10,7 @@ from geomloss import SamplesLoss
 import torch
 
 
-class WassersteinDistance:
+class SinkhornDivergence:
 
     """
     vector_a

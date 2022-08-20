@@ -15,7 +15,7 @@ def _forward_step(net, x, dt, z):
     sqrtdt = np.sqrt(dt)
     return x + _drift(net, x) * dt + z * sqrtdt
 
-def _brownian_motion(x, stdev, n_steps=None):
+def _brownian_motion(x, stdev, device, n_steps=None):
 
     """
     gaussian-sampled brownian motion
@@ -25,18 +25,18 @@ def _brownian_motion(x, stdev, n_steps=None):
     given.
     """
 
-    if not type(stdev) == float:
-        stdev = stdev.item()
+#     if not type(stdev) == float:
+#         stdev = stdev.item()
 
     if n_steps:
-        return torch.randn(n_steps, x.shape[0], x.shape[1], requires_grad=False)*stdev
+        return torch.randn(n_steps, x.shape[0], x.shape[1], requires_grad=True).to(device)*stdev
     else:
-        return torch.randn(x.shape[0], x.shape[1], requires_grad=True) * stdev
+        return torch.randn(x.shape[0], x.shape[1], requires_grad=True).to(device) * stdev
     
 def _manual_forward_step(net, x, dt, stdev, tspan, device):
     
     n_steps = int(tspan / dt)
-    z = _brownian_motion(x, stdev, n_steps=n_steps).to(device)
+    z = _brownian_motion(x, stdev, device, n_steps=n_steps).to(device)
     
     x_hat = x
     for step in range(n_steps):

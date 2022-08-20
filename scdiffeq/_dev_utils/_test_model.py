@@ -12,4 +12,4 @@ def test_model(model):
         model.func.eval()
         model.evaluate()
 
-    return model.test_loss
+    return model.test_loss[0]
