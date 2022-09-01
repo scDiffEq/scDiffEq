@@ -208,7 +208,7 @@ def _rename_state_dict_keys(state_dict, prefix="func."):
         revised_dict[key.strip(prefix)] = state_dict[key]
     return OrderedDict(revised_dict)
 
-from ..._models import build_custom
+# from ..._models import build_custom
 
 def _load_ckpt_state(adata, src_path, ckpt_path, alpha=0.5, use_gpus=None):
     

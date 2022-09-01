@@ -15,6 +15,7 @@ scdiffeq/_io/__init__.py
 scdiffeq/_io/_read_h5ad.py
 scdiffeq/_models/README.md
 scdiffeq/_models/_CustomModel.py
+scdiffeq/_models/_CustomModel_v2.py
 scdiffeq/_models/_PRESCIENT.py
 scdiffeq/_models/__init__.py
 scdiffeq/_models/_scDiffEq.py

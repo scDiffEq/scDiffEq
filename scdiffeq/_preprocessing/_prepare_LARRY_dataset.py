@@ -9,6 +9,7 @@ from torch_adata import TimeResolvedAnnDataset
 
 def _prepare_LARRY_dataset(
     adata,
+    h5ad_path,
     train_perc=0.9,
     num_workers=os.cpu_count(),
     train_batch_size=200,
@@ -18,15 +19,18 @@ def _prepare_LARRY_dataset(
 
     """returns the LARRY dataset prepared for the FATE PREDICTION task."""
     
-    adata.X = adata.X.toarray()
-
+    try:
+        adata.X = adata.X.toarray()
+    except:
+        import adata_utils as au
+        au.coerce_X_to_sparse(adata=adata, h5ad_path=h5ad_path)
+        
     complete_dataset = TimeResolvedAnnDataset(adata)
 
     train_dataset = TimeResolvedAnnDataset(adata[adata.obs["train"]])
     test_dataset = TimeResolvedAnnDataset(adata[adata.obs["test"]])
 
     n_train_ = train_dataset.__len__()
-
     n_train = int(n_train_ * train_perc)
     n_val = int(n_train_ - n_train)
     train, val = random_split(train_dataset, [n_train, n_val])
@@ -103,6 +107,7 @@ def _lazy_LARRY(
               
     dataset = _prepare_LARRY_dataset(
         adata,
+        h5ad_path,
         train_perc,
         num_workers,
         train_batch_size,
@@ -110,5 +115,5 @@ def _lazy_LARRY(
         test_batch_size,
     )
     dataset["task"] = task
-
+    adata.obs.index = adata.obs.index.astype(str)
     return adata, dataset

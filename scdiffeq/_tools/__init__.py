@@ -9,4 +9,4 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # from ._quantify_dynamics import _quantify_dynamics as quantify_dynamics
 
 
-from .._models._core._ancilliary._SinkhornDivergence import SinkhornDivergence as OTLoss
+# from .._models._core._ancilliary._SinkhornDivergence import SinkhornDivergence as OTLoss

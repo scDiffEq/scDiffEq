@@ -13,3 +13,4 @@ from ._test_model import test_model
 from ._ModelEvaluator._funcs import _load_ckpt_state as load_ckpt
 
 from ._retrieve_available_seeds import _retrieve_available_seeds as available_seeds
+from ._get_best_epoch_each_version import _get_best_epoch_each_version as get_best_epoch_ckpts

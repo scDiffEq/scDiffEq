@@ -9,7 +9,7 @@ from ._funcs import _training_summary
 from ._funcs import _plot_training_metrics
 from ._funcs import _load_ckpt_state
 
-from ..._preprocessing import lazy_LARRY
+# from ..._preprocessing import lazy_LARRY
 
 class ModelEvaluator:
         

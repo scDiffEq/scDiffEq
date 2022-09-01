@@ -36,7 +36,7 @@ class SinkhornDivergence:
     def __init__(
         self,
         loss="sinkhorn",
-        backed="online",
+        backed="tensorized",
         p=2,
         blur=0.1,
         scaling=0.7,
@@ -64,20 +64,24 @@ class SinkhornDivergence:
         if weight_a != None and weight_b != None:
             self.weight_a = weight_a.float().to(self.device)
             self.weight_b = weight_b.float().to(self.device)
+            
+            self.weight_a = self.weight_a / self.weight_a.sum()
+            self.weight_b = self.weight_b / self.weight_b.sum()
 
             if requires_grad:
                 self.weight_a.requires_grad_()
                 self.weight_b.requires_grad_()
-            loss = self._OT_solver(
+                                
+            return self._OT_solver(
                 self.weight_a, self.vector_a, self.weight_b, self.vector_b
             )
-            return loss
         else:
-            loss = self._OT_solver(self.vector_a, self.vector_b)
-            return loss
+            return self._OT_solver(self.vector_a, self.vector_b)
 
-    def compute(self, x_hat, x_obs, t):
-        
+
+    def compute(self, w_hat, x_hat, w_obs, x_obs, t):    
+                
         return torch.stack(
-            [self.__call__(x_hat[i], x_obs[i]) for i in range(1, len(t))]
+            [self.__call__(x_obs[i], x_hat[i], w_obs[i], w_hat[i]) for i in range(1, len(t))]
         )
+    

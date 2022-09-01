@@ -4,266 +4,115 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
+
 # import packages #
 # --------------- #
-from pytorch_lightning import LightningModule
-import torchsde # will be removed eventually
+import pytorch_lightning
 import torch
-import time
-import numpy as np
 
 
 # import local dependencies #
 # ------------------------- #
-from ._ancilliary._SinkhornDivergence import SinkhornDivergence
-from ._ancilliary._shape_tools import _restack_x
-from ._ancilliary._count_params import count_params
-from ._ancilliary._ForwardFunctions import ForwardFunctions
+from . import _base_ancilliary as base
 
 
-loss_func = SinkhornDivergence() # this will eventually be modularized / removed
-
-def _initialize_potential_param(net):
-    potential_param = list(net.parameters())[-1].data
-    potential_param = torch.zeros(potential_param.shape)
-            
-def _configure_psi(func):
-    if hasattr(func, "psi_mu"):
-        return func.psi_mu
-    else:
-        _initialize_potential_param(func)
-        return func
-    
-class BaseModel(LightningModule):
-    def __init__(self,
-                 func,
-                 tau,
-                 alpha,
-                 train_t,
-                 test_t,
-                 optimizer=torch.optim.RMSprop,
-                 lr_scheduler=torch.optim.lr_scheduler.StepLR,
-                 dt=0.1,
-                 burn_in_steps=100,
-                 t_scale=0.02,
-                 lr=1e-3,
-                 seed=0):
-        
-        """
-        Parameters:
-        -----------
-        func
-            torch.nn.Module
-        
-        t_scale
-            This is only used for odeint. Otherwise, it is None.
-        """
-        
+class BaseModel(pytorch_lightning.LightningModule):
+    def __init__(self):
         super(BaseModel, self).__init__()
-                
-        
-        self._tau = tau
-        self._seed = seed
-        torch.manual_seed(self._seed)
-        self.hparam_dict = {}
-        self.hparam_dict["seed"] = self._seed
+
+    def model_setup(self,
+                    dataset,
+                    func,
+                    log_path="./",
+                    learning_rates=[1e-3],
+                    optimizers=[torch.optim.Adam],
+                    schedulers=[torch.optim.lr_scheduler.StepLR],
+                    scheduler_kwargs=[{"step_size":100, "gamma":0.9}],
+                    logger=pytorch_lightning.loggers.CSVLogger,
+                    flush_logs_every_n_steps=1,
+                    logger_kwargs={},
+                    dt=0.1,
+                    alpha=0.5,
+                    time_scale=None,
+                    loss_function=None,
+                   ):
+
+        """
+        this is where we define all the options such as what forward function we should use, etc.
+        """
+
+        self.dataset = dataset
         self.func = func
-        self._t_scale = t_scale
-        
-        if not (hasattr(func, "mu") and hasattr(func, "sigma")):
-            self.hparam_dict['t_scale'] = self._t_scale
-        
-        self.ForwardFunc = ForwardFunctions(self.func, self._t_scale)
-            
-        self._lr = lr
-        self._testing = False
-        self._train_t = train_t
-        self._test_t = test_t
+        self._learning_rates = learning_rates
+        self._optimizers = optimizers
+        self._schedulers = schedulers
+        self._scheduler_kwargs = scheduler_kwargs
+        self._time_scale = time_scale
+        self._alpha = alpha
         self._dt = dt
-        self._test_loss_list = []        
-        if alpha == "auto":
-            print (" -- alpha will be parameterized -- ")
-            self._alpha = torch.nn.Parameter(torch.ones(1, requires_grad=True)*0.5).to(self.device)
+        self.forward_function = base.ForwardFunctions(self.func,
+                                                      self._time_scale,
+                                                      self._alpha,
+                                                      self._dt,
+                                                      self.device,
+                                                     )
+        
+        self._log_path = log_path
+        self._flush_logs_every_n_steps = flush_logs_every_n_steps
+        self._logger = logger(
+            save_dir=self._log_path,
+            flush_logs_every_n_steps=self._flush_logs_every_n_steps,
+            **logger_kwargs,
+        )
+        
+        if not loss_function:
+            self.loss_function = base.SinkhornDivergence()
         else:
-            self._alpha = alpha
-        self.psi = _configure_psi(self.func)
-        self._optimizer = optimizer
-        self._lr_scheduler = lr_scheduler
+            self.loss_function = loss_function
+
+    def forward(self, X, t):
+
+        X0, X_obs, W_obs = base.format_batched_inputs(X, t)
+        X_hat = self.forward_function.step(self.func, X0=X0, t=t)
+        W_hat = torch.ones_like(W_obs, requires_grad=True).to(self.device)
+        sinkhorn_loss = self.loss_function.compute(W_hat, X_hat, W_obs, X_obs, t)
         
-        for key, value in count_params(self).items():
-            self.hparam_dict[key]=value
-            
-        if torch.cuda.is_available():
-            gpu_name = torch.cuda.get_device_name()
-            self.hparam_dict['device'] = gpu_name
-        else:
-            self.hparam_dict['device'] = 'cpu'
+        return {"X_hat":X_hat, "sinkhorn_loss":sinkhorn_loss, "t": t}
+
+    def training_step(self, batch, batch_idx):
+
+        FWD = self.forward(X=batch, t=self.dataset._train_time)
+        base.update_loss_logs(self, FWD['sinkhorn_loss'], FWD['t'], self.current_epoch, batch_idx, "train", "sinkhorn", "d")
+
+        return FWD['sinkhorn_loss'].sum()
         
+    def validation_step(self, batch, batch_idx):
         
-    def forward(self, x0, t, dt, tspan):
-
-        """
-        Parameters:
-        -----------
-        x0
-            initial state
-
-        t
-            time
-
-        To-Do:
-        ------
-        (1) Add other forward-stepping functions: odeint, prescient.forward_step()
-        """
-
-        return self.ForwardFunc.step(self.func,
-                                     x0.requires_grad_(),
-                                     t,
-                                     dt,
-                                     stdev=self._alpha,
-                                     tspan=tspan,
-                                     device=self.device,
-                                    )
-
-    def _fit_regularizer(self, x):
-
-        x_final = self._X_final["X"].to(self.device)
-        n_final = self._X_final["n_cells"]
-        xf = x[:, -1, :]
-        size_factor = n_final / xf.shape[0]
-
-        burn_t_span = self._burn_t_final - self._X_final["t"]
-        burn_dt = dt = burn_t_span / self._burn_in_steps
-        burn_t = torch.Tensor([self._X_final["t"], self._burn_t_final])
+        base.retain_gradients(self)
+        FWD = self.forward(X=batch, t=self.dataset._train_time)
+        base.update_loss_logs(self, FWD['sinkhorn_loss'], FWD['t'], self.current_epoch, batch_idx, "val", "sinkhorn", "d")
         
-        X_burn = self.forward(xf, burn_t, burn_dt, burn_t_span)
-        burn_psi = size_factor * self.psi(X_burn).sum()
-        final_psi = -1 * self.psi(x_final).sum()
-
-        reg_psi = (final_psi + burn_psi) * self._tau
-
-        return reg_psi
-
-    def training_step(self, x):
-
-        """
-        To-do:
-        ------
-        (1) Currently the callback_metrics are very brittle. This must be generalized.
-
-        Notes:
-        ------
-        (1) Required method of the pytorch_lightning.LightningModule subclass.
-        """
+        return FWD['sinkhorn_loss']
         
-        x0 = x[:, 0, :]
-        x_obs = _restack_x(x, self._train_t)
-        x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
-        xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
-        if xy_loss.shape[0] > 1:
-            self.log("train_loss_d4", xy_loss.detach()[0])
-            self.log("train_loss_d6", xy_loss.detach()[1])
-        else:
-            self.log("train_loss_d6", xy_loss.detach()[0])
-            
-        if self._regularize:
-            reg_loss = self._fit_regularizer(x)
-            self.log("train_reg_loss", reg_loss.item())
-            total_loss = reg_loss.abs() + xy_loss.sum()
-            return total_loss
-        else:
-            return xy_loss.sum()
+    def test_step(self, batch, batch_idx):
 
-    def validation_step(self, x, idx):
-
-        """ 
+        base.retain_gradients(self)
+        FWD = self.forward(X=batch, t=self.dataset._test_time)
+        base.update_loss_logs(self, FWD['sinkhorn_loss'], FWD['t'], self.current_epoch, batch_idx, "test", "sinkhorn", "d")
         
-        Notes:
-        ------
+        return FWD['sinkhorn_loss']
         
-        
-        To-do:
-        ------
-        (1) Currently the callback_metrics are very brittle. This must be generalized.
-        """
-                        
-        torch.set_grad_enabled(True)
-        
-        if self._testing:
-            t = self._test_t
-#             print("using TEST  t: {}".format(t))
-        else:
-            t = self._train_t
-#             print("using TRAIN t: {}".format(t))
-        
-        x0 = x[:, 0, :]
-        x_obs = _restack_x(x, self._train_t)
-        x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
-        xy_loss = loss_func.compute(x_hat, x_obs, self._train_t)
-        if xy_loss.shape[0] > 1:
-            self.log("val_loss_d4", xy_loss.detach()[0])
-            self.log("val_loss_d6", xy_loss.detach()[1])
-        else:
-            self.log("val_loss_d6", xy_loss.detach()[0])
-            
-        if self._testing:
-            self._TestLoss = xy_loss
-            self._test_results['x_hat'].append(x_hat.detach().cpu().numpy())
-            self._test_results['x_obs'].append(x_obs.detach().cpu().numpy())
-            self._test_results['batch_loss'].append(xy_loss.detach().cpu().numpy())
-            
-        return xy_loss.sum()
+    def configure_optimizers(self):    
+        return base.optim_config(param_groups=[self.parameters()],
+                                 learning_rates=self._learning_rates,
+                                 optimizers=self._optimizers,
+                                 schedulers=self._schedulers,
+                                 scheduler_kwargs=self._scheduler_kwargs,
+                                )
     
-    def predict_step(self, x0):
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        FWD['sinkhorn_loss'] = self.forward(X=batch, t=self.dataset._test_time)
+        base.update_loss_logs(self, FWD['sinkhorn_loss'], FWD['t'], self.current_epoch, batch_idx, "predict", "sinkhorn", "d")
+        return FWD
         
-        """
         
-        """
-        
-        x_hat = self.forward(x0, self._train_t, self._dt, self._tspan['train'])
-        
-        return 
-
-    def test_step(self, x, idx):
-
-        """
-        
-        To-Do:
-        ------
-        (1) While this works, it is mostly implemented as a place-holder. We will need
-            to update this.
-        (2) Much of the code across the 3 {train, validation, test} steps are repeated.
-            We need to make a more general forward function for these. 
-        """
-        
-        torch.set_grad_enabled(True)
-        self.train()
-        x0 = x[:, 0, :]
-        x_obs = _restack_x(x, self._test_t)
-        x_hat = self.forward(x0.requires_grad_(), self._test_t, self._dt, self._tspan['test'])
-        xy_loss = loss_func.compute(x_hat, x_obs, self._test_t)
-        if xy_loss.shape[0] > 1:
-            self.log("test_loss_d4", xy_loss.detach()[0])
-            self.log("test_loss_d6", xy_loss.detach()[1])
-        else:
-            self.log("test_loss_d6", xy_loss.detach()[0])
-
-        return xy_loss.sum()
-
-    def configure_optimizers(self):
-        """
-
-        To-Do:
-        ------
-        (1) LR-scheduler (and multiple LR-scheduler configuration)
-
-        Notes:
-        ------
-        (1) Required method of the pytorch_lightning.LightningModule subclass.
-        """
-        
-        optimizer = self._optimizer(self.parameters(), lr=self._lr)
-        scheduler = self._lr_scheduler(optimizer, step_size = 100, gamma = 0.9)
-        
-#         optimizer.add_param_group({'params':self._alpha}); ValueError: some parameters appear in more than one parameter group
-        return [optimizer], [scheduler]
