@@ -7,22 +7,68 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # import local dependencies #
 # ------------------------- #
 from ._core._BaseModel import BaseModel
+import pytorch_lightning
 
-
-# ------------------------------------------------------------------------------------- #
-# MAIN MODULE CLASS: CustomModel
-# ------------------------------------------------------------------------------------- #
+# MAIN MODULE CLASS: CustomModel ------------------------------------------------------ #
 
 class CustomModel(BaseModel):
     
-    def __init__(self):
+    def __init__(self,
+                 adata=None,
+                 dataset=None,
+                 func=None,
+                 accelerator="gpu",
+                 devices=1,
+                 epochs=1500,
+                 log_every_n_steps=1,
+                ):
+        """
+        Parameters:
+        -----------
+        adata
+        
+        func
+        
+        accelerator
+        
+        devices
+        
+        epochs
+        
+        log_every_n_steps
+        
+        Returns:
+        --------
+        None
+        
+        Notes:
+        ------
+        """
         super(CustomModel, self).__init__()
         
+        if adata:
+            self._adata = adata
+            # TO-DO: prepare torch.utils.data.dataset class from adata
+        elif dataset:
+            self.dataset = dataset
+            
         self.model_setup(dataset, func)
+        
+        
+        self._accelerator = accelerator
+        self._log_every_n_steps = log_every_n_steps
+        self._devices = devices
+        self.trainer = pytorch_lightning.Trainer(accelerator=self._accelerator,
+                          devices=self._devices,
+                          max_epochs=epochs,
+                          log_every_n_steps=log_every_n_steps,
+                         )
         
     def fit(self):
         
-        ...
+        
+        self.trainer.fit(self, self.dataset)
+        
         
     def evaluate(self):
         
