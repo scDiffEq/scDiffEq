@@ -5,6 +5,7 @@ import sys
 
 setup(
     name="scdiffeq",
+    version="0.0.43",
     python_requires=">3.7.0",
     author="Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard",
     author_email="mvinyard@broadinstitute.org",
@@ -14,9 +15,14 @@ setup(
     description="scDiffEq: modelling single-cell dynamics using neural differential equations.",
     packages=[
         "scdiffeq",
+        "scdiffeq._dev_utils",
         "scdiffeq._io",
-        "scdiffeq._models",
+	"scdiffeq._models",
+	"scdiffeq._models._core",
+	"scdiffeq._models._core._base_ancilliary",
+	"scdiffeq._models._core._lightning_callbacks",
 	"scdiffeq._plotting",
+	"scdiffeq._preprocessing",
 	"scdiffeq._tools",
     ],
     install_requires=[
