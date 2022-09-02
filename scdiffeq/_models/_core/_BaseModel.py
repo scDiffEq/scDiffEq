@@ -6,16 +6,28 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # import packages #
 # --------------- #
-import pytorch_lightning
+from pytorch_lightning import LightningModule, loggers
 import torch
 
 
 # import local dependencies #
 # ------------------------- #
 from . import _base_ancilliary as base
+from . import _lightning_callbacks as cbs
 
 
-class BaseModel(pytorch_lightning.LightningModule):
+def _fate_bias_transform(X_hat, n_fates, device):
+    
+    """
+    Lin = torch.nn.Linear(X_hat.shape, n_fates)
+    """
+
+    Lin = torch.nn.functional.linear
+    Softmax = torch.nn.functional.softmax
+
+    return Softmax(Lin(X_hat, torch.ones(11, X_hat.shape[1]).to(device)), dim=1)
+
+class BaseModel(LightningModule):
     def __init__(self):
         super(BaseModel, self).__init__()
 
@@ -28,19 +40,22 @@ class BaseModel(pytorch_lightning.LightningModule):
         optimizers=[torch.optim.Adam],
         schedulers=[torch.optim.lr_scheduler.StepLR],
         scheduler_kwargs=[{"step_size": 100, "gamma": 0.9}],
-        logger=pytorch_lightning.loggers.CSVLogger,
+        logger=loggers.CSVLogger,
         flush_logs_every_n_steps=1,
         logger_kwargs={},
         dt=0.1,
         alpha=0.5,
         time_scale=None,
         loss_function=None,
+        trainer_kwargs={},
+        seed=617,
     ):
 
         """
         this is where we define all the options such as what forward function we should use, etc.
         """
-
+        self.hparam_dict = {}
+        self.hparam_dict["seed"] = seed
         self.dataset = dataset
         self.func = func
         self._learning_rates = learning_rates
@@ -57,7 +72,8 @@ class BaseModel(pytorch_lightning.LightningModule):
             self._dt,
             self.device,
         )
-
+        
+        self._callback_list = [cbs.SaveHyperParamsYAML(), cbs.TrainingSummary()]
         self._log_path = log_path
         self._flush_logs_every_n_steps = flush_logs_every_n_steps
         self._logger = logger(
@@ -65,6 +81,8 @@ class BaseModel(pytorch_lightning.LightningModule):
             flush_logs_every_n_steps=self._flush_logs_every_n_steps,
             **logger_kwargs,
         )
+        
+        self._n_fates = dataset.adata.obs["Annotation"].nunique()
 
         if not loss_function:
             self.loss_function = base.SinkhornDivergence()
@@ -73,12 +91,15 @@ class BaseModel(pytorch_lightning.LightningModule):
 
     def forward(self, X, t):
 
-        X0, X_obs, W_obs = base.format_batched_inputs(X, t)
+        X0, X_obs, W_obs, X_bias = base.format_batched_inputs(X, t)
         X_hat = self.forward_function.step(self.func, X0=X0, t=t)
         W_hat = torch.ones_like(W_obs, requires_grad=True).to(self.device)
         sinkhorn_loss = self.loss_function.compute(W_hat, X_hat, W_obs, X_obs, t)
+        
+        X_hat_bias = _fate_bias_transform(X_hat[-1], self._n_fates, self.device) # ouput shape: batch_size x n_fates
+        fate_loss = torch.nn.functional.mse_loss(X_hat_bias, X_bias)
 
-        return {"X_hat": X_hat, "sinkhorn_loss": sinkhorn_loss, "t": t}
+        return {"X_hat": X_hat, "sinkhorn_loss": sinkhorn_loss, "fate_loss": fate_loss, "t": t}
 
     def training_step(self, batch, batch_idx):
 
@@ -93,8 +114,8 @@ class BaseModel(pytorch_lightning.LightningModule):
             "sinkhorn",
             "d",
         )
-
-        return FWD["sinkhorn_loss"].sum()
+        
+        return sum(FWD["sinkhorn_loss"] + FWD["fate_loss"]*100)
 
     def validation_step(self, batch, batch_idx):
 
@@ -111,7 +132,7 @@ class BaseModel(pytorch_lightning.LightningModule):
             "d",
         )
 
-        return FWD["sinkhorn_loss"]
+        return sum(FWD["sinkhorn_loss"] + FWD["fate_loss"])
 
     def test_step(self, batch, batch_idx):
 
@@ -128,7 +149,7 @@ class BaseModel(pytorch_lightning.LightningModule):
             "d",
         )
 
-        return FWD["sinkhorn_loss"]
+        return sum(FWD["sinkhorn_loss"] + FWD["fate_loss"])
 
     def configure_optimizers(self):
         return base.optim_config(

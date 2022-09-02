@@ -7,7 +7,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 # import local dependencies #
 # ------------------------- #
 from ._core._BaseModel import BaseModel
-import pytorch_lightning
+from pytorch_lightning import Trainer
 
 # MAIN MODULE CLASS: CustomModel ------------------------------------------------------ #
 
@@ -49,19 +49,18 @@ class CustomModel(BaseModel):
         if adata:
             self._adata = adata
             # TO-DO: prepare torch.utils.data.dataset class from adata
-        elif dataset:
-            self.dataset = dataset
             
         self.model_setup(dataset, func)
-        
-        
         self._accelerator = accelerator
         self._log_every_n_steps = log_every_n_steps
         self._devices = devices
-        self.trainer = pytorch_lightning.Trainer(accelerator=self._accelerator,
+        self.trainer = Trainer(
+                          accelerator=self._accelerator,
                           devices=self._devices,
                           max_epochs=epochs,
+                          logger=self._logger,
                           log_every_n_steps=log_every_n_steps,
+                          callbacks=self._callback_list,
                          )
         
     def fit(self):

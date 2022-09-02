@@ -36,7 +36,7 @@ def _retain_gradients_for_potential(model):
         
         
 def _update_loss_logs(model, loss, t, epoch, batch_idx, stage="train", metric="sinkhorn", time_unit="d"):
-
-    for i in range(1, len(loss)):
-        log_description = "{}.{}_loss.{}{}".format(stage, metric, time_unit, int(t[i]))
+    
+    for i in range(len(loss)):
+        log_description = "{}.{}_loss.{}{}".format(stage, metric, time_unit, int(t[1:][i]))
         model.log(log_description, loss[i].item())
