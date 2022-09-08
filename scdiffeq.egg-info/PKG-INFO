@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: scdiffeq
 Version: 0.0.0
-Summary: scDiffEq: single cell dynamics using neural ODEs.
-Home-page: https://github.com/pinellolab/sc-neural-ODEs
+Summary: scDiffEq: modelling single-cell dynamics using neural differential equations.
+Home-page: https://github.com/mvinyard/sc-neural-diffeqs
 Author: Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard
 Author-email: mvinyard@broadinstitute.org
 License: MIT
@@ -33,7 +33,6 @@ pip install -e .
 ```
 
 ## Main API
-  
 ```python
 import scdiffeq as sdq
 from neural_diffeqs import neural_diffeq
@@ -48,5 +47,4 @@ model.fit()
 ## Built on:
 <img width="50" hspace="20" alt="pytorch_logo" href="https://pytorch.org/" src="https://user-images.githubusercontent.com/47393421/187940001-61655a05-5393-419a-be96-75d11f233d6e.png"><img width="50" href="https://www.pytorchlightning.ai/" hspace="20" alt="pytorch_lightning_logo" src="https://user-images.githubusercontent.com/47393421/187939281-19139d2c-84fe-47b8-a77c-b87e04feca36.png">
 <img width="70" href="https://github.com/mvinyard/neural-diffeqs" alt="neural_diffeqs_logo" src="https://user-images.githubusercontent.com/47393421/187945512-c6b9e9e9-92ca-4578-bbbc-f2216727b0e9.png">
-
 
