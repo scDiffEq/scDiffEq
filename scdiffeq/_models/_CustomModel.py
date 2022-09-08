@@ -4,13 +4,12 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
-# import local dependencies #
-# ------------------------- #
+# import local dependencies ---------------------------------------------------
 from ._core._BaseModel import BaseModel
 from pytorch_lightning import Trainer
 
-# MAIN MODULE CLASS: CustomModel ------------------------------------------------------ #
 
+# MAIN MODULE CLASS: CustomModel ----------------------------------------------
 class CustomModel(BaseModel):
     
     def __init__(self,
