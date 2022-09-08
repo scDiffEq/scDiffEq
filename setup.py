@@ -20,7 +20,7 @@ setup(
 	"scdiffeq._tools",
     ],
     install_requires=[
-        "anndata>=0.7.8",
+        "anndata>=0.8",
         "geomloss>=0.2.4",
         "matplotlib>=3.5.0",
         "pandas>=1.3.5",
