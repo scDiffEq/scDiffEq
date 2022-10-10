@@ -4,6 +4,10 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
+
+# specify version: -----------------------------------------------------------------------
+__version__ = "0.0.43"
+
 # from ._pca import _pca as pca
 # from ._umap import _umap as umap
 # from ._quantify_dynamics import _quantify_dynamics as quantify_dynamics

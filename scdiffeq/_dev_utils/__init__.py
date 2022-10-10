@@ -4,6 +4,10 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
+
+# specify version: -----------------------------------------------------------------------
+__version__ = "0.0.43"
+
 from ._plot_model_loss import _plot_model_loss as plot_loss
 from ._ModelEvaluator._ModelEvaluator import ModelEvaluator
 

@@ -35,8 +35,25 @@ def _retain_gradients_for_potential(model):
         model.train()
         
         
-def _update_loss_logs(model, loss, t, epoch, batch_idx, stage="train", metric="sinkhorn", time_unit="d"):
+def _update_loss_logs(
+        model,
+        loss,
+        t,
+        epoch,
+        batch_idx,
+        stage="train",
+        metric="sinkhorn",
+        time_unit="d",
+        fate_bias_loss=None,
+        fate_bias_metric="MSE",
+        fate_bias_multiplier=None,
+    ):
     
     for i in range(len(loss)):
         log_description = "{}.{}_loss.{}{}".format(stage, metric, time_unit, int(t[1:][i]))
         model.log(log_description, loss[i].item())
+    
+    if fate_bias_loss:
+        log_description = "{}.{}_loss.mult_{}".format(stage, fate_bias_metric, fate_bias_multiplier)
+        model.log(log_description, fate_bias_loss)
+        

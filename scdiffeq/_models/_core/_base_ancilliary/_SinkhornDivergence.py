@@ -82,6 +82,6 @@ class SinkhornDivergence:
     def compute(self, w_hat, x_hat, w_obs, x_obs, t):    
                 
         return torch.stack(
-            [self.__call__(x_obs[i], x_hat[i], w_obs[i], w_hat[i]) for i in range(1, len(t))]
+            [self.__call__(x_obs[i], x_hat[i], w_obs[i], w_hat[i]) for i in range(0, int(len(t)-1))]
         )
     

@@ -11,3 +11,4 @@ from ._formatting import _format_batched_inputs as format_batched_inputs
 from ._accounting import _retain_gradients_for_potential as retain_gradients
 from ._accounting import _count_params as count_params
 from ._accounting import _update_loss_logs as update_loss_logs
+from ._fate_bias_transform import _fate_bias_transform as fate_bias

@@ -4,3 +4,6 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 # from ._utils import _build_plot as _build
+# specify version: -----------------------------------------------------------------------
+__version__ = "0.0.43"
+

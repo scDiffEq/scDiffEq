@@ -1,28 +1,26 @@
 
-# import packages #
-# --------------- #
+__module_name__ = "_ForwardFunctions.py"
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["vinyard@g.harvard.edu",])
+
+
+# import packages: -----------------------------------------------------------------------
 import numpy as np
 import pydk
 import torch
 import torchsde
 import torchdiffeq
 
-# ------------------------------------------------------------------------------------- #
-# MODULE TABLE OF CONTENTS
-# ------------------------------------------------------------------------------------- #
-# MANUAL FORWARD STEPPING FUNCTIONS
-# CURRENTLY IMPLEMENTED CREDENTIALING FLAGS
-# CREDENTIALING FUNCTIONS
-# REGISTER INTEGRATOR KWARGS
-# MAIN MODULE CLASS: ForwardFunctions
-# ------------------------------------------------------------------------------------- #
+
+# Module Table of Contents: --------------------------------------------------------------
+# (1) Manual forward-stepping functions
+# (2) Currently implemented credential-handling flags
+# (3) Credentialing functions
+# (4) Register integrator kwargs
+# (5) Main module class: ForwardFunctions
 
 
-# ------------------------------------------------------------------------------------- #
-# MANUAL FORWARD STEPPING FUNCTIONS
-# ------------------------------------------------------------------------------------- #
-
-
+# Manual forward-stepping functions (1): -------------------------------------------------
 def _potential(net, x):
     x = x.requires_grad_()
     return net(x)
@@ -40,7 +38,7 @@ def _forward_step(net, x, dt, z):
 
 
 def _brownian_motion(x, stdev, n_steps=None):
-    
+
     """
     gaussian-sampled brownian motion
 
@@ -50,23 +48,18 @@ def _brownian_motion(x, stdev, n_steps=None):
     """
 
     if n_steps:
-        return (
-            torch.randn(n_steps, x.shape[0], x.shape[1], requires_grad=True)
-            * stdev
-        )
+        return torch.randn(n_steps, x.shape[0], x.shape[1], requires_grad=True) * stdev
     else:
-        return (
-            torch.randn(x.shape[0], x.shape[1], requires_grad=True) * stdev
-        )
+        return torch.randn(x.shape[0], x.shape[1], requires_grad=True) * stdev
 
 
 def _timespan(t):
     if (type(t) == torch.Tensor) or (type(t) == np.ndarray):
         return (t.max() - t.min()).item()
     elif type(t) == list:
-        return (max(t) - min(t))
-    
-    
+        return max(t) - min(t)
+
+
 def _manual_forward_step(net, x, dt, stdev, tspan, device):
 
     n_steps = int(tspan / dt)
@@ -76,26 +69,23 @@ def _manual_forward_step(net, x, dt, stdev, tspan, device):
         x_hat = _forward_step(net, x_hat, dt, z[step].to(device))
     return x_hat
 
-    
+
 def _manual_forward(func, x0, t, dt, stdev, device):
-    
+
     tspan = _timespan(t)
     n_timesteps = int(tspan / dt)
-    
+
     x_step, x_forward = x0, [x0]
     for step in range(n_timesteps):
         x_step = _manual_forward_step(func, x_step, dt, stdev, tspan, device)
         x_forward.append(x_step)
-        
+
     return torch.stack(x_forward)
 
+# ----------------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------------- #
 
-# ------------------------------------------------------------------------------------- #
-# CURRENTLY IMPLEMENTED CREDENTIALING FLAGS
-# ------------------------------------------------------------------------------------- #
-
+# Currently implemented credentialing flags (2): -----------------------------------------
 NEURAL_SDE_FLAGS = {
     "using_neural_diffeq": True,
     "integrator": torchsde.sdeint,
@@ -118,14 +108,10 @@ MANUAL_FORWARD_FLAGS = {
     "use_stdev": True,
 }
 
-# ------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------
 
 
-# ------------------------------------------------------------------------------------- #
-# CREDENTIALING FUNCTIONS
-# ------------------------------------------------------------------------------------- #
-
-
+# Credentialing functions (3): -----------------------------------------------------------
 def _SDE_credentials(func):
 
     """Returns boolean indicator for SDE-passing credentials."""
@@ -175,24 +161,19 @@ def _register_credentials(ForwardFunctionsClass):
 
     _set_attributes(self, _drift_net_credentials(mu))
 
-
-# ------------------------------------------------------------------------------------- #
-
-
-# ------------------------------------------------------------------------------------- #
-# REGISTER INTEGRATOR KWARGS
-# ------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------
 
 
+# Register integrator **kwargs (4): ------------------------------------------------------
 def _register_integrator_kwargs(integrator, t, require_dt, **kwargs):
-    
+
     """primarily used to toggle dt but gives an interface to add other sdeint/odeint kwargs"""
-    
+
     if integrator.__name__ == "sdeint":
         kwarg_dict = {"ts": t}
     else:
         kwarg_dict = {"t": t}
-        
+
     for key, value in kwargs.items():
         if value:
             if key == "dt":
@@ -202,19 +183,30 @@ def _register_integrator_kwargs(integrator, t, require_dt, **kwargs):
                     kwarg_dict[key] = kwargs[key]
             else:
                 kwarg_dict[key] = value
-            
+
     return kwarg_dict
 
-# ------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------
 
 
-
-# ------------------------------------------------------------------------------------- #
-# MAIN MODULE CLASS: ForwardFunctions
-# ------------------------------------------------------------------------------------- #
-
+# Main module class: ForwardFunctions (5): -----------------------------------------------
 class ForwardFunctions:
-    def __init__(self, func, time_scale, stdev, dt, device):
+    def __init__(self, func, time_scale=None, stdev=None, dt=None, device=None):
+        
+        
+        """
+        Parameters:
+        -----------
+        func [torch.nn.Module, neural_diffeq]
+        
+        time_scale
+        
+        stdev
+        
+        dt
+        
+        device
+        """
 
         # format func credentials
         self.func = func
@@ -222,30 +214,30 @@ class ForwardFunctions:
 
         if self.use_time_scalar:
             self._time_scale = time_scale
-        
+
         if self.use_stdev:
             self._stdev = stdev
         else:
             self._stdev = None
-        
+
         self._dt = dt
         self._device = device
 
-    def step(self, func, X0, t):
+    def __call__(self, func, X0, t):
 
         # format t and kwargs
         if self.use_time_scalar:
-            t = (pydk.min_max_normalize(t) * self._time_scale)
+            t = pydk.min_max_normalize(t) * self._time_scale
         tspan = _timespan(t)
-        
+
         kwargs = _register_integrator_kwargs(
             self.integrator,
             t,
             self.require_dt,
-            **{"dt":self._dt, "stdev": self._stdev, "device": self._device}
+            **{"dt": self._dt, "stdev": self._stdev, "device": self._device}
         )
 
         # do integration
         return self.integrator(func, X0, **kwargs)
 
-# ------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------
