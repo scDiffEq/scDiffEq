@@ -42,6 +42,7 @@ class SinkhornDivergence:
         scaling=0.7,
         debias=True,
         gpu=0,
+        ignore_t0=True,
     ):
 
         self.device = torch.device(
@@ -50,6 +51,8 @@ class SinkhornDivergence:
         self._OT_solver = SamplesLoss(
             loss=loss, backend=backed, p=p, blur=blur, scaling=scaling, debias=True
         )
+        
+        self.ignore_t0 = ignore_t0
 
     def __call__(
         self, vector_a, vector_b, weight_a=None, weight_b=None, requires_grad=True
@@ -67,21 +70,22 @@ class SinkhornDivergence:
             
             self.weight_a = self.weight_a / self.weight_a.sum()
             self.weight_b = self.weight_b / self.weight_b.sum()
+            
+            if self.ignore_t0:
+                self.weight_a = self.weight_a[1:]
+                self.weight_b = self.weight_b[1:]
+                self.vector_a = self.vector_a[1:]
+                self.vector_b = self.vector_b[1:]
 
             if requires_grad:
                 self.weight_a.requires_grad_()
                 self.weight_b.requires_grad_()
-                                
+
             return self._OT_solver(
                 self.weight_a, self.vector_a, self.weight_b, self.vector_b
             )
         else:
+            self.vector_a = self.vector_a[1:]
+            self.vector_b = self.vector_b[1:]
+            print(self.vector_a.shape, self.vector_b.shape)
             return self._OT_solver(self.vector_a, self.vector_b)
-
-
-    def compute(self, w_hat, x_hat, w_obs, x_obs, t):    
-                
-        return torch.stack(
-            [self.__call__(x_obs[i], x_hat[i], w_obs[i], w_hat[i]) for i in range(0, int(len(t)-1))]
-        )
-    

@@ -1,15 +1,20 @@
 
-__module_name__ = "_read_h5ad.py"
-__author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["vinyard@g.harvard.edu",])
+__module_name__ = "__init__.py"
+__doc__ = """Main __init__ module - most user-visible API."""
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(["mvinyard@broadinstitute.org", "arasmuss@broadinstitute.org", "ruitong@broadinstitute.org"])
 
 
-# import packages #
-# --------------- #
-from anndata import read_h5ad
+# specify version: -----------------------------------------------------------------------
+__version__ = "0.0.44"
 
 
-def _read_h5ad(h5ad_path, silent=False):
+# import packages: -----------------------------------------------------------------------
+import anndata
+
+
+# API-facing function: -------------------------------------------------------------------
+def read_h5ad(h5ad_path: str, silent: bool=False)->anndata.AnnData:
 
     """
     Read an AnnData object from a path to a .h5ad file.
@@ -37,7 +42,7 @@ def _read_h5ad(h5ad_path, silent=False):
 
     """
 
-    adata = read_h5ad(h5ad_path)
+    adata = anndata.read_h5ad(h5ad_path)
 
     if not silent:
         print(adata)

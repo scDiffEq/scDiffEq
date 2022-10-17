@@ -5,7 +5,6 @@ __email__ = ", ".join(["vinyard@g.harvard.edu",])
 
 
 from ._configure_optimization import _configure_optimization as optim_config
-from ._ForwardFunctions import ForwardFunctions
 from ._SinkhornDivergence import SinkhornDivergence
 from ._formatting import _format_batched_inputs as format_batched_inputs
 from ._accounting import _retain_gradients_for_potential as retain_gradients
