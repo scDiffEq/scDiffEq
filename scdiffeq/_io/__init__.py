@@ -2,7 +2,13 @@
 __module_name__ = "__init__.py"
 __doc__ = """IO __init__ module. Sub-package of the main scdiffeq API."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
-__email__ = ", ".join(["mvinyard@broadinstitute.org", "arasmuss@broadinstitute.org", "ruitong@broadinstitute.org"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
 
 
 # specify version: -----------------------------------------------------------------------
