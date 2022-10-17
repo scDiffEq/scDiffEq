@@ -1,14 +1,34 @@
 
-from ._base_ancilliary._SinkhornDivergence import SinkhornDivergence
+__module_name__ = "_base_lightning_model.py"
+__doc__ = """Base module handling lightning-related items the user may wish to take for granted."""
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
+
+
+# specify version: -----------------------------------------------------------------------
+__version__ = "0.0.44"
+
+
+# -- import packages: --------------------------------------------------------------------
 from neural_diffeqs import NeuralSDE, NeuralODE
 from pytorch_lightning import LightningModule
-from ._batch_forward import BatchForward
 from torch_composer import TorchNet
 import torch
 
 
-# -- Lightning base: -----
-class LightningBase(LightningModule):
+# -- import local dependencies: ----------------------------------------------------------
+from ._batch_forward import BatchForward
+# from ._base_ancilliary._SinkhornDivergence import SinkhornDivergence
+
+
+# -- Lightning base: ---------------------------------------------------------------------
+class BaseLightningModel(LightningModule):
     """Base pytorch-lightning model wrapped / trained within models.scDiffEq"""
 
     def __init__(

@@ -1,8 +1,18 @@
 
 __module_name__ = "_BaseForwardIntegrators.py"
 __doc__ = """Base module for classes that handle forward integration."""
-__author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["vinyard@g.harvard.edu",])
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
+
+
+# specify version: -----------------------------------------------------------------------
+__version__ = "0.0.44"
 
 
 # -- import packages: --------------------------------------------------------------------

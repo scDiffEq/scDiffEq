@@ -1,24 +1,33 @@
 
-__module_name__ = "_scDiffEq.py"
-__author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["vinyard@g.harvard.edu",])
+__module_name__ = "_scdiffeq.py"
+__doc__ = """To-do."""
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
 
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
 
-# import packages: ------------------------------------------------------------
+# version: -------------------------------------------------------------------------------
+__version__ = "0.0.44"
+
+
+# import packages: -----------------------------------------------------------------------
 from pytorch_lightning import LightningDataModule
+from neural_diffeqs import NeuralODE, NeuralSDE
+from torch_composer import TorchNet
 import anndata
 import torch
 
-from neural_diffeqs import NeuralODE, NeuralSDE
-from torch_composer import TorchNet
 
-from ._core._base_model import BaseModel
+# import local dependencies: -------------------------------------------------------------
+from ._base._core._base_model import BaseModel
 
-# MAIN MODULE CLASS: scDiffEq Model -------------------------------------------
 
-# -----------------------------------------------------------------------------
+# Focus of this module: scDiffEq model: --------------------------------------------------
 class scDiffEq(BaseModel):
     
     def __init__(self,

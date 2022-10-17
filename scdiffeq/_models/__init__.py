@@ -11,12 +11,14 @@ __email__ = ", ".join(
 )
 
 
-# specify version: -----------------------------------------------------------------------
+# version: -------------------------------------------------------------------------------
 __version__ = "0.0.44"
 
 
-# import functions to be accessed as sdq.models.<MODEL>: ---------------------------------
-from ._core._base_model import BaseModel
-from ._core import *
+# import modules / functions to be accessed as sdq.models.<MODEL>: -----------------------
 from ._scdiffeq import scDiffEq
-from ._prescient import PRESCIENT
+from . import _base as base
+
+
+# to-do: ---------------------------------------------------------------------------------
+# from ._prescient import PRESCIENT
