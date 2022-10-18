@@ -1,12 +1,27 @@
 
+__module_name__ = "_credentialling.py"
+__doc__ = """To-do."""
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
+
+
+# -- import packages: --------------------------------------------------------------------
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch_composer import TorchNet
 import torch
 
 
+# -- import local dependencies: ----------------------------------------------------------
 from ._integrators import SDEIntegrator, ODEIntegrator, TorchNNIntegrator
 
 
+# -- controller class: -------------------------------------------------------------------
 class FunctionCredentials:
     def __init__(self):
         pass
@@ -61,7 +76,7 @@ class FunctionCredentials:
         return self.CREDENTIALS_HANDOFF(CREDENTIALS)
 
 
-# -- model-facing function: -----------------
+# -- model-facing function: --------------------------------------------------------------
 def credential_handoff(func):
     CREDENTIALER = FunctionCredentials()
     return CREDENTIALER(func)

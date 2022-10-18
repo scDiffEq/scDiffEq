@@ -2,20 +2,26 @@
 
 __module_name__ = "_BrownianDiffuser.py"
 __doc__ = """BrownianDiffuser module"""
-__author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["vinyard@g.harvard.edu",])
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
+
 
 
 # -- import packages: --------------------------------------------------------------------
 import torch
 import numpy as np
 
-# -- general setup function: -------------------------------------------------------------
-def autodevice():
-    if torch.cuda.is_available():
-        return torch.device("cuda:{}".format(torch.cuda.current_device()))
-    return torch.device("cpu")
 
+from .._base_utility_functions import autodevice
+
+
+# -- general setup function: -------------------------------------------------------------
 def timespan(t: (torch.Tensor or np.ndarray)):
     return (t.max() - t.min()).item()
 

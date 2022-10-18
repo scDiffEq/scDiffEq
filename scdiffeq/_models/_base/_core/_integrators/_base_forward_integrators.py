@@ -27,12 +27,6 @@ class AbstractForwardIntegrator(ABC):
         pass
 
 
-def autodevice():
-    if torch.cuda.is_available():
-        return torch.device("cuda:{}".format(torch.cuda.current_device()))
-    return torch.device("cpu")
-
-
 class BaseForwardIntegrator(AbstractForwardIntegrator):
     def __init__(self):
         super(BaseForwardIntegrator, self).__init__()
