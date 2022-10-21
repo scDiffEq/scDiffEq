@@ -26,6 +26,8 @@ import torch
 # -- import local dependencies: ----------------------------------------------------------
 from ._base._core._base_model import BaseModel
 from ._base._core._configure_lightning_trainer import configure_lightning_trainer
+from ._base._core._prepare_data import prepare_data
+from ._base._core._configure_inputs import InputConfiguration
 
 
 # -- Focus of this module: scDiffEq model: -----------------------------------------------
@@ -91,7 +93,12 @@ class scDiffEq(BaseModel):
             create func on the fly - grab data_dim from the the DataModule
         ------------------------------------------------------------
         """
-        super(scDiffEq, self).__init__(func)
+        
+        config = InputConfiguration(self, func=None, adata=None, DataModule=None)
+        config.configure(self, use_key="X_pca", time_key="Time point", w_key="w", **kwargs)
+        config.pass_to_model(self)
+        
+        super(scDiffEq, self).__init__(self.func)
         
         self.trainer = configure_lightning_trainer(model_save_dir="scDiffEq_model",
                                     log_name="lightning_logs",

@@ -19,6 +19,7 @@ __version__ = "0.0.44"
 from ._scdiffeq import scDiffEq
 from . import _base as base
 
+from ._base._core._prepare_data import prepare_data
 
 # to-do: ---------------------------------------------------------------------------------
 # from ._prescient import PRESCIENT
