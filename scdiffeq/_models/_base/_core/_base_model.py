@@ -35,11 +35,11 @@ class BaseLightningModel(LightningModule):
 
     def __init__(
         self,
-        func: [NeuralSDE, NeuralODE, TorchNet],
-        dt=0.1,
-        optimizer_kwargs={"lr": 1e-4},
-        scheduler_kwargs={"step_size": 20, "gamma": 0.1},
-        ignore_t0=True,
+        func: [NeuralSDE, NeuralODE, TorchNet] = None,
+        dt: float = 0.1,
+        optimizer_kwargs: dict = {"lr": 1e-4},
+        scheduler_kwargs: dict = {"step_size": 20, "gamma": 0.1},
+        ignore_t0: bool = True,
     ):
         """To-do: docs"""
         super(BaseLightningModel, self).__init__()
@@ -51,7 +51,8 @@ class BaseLightningModel(LightningModule):
         self.func = func
         self.dt = dt
         self.save_hyperparameters(ignore=["func"])
-        self.__configure_forward_step__(ignore_t0)
+        if func:
+            self.__configure_forward_step__(ignore_t0)
 
     def __configure_forward_step__(self, ignore_t0):
         """To-Do: docs"""
@@ -71,7 +72,7 @@ class BaseLightningModel(LightningModule):
 
 # BaseModel: -----------------------------------------------------------------------------
 class BaseModel(BaseLightningModel):
-    def __init__(self, func, **kwargs):
+    def __init__(self, func: [NeuralSDE, NeuralODE, TorchNet] = None, **kwargs):
         super(BaseModel, self).__init__(func, **kwargs)
 
     def training_step(self, batch, batch_idx):
