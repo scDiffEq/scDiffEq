@@ -22,13 +22,70 @@ from torch_composer import TorchNet
 import anndata
 import torch
 
-
-# -- import local dependencies: ----------------------------------------------------------
-from ._base._core._base_model import BaseModel
+from ._base._core._base_model import LightningModel
+from ._base._core._prepare_lightning_data_module import prepare_LightningDataModule
 from ._base._core._configure_lightning_trainer import configure_lightning_trainer
-from ._base._core._prepare_data import prepare_data
-from ._base._core._configure_inputs import InputConfiguration
+from ._base._core._base_utility_functions import extract_func_kwargs
+# -- import local dependencies: ----------------------------------------------------------
+# from . import _base as base
+from pytorch_lightning import Trainer
 
+
+# base.prepare_LightningDataModule(adata)
+
+# -- import packages: --------------------------------------------------------------------
+from abc import ABC, abstractmethod
+
+
+class BaseModel(ABC):
+    """
+    Base model to interface PyTorch-Lightning model with a
+    Lightning Trainer, an AnnData / LightningDataModule.
+    """
+
+    def __parse__(self, kwargs, ignore=["self", "__class__"]):
+        ref_kwargs = {}
+        for k, v in kwargs.items():
+            if not k in ignore:
+                setattr(self, k, v)
+                ref_kwargs[k] = v
+        self.kwargs = ref_kwargs
+
+    def __configure__(self):
+        """Where we define the Trainer / loggers / etc."""
+        
+        lit_kwargs = extract_func_kwargs(LightningModel, self.kwargs)
+        trainer_kwargs = extract_func_kwargs(configure_lightning_trainer, self.kwargs)
+        data_kwargs = extract_func_kwargs(prepare_LightningDataModule, self.kwargs)
+        
+        self.trainer = Trainer(accelerator="gpu", devices=1, max_epochs=20)
+        self.LightningModel = LightningModel(**lit_kwargs)
+        self.DataModule = prepare_LightningDataModule(**data_kwargs)
+        # configure_lightning_trainer(**trainer_kwargs)
+
+    def fit(self):
+        self.trainer.fit(self.LightningModel, self.DataModule)
+
+    def predict(self):
+        self.pred = self.trainer.predict(self, self.DataModule)
+
+        
+## == moved code: ==== was in base model. more effective here        
+#     def __register_inputs__(self):
+#         """To-do: docs"""
+#         pass
+
+#         self.config = InputConfiguration(func=self.func, adata=self.adata, DataModule=self.DataModule)
+#         self.config.configure(use_key=self.use_key, time_key=self.time_key, w_key=self.w_key, **kwargs)
+#         self.config.pass_to_model(self)
+        
+#         self.func = func
+#         self.dt = dt
+#         self.save_hyperparameters(ignore=["func"])
+#         if hasattr(self, "func"):
+#             self.__configure_forward_step__(self.ignore_t0)
+#
+## ============================================================
 
 # -- Focus of this module: scDiffEq model: -----------------------------------------------
 class scDiffEq(BaseModel):
@@ -37,6 +94,11 @@ class scDiffEq(BaseModel):
                  adata: anndata.AnnData = None,
                  DataModule: LightningDataModule=None,
                  func:[NeuralODE, NeuralSDE, torch.nn.Module] = None,
+                 optimizer_kwargs: dict = {"lr": 1e-4},
+                 scheduler_kwargs: dict = {"step_size": 20, "gamma": 0.1},
+                 ignore_t0: bool = True,
+                 dt: float = 0.1,
+                 **kwargs,
                 ):
        
     
@@ -92,50 +154,18 @@ class scDiffEq(BaseModel):
         if just DataModule:
             create func on the fly - grab data_dim from the the DataModule
         ------------------------------------------------------------
-        """
+        """        
         
-        config = InputConfiguration(self, func=None, adata=None, DataModule=None)
-        config.configure(self, use_key="X_pca", time_key="Time point", w_key="w", **kwargs)
-        config.pass_to_model(self)
+        super(scDiffEq, self)
+        self.__parse__(locals())
         
-        super(scDiffEq, self).__init__(self.func)
-        
-        self.trainer = configure_lightning_trainer(model_save_dir="scDiffEq_model",
-                                    log_name="lightning_logs",
-                                    version=None,
-                                    prefix="",
-                                    flush_logs_every_n_steps=5,
-                                    max_epochs=1500,
-                                    log_every_n_steps=1,
-                                    reload_dataloaders_every_n_epochs=5,
-                                    resume_from_checkpoint=False,
-                                    kwargs={},
-                                   )
-        
-    def fit(self):
-        """
-        Parameters:
-        -----------
-        
-        Returns:
-        --------
-        None
-        
-        Notes:
-        ------
-        """
-        self.trainer.fit(self, self.DataModule())
-        
-    def predict(self):
-        """
-        Parameters:
-        -----------
-        
-        Returns:
-        --------
-        None
-        
-        Notes:
-        ------
-        """
-        self.pred = self.trainer.predict(self, self.DataModule())
+#         self.trainer = base.configure_lightning_trainer(model_save_dir="scDiffEq_model",
+#                                     log_name="lightning_logs",
+#                                     version=None,
+#                                     prefix="",
+#                                     flush_logs_every_n_steps=5,
+#                                     max_epochs=1500,
+#                                     log_every_n_steps=1,
+#                                     reload_dataloaders_every_n_epochs=5,
+#                                     kwargs={},
+#                                    )

@@ -1,22 +1,17 @@
 
 import torch_adata
 from torch_adata import BaseLightningDataModule
+from pytorch_lightning import LightningDataModule
 import inspect
 import torch
+import os
 
-
-def func_params(func):
-    return list(inspect.signature(func).parameters.keys())
-
-
-def extract_func_kwargs(func, kwargs):
-    func_kwargs = {}
-    params = func_params(func)
-    for k, v in kwargs.items():
-        if k in params:
-            func_kwargs[k] = v
-    return func_kwargs
-
+from pytorch_lightning import LightningDataModule
+from torch.utils.data import DataLoader
+import os
+import anndata
+from abc import ABC, abstractmethod
+from ._base_utility_functions import extract_func_kwargs
 
 def _augment_obs_with_W(adata, w_key="W"):
     w_hat_key = "{}_hat".format(w_key)
@@ -47,13 +42,14 @@ def _split_test_train(
             use_key=use_key,
             groupby=time_key,
             obs_keys=w_keys,
+            silent=True,
         )
 
     else:
         train_adata, test_dataset = adata, None
 
     train_dataset = torch_adata.AnnDataset(
-        train_adata, use_key=use_key, groupby=time_key, obs_keys=w_keys
+        train_adata, use_key=use_key, groupby=time_key, obs_keys=w_keys, silent=True
     )
 
     if percent_val:
@@ -90,7 +86,6 @@ class DataModule(BaseLightningDataModule):
         for k, v in datasets.items():
             if not v is None:
                 setattr(self, k, v)
-                
                 
 def prepare_LightningDataModule(
     adata,

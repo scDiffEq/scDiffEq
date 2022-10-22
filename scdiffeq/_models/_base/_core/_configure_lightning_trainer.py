@@ -13,7 +13,12 @@ __email__ = ", ".join(
 
 # -- : ----
 from pytorch_lightning import loggers
+from pytorch_lightning import Trainer
 import os
+import torch
+
+
+from ._base_utility_functions import extract_func_kwargs
 
 
 def configure_CSVLogger(
@@ -68,9 +73,11 @@ def configure_lightning_trainer(
     max_epochs=1500,
     log_every_n_steps=1,
     reload_dataloaders_every_n_epochs=5,
-    resume_from_checkpoint=False,
     kwargs={},
 ):
+    
+    if not os.path.exists(model_save_dir):
+        os.mkdir(model_save_dir)
 
     logger_kwargs = extract_func_kwargs(func=loggers.CSVLogger, kwargs=locals())
     trainer_kwargs = extract_func_kwargs(func=Trainer, kwargs=locals())

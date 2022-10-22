@@ -147,6 +147,7 @@ class SinkhornDivergence(LossFunction):
         """
         
         inputs = self.__format_inputs__(X, X_hat, W, W_hat)
+            
         return self.loss_func(
             inputs["W"], inputs["X"], inputs["W_hat"], inputs["X_hat"]
         )

@@ -17,10 +17,9 @@ __version__ = "0.0.44"
 
 # import modules / functions to be accessed as sdq.models.<MODEL>: -----------------------
 from ._scdiffeq import scDiffEq
-from ._base._core._base_model import BaseModel
-from . import _base as base
+# from ._base._core._base_model import BaseModel
+# from . import _base as base
 
-from ._base._core._prepare_data import prepare_data
 
 # TODO: ----------------------------------------------------------------------------------
 # from ._prescient import PRESCIENT

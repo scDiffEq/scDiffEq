@@ -2,19 +2,11 @@
 
 import inspect
 import torch
+from neural_diffeqs import NeuralSDE
 
+from ._base_utility_functions import extract_func_kwargs
+from ._prepare_lightning_data_module import prepare_LightningDataModule
 
-def func_params(func):
-    return list(inspect.signature(func).parameters.keys())
-
-
-def extract_func_kwargs(func, kwargs):
-    func_kwargs = {}
-    params = func_params(func)
-    for k, v in kwargs.items():
-        if k in params:
-            func_kwargs[k] = v
-    return func_kwargs
 
 class InputConfiguration:
     def __init__(self, func=None, adata=None, DataModule=None):
@@ -38,7 +30,7 @@ class InputConfiguration:
 
     def _adata_only(self, use_key, time_key, w_key):
 
-        self.DataModule = sdq.models.prepare_data(
+        self.DataModule = prepare_LightningDataModule(
             self.adata, use_key=use_key, time_key=time_key, w_key=w_key
         )
         self.func = NeuralSDE(state_size=self.DataModule.n_dims)
@@ -55,7 +47,7 @@ class InputConfiguration:
             print(" - [ NOTE ] | PASS ADATA OR NEURAL DIFFEQ")
 
         elif self._non_null == ["func", "adata"]:
-            self.DataModule = sdq.models.prepare_data(
+            self.DataModule = prepare_LightningDataModule(
                 self.adata, use_key=use_key, time_key=time_key, w_key=w_key
             )
 

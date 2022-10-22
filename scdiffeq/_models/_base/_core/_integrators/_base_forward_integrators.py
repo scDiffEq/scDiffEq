@@ -20,6 +20,10 @@ from abc import ABC, abstractmethod
 import torch
 
 
+# -- import local dependencies: ----------------------------------------------------------
+from .._base_utility_functions import autodevice
+
+
 # -- Integrator base classes: ------------------------------------------------------------
 class AbstractForwardIntegrator(ABC):
     @abstractmethod
