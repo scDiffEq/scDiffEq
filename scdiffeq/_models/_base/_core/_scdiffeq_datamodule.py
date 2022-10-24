@@ -1,5 +1,6 @@
 
 import torch_adata
+import os
 
 BaseLightningDataModule = torch_adata.tl.BaseLightningDataModule
 
@@ -31,3 +32,12 @@ class scDiffEqDataModule(BaseLightningDataModule):
 
     def setup(self, stage: str = None):
         pass
+
+
+def configure_data(adata, time_key, batch_size=2000, num_workers=os.cpu_count(), percent_val=0.2):
+    
+    """"""
+    
+    kwargs = {"time_key": time_key, "percent_val": percent_val}
+    
+    return scDiffEqDataModule(adata, batch_size, num_workers, **kwargs)

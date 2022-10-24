@@ -29,7 +29,7 @@ from ._base._core._base_model import LightningModel
 from ._base._core._configure import configure_lightning_trainer
 from ._base._core._configure import InputConfiguration
 from ._base._core._base_utility_functions import extract_func_kwargs
-from ._base._core._scdiffeq_datamodule import scDiffEqDataModule
+from ._base._core._scdiffeq_datamodule import configure_data
 
 
 # -- base model: -------------------------------------------------------------------------
@@ -53,15 +53,12 @@ class BaseModel(ABC):
         
         lit_kwargs = extract_func_kwargs(LightningModel, self._kwargs)
         trainer_kwargs = extract_func_kwargs(configure_lightning_trainer, self._kwargs)
-        data_kwargs = extract_func_kwargs(scDiffEqDataModule, self._kwargs)
+        data_kwargs = extract_func_kwargs(configure_data, self._kwargs)
+        
         
         self.LightningModel = LightningModel(**lit_kwargs)
         self.trainer = configure_lightning_trainer(**trainer_kwargs)
-        
-        print("DATA KWARGS")
-        print(data_kwargs)
-        
-        self.DataModule = scDiffEqDataModule(**data_kwargs) # percent_val=0.2, time_key=self.time_key) # 
+        self.DataModule = configure_data(**data_kwargs)
         
     def fit(self):
         self.trainer.fit(self.LightningModel, self.DataModule)
@@ -81,10 +78,12 @@ class scDiffEq(BaseModel):
                  DataModule: LightningDataModule=None,
                  func:[NeuralODE, NeuralSDE, torch.nn.Module] = None,
                  time_key="Time point",
+                 batch_size: int = 2000,
                  optimizer_kwargs: dict = {"lr": 1e-4},
                  scheduler_kwargs: dict = {"step_size": 20, "gamma": 0.1},
                  ignore_t0: bool = True,
                  dt: float = 0.1,
+                 percent_val: float = 0.2, 
                  **kwargs,
                 ):
        
