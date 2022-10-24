@@ -43,7 +43,7 @@ class ODEIntegrator(BaseForwardIntegrator):
 # -- TorchNN: ----------------------------------------------------------------------------
 class TorchNNIntegrator(BaseForwardIntegrator):
     def __init__(self):
-        ...
+        pass
     
     def forward(self, func, X0, t, dt=0.1, stdev=0.5, max_steps=None):
         diffuser = BrownianDiffuser(X0=X0, t=t, dt=dt, stdev=stdev, max_steps=max_steps)

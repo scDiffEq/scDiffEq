@@ -30,9 +30,4 @@ class scDiffEqDataModule(BaseLightningDataModule):
         self.test_dataset = split.test_dataset
 
     def setup(self, stage: str = None):
-        
-        if stage == "fit" or None:
-            self.train_dataset = split.train_dataset
-            self.val_dataset = split.val_dataset
-        elif stage == "predict":
-            self.test_dataset = split.test_dataset
+        pass

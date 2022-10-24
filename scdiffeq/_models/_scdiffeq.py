@@ -62,6 +62,9 @@ class BaseModel(ABC):
     def fit(self):
         self.trainer.fit(self.LightningModel, self.DataModule)
 
+    def test(self):
+        self.pred = self.trainer.predict(self, self.DataModule)
+        
     def predict(self):
         self.pred = self.trainer.predict(self, self.DataModule)
 

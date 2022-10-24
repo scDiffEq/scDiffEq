@@ -114,7 +114,7 @@ class BatchForward(BaseBatchForward):
     def __call__(self, model, batch, stage, **kwargs):
         """
         By default, __call___ will run:
-        (1) __parse__()
+        (1) __parse__(batch)
         (2) __inference__()
         (3) __loss__()
         (4) __log__()
@@ -192,10 +192,10 @@ class LightningModel(BaseLightningModel):
         self.__configure_forward_step__()
         
     def training_step(self, batch, batch_idx):
-        return self.forward(self, batch, stage="train", dt=self.dt)
+        return self.forward(self, batch, stage="fit", dt=self.dt)
 
     def validation_step(self, batch, batch_idx):
-        return self.forward(self, batch, stage="val", dt=self.dt)
+        return self.forward(self, batch, stage="fit", dt=self.dt)
 
     def test_step(self, batch, batch_idx):
         return self.forward(self, batch, stage="test", dt=self.dt)
