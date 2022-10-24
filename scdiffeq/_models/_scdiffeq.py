@@ -58,10 +58,6 @@ class BaseModel(ABC):
         
         self.LightningModel = LightningModel(**lit_kwargs)
         self.trainer = configure_lightning_trainer(**trainer_kwargs)
-        
-        print("DATA KWARGS")
-        print(data_kwargs)
-
         self.DataModule = configure_data(**data_kwargs)
         
     def fit(self):
