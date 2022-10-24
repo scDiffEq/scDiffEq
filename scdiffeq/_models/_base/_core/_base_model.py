@@ -192,10 +192,10 @@ class LightningModel(BaseLightningModel):
         self.__configure_forward_step__()
         
     def training_step(self, batch, batch_idx):
-        return self.forward(self, batch, stage="fit", dt=self.dt)
+        return self.forward(self, batch, stage="train", dt=self.dt)
 
     def validation_step(self, batch, batch_idx):
-        return self.forward(self, batch, stage="fit", dt=self.dt)
+        return self.forward(self, batch, stage="val", dt=self.dt)
 
     def test_step(self, batch, batch_idx):
         return self.forward(self, batch, stage="test", dt=self.dt)
