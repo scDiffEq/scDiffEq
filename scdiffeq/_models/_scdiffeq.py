@@ -57,13 +57,17 @@ class BaseModel(ABC):
         
         self.LightningModel = LightningModel(**lit_kwargs)
         self.trainer = configure_lightning_trainer(**trainer_kwargs)
-        self.DataModule = scDiffEqDataModule(adata=self.adata, percent_val=0.2, time_key=self.time_key) # **data_kwargs
+        
+        print("DATA KWARGS")
+        print(data_kwargs)
+        
+        self.DataModule = scDiffEqDataModule(**data_kwargs) # percent_val=0.2, time_key=self.time_key) # 
         
     def fit(self):
         self.trainer.fit(self.LightningModel, self.DataModule)
 
     def test(self):
-        self.pred = self.trainer.predict(self, self.DataModule)
+        self.test_pred = self.trainer.test(self, self.DataModule)
         
     def predict(self):
         self.pred = self.trainer.predict(self, self.DataModule)
