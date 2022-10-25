@@ -84,6 +84,7 @@ class scDiffEq(BaseModel):
                  ignore_t0: bool = True,
                  dt: float = 0.1,
                  percent_val: float = 0.2, 
+                 devices: int = torch.cuda.device_count(),
                  **kwargs,
                 ):
        
