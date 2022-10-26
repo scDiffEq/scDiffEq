@@ -34,11 +34,11 @@ from ._integrators import credential_handoff
 from ._base_utility_functions import extract_func_kwargs
 
 class BaseBatchForward(ABC):
-    def __init__(self, func, loss_function):
+    def __init__(self, func, loss_function, device):
         """To-do: add docs."""
 
         self.integrator, self.func_type = credential_handoff(func)
-        self.loss_function = loss_function
+        self.loss_function = loss_function(device)
         self.func = func
 
     @abstractmethod
@@ -160,7 +160,10 @@ class BaseLightningModel(LightningModule):
     
     def __configure_forward_step__(self, ignore_t0=True):
         """To-Do: docs"""
-        forward_step = BatchForward(self.func, loss_function = SinkhornDivergence())
+        forward_step = BatchForward(self.func,
+                                    loss_function = SinkhornDivergence,
+                                    device = self.device,
+                                   )
         setattr(self, "forward", getattr(forward_step, "__call__"))
         setattr(self, "integrator", getattr(forward_step, "integrator"))
         setattr(self, "func_type", getattr(forward_step, "func_type"))

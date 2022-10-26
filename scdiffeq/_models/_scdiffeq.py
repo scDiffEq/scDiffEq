@@ -39,22 +39,50 @@ class BaseModel(ABC):
     Lightning Trainer, an AnnData / LightningDataModule.
     """
 
-    def __parse__(self, kwargs, ignore=["self", "__class__"]):
+    def __parse__(self, kwargs, ignore):
         self._kwargs = {}
         for k, v in kwargs.items():
-            if not k in ignore:
+            if k == "kwargs":
+                for l, w in v.items():
+                    self._kwargs[l] = w
+            elif not k in ignore:
                 setattr(self, k, v)
                 self._kwargs[k] = v
 
-    def __configure__(self, kwargs):
+    def __report_kwargs__(self, lit_kwargs, trainer_kwargs, data_kwargs, ignore):
+        
+        ignore += ["func", "adata"]
+        
+        print("\n - LIGHTNING MODEL KWARGS -")
+        print("----------------------------")
+        for k, v in lit_kwargs.items():
+            if not k in ignore:
+                print("{}: {}".format(k, v))
+        
+        print("\n - DATA KWARGS -")
+        print("-----------------")
+        for k, v in trainer_kwargs.items():
+            if not k in ignore:
+                print("{}: {}".format(k, v))
+        
+        print("\n - TRAINER / LOGGER KWARGS -")
+        print("----------------------------")
+        for k, v in data_kwargs.items():
+            if not k in ignore:
+                print("{}: {}".format(k, v))
+        
+                
+    def __configure__(self, report_kwargs, kwargs, ignore=["self", "__class__"]):
         """Where we define the Trainer / loggers / etc."""
         
-        self.__parse__(kwargs)
+        self.__parse__(kwargs, ignore)
         
         lit_kwargs = extract_func_kwargs(LightningModel, self._kwargs)
         trainer_kwargs = extract_func_kwargs(configure_lightning_trainer, self._kwargs)
         data_kwargs = extract_func_kwargs(configure_data, self._kwargs)
         
+        if report_kwargs:
+            self.__report_kwargs__(lit_kwargs, trainer_kwargs, data_kwargs, ignore)
         
         self.LightningModel = LightningModel(**lit_kwargs)
         self.trainer = configure_lightning_trainer(**trainer_kwargs)
@@ -85,6 +113,7 @@ class scDiffEq(BaseModel):
                  dt: float = 0.1,
                  percent_val: float = 0.2, 
                  devices: int = torch.cuda.device_count(),
+                 report_kwargs=False,
                  **kwargs,
                 ):
        
@@ -124,4 +153,4 @@ class scDiffEq(BaseModel):
         """        
         
         super(scDiffEq, self)
-        self.__configure__(locals())
+        self.__configure__(report_kwargs, locals())

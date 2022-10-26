@@ -21,7 +21,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from .._base_utility_functions import autodevice
+# from .._base_utility_functions import autodevice
 
 
 # -- Integrator base classes: ------------------------------------------------------------
@@ -34,7 +34,7 @@ class AbstractForwardIntegrator(ABC):
 class BaseForwardIntegrator(AbstractForwardIntegrator):
     def __init__(self):
         super(BaseForwardIntegrator, self).__init__()
-        self.device = autodevice()
+#         self.device = autodevice()
 
     # -- base integrator supporting functions: -------------------------------------------
     def _specify_forward_module(self, pkg, module):

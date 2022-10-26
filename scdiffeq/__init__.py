@@ -11,3 +11,4 @@ __version__ = "0.0.44"
 
 from . import _io as io
 from . import _models as models
+from ._models._base import _core as core

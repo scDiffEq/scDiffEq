@@ -14,7 +14,14 @@ def _augment_obs_with_W(adata, w_key="W"):
 
 
 class scDiffEqDataModule(BaseLightningDataModule):
+    """
+    https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningDataModule.html
+    """
     def prepare_data(self):
+        """
+        download, split, etc...
+        only called on 1 GPU/TPU in distributed
+        """
         self.groupby = self.time_key
         self._w_keys = _augment_obs_with_W(self.adata, w_key="W")
         
@@ -31,6 +38,9 @@ class scDiffEqDataModule(BaseLightningDataModule):
         self.test_dataset = split.test_dataset
 
     def setup(self, stage: str = None):
+        """
+        Make assignments here (val/train/test split). Called on every process in DDP.
+        """
         pass
 
 

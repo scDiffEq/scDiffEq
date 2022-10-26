@@ -20,7 +20,7 @@ import torch
 
 # import local dependencies: -------------------------------------------------------------
 from ._base_utility_functions import (
-    autodevice,
+#     autodevice,
     extract_func_kwargs,
     local_arg_parser,
 )
@@ -41,7 +41,7 @@ def _format_W(W, X, sample_axis=1):
 
 # Base class: ----------------------------------------------------------------------------
 class LossFunction(ABC):
-    device = autodevice()
+#     device = autodevice()
 
     def __parse__(self, passed_kwargs):
 
@@ -61,6 +61,7 @@ class SinkhornDivergence(LossFunction):
 
     def __init__(
         self,
+        device,
         loss="sinkhorn",
         backend="online",
         p=2,
@@ -70,6 +71,7 @@ class SinkhornDivergence(LossFunction):
         sample_axis=1,
         **kwargs
     ):
+        self.device = device
         self.__parse__(locals())
 
     def __format_inputs__(
