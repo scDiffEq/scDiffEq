@@ -16,6 +16,8 @@ __version__ = "0.0.44"
 
 
 # -- import packages: --------------------------------------------------------------------
+from abc import ABC, abstractmethod
+
 from pytorch_lightning import LightningModule, loggers
 from neural_diffeqs import NeuralSDE, NeuralODE
 from torch_composer import TorchNet
@@ -23,14 +25,11 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
+from ._base_utility_functions import extract_func_kwargs
 from ._sinkhorn_divergence import SinkhornDivergence
+from ._integrators import credential_handoff
 from ._configure import InputConfiguration
 
-
-import torch
-from abc import ABC, abstractmethod
-from ._integrators import credential_handoff
-from ._base_utility_functions import extract_func_kwargs
 
 class BaseBatchForward(ABC):
     def __init__(self, func, loss_function, device):
@@ -176,6 +175,7 @@ class BaseLightningModel(LightningModule):
 
     def configure_optimizers(self):
         """To-Do: docs"""
+        # TODO: add optimizer / scheduler config to input args through sdq.models.scDiffEq
         optimizer = torch.optim.RMSprop(
             self.parameters(), **self.optimizer_kwargs # .hparams["optimizer_kwargs"]
         )
