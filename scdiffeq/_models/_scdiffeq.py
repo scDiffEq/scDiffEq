@@ -76,6 +76,11 @@ class BaseModel(ABC):
     def __configure__(self, report_kwargs, kwargs, ignore=["self", "__class__"]):
         """Where we define the Trainer / loggers / etc."""
         
+        # TODO: MODEL/DATA INPUT CONFIGURATION
+            # INPUT: adata -> LightningDataModule
+            # INPUT: no model -> auto-configured model (will use best NSDE)
+            # MODULE IS ALREADY WRITTEN; JUST NEED TO UPDATE W/ COMPATIBILITY
+        
         self.__parse__(kwargs, ignore)
         
         lit_kwargs = extract_func_kwargs(LightningModel, self._kwargs)
@@ -125,6 +130,7 @@ class scDiffEq(BaseModel):
                  reload_dataloaders_every_n_epochs=5,
                  report_kwargs=False,
                  **kwargs,
+                 # TODO: ENCODER/DECODER KWARGS
                 ):
        
     
