@@ -58,7 +58,11 @@ class BaseBatchForward(ABC):
 
 
 class BatchForward(BaseBatchForward):
-    
+    """
+    Subsituting this class, subclassed from the `BaseBatchForward` module, above
+    adds flexibility for other types of forward functions. i.e., +/- different or
+    additional loss functions (e.g., velo, fate) and/or dim. reduction (e.g., VAE)
+    """
     def _sum_norm(self, W):
         return W / W.sum(1)[:, None]
 
