@@ -1,30 +1,31 @@
 
+__module_name__ = "_configure_lightning_trainer.py"
+__doc__ = """To-do."""
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
+
+
+from abc import ABC, abstractmethod
+import os
+
 import torch_adata
 from pytorch_lightning import LightningDataModule
 import inspect
 import torch
-import os
 
 from torch.utils.data import DataLoader
-import os
 import anndata
 from abc import ABC, abstractmethod
 from ._base_utility_functions import extract_func_kwargs
-import inspect
-import torch
 from neural_diffeqs import NeuralSDE
-
-# from ._base_utility_functions import extract_func_kwargs
-# from ._prepare_lightning_data_module import prepare_LightningDataModule
-
-import os
-
-
-from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-import os
-import anndata
-from abc import ABC, abstractmethod
+
 
 class BaseLightningDataModule(ABC, LightningDataModule):
     def __init__(
@@ -220,25 +221,6 @@ class InputConfiguration:
 
         for attr in self._attrs:
             setattr(model, attr, getattr(self, attr))
-            
-            
-            
-# ----
-# ----
-# ----
-
-
-
-__module_name__ = "_configure_lightning_trainer.py"
-__doc__ = """To-do."""
-__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
-__email__ = ", ".join(
-    [
-        "mvinyard@broadinstitute.org",
-        "arasmuss@broadinstitute.org",
-        "ruitong@broadinstitute.org",
-    ]
-)
 
 
 # -- : ----
@@ -297,6 +279,7 @@ def accelerator():
 def configure_lightning_trainer(
     model_save_dir="scDiffEq_model",
     log_name="lightning_logs",
+    devices=torch.cuda.device_count(),
     version=None,
     prefix="",
     flush_logs_every_n_steps=5,
@@ -305,7 +288,7 @@ def configure_lightning_trainer(
     reload_dataloaders_every_n_epochs=5,
     kwargs={},
 ):
-    
+
     if not os.path.exists(model_save_dir):
         os.mkdir(model_save_dir)
 
@@ -316,7 +299,6 @@ def configure_lightning_trainer(
     
     return Trainer(
         accelerator=accelerator(),
-        devices=torch.cuda.device_count(),
         logger=logging["logger"],
         **trainer_kwargs
     )

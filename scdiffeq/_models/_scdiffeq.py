@@ -22,6 +22,7 @@ from neural_diffeqs import NeuralODE, NeuralSDE
 from torch_composer import TorchNet
 import anndata
 import torch
+import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
@@ -39,22 +40,55 @@ class BaseModel(ABC):
     Lightning Trainer, an AnnData / LightningDataModule.
     """
 
-    def __parse__(self, kwargs, ignore=["self", "__class__"]):
+    def __parse__(self, kwargs, ignore):
         self._kwargs = {}
         for k, v in kwargs.items():
-            if not k in ignore:
+            if k == "kwargs":
+                for l, w in v.items():
+                    self._kwargs[l] = w
+            elif not k in ignore:
                 setattr(self, k, v)
                 self._kwargs[k] = v
 
-    def __configure__(self, kwargs):
+    def __report_kwargs__(self, lit_kwargs, trainer_kwargs, data_kwargs, ignore):
+        
+        ignore += ["func", "adata"]
+        
+        print("\n - LIGHTNING MODEL KWARGS -")
+        print("----------------------------")
+        for k, v in lit_kwargs.items():
+            if not k in ignore:
+                print("{}: {}".format(k, v))
+        
+        print("\n - DATA KWARGS -")
+        print("-----------------")
+        for k, v in trainer_kwargs.items():
+            if not k in ignore:
+                print("{}: {}".format(k, v))
+        
+        print("\n - TRAINER / LOGGER KWARGS -")
+        print("----------------------------")
+        for k, v in data_kwargs.items():
+            if not k in ignore:
+                print("{}: {}".format(k, v))
+        
+                
+    def __configure__(self, report_kwargs, kwargs, ignore=["self", "__class__"]):
         """Where we define the Trainer / loggers / etc."""
         
-        self.__parse__(kwargs)
+        # TODO: MODEL/DATA INPUT CONFIGURATION
+            # INPUT: adata -> LightningDataModule
+            # INPUT: no model -> auto-configured model (will use best NSDE)
+            # MODULE IS ALREADY WRITTEN; JUST NEED TO UPDATE W/ COMPATIBILITY
+        
+        self.__parse__(kwargs, ignore)
         
         lit_kwargs = extract_func_kwargs(LightningModel, self._kwargs)
         trainer_kwargs = extract_func_kwargs(configure_lightning_trainer, self._kwargs)
         data_kwargs = extract_func_kwargs(configure_data, self._kwargs)
         
+        if report_kwargs:
+            self.__report_kwargs__(lit_kwargs, trainer_kwargs, data_kwargs, ignore)
         
         self.LightningModel = LightningModel(**lit_kwargs)
         self.trainer = configure_lightning_trainer(**trainer_kwargs)
@@ -79,12 +113,24 @@ class scDiffEq(BaseModel):
                  func:[NeuralODE, NeuralSDE, torch.nn.Module] = None,
                  time_key="Time point",
                  batch_size: int = 2000,
+                 num_workers: int = os.cpu_count(),
                  optimizer_kwargs: dict = {"lr": 1e-4},
                  scheduler_kwargs: dict = {"step_size": 20, "gamma": 0.1},
                  ignore_t0: bool = True,
                  dt: float = 0.1,
                  percent_val: float = 0.2, 
+                 devices: int = torch.cuda.device_count(),
+                 model_save_dir='scDiffEq_model',
+                 log_name='lightning_logs',
+                 version=None,
+                 prefix='',
+                 flush_logs_every_n_steps=5,
+                 max_epochs=1500,
+                 log_every_n_steps=1,
+                 reload_dataloaders_every_n_epochs=5,
+                 report_kwargs=False,
                  **kwargs,
+                 # TODO: ENCODER/DECODER KWARGS
                 ):
        
     
@@ -123,4 +169,4 @@ class scDiffEq(BaseModel):
         """        
         
         super(scDiffEq, self)
-        self.__configure__(locals())
+        self.__configure__(report_kwargs, locals())

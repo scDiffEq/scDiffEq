@@ -18,7 +18,7 @@ import torch
 import numpy as np
 
 
-from .._base_utility_functions import autodevice
+# from .._base_utility_functions import autodevice
 
 
 # -- general setup function: -------------------------------------------------------------
@@ -48,7 +48,7 @@ class BrownianDiffuser:
     """Class for manual drift functions"""
 
     # -- one-time init calculations: -----------------------------------------------------
-    def __init__(self, X0, t, device=autodevice(), dt=0.1, stdev=0.5, max_steps=None):
+    def __init__(self, X0, t, device, dt=0.1, stdev=0.5, max_steps=None): # =autodevice()
         """
         Set up all elements that are not necessary to repeat, here.
         """

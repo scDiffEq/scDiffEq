@@ -18,14 +18,14 @@ from neural_diffeqs import NeuralODE, NeuralSDE, TorchNet
 
 from ._integrators import *
 
-from ._sinkhorn_divergence import SinkhornDivergence
+# from ._sinkhorn_divergence import SinkhornDivergence
 from ._configure import configure_lightning_trainer, prepare_LightningDataModule, InputConfiguration
 from ._base_model import LightningModel
 # from ._batch_forward import BatchForward
 from ._scdiffeq_datamodule import scDiffEqDataModule
 
 from ._base_utility_functions import (
-    autodevice,
+#     autodevice,
     func_params,
     extract_func_kwargs,
     local_arg_parser,

@@ -21,12 +21,11 @@ from neural_diffeqs import NeuralSDE, NeuralODE
 from torch_composer import TorchNet
 import torch
 
+
 # -- import local dependencies: ----------------------------------------------------------
-# from ._batch_forward import BatchForward
 from ._sinkhorn_divergence import SinkhornDivergence
 from ._configure import InputConfiguration
-# from . import _base_ancilliary as base
-# from . import _lightning_callbacks as cbs
+
 
 import torch
 from abc import ABC, abstractmethod
@@ -34,11 +33,11 @@ from ._integrators import credential_handoff
 from ._base_utility_functions import extract_func_kwargs
 
 class BaseBatchForward(ABC):
-    def __init__(self, func, loss_function):
+    def __init__(self, func, loss_function, device):
         """To-do: add docs."""
 
         self.integrator, self.func_type = credential_handoff(func)
-        self.loss_function = loss_function
+        self.loss_function = loss_function(device)
         self.func = func
 
     @abstractmethod
@@ -59,23 +58,27 @@ class BaseBatchForward(ABC):
 
 
 class BatchForward(BaseBatchForward):
-    
+    """
+    Subsituting this class, subclassed from the `BaseBatchForward` module, above
+    adds flexibility for other types of forward functions. i.e., +/- different or
+    additional loss functions (e.g., velo, fate) and/or dim. reduction (e.g., VAE)
+    """
     def _sum_norm(self, W):
         return W / W.sum(1)[:, None]
 
     def _format_sinkhorn_weights(self, W, W_hat):
         self.W, self.W_hat = self._sum_norm(W), self._sum_norm(W_hat)
-        
+
     def _format_t(self, batch):
         self.t = batch[0].unique()
-        
+
         if self.func_type == "neural_SDE":
-            self.t_arg = {"ts":self.t}
+            self.t_arg = {"ts": self.t}
         else:
-            self.t_arg = {"t":batch[0].unique()}
+            self.t_arg = {"t": batch[0].unique()}
 
     def __parse__(self, batch):
-        
+
         self._format_t(batch)
 
         if len(batch) >= 3:
@@ -84,7 +87,7 @@ class BatchForward(BaseBatchForward):
         if len(batch) == 4:
             W_hat = batch[3].transpose(1, 0)
             self._format_sinkhorn_weights(W, W_hat)
-        
+
         self.X = batch[1].transpose(1, 0)
         self.X0 = self.X[0]
 
@@ -92,20 +95,24 @@ class BatchForward(BaseBatchForward):
         """
         t or ts is by necessity included in **kwargs
         dt is also most easily handled by kwargs.
-        """ 
+        """
         kwargs.update(self.t_arg)
         self.X_hat = self.integrator(self.func, self.X0, **kwargs)
         return self.X_hat
 
     def __loss__(self):
-        
+
         if self.X_hat.shape[0] > len(self.t):
-            time_slice = torch.linspace(0, (self.X_hat.shape[0] - 1), len(self.t)).to(int)
+            time_slice = torch.linspace(0, (self.X_hat.shape[0] - 1), len(self.t)).to(
+                int
+            )
             X_hat = self.X_hat[time_slice.to(int)].contiguous()
         else:
             X_hat = self.X_hat.contiguous()
-        
-        return self.loss_function(X_hat, self.X.contiguous(), self.W.contiguous(), self.W_hat.contiguous())
+
+        return self.loss_function(
+            X_hat, self.X.contiguous(), self.W.contiguous(), self.W_hat.contiguous()
+        )
 
     def __log__(self, model, stage, loss):
         for n, i in enumerate(range(len(self.t))[-len(loss):]):
@@ -129,8 +136,7 @@ class BatchForward(BaseBatchForward):
         self.__log__(model, stage, loss)
         return loss.sum()
 
-# -- Lightning base: ---------------------------------------------------------------------
-# -- Lightning base: ---------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 def set_key_as_attr(self, k, v, hide):
 
@@ -160,7 +166,10 @@ class BaseLightningModel(LightningModule):
     
     def __configure_forward_step__(self, ignore_t0=True):
         """To-Do: docs"""
-        forward_step = BatchForward(self.func, loss_function = SinkhornDivergence())
+        forward_step = BatchForward(self.func,
+                                    loss_function = SinkhornDivergence,
+                                    device = self.device,
+                                   )
         setattr(self, "forward", getattr(forward_step, "__call__"))
         setattr(self, "integrator", getattr(forward_step, "integrator"))
         setattr(self, "func_type", getattr(forward_step, "func_type"))
