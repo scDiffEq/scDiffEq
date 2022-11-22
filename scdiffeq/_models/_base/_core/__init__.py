@@ -14,7 +14,7 @@ __email__ = ", ".join(
 # -- specify version: --------------------------------------------------------------------
 __version__ = "0.0.44"
 
-from neural_diffeqs import NeuralODE, NeuralSDE, TorchNet
+from neural_diffeqs import NeuralODE, NeuralSDE
 
 from ._integrators import *
 

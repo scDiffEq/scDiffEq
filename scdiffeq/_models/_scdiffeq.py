@@ -19,7 +19,7 @@ __version__ = "0.0.44"
 from abc import ABC, abstractmethod
 from pytorch_lightning import LightningDataModule
 from neural_diffeqs import NeuralODE, NeuralSDE
-from torch_composer import TorchNet
+from torch_nets import TorchNet
 import anndata
 import torch
 import os

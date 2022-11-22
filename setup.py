@@ -25,7 +25,8 @@ setup(
         "scikit-learn>=1.0.2",
         "umap-learn>=0.5.2",
         "pytorch-lightning>=1.7.7",
-        "neural-diffeqs",
+        "neural-diffeqs==0.2.0rc0",
+	"torch-nets==0.0.1",
         "torch-adata",
     ],
     classifiers=[
