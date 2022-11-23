@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 
 from pytorch_lightning import LightningModule, loggers
 from neural_diffeqs import NeuralSDE, NeuralODE
-from torch_composer import TorchNet
+from torch_nets import TorchNet
 import torch
 
 

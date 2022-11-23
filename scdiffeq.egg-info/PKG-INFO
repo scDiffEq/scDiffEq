@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: scdiffeq
+Version: 0.0.44
+Summary: scDiffEq: modelling single-cell dynamics using neural differential equations.
+Home-page: https://github.com/mvinyard/sc-neural-diffeqs
+Author: Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard
+Author-email: mvinyard@broadinstitute.org
+License: MIT
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >3.7.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # <a href=""><img src=docs/images/scdiffeq.logo.svg alt="scdiffeq-logo" width="320"/>
   
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
@@ -19,11 +36,9 @@ pip install -e .
   
 ```python
 import scdiffeq as sdq
-from neural_diffeqs import NeuralSDE
+from neural_diffeqs import neural_diffeq
 
-model = sdq.models.scDiffEq(
-    adata, func=NeuralSDE(state_size=50, mu_hidden=[400, 400], sigma_hidden=[400, 400])
-)
+model = sdq.models.CustomModel(adata, func=neural_diffeq())
 ```
   
 ```python
@@ -33,3 +48,5 @@ model.fit()
 ## Built on:
 <img width="50" hspace="20" alt="pytorch_logo" href="https://pytorch.org/" src="https://user-images.githubusercontent.com/47393421/187940001-61655a05-5393-419a-be96-75d11f233d6e.png"><img width="50" href="https://www.pytorchlightning.ai/" hspace="20" alt="pytorch_lightning_logo" src="https://user-images.githubusercontent.com/47393421/187939281-19139d2c-84fe-47b8-a77c-b87e04feca36.png">
 <img width="70" href="https://github.com/mvinyard/neural-diffeqs" alt="neural_diffeqs_logo" src="https://user-images.githubusercontent.com/47393421/187945512-c6b9e9e9-92ca-4578-bbbc-f2216727b0e9.png">
+
+

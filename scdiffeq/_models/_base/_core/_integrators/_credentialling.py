@@ -13,7 +13,7 @@ __email__ = ", ".join(
 
 # -- import packages: --------------------------------------------------------------------
 from neural_diffeqs import NeuralODE, NeuralSDE
-from torch_composer import TorchNet
+from torch_nets import TorchNet
 import torch
 
 
