@@ -19,9 +19,11 @@ pip install -e .
   
 ```python
 import scdiffeq as sdq
-from neural_diffeqs import neural_diffeq
+from neural_diffeqs import NeuralSDE
 
-model = sdq.models.CustomModel(adata, func=neural_diffeq())
+model = sdq.models.scDiffEq(
+    adata, func=NeuralSDE(state_size=50, mu_hidden=[400, 400], sigma_hidden=[400, 400])
+)
 ```
   
 ```python
