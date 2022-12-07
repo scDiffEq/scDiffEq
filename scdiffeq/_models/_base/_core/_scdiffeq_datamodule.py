@@ -2,7 +2,7 @@
 import torch_adata
 import os
 
-BaseLightningDataModule = torch_adata.tl.BaseLightningDataModule
+from torch_adata import BaseLightningDataModule
 
 
 def _augment_obs_with_W(adata, w_key="W"):

@@ -19,7 +19,7 @@ import torch
 
 
 # import local dependencies: -------------------------------------------------------------
-from ._base_utility_functions import (
+from .._utils import (
 #     autodevice,
     extract_func_kwargs,
     local_arg_parser,

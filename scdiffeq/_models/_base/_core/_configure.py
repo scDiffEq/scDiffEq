@@ -22,7 +22,12 @@ import torch
 from torch.utils.data import DataLoader
 import anndata
 from abc import ABC, abstractmethod
-from ._base_utility_functions import extract_func_kwargs
+# from ._base_utility_functions import extract_func_kwargs
+from .._utils import (
+#     autodevice,
+    extract_func_kwargs,
+    local_arg_parser,
+)
 from neural_diffeqs import NeuralSDE
 from torch.utils.data import DataLoader
 
@@ -230,7 +235,7 @@ import os
 import torch
 
 
-from ._base_utility_functions import extract_func_kwargs
+# from ._base_utility_functions import extract_func_kwargs
 
 
 def configure_CSVLogger(
