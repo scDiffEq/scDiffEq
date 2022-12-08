@@ -18,3 +18,5 @@ __version__ = "0.0.44"
 # -- import base module groups: ----------------------------------------------------------
 from ._lightning_callbacks import *
 from ._core import *
+from ._base_model import BaseModel
+from ._config import *

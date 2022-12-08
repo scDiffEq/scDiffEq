@@ -16,7 +16,6 @@ __version__ = "0.0.44"
 
 
 # -- import packages: --------------------------------------------------------------------
-from abc import ABC, abstractmethod
 from pytorch_lightning import LightningDataModule
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch_nets import TorchNet
@@ -26,92 +25,18 @@ import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ._base._core._base_model import LightningModel
-from ._base._core._configure import configure_lightning_trainer
-from ._base._core._configure import InputConfiguration
-from ._base._core._base_utility_functions import extract_func_kwargs
-from ._base._core._scdiffeq_datamodule import configure_data
-
-
-# -- base model: -------------------------------------------------------------------------
-class BaseModel(ABC):
-    """
-    Base model to interface PyTorch-Lightning model with a
-    Lightning Trainer, an AnnData / LightningDataModule.
-    """
-
-    def __parse__(self, kwargs, ignore):
-        self._kwargs = {}
-        for k, v in kwargs.items():
-            if k == "kwargs":
-                for l, w in v.items():
-                    self._kwargs[l] = w
-            elif not k in ignore:
-                setattr(self, k, v)
-                self._kwargs[k] = v
-
-    def __report_kwargs__(self, lit_kwargs, trainer_kwargs, data_kwargs, ignore):
-        
-        ignore += ["func", "adata"]
-        
-        print("\n - LIGHTNING MODEL KWARGS -")
-        print("----------------------------")
-        for k, v in lit_kwargs.items():
-            if not k in ignore:
-                print("{}: {}".format(k, v))
-        
-        print("\n - DATA KWARGS -")
-        print("-----------------")
-        for k, v in trainer_kwargs.items():
-            if not k in ignore:
-                print("{}: {}".format(k, v))
-        
-        print("\n - TRAINER / LOGGER KWARGS -")
-        print("----------------------------")
-        for k, v in data_kwargs.items():
-            if not k in ignore:
-                print("{}: {}".format(k, v))
-        
-                
-    def __configure__(self, report_kwargs, kwargs, ignore=["self", "__class__"]):
-        """Where we define the Trainer / loggers / etc."""
-        
-        # TODO: MODEL/DATA INPUT CONFIGURATION
-            # INPUT: adata -> LightningDataModule
-            # INPUT: no model -> auto-configured model (will use best NSDE)
-            # MODULE IS ALREADY WRITTEN; JUST NEED TO UPDATE W/ COMPATIBILITY
-        
-        self.__parse__(kwargs, ignore)
-        
-        lit_kwargs = extract_func_kwargs(LightningModel, self._kwargs)
-        trainer_kwargs = extract_func_kwargs(configure_lightning_trainer, self._kwargs)
-        data_kwargs = extract_func_kwargs(configure_data, self._kwargs)
-        
-        if report_kwargs:
-            self.__report_kwargs__(lit_kwargs, trainer_kwargs, data_kwargs, ignore)
-        
-        self.LightningModel = LightningModel(**lit_kwargs)
-        self.trainer = configure_lightning_trainer(**trainer_kwargs)
-        self.DataModule = configure_data(**data_kwargs)
-        
-    def fit(self):
-        self.trainer.fit(self.LightningModel, self.DataModule)
-
-    def test(self):
-        self.test_pred = self.trainer.test(self, self.DataModule)
-        
-    def predict(self):
-        self.pred = self.trainer.predict(self, self.DataModule)
+from . import _base as base
 
 
 # -- Focus of this module: scDiffEq model: -----------------------------------------------
-class scDiffEq(BaseModel):
+class scDiffEq(base.BaseModel):
     
     def __init__(self,
                  adata: anndata.AnnData = None,
                  DataModule: LightningDataModule=None,
                  func:[NeuralODE, NeuralSDE, torch.nn.Module] = None,
                  time_key="Time point",
+                 use_key="X_pca",
                  batch_size: int = 2000,
                  num_workers: int = os.cpu_count(),
                  optimizer_kwargs: dict = {"lr": 1e-4},
@@ -166,7 +91,10 @@ class scDiffEq(BaseModel):
         Notes:
         ------
 
-        """        
+        """
+        
+        if not func:
+            func = base.default_NeuralSDE(state_size=adata.obsm[use_key].shape[1])
         
         super(scDiffEq, self)
         self.__configure__(report_kwargs, locals())

@@ -32,5 +32,6 @@ __version__ = "0.0.44"
 
 
 from ._lightning_model import LightningModel
+from ._default_neural_sde import default_NeuralSDE
 
 # from ._batch_forward import BatchForward
