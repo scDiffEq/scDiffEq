@@ -1,6 +1,7 @@
 
 __module_name__ = "__init__.py"
-__doc__ = """To-do."""
+__version__ = "0.0.44"
+__doc__ = """Top-level __init__ for accessing models."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
     [
@@ -11,17 +12,10 @@ __email__ = ", ".join(
 )
 
 
-# version: -------------------------------------------------------------------------------
-__version__ = "0.0.44"
-
-
-# import modules / functions to be accessed as sdq.models.<MODEL>: -----------------------
+# -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
-# from ._prescient import PRESCIENT
-
-# from ._base._core._base_model import BaseModel
-# from . import _base as base
+from ._prescient import PRESCIENT
 
 
-# TODO: ----------------------------------------------------------------------------------
-# from ._prescient import PRESCIENT
+# -- developer imports: ------------------------------------------------------------------
+from ._base import _core

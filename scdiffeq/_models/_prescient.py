@@ -31,4 +31,5 @@ class PRESCIENT(BaseModel):
         (1) https://github.com/gifford-lab/prescient
         """
         super(PRESCIENT, self)
-        self.__configure__(locals())
+        
+        print("Not yet implemented")

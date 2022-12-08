@@ -11,6 +11,7 @@ from ._sinkhorn_divergence import SinkhornDivergence
 from ._batch_forward import BatchForward
 from .._utils import parser
 
+
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningModel(LightningModule):
     

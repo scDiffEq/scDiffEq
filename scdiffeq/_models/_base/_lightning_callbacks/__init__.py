@@ -1,6 +1,7 @@
 
 __module_name__ = "__init__.py"
-__doc__ = """To-do."""
+__version__ = "0.0.44"
+__doc__ = """__init__ module for the PyTorch-Lightning callbacks."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
     [
@@ -9,10 +10,3 @@ __email__ = ", ".join(
         "ruitong@broadinstitute.org",
     ]
 )
-
-
-# specify version: -----------------------------------------------------------------------
-__version__ = "0.0.44"
-
-
-# ----------------------------------------------------------------------------------------

@@ -59,7 +59,7 @@ class BaseBatchForward(ABC):
 # -- Main class accepted by LightningModel: ----------------------------------------------
 class BatchForward(BaseBatchForward):
     """
-    Subsituting this class, subclassed from the `BaseBatchForward` module, above
+    Substituting this class, subclassed from the `BaseBatchForward` module, above
     adds flexibility for other types of forward functions. i.e., +/- different or
     additional loss functions (e.g., velo, fate) and/or dim. reduction (e.g., VAE)
     """
@@ -82,11 +82,11 @@ class BatchForward(BaseBatchForward):
         self._format_t(batch)
 
         if len(batch) >= 3:
-            W = batch[2].transpose(1, 0)
+            self.W = batch[2].transpose(1, 0)
 
         if len(batch) == 4:
             W_hat = batch[3].transpose(1, 0)
-            self._format_sinkhorn_weights(W, W_hat)
+            self._format_sinkhorn_weights(self.W, W_hat)
 
         self.X = batch[1].transpose(1, 0)
         self.X0 = self.X[0]
