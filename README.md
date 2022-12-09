@@ -1,4 +1,5 @@
-# <a href=""><img src=docs/images/scdiffeq.logo.svg alt="scdiffeq-logo" width="320"/>
+# <a href=""><img src=docs/images/scdiffeq.logo.png alt="scdiffeq-logo" 
+width="320"/>
   
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
 [![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
