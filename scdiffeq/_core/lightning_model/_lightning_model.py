@@ -42,7 +42,7 @@ class LightningModel(LightningModule):
         self.__configure_forward_step__()
         
     def __configure_forward_step__(self, ignore_t0=True):
-        # TO-DO: documentation
+        # TODO: documentation
         forward_step = BatchForward(self.func,
                                     loss_function = SinkhornDivergence,
                                     device = self.device,
@@ -53,24 +53,24 @@ class LightningModel(LightningModule):
 
         
     def training_step(self, batch, batch_idx):
-        # TO-DO: documentation
+        # TODO: documentation
         return self.forward(self, batch, stage="train", dt=self.dt)
 
     def validation_step(self, batch, batch_idx):
-        # TO-DO: documentation
+        # TODO: documentation
         return self.forward(self, batch, stage="val", dt=self.dt)
 
     def test_step(self, batch, batch_idx):
-        # TO-DO: documentation
+        # TODO: documentation
         return self.forward(self, batch, stage="test", dt=self.dt)
 
     def predict_step(self, batch, batch_idx):
-        # TO-DO: documentation
+        # TODO: documentation
         return self.forward(self, batch, stage="predict", dt=self.dt)
 
     def configure_optimizers(self):
-        # TO-DO: documentation
-        # TO-DO: add optimizer / scheduler config to input args through sdq.models.scDiffEq
+        # TODO: documentation
+        # TODO: add optimizer / scheduler config to input args through sdq.models.scDiffEq
         optimizer = torch.optim.RMSprop(
             self.parameters(), **self.optimizer_kwargs # .hparams["optimizer_kwargs"]
         )
