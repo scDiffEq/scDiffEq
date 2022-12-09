@@ -60,10 +60,11 @@ class FunctionCredentials:
             return ODEIntegrator(), "neural_ODE"
         if all([CRED["IS"]["TORCH_NET"]]):
             return TorchNNIntegrator(), "neural_net"
+        else:
+            print("Something went wrong...")
 
     def __call__(self, func):
         """returns integrator, function_type"""
-
         CREDENTIALS = {"IS": {}, "HAS": {}}
         CREDENTIALS["IS"]["ODE"] = self._is_neural_ode(func)
         CREDENTIALS["IS"]["SDE"] = self._is_neural_sde(func)

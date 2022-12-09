@@ -1,6 +1,7 @@
 
 __module_name__ = "_scdiffeq.py"
-__doc__ = """To-do."""
+__doc__ = """API-facing model module."""
+__version__ = "0.0.45"
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
     [
@@ -9,10 +10,6 @@ __email__ = ", ".join(
         "ruitong@broadinstitute.org",
     ]
 )
-
-
-# -- version: ----------------------------------------------------------------------------
-__version__ = "0.0.44"
 
 
 # -- import packages: --------------------------------------------------------------------
@@ -25,11 +22,11 @@ import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from . import _base as base
 
 
-# -- Focus of this module: scDiffEq model: -----------------------------------------------
-class scDiffEq(base.BaseModel):
+
+# -- API-facing model class: -------------------------------------------------------------
+class scDiffEq:
     
     def __init__(self,
                  adata: anndata.AnnData = None,
@@ -93,8 +90,8 @@ class scDiffEq(base.BaseModel):
 
         """
         
-        if not func:
-            func = base.default_NeuralSDE(state_size=adata.obsm[use_key].shape[1])
-        
         super(scDiffEq, self)
-        self.__configure__(report_kwargs, locals())
+        self.__configure__(locals()) # report_kwargs
+        
+    def __repr__(self):
+        return "scDiffEq model"

@@ -18,3 +18,4 @@ from ._integrators import (
 
 # -- import handler function: ------------------------------------------------------------
 from ._credentialling import credential_handoff
+from ._brownian_diffuser import BrownianDiffuser

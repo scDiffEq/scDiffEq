@@ -9,7 +9,7 @@ import torch
 # -- import local dependencies: ----------------------------------------------------------
 from ._sinkhorn_divergence import SinkhornDivergence
 from ._batch_forward import BatchForward
-from .._utils import parser
+from .._config import parser
 
 
 # -- LightningModel: ---------------------------------------------------------------------

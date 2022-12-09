@@ -12,7 +12,7 @@ import torchdiffeq
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ._base_forward_integrators import BaseForwardIntegrator
+from ._base_forward_integrator import BaseForwardIntegrator
 from ._brownian_diffuser import BrownianDiffuser
 
 
@@ -40,11 +40,15 @@ class ODEIntegrator(BaseForwardIntegrator):
         self._scale_time(**kwargs)
 
 
-# -- TorchNN: ----------------------------------------------------------------------------
+# -- TorchNet: ---------------------------------------------------------------------------
 class TorchNNIntegrator(BaseForwardIntegrator):
-    def __init__(self):
-        pass
-    
     def forward(self, func, X0, t, dt=0.1, stdev=0.5, max_steps=None):
-        diffuser = BrownianDiffuser(X0=X0, t=t, dt=dt, stdev=stdev, max_steps=max_steps)
+        diffuser = sdq.models._base.BrownianDiffuser(
+            X0=X0,
+            t=t,
+            dt=dt,
+            stdev=stdev,
+            max_steps=max_steps,
+            device=device,
+        )
         return diffuser(func)

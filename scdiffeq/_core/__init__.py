@@ -1,7 +1,7 @@
 
 __module_name__ = "__init__.py"
-__version__ = "0.0.44"
-__doc__ = """Top-level __init__ for accessing models."""
+__version__ = "0.0.45"
+__doc__ = """Top-level __init__ for accessing the scDiffEq model."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
     [
@@ -14,8 +14,8 @@ __email__ = ", ".join(
 
 # -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
-from ._prescient import PRESCIENT
 
 
-# -- developer imports: ------------------------------------------------------------------
-from ._base import _core
+# -- developer-facing modules: -----------------------------------------------------------
+from . import loss
+from . import configs

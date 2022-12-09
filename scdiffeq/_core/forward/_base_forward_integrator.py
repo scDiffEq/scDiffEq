@@ -1,5 +1,6 @@
 
-__module_name__ = "_BaseForwardIntegrators.py"
+__module_name__ = "_base_forward_integrator.py"
+__version__ = "0.0.44"
 __doc__ = """Base module for classes that handle forward integration."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
@@ -11,32 +12,16 @@ __email__ = ", ".join(
 )
 
 
-# specify version: -----------------------------------------------------------------------
-__version__ = "0.0.44"
-
-
 # -- import packages: --------------------------------------------------------------------
 from abc import ABC, abstractmethod
 import torch
 
 
-# -- import local dependencies: ----------------------------------------------------------
-# from .._base_utility_functions import autodevice
-
-
-# -- Integrator base classes: ------------------------------------------------------------
-class AbstractForwardIntegrator(ABC):
-    @abstractmethod
-    def __call__(self):
-        pass
-
-
-class BaseForwardIntegrator(AbstractForwardIntegrator):
-    def __init__(self):
-        super(BaseForwardIntegrator, self).__init__()
-#         self.device = autodevice()
-
-    # -- base integrator supporting functions: -------------------------------------------
+class BaseForwardIntegrator(ABC):
+    """
+    Base class for forward integration of a neural differential equation or more
+    generally, a neural network passed through a diffuser.
+    """
     def _specify_forward_module(self, pkg, module):
         setattr(self, "forward", getattr(pkg, module))
 
@@ -53,17 +38,28 @@ class BaseForwardIntegrator(AbstractForwardIntegrator):
         for arg, val in local_args.items():
             if (not arg in ignore) and (isinstance(val, (float, int, torch.Tensor))):
                 self.kwargs[arg] = val
-    
+
     def _config_optionals(self, **kwargs):
         """run something INSIDE OF THIS like time_config which can be overwritten on the fly"""
         pass
-    
-    # -- main call: ----------------------------------------------------------------------
-    def __call__(self, func, X0, t=None, ts=None, dt=None, dt_min=None, stdev=None, max_steps=None, config_optionals=False):
+
+    def __call__(
+        self,
+        func,
+        X0,
+        t=None,
+        ts=None,
+        dt=None,
+        dt_min=None,
+        stdev=None,
+        max_steps=None,
+        config_optionals=False,
+    ):
         """
         handle case-specific conversions then return forward func
         """
         self._config_kwargs(locals())
         if config_optionals:
             self._config_optionals(config_optionals)
-        return self.forward(func, X0, **self.kwargs)
+            
+        return self.forward(func.to("cuda:0"), X0.to("cuda:0"), **self.kwargs)

@@ -18,10 +18,7 @@ import torch
 import numpy as np
 
 
-# from .._base_utility_functions import autodevice
-
-
-# -- general setup function: -------------------------------------------------------------
+# -- supporting functions: ---------------------------------------------------------------
 def timespan(t: (torch.Tensor or np.ndarray)):
     return (t.max() - t.min()).item()
 
@@ -52,7 +49,6 @@ class BrownianDiffuser:
         """
         Set up all elements that are not necessary to repeat, here.
         """
-
         self.__dict__.update(locals())
         self.sqrt_dt = np.sqrt(self.dt)
         self.n_steps = int(timespan(self.t) / self.dt)
