@@ -1,6 +1,6 @@
 
 __module_name__ = "_configuration.py"
-__doc__ = """To-do."""
+__doc__ = """TODO."""
 __version__ = """0.0.45"""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
