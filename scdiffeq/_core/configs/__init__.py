@@ -16,3 +16,4 @@ __email__ = ", ".join(
 from ._scdiffeq_configuration import scDiffEqConfiguration
 
 from ._fetch_from_torch import fetch_optimizer, fetch_lr_scheduler
+from ._extract_func_kwargs import func_params, extract_func_kwargs

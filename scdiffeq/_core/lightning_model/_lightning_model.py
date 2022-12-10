@@ -18,63 +18,77 @@ from neural_diffeqs import NeuralODE, NeuralSDE
 from torch_nets import TorchNet
 import torch
 
-# -- import local dependencies: ----------------------------------------------------------
-from ._sinkhorn_divergence import SinkhornDivergence
-from ._batch_forward import BatchForward
-from .._config import parser
 
 
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningModel(LightningModule):
-    
-    """Base pytorch-lightning model wrapped / trained within models.scDiffEq"""
-    def __init__(self,
-                 func: [NeuralSDE, NeuralODE, TorchNet] = None,
-                 dt: float = 0.1,
-                 optimizer_kwargs={},
-                 scheduler_kwargs={},
-                 **kwargs,
-                ):
-        """TODO: docs"""
-        
-        super(LightningModel, self).__init__()
-        parser(self, locals())
-        self.__configure_forward_step__()
-        
-    def __configure_forward_step__(self, ignore_t0=True):
-        # TODO: documentation
-        forward_step = BatchForward(self.func,
-                                    loss_function = SinkhornDivergence,
-                                    device = self.device,
-                                   )
-        setattr(self, "forward", getattr(forward_step, "__call__"))
-        setattr(self, "integrator", getattr(forward_step, "integrator"))
-        setattr(self, "func_type", getattr(forward_step, "func_type"))
+    """Pytorch-Lightning model trained within scDiffEq"""
 
-        
+    def __init__(
+        self,
+        func: [NeuralSDE, NeuralODE, TorchNet] = None,
+        **kwargs,
+    ):
+        """TODO: docs"""
+
+        super(LightningModel, self).__init__()
+        self.lit_config = LightningModelConfig(params=func.parameters(), **kwargs)
+
     def training_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="train", dt=self.dt)
+        return self.forward(self, batch, stage="train")
 
     def validation_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="val", dt=self.dt)
+        return self.forward(self, batch, stage="val")
 
     def test_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="test", dt=self.dt)
+        return self.forward(self, batch, stage="test")
 
     def predict_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="predict", dt=self.dt)
+        return self.forward(self, batch, stage="predict")
 
     def configure_optimizers(self):
-        # TODO: documentation
-        # TODO: add optimizer / scheduler config to input args through sdq.models.scDiffEq
-        optimizer = torch.optim.RMSprop(
-            self.parameters(), **self.optimizer_kwargs # .hparams["optimizer_kwargs"]
-        )
-        scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, **self.scheduler_kwargs # .hparams[""]
-        )
-        return [optimizer], [scheduler]
+        """
+        Parameters:
+        -----------
+        None
+
+        Returns:
+        --------
+        [optimizer], [scheduler]
+            type: list, list
+
+        TODO:
+        -----
+        (1) add documentation
+        (2) add support for multiple optimizers & schedulers (needed or not?)
+        """
+        return [lit_config.optimizer], [lit_config.lr_scheduler]
+
+
+    
+# class LightningModel(LightningModule):
+#     def __init__(self,
+#                  func: [NeuralSDE, NeuralODE, TorchNet] = None,
+#                  dt: float = 0.1,
+#                  optimizer_kwargs={},
+#                  scheduler_kwargs={},
+#                  **kwargs,
+#                 ):        
+#         super(LightningModel, self).__init__()
+#         parser(self, locals())
+#         self.__configure_forward_step__()
+        
+#     def __configure_forward_step__(self, ignore_t0=True):
+#         # TODO: documentation
+#         forward_step = BatchForward(self.func,
+#                                     loss_function = SinkhornDivergence,
+#                                     device = self.device,
+#                                    )
+#         setattr(self, "forward", getattr(forward_step, "__call__"))
+#         setattr(self, "integrator", getattr(forward_step, "integrator"))
+#         setattr(self, "func_type", getattr(forward_step, "func_type"))
+
