@@ -14,8 +14,9 @@ __email__ = ", ".join(
 
 # -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
-
+from .loss import Loss
 
 # -- developer-facing modules: -----------------------------------------------------------
-from . import loss
 from . import configs
+from . import loss
+from . import utils

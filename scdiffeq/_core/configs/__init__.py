@@ -14,6 +14,5 @@ __email__ = ", ".join(
 
 # -- import modules: ---------------------------------------------------------------------
 from ._scdiffeq_configuration import scDiffEqConfiguration
-
-from ._fetch_from_torch import fetch_optimizer, fetch_lr_scheduler
+from ._lightning_model_configuration import LightningModelConfig
 from ._extract_func_kwargs import func_params, extract_func_kwargs

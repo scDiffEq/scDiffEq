@@ -12,3 +12,5 @@ __email__ = ", ".join(
 )
 
 # -- import: -----------------------------------------------------------------------------
+from ._loss import Loss
+from ._sinkhorn_divergence import SinkhornDivergence
