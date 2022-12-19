@@ -28,3 +28,4 @@ from ._brownian_diffuser import BrownianDiffuser
 from ._batch_forward import BatchForward
 from ._credentialling import credential_handoff
 from ._batch import Batch
+from ._sde_forward import SDE_forward

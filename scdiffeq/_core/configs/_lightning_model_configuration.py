@@ -21,6 +21,7 @@ import torch
 # -- import local dependencies: --------------------------------------------------------
 from ._extract_func_kwargs import extract_func_kwargs
 from ..loss import Loss
+from ..forward import SDE_forward
 
 
 # -- import packages: ------------------------------------------------------------------
@@ -165,7 +166,7 @@ class LightningModelConfig:
 
     @property
     def forward_method(self):
-        pass
+        return SDE_forward
 
     @property
     def loss_function(self):

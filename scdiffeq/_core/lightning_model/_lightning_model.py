@@ -20,7 +20,6 @@ from torchsde import sdeint
 import torch
 
 from ..configs import LightningModelConfig
-from ..forward import Batch
 
 
 # -- LightningModel: ---------------------------------------------------------------------
@@ -33,7 +32,7 @@ class LightningModel(LightningModule):
         self.lit_config = LightningModelConfig(params=func.parameters(), **kwargs)
         self.loss_func = self.lit_config.loss_function
         self.dt = self.lit_config.dt
-        
+        self.forward = self.lit_config.forward_method
 
     def __init__(
         self,
@@ -46,29 +45,29 @@ class LightningModel(LightningModule):
         
         self.__config__(func, kwargs)
                 
-    def forward(self, batch, stage=None):
+#     def forward(self, batch, stage=None):
         
-        batch = Batch(batch, func_type="neural_SDE")
-        X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt":0.1})
+#         batch = Batch(batch, func_type="neural_SDE")
+#         X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt":0.1})
 
-        loss = self.loss_func(batch.X.contiguous(), X_hat.contiguous(), batch.W.contiguous(), batch.W.contiguous())
-        return {"loss": loss['positional'].sum()}
+#         loss = self.loss_func(batch.X.contiguous(), X_hat.contiguous(), batch.W.contiguous(), batch.W.contiguous())
+#         return {"loss": loss['positional'].sum()}
 
     def training_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(batch, stage="train")
+        return self.forward(self, batch, stage="train")
 
     def validation_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(batch, stage="val")
+        return self.forward(self, batch, stage="val")
 
     def test_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(batch, stage="test")
+        return self.forward(self, batch, stage="test")
 
     def predict_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(batch, stage="predict")
+        return self.forward(self, batch, stage="predict")
 
     def configure_optimizers(self):
         """

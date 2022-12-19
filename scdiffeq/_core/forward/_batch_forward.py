@@ -21,7 +21,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..configs import func_params, extract_func_kwargs
+# from ..configs import func_params, extract_func_kwargs
 # from ..configs._data_configure import InputConfiguration
 from ..forward import credential_handoff
 
