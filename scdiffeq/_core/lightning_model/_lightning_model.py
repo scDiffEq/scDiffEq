@@ -19,17 +19,15 @@ from torch_nets import TorchNet
 from torchsde import sdeint
 import torch
 
-from ..configs import LightningModelConfig
-
 
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningModel(LightningModule):
     """Pytorch-Lightning model trained within scDiffEq"""
     
-    def __config__(self, func, kwargs):
-        
+    def __config__(self, func, lit_config, kwargs):
+                
         self.func = func
-        self.lit_config = LightningModelConfig(params=func.parameters(), **kwargs)
+        self.lit_config = lit_config(params=func.parameters(), **kwargs)
         self.loss_func = self.lit_config.loss_function
         self.dt = self.lit_config.dt
         self.forward = self.lit_config.forward_method
@@ -37,21 +35,14 @@ class LightningModel(LightningModule):
     def __init__(
         self,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
+        lit_config=None,
         **kwargs,
     ):
         """TODO: docs"""
 
         super(LightningModel, self).__init__()
         
-        self.__config__(func, kwargs)
-                
-#     def forward(self, batch, stage=None):
-        
-#         batch = Batch(batch, func_type="neural_SDE")
-#         X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt":0.1})
-
-#         loss = self.loss_func(batch.X.contiguous(), X_hat.contiguous(), batch.W.contiguous(), batch.W.contiguous())
-#         return {"loss": loss['positional'].sum()}
+        self.__config__(func, lit_config, kwargs)
 
     def training_step(self, batch, batch_idx):
         # TODO: documentation

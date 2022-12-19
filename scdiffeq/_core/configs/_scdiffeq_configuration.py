@@ -11,26 +11,46 @@ __email__ = ", ".join(
     ]
 )
 
+import pytorch_lightning
+import torch_adata
+from torch.utils.data import DataLoader
+
+
+from ..lightning_model import LightningModel
+from ._lightning_model_configuration import LightningModelConfig
 
 class scDiffEqConfiguration:
     """
     Manage the interaction with: LightningModel, Trainer, and LightningDataModule
     # called from within scDiffEq
     """
-    def __init__(self):
-        pass
-    
+    def __init__(self, adata=None, data=None, func=None):
+        
+        self._adata = adata
+        self._data  = data
+        self._func  = func
+            
     def _configure_lightning_model(self):
         """sets self._LightningModel"""
-        pass
+        self._LightningModel = LightningModel(func=self._func, lit_config=LightningModelConfig)
 
     def _configure_lightning_trainer(self):
         """sets self._LightningTrainer"""
-        pass
+        self._LightningTrainer = pytorch_lightning.Trainer(
+            accelerator="gpu", devices=1, max_epochs=10, log_every_n_steps=1
+        )
 
     def _configure_lightning_data_module(self):
         """sets self._LightningDataModule"""
-        pass
+                
+        if isinstance(self._data, pytorch_lightning.LightningDataModule):
+            self._LightningDataModule = self._data
+        
+#         self._adata.obs["W"] = self._adata.obs["v"] = 1
+#         dataset = torch_adata.AnnDataset(
+#             self._adata, use_key="X_pca", groupby="Time point", obs_keys="W"
+#         )
+#         self._LightningDataModule = DataLoader(dataset, batch_size=5200, num_workers=4)
 
     @property
     def LightingModel(self):

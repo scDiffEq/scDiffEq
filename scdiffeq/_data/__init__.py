@@ -13,5 +13,5 @@ __email__ = ", ".join(
 
 
 # import functions accessed as sdq.data.<func>: ------------------------------------------
-# from ._base_lightning_anndata_module import BaseLightningAnnDataModule
-# from ._larry_lightning_data_module import LARRY_LightningDataModule
+from ._base_lightning_anndata_module import BaseLightningAnnDataModule
+from ._larry_lightning_data_module import LARRY_LightningDataModule as LARRY
