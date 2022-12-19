@@ -21,9 +21,9 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from .._config import extract_func_kwargs, parser
-from .._config._data_configure import InputConfiguration
-from ._integrators import credential_handoff
+from ..configs import func_params, extract_func_kwargs
+# from ..configs._data_configure import InputConfiguration
+from ..forward import credential_handoff
 
 
 # -- Supporting functions: ---------------------------------------------------------------
@@ -38,17 +38,18 @@ class BatchForward:
     forward functions. i.e., +/- different or additional loss functions (e.g.,
     velo, fate) and/or dim. reduction (e.g., VAE)
     """
-    def __init__(self, func, loss_function, device):
-        """To-do: add docs."""
+    def __init__(self, func, device="cuda:0"): # , loss_function, device):
+        """TODO: add docs."""
 
-        integrator, func_type = credential_handoff(func)
-        loss_function = loss_function(device)
-
-        parser(self, locals())
+        self.integrator, self._func_type = credential_handoff(func)
+        self.func = func
+        self.device = device
+#         loss_function = loss_function(device)
+#         parser(self, locals())
 
     @property
     def time_arg(self):
-        if self.func_type == "neural_SDE":
+        if self._func_type == "neural_SDE":
             return {"ts": self.t}
         return {"t": batch[0].unique()}
 

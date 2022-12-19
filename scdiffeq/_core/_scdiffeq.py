@@ -91,7 +91,7 @@ class scDiffEq:
         """
         
         super(scDiffEq, self)
-        self.__configure__(locals()) # report_kwargs
+#         self.__configure__(locals()) # report_kwargs
         
     def __repr__(self):
         return "scDiffEq model"

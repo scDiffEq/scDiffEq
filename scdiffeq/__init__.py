@@ -17,10 +17,10 @@ from ._core._scdiffeq import scDiffEq
 
 
 # -- import sub-packages: ----------------------------------------------------------------
-from . import data
-from . import io
-from . import plotting
-from . import tools
+from . import _data as data
+from . import _io as io
+from . import _plotting as pl
+from . import _tools as tl
 
 
 # -- developer import: -------------------------------------------------------------------

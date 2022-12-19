@@ -16,13 +16,24 @@ __email__ = ", ".join(
 from pytorch_lightning import LightningModule
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch_nets import TorchNet
+from torchsde import sdeint
 import torch
 
+from ..configs import LightningModelConfig
+from ..forward import Batch
 
 
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningModel(LightningModule):
     """Pytorch-Lightning model trained within scDiffEq"""
+    
+    def __config__(self, func, kwargs):
+        
+        self.func = func
+        self.lit_config = LightningModelConfig(params=func.parameters(), **kwargs)
+        self.loss_func = self.lit_config.loss_function
+        self.dt = self.lit_config.dt
+        
 
     def __init__(
         self,
@@ -32,23 +43,32 @@ class LightningModel(LightningModule):
         """TODO: docs"""
 
         super(LightningModel, self).__init__()
-        self.lit_config = LightningModelConfig(params=func.parameters(), **kwargs)
+        
+        self.__config__(func, kwargs)
+                
+    def forward(self, batch, stage=None):
+        
+        batch = Batch(batch, func_type="neural_SDE")
+        X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt":0.1})
+
+        loss = self.loss_func(batch.X.contiguous(), X_hat.contiguous(), batch.W.contiguous(), batch.W.contiguous())
+        return {"loss": loss['positional'].sum()}
 
     def training_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="train")
+        return self.forward(batch, stage="train")
 
     def validation_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="val")
+        return self.forward(batch, stage="val")
 
     def test_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="test")
+        return self.forward(batch, stage="test")
 
     def predict_step(self, batch, batch_idx):
         # TODO: documentation
-        return self.forward(self, batch, stage="predict")
+        return self.forward(batch, stage="predict")
 
     def configure_optimizers(self):
         """
@@ -66,29 +86,6 @@ class LightningModel(LightningModule):
         (1) add documentation
         (2) add support for multiple optimizers & schedulers (needed or not?)
         """
-        return [lit_config.optimizer], [lit_config.lr_scheduler]
-
-
-    
-# class LightningModel(LightningModule):
-#     def __init__(self,
-#                  func: [NeuralSDE, NeuralODE, TorchNet] = None,
-#                  dt: float = 0.1,
-#                  optimizer_kwargs={},
-#                  scheduler_kwargs={},
-#                  **kwargs,
-#                 ):        
-#         super(LightningModel, self).__init__()
-#         parser(self, locals())
-#         self.__configure_forward_step__()
         
-#     def __configure_forward_step__(self, ignore_t0=True):
-#         # TODO: documentation
-#         forward_step = BatchForward(self.func,
-#                                     loss_function = SinkhornDivergence,
-#                                     device = self.device,
-#                                    )
-#         setattr(self, "forward", getattr(forward_step, "__call__"))
-#         setattr(self, "integrator", getattr(forward_step, "integrator"))
-#         setattr(self, "func_type", getattr(forward_step, "func_type"))
+        return [self.lit_config.optimizer], [self.lit_config.lr_scheduler]
 

@@ -25,3 +25,6 @@ from ._integrators import (
 # -- import handler function: ------------------------------------------------------------
 from ._credentialling import credential_handoff
 from ._brownian_diffuser import BrownianDiffuser
+from ._batch_forward import BatchForward
+from ._credentialling import credential_handoff
+from ._batch import Batch

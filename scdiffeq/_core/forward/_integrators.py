@@ -21,6 +21,9 @@ class SDEIntegrator(BaseForwardIntegrator):
     def __init__(self, dt=0.1, module="sdeint"):
         self._dt = dt
         self._specify_forward_module(torchsde, module)
+        
+    def __repr__(self):
+        return "SDEINT()"
 
 
 # -- supporting functions: ODE: ----------------------------------------------------------
@@ -38,6 +41,9 @@ class ODEIntegrator(BaseForwardIntegrator):
 
     def _config_optionals(self, kwargs={"scaler": 0.0002}):
         self._scale_time(**kwargs)
+        
+    def __repr__(self):
+        return "ODEINT()"
 
 
 # -- TorchNet: ---------------------------------------------------------------------------
@@ -52,3 +58,6 @@ class TorchNNIntegrator(BaseForwardIntegrator):
             device=device,
         )
         return diffuser(func)
+    
+    def __repr__(self):
+        return "TorchNNINT()"
