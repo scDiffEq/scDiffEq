@@ -11,7 +11,7 @@ __email__ = ", ".join(
     ]
 )
 
-import pytorch_lightning
+from pytorch_lightning import LightningDataModule, Trainer
 import torch_adata
 from torch.utils.data import DataLoader
 
@@ -19,32 +19,60 @@ from torch.utils.data import DataLoader
 from ..lightning_model import LightningModel
 from ._lightning_model_configuration import LightningModelConfig
 
+from ..utils import extract_func_kwargs
+
 class scDiffEqConfiguration:
     """
     Manage the interaction with: LightningModel, Trainer, and LightningDataModule
     # called from within scDiffEq
     """
-    def __init__(self, adata=None, data=None, func=None):
+    
+    def __parse__(self, kwargs, ignore=['self'], hide=['adata', 'DataModule', 'func']):
         
-        self._adata = adata
-        self._data  = data
-        self._func  = func
+        self.PASSED_KWARGS = {}
+        
+        for key, val in kwargs.items():
+            if not key in ignore:
+                if key in hide:
+                    key = "_{}".format(key)
+                elif key == "kwargs":
+                    for _key, _val in val.items():
+                        self.PASSED_KWARGS[_key] = _val
+                else:
+                    self.PASSED_KWARGS[key] = val
+                setattr(self, key, val)
+        
+        # TODO: add data config func so you can pass the following:
+        # self.DATA_KWARGS = extract_func_kwargs(LightningData, self.PASSED_KWARGS)
+        
+        self.MODEL_KWARGS = extract_func_kwargs(LightningModel, self.PASSED_KWARGS)
+        self.TRAINER_KWARGS = extract_func_kwargs(Trainer, self.PASSED_KWARGS)
+    
+    def __init__(self,
+                 adata=None,
+                 DataModule=None,
+                 func=None,
+                 accelerator="gpu",
+                 devices=1,
+                 max_epochs=10,
+                 log_every_n_steps=1, 
+                 **kwargs):
+        
+        self.__parse__(locals())
             
     def _configure_lightning_model(self):
         """sets self._LightningModel"""
-        self._LightningModel = LightningModel(func=self._func, lit_config=LightningModelConfig)
+        self._LightningModel = LightningModel(func=self._func, lit_config=LightningModelConfig, **self.MODEL_KWARGS)
 
     def _configure_lightning_trainer(self):
         """sets self._LightningTrainer"""
-        self._LightningTrainer = pytorch_lightning.Trainer(
-            accelerator="gpu", devices=1, max_epochs=10, log_every_n_steps=1
-        )
+        self._LightningTrainer = Trainer(**self.TRAINER_KWARGS)
 
     def _configure_lightning_data_module(self):
         """sets self._LightningDataModule"""
                 
-        if isinstance(self._data, pytorch_lightning.LightningDataModule):
-            self._LightningDataModule = self._data
+        if isinstance(self._DataModule, LightningDataModule):
+            self._LightningDataModule = self._DataModule
         
 #         self._adata.obs["W"] = self._adata.obs["v"] = 1
 #         dataset = torch_adata.AnnDataset(

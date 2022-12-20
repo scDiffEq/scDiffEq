@@ -12,3 +12,4 @@ __email__ = ", ".join(
 )
 
 from ._lightning_model import LightningModel
+from ._default_neural_sde import default_NeuralSDE

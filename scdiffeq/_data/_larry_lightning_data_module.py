@@ -10,12 +10,10 @@ class LARRY_LightningDataModule(BaseLightningAnnDataModule):
         adata = self.adata
         adata.obs["W"] = adata.obs["v"] = 1
         self.dataset = torch_adata.AnnDataset(
-            self.adata, use_key="X_pca", groupby="Time point", obs_keys=["W"]
+            self.adata, use_key=self.hparams["use_key"], groupby="Time point", obs_keys=["W"]
         )
 
     def setup(self, stage=None):
         """Setup the data for feeding towards a specific stage"""
         if (stage == None) or (stage == "fit"):
-            train, val = torch_adata.split(self.dataset, percentages=[0.8, 0.2])
-            self.train_dataset = train.dataset
-            self.val_dataset = val.dataset
+            self.train_dataset, self.val_dataset = torch_adata.tl.split(self.dataset, percentages=[0.8, 0.2])

@@ -20,44 +20,156 @@ from torchsde import sdeint
 import torch
 
 
+from ._default_neural_sde import default_NeuralSDE
+from ..utils import extract_func_kwargs
+
+
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningModel(LightningModule):
     """Pytorch-Lightning model trained within scDiffEq"""
     
+    def __parse__(self, kwargs, ignore=["self", "__class__"]):
+        
+        self.kwargs = {}
+        for key, val in kwargs.items():
+            if not key in ignore:
+                self.kwargs[key] = val
+                if key == "kwargs":
+                    for k, v in val.items():
+                        self.kwargs[k] = v
+    
     def __config__(self, func, lit_config, kwargs):
-                
-        self.func = func
-        self.lit_config = lit_config(params=func.parameters(), **kwargs)
+        """
+        Configures LightningModel using the passed "lit_config".
+        
+        Parameters:
+        -----------
+        func
+        
+        lit_config
+        
+        kwargs
+        
+        Returns:
+        --------
+        None
+        """
+
+        nsde_kwargs = extract_func_kwargs(default_NeuralSDE, self.kwargs)
+            
+        if not func:
+            self.func = default_NeuralSDE(**nsde_kwargs)
+        else:
+            self.func = func
+            
+        self.lit_config = lit_config(params=self.func.parameters(), **kwargs)
         self.loss_func = self.lit_config.loss_function
-        self.dt = self.lit_config.dt
+        dt = self.lit_config.dt
         self.forward = self.lit_config.forward_method
 
     def __init__(
         self,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
         lit_config=None,
+        state_size=None,
         **kwargs,
     ):
-        """TODO: docs"""
+        """
+        Parameters:
+        -----------
+        func
+        
+        lit_config
+        
+        kwargs
+        
+        Returns:
+        --------
+        None
+        """
 
         super(LightningModel, self).__init__()
-        
+        self.__parse__(locals())
         self.__config__(func, lit_config, kwargs)
 
-    def training_step(self, batch, batch_idx):
-        # TODO: documentation
+    def training_step(self, batch, batch_idx)->dict:
+        """
+        Wraps "LightningModel.forward", indicating stage as "train".
+        
+        Parameters:
+        -----------
+        batch
+            type: list
+        
+        batch_idx
+            type: int
+        
+        Returns:
+        --------
+        forward_out
+            Contains at least "loss" key, required for PyTorch-Lightning backprop.
+            type: dict
+        """
         return self.forward(self, batch, stage="train")
 
     def validation_step(self, batch, batch_idx):
-        # TODO: documentation
+        """
+        Wraps "LightningModel.forward", indicating stage as "val".
+        
+        Parameters:
+        -----------
+        batch
+            type: list
+        
+        batch_idx
+            type: int
+        
+        Returns:
+        --------
+        forward_out
+            Contains at least "loss" key, required for PyTorch-Lightning backprop.
+            type: dict
+        """
         return self.forward(self, batch, stage="val")
 
     def test_step(self, batch, batch_idx):
-        # TODO: documentation
+        """
+        Wraps "LightningModel.forward", indicating stage as "test".
+        
+        Parameters:
+        -----------
+        batch
+            type: list
+        
+        batch_idx
+            type: int
+        
+        Returns:
+        --------
+        forward_out
+            Contains at least "loss" key, required for PyTorch-Lightning backprop.
+            type: dict
+        """
         return self.forward(self, batch, stage="test")
 
     def predict_step(self, batch, batch_idx):
-        # TODO: documentation
+        """
+        Wraps "LightningModel.forward", indicating stage as "predict".
+        
+        Parameters:
+        -----------
+        batch
+            type: list
+        
+        batch_idx
+            type: int
+        
+        Returns:
+        --------
+        forward_out
+            Contains at least "loss" key, required for PyTorch-Lightning backprop.
+            type: dict
+        """
         return self.forward(self, batch, stage="predict")
 
     def configure_optimizers(self):
@@ -78,4 +190,3 @@ class LightningModel(LightningModule):
         """
         
         return [self.lit_config.optimizer], [self.lit_config.lr_scheduler]
-

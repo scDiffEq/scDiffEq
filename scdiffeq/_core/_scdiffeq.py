@@ -14,23 +14,50 @@ __email__ = ", ".join(
 
 # -- import packages: --------------------------------------------------------------------
 from pytorch_lightning import LightningDataModule
+from pytorch_lightning import Trainer
 from neural_diffeqs import NeuralODE, NeuralSDE
+from torch.utils.data import DataLoader
 from torch_nets import TorchNet
+import torch_adata
 import anndata
 import torch
 import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
-
+from . import configs
 
 
 # -- API-facing model class: -------------------------------------------------------------
 class scDiffEq:
-    
+    def __parse__(self, kwargs, ignore=["self"], hide=["adata", "DataModule", "func"]):
+
+        self.PASSED_KWARGS = {}
+        for key, val in kwargs.items():
+            if not key in ignore:
+                if key in hide:
+                    setattr(self, "_{}".format(key), val)
+                elif key == "kwargs":
+                    for k, v in val.items():
+                        self.PASSED_KWARGS[k] = v
+                else:
+                    self.PASSED_KWARGS[key] = val
+
+    def __config__(self):
+        self.config = configs.scDiffEqConfiguration(
+            adata=self._adata, DataModule=self._DataModule, func=self._func, **self.PASSED_KWARGS
+        )
+        for attr in self.config.__dir__():
+            if not attr.startswith("_"):
+                try:
+                    setattr(self, attr, getattr(self.config, attr))
+                except:
+                    print("Unable to set: {}".format(attr))
+                    
+                    
     def __init__(self,
                  adata: anndata.AnnData = None,
-                 DataModule: LightningDataModule=None,
+                 DataModule: LightningDataModule = None,
                  func:[NeuralODE, NeuralSDE, torch.nn.Module] = None,
                  time_key="Time point",
                  use_key="X_pca",
@@ -54,8 +81,7 @@ class scDiffEq:
                  **kwargs,
                  # TODO: ENCODER/DECODER KWARGS
                 ):
-       
-    
+        
         """
         Primary user-facing model.
         
@@ -89,9 +115,12 @@ class scDiffEq:
         ------
 
         """
-        
-        super(scDiffEq, self)
-#         self.__configure__(locals()) # report_kwargs
+
+        self.__parse__(locals())
+        self.__config__()
         
     def __repr__(self):
         return "scDiffEq model"
+
+    def fit(self):
+        self.LightningTrainer.fit(self.LightingModel, self.LightningDataModule)

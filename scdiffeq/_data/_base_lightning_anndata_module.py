@@ -22,6 +22,14 @@ import os
 
 # -- main module: ------------------------------------------------------------------------
 class BaseLightningAnnDataModule(LightningDataModule):
+    
+#     def __parse__(self, kwargs, ignore=['self']):
+        
+#         self._PARSED_KWARGS = {}
+#         for key, val in kwargs.items():
+#             if not key in ignore:
+#                 self._PARSED_KWARGS[key] = val
+    
     def __init__(
         self,
         adata: anndata.AnnData = None,
@@ -78,6 +86,12 @@ class BaseLightningAnnDataModule(LightningDataModule):
     def n_features(self):
         if hasattr(self, "adata"):
             return self.adata.shape[1]
+        
+    @property
+    def n_dims(self):
+        if hasattr(self, "adata"):
+            return self.adata.obsm[self.hparams['use_key']].shape[1]
+        
 
     @abstractmethod
     def prepare_data(self):
