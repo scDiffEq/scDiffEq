@@ -2,9 +2,9 @@
 
 import torch_adata
 
-from ._base_lightning_anndata_module import BaseLightningAnnDataModule
+from ._lightning_anndata_module import LightningAnnDataModule
 
-class LARRY_LightningDataModule(BaseLightningAnnDataModule):
+class LARRY_LightningDataModule(LightningAnnDataModule):
     def prepare_data(self):
         """fetch the data. do any required preprocessing."""
         adata = self.adata

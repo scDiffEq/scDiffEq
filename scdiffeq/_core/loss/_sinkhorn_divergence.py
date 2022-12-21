@@ -16,14 +16,14 @@ from geomloss import SamplesLoss
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import autodevice
+from ..utils import auto_device
 
 
 # -- API-facing class: -------------------------------------------------------------------
 class SinkhornDivergence(SamplesLoss):
     def __init__(
         self,
-        device=autodevice(),
+        device=auto_device(),
         loss="sinkhorn",
         backend="auto",  # online
 #         diameter=,

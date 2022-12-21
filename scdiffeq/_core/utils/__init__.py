@@ -14,5 +14,6 @@ __email__ = ", ".join(
 
 # -- import: -----------------------------------------------------------------------------
 from ._sum_normalize import sum_normalize
-from ._autodevice import autodevice
+from ._auto_device import auto_device
 from ._kwarg_handling import func_params, extract_func_kwargs
+from ._base import Base

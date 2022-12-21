@@ -15,4 +15,5 @@ __email__ = ", ".join(
 # -- import modules: ---------------------------------------------------------------------
 from ._scdiffeq_configuration import scDiffEqConfiguration
 from ._lightning_model_configuration import LightningModelConfig
+from ._lightning_trainer_configuration import LightningTrainerConfig
 from ._extract_func_kwargs import func_params, extract_func_kwargs

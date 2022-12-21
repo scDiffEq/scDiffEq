@@ -1,13 +1,21 @@
 
+
+
+# -- import packages: --------------------------------------------------------------------
 import torch
 
+
+# -- import local dependencies: ----------------------------------------------------------
 from ..utils import sum_normalize
 from ._sinkhorn_divergence import SinkhornDivergence
 
 
+# -- import typing: ----------------------------------------------------------------------
 NoneType = type(None)
 from typing import Union
 
+
+# -- main class: -------------------------------------------------------------------------
 class Loss:
     def __parse__(self, kwargs, ignore=["self"], explicit=["X", "X_hat"]):
 

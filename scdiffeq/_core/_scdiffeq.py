@@ -29,31 +29,35 @@ from . import configs
 
 
 # -- API-facing model class: -------------------------------------------------------------
-class scDiffEq:
-    def __parse__(self, kwargs, ignore=["self"], hide=["adata", "DataModule", "func"]):
+class scDiffEq(Base):
 
-        self.PASSED_KWARGS = {}
-        for key, val in kwargs.items():
-            if not key in ignore:
-                if key in hide:
-                    setattr(self, "_{}".format(key), val)
-                elif key == "kwargs":
-                    for k, v in val.items():
-                        self.PASSED_KWARGS[k] = v
-                else:
-                    self.PASSED_KWARGS[key] = val
+#     def __parse__(self, ):
+#         self.PASSED_KWARGS = {}
+#         for key, val in kwargs.items():
+#             if not key in ignore:
+#                 self.PASSED_KWARGS[key] = val
+#                 if key in hide:
+#                     key = "_{}".format(key)
+#                 setattr(self, key, val)
+#                 if key == "kwargs":
+#                     for k, v in val.items():
+#                         self.PASSED_KWARGS[k] = v
+#                         setattr(self, key, val)
+                
 
-    def __config__(self):
-        self.config = configs.scDiffEqConfiguration(
-            adata=self._adata, DataModule=self._DataModule, func=self._func, **self.PASSED_KWARGS
-        )
+    def __config__(self, kwargs, ignore=['self'], hide=[]):
+
+        self.__parse__(kwargs)
+        self.config = configs.scDiffEqConfiguration(self.PASSED_KWARGS,
+                                                    ignore=["self"],
+                                                    hide=["adata", "DataModule", "func"],
+                                                   )
         for attr in self.config.__dir__():
             if not attr.startswith("_"):
-                try:
-                    setattr(self, attr, getattr(self.config, attr))
-                except:
-                    print("Unable to set: {}".format(attr))
-                    
+                #try:
+                setattr(self, attr, getattr(self.config, attr))
+                #except:
+                #    print("Unable to set: {}".format(attr))
                     
     def __init__(self,
                  adata: anndata.AnnData = None,
@@ -116,11 +120,17 @@ class scDiffEq:
 
         """
 
-        self.__parse__(locals())
-        self.__config__()
+        self.__config__(locals(), ignore=['self'], hide=[])
         
     def __repr__(self):
+        # TODO: add a nice self-report method to be returned as a str
         return "scDiffEq model"
 
     def fit(self):
         self.LightningTrainer.fit(self.LightingModel, self.LightningDataModule)
+        
+    def test(self):
+        self.test_pred = self.LightningTrainer.test(self, self.LightningDataModule)
+
+    def predict(self):
+        self.predicted = self.LightningTrainer.predict(self, self.LightningDataModule)
