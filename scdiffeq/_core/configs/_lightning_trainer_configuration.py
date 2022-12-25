@@ -12,7 +12,7 @@ import torch
 import os
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import extract_func_kwargs
+from ..utils import function_kwargs
 
 
 # -- Main class: -------------------------------------------------------------------------
@@ -73,7 +73,7 @@ class LightningTrainerConfig:
                 else:
                     setattr(self, key, val)
 
-        self._trainer_kwargs = extract_func_kwargs(
+        self._trainer_kwargs = function_kwargs(
             func=pytorch_lightning.Trainer, kwargs=kwargs
         )
 

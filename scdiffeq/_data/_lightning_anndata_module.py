@@ -15,7 +15,7 @@ import os
 
 # -- import local dependencies: ----------------------------------------------------------
 from .._io._read_h5ad import read_h5ad
-from .._core.utils import extract_func_kwargs
+from .._core.utils import function_kwargs
 
 
 
@@ -56,7 +56,7 @@ class LightningAnnDataModule(LightningDataModule):
         self.save_hyperparameters(ignore=["adata", "Dataset"])
         self._adata = adata
         self._Dataset = Dataset
-        self.AnnDataset_kwargs = extract_func_kwargs(func=torch_adata.AnnDataset,
+        self.AnnDataset_kwargs = function_kwargs(func=torch_adata.AnnDataset,
                                                      kwargs=locals(),
                                                      ignore=['adata']
                                                     )

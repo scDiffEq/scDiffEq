@@ -22,6 +22,7 @@ import torch
 from ._extract_func_kwargs import extract_func_kwargs
 from ..loss import Loss
 from ..forward import SDE_forward
+from ..lightning_models import LightningDiffEq, default_NeuralSDE
 
 
 # -- import packages: ------------------------------------------------------------------
@@ -87,14 +88,15 @@ class LightningModelConfig:
           the passed args (if is list) for each keyword argument.
     """
 
-    def __parse__(self, kwargs, ignore=["self"]):
+    def __parse__(self, kwargs, ignore=["self", "func"]):
         for k, v in kwargs.items():
             if not k in ignore:
                 setattr(self, "_{}".format(k), v)
 
     def __init__(
         self,
-        params,
+        func=None,
+        state_size=None,
         optimizer="RMSprop",
         lr_scheduler="StepLR",
         lr=1e-4,
@@ -104,7 +106,9 @@ class LightningModelConfig:
         **kwargs,
     ):
         self.__parse__(locals())
+        self._configure_func(func)
         self._format_model_params(self._params)
+        self._configure_model(self.func)
 
     def _format_model_params(self, params):
         if isinstance(params, list) and isinstance(
@@ -124,15 +128,15 @@ class LightningModelConfig:
 
     @property
     def _optimizer_kwargs(self):
-        return extract_func_kwargs(
-            self._fetch_optimizer(self._optimizer), self._kwargs
-        )
+        return extract_func_kwargs(self._fetch_optimizer(self._optimizer), self._kwargs)
 
     def _fetch_optimizer(self, optimizer: Union[torch.optim.Optimizer, str]):
         return fetch_optimizer(optimizer)
 
     def _configure_optimizer(self, optimizer: Union[torch.optim.Optimizer, str]):
-        self.config_optimizer = self._fetch_optimizer(optimizer)(self._params, lr=1e-4, **self._optimizer_kwargs)
+        self.config_optimizer = self._fetch_optimizer(optimizer)(
+            self._params, lr=self._lr, **self._optimizer_kwargs
+        )
 
     @property
     def optimizer(self):
@@ -151,6 +155,15 @@ class LightningModelConfig:
             self._fetch_lr_scheduler(self._lr_scheduler), self._kwargs
         )
 
+    def _configure_func(self, func):
+
+        if not func:
+            self._kwargs["state_size"] = self._state_size
+            neural_sde_kwargs = extract_func_kwargs(default_NeuralSDE, self._kwargs)
+            self.func = default_NeuralSDE(**neural_sde_kwargs)
+            
+        self._params = self.func.parameters()
+        
     def _configure_lr_scheduler(
         self, lr_scheduler: Union[torch.optim.lr_scheduler._LRScheduler, str]
     ):
@@ -166,12 +179,25 @@ class LightningModelConfig:
 
     @property
     def forward_method(self):
+        # TODO: flexibility towards NeuralODE and TorchNN
         return SDE_forward
 
     @property
     def loss_function(self):
         return Loss()
-    
+
     @property
     def dt(self):
         return self._dt
+
+    def _configure_model(self, func):
+
+        self._LIGHTNING_MODEL = LightningDiffEq(func)
+        self._LIGHTNING_MODEL.optimizer = self.optimizer
+        self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
+        self._LIGHTNING_MODEL.forward = self.forward_method
+        self._LIGHTNING_MODEL.loss_func = self.loss_function
+
+    @property
+    def LightningModel(self):
+        return self._LIGHTNING_MODEL

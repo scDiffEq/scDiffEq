@@ -21,14 +21,14 @@ import torch
 
 
 from ._default_neural_sde import default_NeuralSDE
-from ..utils import extract_func_kwargs
+from ..utils import function_kwargs
 
 
 # -- LightningModel: ---------------------------------------------------------------------
-class LightningModel(LightningModule):
+class LightningDiffEq(LightningModule):
     """Pytorch-Lightning model trained within scDiffEq"""
     
-    def __parse__(self, kwargs, ignore=["self", "__class__"]):
+    def __parse__(self, kwargs, ignore=["self", "func", "__class__"]):
         
         self.kwargs = {}
         for key, val in kwargs.items():
@@ -37,41 +37,10 @@ class LightningModel(LightningModule):
                 if key == "kwargs":
                     for k, v in val.items():
                         self.kwargs[k] = v
-    
-    def __config__(self, func, lit_config, kwargs):
-        """
-        Configures LightningModel using the passed "lit_config".
-        
-        Parameters:
-        -----------
-        func
-        
-        lit_config
-        
-        kwargs
-        
-        Returns:
-        --------
-        None
-        """
-
-        nsde_kwargs = extract_func_kwargs(default_NeuralSDE, self.kwargs)
-            
-        if not func:
-            self.func = default_NeuralSDE(**nsde_kwargs)
-        else:
-            self.func = func
-            
-        self.lit_config = lit_config(params=self.func.parameters(), **kwargs)
-        self.loss_func = self.lit_config.loss_function
-        dt = self.lit_config.dt
-        self.forward = self.lit_config.forward_method
 
     def __init__(
         self,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
-        lit_config=None,
-        state_size=None,
         **kwargs,
     ):
         """
@@ -88,9 +57,9 @@ class LightningModel(LightningModule):
         None
         """
 
-        super(LightningModel, self).__init__()
+        super(LightningDiffEq, self).__init__()
         self.__parse__(locals())
-        self.__config__(func, lit_config, kwargs)
+        self.func = func
 
     def training_step(self, batch, batch_idx)->dict:
         """
@@ -189,4 +158,4 @@ class LightningModel(LightningModule):
         (2) add support for multiple optimizers & schedulers (needed or not?)
         """
         
-        return [self.lit_config.optimizer], [self.lit_config.lr_scheduler]
+        return [self.optimizer], [self.lr_scheduler]

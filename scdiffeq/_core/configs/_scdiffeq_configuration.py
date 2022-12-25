@@ -1,4 +1,3 @@
-
 __module_name__ = "_configuration.py"
 __doc__ = """TODO."""
 __version__ = """0.0.45"""
@@ -12,102 +11,100 @@ __email__ = ", ".join(
 )
 
 from pytorch_lightning import LightningDataModule, Trainer
-import torch_adata
 from torch.utils.data import DataLoader
+import torch_adata
+import anndata
 
-
-from ..lightning_model import LightningModel
-from ._lightning_model_configuration import LightningModelConfig
+from ._lightning_model_configuration import LightningModelConfig # done
 from ._lightning_trainer_configuration import LightningTrainerConfig
-from ._lightning_data_module_configuration import LightningDataModuleConfig
+from ._lightning_data_module_configuration import LightningDataModuleConfig # done
 
-from ..utils import extract_func_kwargs, Base
-# from ...data import LightningAnnDataModule
+from ..utils import function_kwargs, ParseBase
 
 
-#     def __parse__(self, kwargs, , hide=[]):
-
-#         self._PASSED_KWARGS = {}
-#         for key, val in kwargs.items():
-#             if not key in ignore:
-#                 self._PASSED_KWARGS[key] = val
-#                 if key in hide:
-#                     key = "_{}".format(key)
-#                 setattr(self, key, val)
-#             elif key == "kwargs":
-#                 self._PASSED_KWARGS = self._split_kwargs(val, self._PASSED_KWARGS)
-
-#     def _split_kwargs(self, kw, KWARG_DICT={}):
-#         for k, v in kw.items():
-#             KWARG_DICT[k] = v
-#             setattr(self, k, v)
-#         return KWARG_DICT
-    
-class scDiffEqConfiguration(Base):
+class scDiffEqConfiguration:
     """
     Manage the interaction with: LightningModel, Trainer, and LightningDataModule
     # called from within scDiffEq
     """
-    
-    def __config__(self, kwargs, ignore=["self", "kwargs"], hide=['data', 'func']):
-        
-        self.__parse__(locals(), ignore, hide)        
-        
-        self.DATA_KWARGS = extract_func_kwargs(LightningDataModuleConfig, self._PASSED_KWARGS)
-        self.MODEL_KWARGS = extract_func_kwargs(LightningModel, self._PASSED_KWARGS)
-        self.TRAINER_KWARGS = extract_func_kwargs(LightningTrainerConfig, self._PASSED_KWARGS)
-    
-    def __init__(self,
-                 data=None,
-                 func=None,
-                 accelerator="gpu",
-                 devices=1,
-                 max_epochs=10,
-                 log_every_n_steps=1, 
-                 use_key="X_pca",
-                 **kwargs):
-        
-        super(scDiffEqConfiguration, self).__init__()
-        
-        self.__config__(locals())
-            
-    def _configure_lightning_model(self):
-        """sets self._LightningModel"""
-        self.MODEL_KWARGS['state_size'] = self.state_size
-        self._LightningModel = LightningModel(func=self._func, lit_config=LightningModelConfig, **self.MODEL_KWARGS)
-        
-    @property
-    def state_size(self):
-        return self.LightningDataModule.n_dim
-        
-    def _configure_lightning_trainer(self):
-        """sets self._LightningTrainer"""
-        self._LightningTrainer = LightningTrainerConfig(**self.TRAINER_KWARGS).trainer
 
-    def _configure_lightning_data_module(self):
-        """sets self._LightningDataModule"""
-        self._LightningDataModule = LightningDataModuleConfig(self._data, self.DATA_KWARGS).LightningDataModule
+    KWARGS = {}
+    
+    def __parse__(self, kwargs, ignore, hide):
+        
+        self._PASSED_KWARGS = {}
+        
+        for key, val in kwargs.items():
+            if not key in ignore:
+                self._PASSED_KWARGS[key] = val
                 
-#         if isinstance(self._DataModule, LightningDataModule):
-#             self._LightningDataModule = self._DataModule
-        
-#         self._adata.obs["W"] = self._adata.obs["v"] = 1
-#         dataset = torch_adata.AnnDataset(
-#             self._adata, use_key="X_pca", groupby="Time point", obs_keys="W"
-#         )
-#         
 
+    def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"], hide=[]):
+
+        self.__parse__(kwargs, ignore, hide)
+
+        self.KWARGS["MODEL"] = function_kwargs(
+            LightningModelConfig, self._PASSED_KWARGS
+        )
+        self.KWARGS["MODEL"]["state_size"] = 50  # tmp
+        self.KWARGS["TRAINER"] = function_kwargs(
+            LightningTrainerConfig, self._PASSED_KWARGS
+        )
+        self.KWARGS["DATA"] = function_kwargs(
+            LightningDataModuleConfig, self._PASSED_KWARGS
+        )
+
+    def __init__(
+        self,
+        adata: anndata.AnnData = None,
+        func=None,
+        use_key="X_pca",
+        groupby="Time point",
+        obs_keys=None,
+        train_key="train",
+        val_key="val",
+        test_key="test",
+        predict_key="predict",
+        accelerator="gpu",
+        devices=1,
+        batch_size=2000,
+        num_workers=4,
+        n_groups=None,
+        train_val_percentages=[0.8, 0.2],
+        remainder_idx=-1,
+        predict_all=True,
+        attr_names={"obs": [], "aux": []},
+        one_hot=False,
+        aux_keys=None,
+        silent=True,
+        optimizer="RMSprop",
+        lr_scheduler="StepLR",
+        lr=0.0001,
+        step_size=20,
+        dt=0.1,
+        model_save_dir: str = "scDiffEq_model",
+        log_name: str = "lightning_logs",
+        version=None,
+        prefix="",
+        flush_logs_every_n_steps=5,
+        max_epochs=1500,
+        log_every_n_steps=1,
+        reload_dataloaders_every_n_epochs=5,
+        **kwargs
+    ):
+
+        super(scDiffEqConfiguration, self).__init__()
+        self.__config__(locals())
+
+    # -- key properties: ------------------------------------------------------------
     @property
     def LightingModel(self):
-        self._configure_lightning_model()
-        return self._LightningModel
+        return LightningModelConfig(**self.KWARGS["MODEL"]).LightningModel
 
     @property
     def LightningTrainer(self):
-        self._configure_lightning_trainer()
-        return self._LightningTrainer
+        return LightningTrainerConfig(**self.KWARGS["TRAINER"]).trainer
 
     @property
     def LightningDataModule(self):
-        self._configure_lightning_data_module()
-        return self._LightningDataModule
+        return LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule

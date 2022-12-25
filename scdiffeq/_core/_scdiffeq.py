@@ -29,62 +29,62 @@ from . import configs
 
 
 # -- API-facing model class: -------------------------------------------------------------
-class scDiffEq(Base):
+class scDiffEq:
+    def __parse__(self, kwargs, ignore, hide):
+        
+        self._SCDIFFEQ_PASSED_KWARGS = {}
+        
+        for key, val in kwargs.items():
+            if not key in ignore:
+                self._SCDIFFEQ_PASSED_KWARGS[key] = val
+                    
+    def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"], hide=[]):
 
-#     def __parse__(self, ):
-#         self.PASSED_KWARGS = {}
-#         for key, val in kwargs.items():
-#             if not key in ignore:
-#                 self.PASSED_KWARGS[key] = val
-#                 if key in hide:
-#                     key = "_{}".format(key)
-#                 setattr(self, key, val)
-#                 if key == "kwargs":
-#                     for k, v in val.items():
-#                         self.PASSED_KWARGS[k] = v
-#                         setattr(self, key, val)
-                
-
-    def __config__(self, kwargs, ignore=['self'], hide=[]):
-
-        self.__parse__(kwargs)
-        self.config = configs.scDiffEqConfiguration(self.PASSED_KWARGS,
-                                                    ignore=["self"],
-                                                    hide=["adata", "DataModule", "func"],
-                                                   )
+        self.__parse__(kwargs, ignore, hide)
+        self.config = configs.scDiffEqConfiguration(**self._SCDIFFEQ_PASSED_KWARGS)
         for attr in self.config.__dir__():
             if not attr.startswith("_"):
-                #try:
                 setattr(self, attr, getattr(self.config, attr))
-                #except:
-                #    print("Unable to set: {}".format(attr))
-                    
-    def __init__(self,
-                 adata: anndata.AnnData = None,
-                 DataModule: LightningDataModule = None,
-                 func:[NeuralODE, NeuralSDE, torch.nn.Module] = None,
-                 time_key="Time point",
-                 use_key="X_pca",
-                 batch_size: int = 2000,
-                 num_workers: int = os.cpu_count(),
-                 optimizer_kwargs: dict = {"lr": 1e-4},
-                 scheduler_kwargs: dict = {"step_size": 20, "gamma": 0.1},
-                 ignore_t0: bool = True,
-                 dt: float = 0.1,
-                 percent_val: float = 0.2, 
-                 devices: int = torch.cuda.device_count(),
-                 model_save_dir='scDiffEq_model',
-                 log_name='lightning_logs',
-                 version=None,
-                 prefix='',
-                 flush_logs_every_n_steps=5,
-                 max_epochs=1500,
-                 log_every_n_steps=1,
-                 reload_dataloaders_every_n_epochs=5,
-                 report_kwargs=False,
-                 **kwargs,
-                 # TODO: ENCODER/DECODER KWARGS
-                ):
+
+    def __init__(
+        self,
+        adata: anndata.AnnData = None,
+        func: [NeuralODE, NeuralSDE, torch.nn.Module] = None,
+        use_key="X_pca",
+        groupby="Time point",
+        obs_keys=['W', 'v'],
+        train_key="train",
+        val_key="val",
+        test_key="test",
+        predict_key="predict",
+        accelerator="gpu",
+        devices=1,
+        batch_size=2000,
+        num_workers=4,
+        n_groups=None,
+        train_val_percentages=[0.8, 0.2],
+        remainder_idx=-1,
+        predict_all=True,
+        attr_names={"obs": [], "aux": []},
+        one_hot=False,
+        aux_keys=None,
+        silent=True,
+        optimizer="RMSprop",
+        lr_scheduler="StepLR",
+        lr=0.0001,
+        step_size=20,
+        dt=0.1,
+        model_save_dir: str = "scDiffEq_model",
+        log_name: str = "lightning_logs",
+        version=None,
+        prefix="",
+        flush_logs_every_n_steps=5,
+        max_epochs=1500,
+        log_every_n_steps=1,
+        reload_dataloaders_every_n_epochs=5,
+        **kwargs
+        # TODO: ENCODER/DECODER KWARGS
+    ):
         
         """
         Primary user-facing model.
@@ -130,7 +130,7 @@ class scDiffEq(Base):
         self.LightningTrainer.fit(self.LightingModel, self.LightningDataModule)
         
     def test(self):
-        self.test_pred = self.LightningTrainer.test(self, self.LightningDataModule)
+        self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
 
     def predict(self):
-        self.predicted = self.LightningTrainer.predict(self, self.LightningDataModule)
+        self.predicted = self.LightningTrainer.predict(self.LightingModel, self.LightningDataModule)

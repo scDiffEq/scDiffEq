@@ -15,7 +15,8 @@ __email__ = ", ".join(
 # -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
 from .loss import Loss
-from .lightning_model._lightning_model import LightningModel
+from .lightning_models import LightningDiffEq
+from .utils import ParseBase
 
 # -- developer-facing modules: -----------------------------------------------------------
 from . import configs
