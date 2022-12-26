@@ -1,5 +1,4 @@
 
-
 __module_name__ = "_lightning_trainer_configuration.py"
 __doc__ = """To-do"""
 __author__ = "Michael E. Vinyard"
@@ -10,6 +9,7 @@ __email__ = "mvinyard@broadinstitute.org"
 import pytorch_lightning
 import torch
 import os
+
 
 # -- import local dependencies: ----------------------------------------------------------
 from ..utils import function_kwargs
