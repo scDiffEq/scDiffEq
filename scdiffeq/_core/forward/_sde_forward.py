@@ -10,7 +10,7 @@ from ._batch import Batch
 # -- default SDE forward: --------------------------------------------------------------
 def SDE_forward(self, batch, stage=None, return_predicted=False):
 
-    batch = Batch(batch, func_type="neural_SDE")
+    batch = Batch(batch, func_type="NeuralSDE")
     X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt": 0.1})
     
     loss = self.loss_func(

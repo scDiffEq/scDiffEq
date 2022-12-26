@@ -10,7 +10,7 @@ class Batch:
     @property
     def t(self):
         _t = self._passed_batch[0].unique()
-        if self._func_type == "neural_SDE":
+        if self._func_type == "NeuralSDE":
             return {"ts": _t}
         return {"t": _t}
 
