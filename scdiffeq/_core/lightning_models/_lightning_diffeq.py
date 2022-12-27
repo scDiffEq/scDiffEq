@@ -140,7 +140,7 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="predict")
+        return self.forward(self, batch, stage="predict", t=self.t)
 
     def configure_optimizers(self):
         """

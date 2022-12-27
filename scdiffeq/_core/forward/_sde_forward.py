@@ -31,28 +31,34 @@ class LossLog:
 loss_log = LossLog()
 
 # -- default SDE forward: --------------------------------------------------------------
-def SDE_forward(self, batch, stage=None):
+def SDE_forward(self, batch, stage=None, t=None):
 
-    batch = Batch(batch, stage, func_type="NeuralSDE")
+    batch = Batch(batch, stage, func_type="NeuralSDE", t=t)
     X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt": 0.1})
 
-    loss = self.loss_func(
-        batch.X.contiguous(),
-        X_hat.contiguous(),
-        batch.W.contiguous(),
-        batch.W.contiguous(),
-    )
-    
-    loss_log.positional(self, loss, stage, batch)
-    
-    if not stage in ["predict", "test"]:
-        for i, t in enumerate(batch.t["ts"]):
-            log_ = "{}_loss_{}".format(stage, str(int(t)))
-            val_ = loss["positional"][i].item()
-            self.log(log_, val_)
+    if not stage in ['predict']:
+        loss = self.loss_func(
+            batch.X.contiguous(),
+            X_hat.contiguous(),
+            batch.W.contiguous(),
+            batch.W.contiguous(),
+        )
 
+        loss_log.positional(self, loss, stage, batch)
+
+        if not stage in ["predict", "test"]:
+            for i, t in enumerate(batch.t["ts"]):
+                log_ = "{}_loss_{}".format(stage, str(int(t)))
+                val_ = loss["positional"][i].item()
+                self.log(log_, val_)
+
+        return {
+            "loss": loss["positional"].sum(),
+            "pred": X_hat,
+            "batch": batch,
+               }
+    
     return {
-        "loss": loss["positional"].sum(),
-        "pred": X_hat,
-        "batch": batch,
-           }
+            "pred": X_hat,
+            "batch": batch,
+               }

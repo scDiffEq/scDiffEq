@@ -11,8 +11,9 @@ class Batch:
         for key, val in kwargs.items():
             setattr(self, "_{}".format(key), val)
     
-    def __init__(self, batch, stage, func_type):
+    def __init__(self, batch, stage, func_type, t=None):
         self.__parse__(locals())
+        self._t = t
         
     @property
     def stage(self):
@@ -20,10 +21,11 @@ class Batch:
     
     @property
     def t(self):
-        _t = self._batch[0].unique()
+        if not hasattr(self, "_t"):
+            self._t = self._batch[0].unique()
         if self._func_type == "NeuralSDE":
-            return {"ts": _t}
-        return {"t": _t}
+            return {"ts": self._t}
+        return {"t": self._t}
 
     @property
     def X(self):

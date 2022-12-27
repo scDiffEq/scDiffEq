@@ -102,6 +102,7 @@ class LightningModelConfig:
         lr=1e-4,
         step_size=20,
         dt=0.1,
+        t=None,
         *args,
         **kwargs,
     ):
@@ -190,6 +191,10 @@ class LightningModelConfig:
     @property
     def dt(self):
         return self._dt
+    
+    @property
+    def t(self):
+        return self._t
 
     def _configure_model(self, func):
 
@@ -198,6 +203,7 @@ class LightningModelConfig:
         self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
         self._LIGHTNING_MODEL.forward = self.forward_method
         self._LIGHTNING_MODEL.loss_func = self.loss_function
+        self._LIGHTNING_MODEL.t = self.t
 
     @property
     def LightningModel(self):

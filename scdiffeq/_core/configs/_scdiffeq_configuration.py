@@ -91,6 +91,7 @@ class scDiffEqConfiguration:
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=5,
         ckpt_outputs_frequency=50,
+        t=None,
         **kwargs
     ):
 
@@ -109,3 +110,13 @@ class scDiffEqConfiguration:
     @property
     def LightningDataModule(self):
         return LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
+
+    
+    def _reconfigure_LightningDataModule(self, adata):
+        self.KWARGS["DATA"]['adata'] = adata
+        self._PredictionLightningDataModule = LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
+        return self._PredictionLightningDataModule
+        
+    @property
+    def PredictionLightningDataModule(self):
+        return self._PredictionLightningDataModule

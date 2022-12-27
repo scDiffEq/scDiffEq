@@ -43,7 +43,7 @@ class scDiffEq:
         self.__parse__(kwargs, ignore, hide)
         self.config = configs.scDiffEqConfiguration(**self._SCDIFFEQ_PASSED_KWARGS)
         for attr in self.config.__dir__():
-            if not attr.startswith("_"):
+            if (not attr.startswith("_")) and (not attr.startswith("Prediction")):
                 setattr(self, attr, getattr(self.config, attr))
 
     def __init__(
@@ -83,6 +83,7 @@ class scDiffEq:
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=5,
         ckpt_outputs_frequency=50,
+        t=None,
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):
@@ -133,5 +134,11 @@ class scDiffEq:
     def test(self):
         self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
 
-    def predict(self):
-        self.predicted = self.LightningTrainer.predict(self.LightingModel, self.LightningDataModule)
+    def predict(self, adata=None):
+        if adata:
+            self.config._reconfigure_LightningDataModule(adata)
+            PredictionLightningDataModule = self.config.PredictionLightningDataModule
+        else:
+            PredictionLightningDataModule = self.config.LightningDataModule
+        
+        self.predicted = self.LightningTrainer.predict(self.LightingModel, PredictionLightningDataModule)
