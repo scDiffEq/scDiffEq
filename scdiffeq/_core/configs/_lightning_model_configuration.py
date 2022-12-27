@@ -160,8 +160,9 @@ class LightningModelConfig:
         if not func:
             self._kwargs["state_size"] = self._state_size
             neural_sde_kwargs = extract_func_kwargs(default_NeuralSDE, self._kwargs)
-            self.func = default_NeuralSDE(**neural_sde_kwargs)
+            func = default_NeuralSDE(**neural_sde_kwargs)
             
+        self.func = func
         self._params = self.func.parameters()
         
     def _configure_lr_scheduler(

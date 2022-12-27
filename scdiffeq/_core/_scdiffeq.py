@@ -82,6 +82,7 @@ class scDiffEq:
         max_epochs=1500,
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=5,
+        ckpt_outputs_frequency=50,
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):

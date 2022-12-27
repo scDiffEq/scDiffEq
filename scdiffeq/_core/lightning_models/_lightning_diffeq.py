@@ -62,7 +62,7 @@ class LightningDiffEq(LightningModule):
         self.__parse__(locals())
         self.func = func
 
-    def training_step(self, batch, batch_idx, return_predicted=False)->dict:
+    def training_step(self, batch, batch_idx)->dict:
         """
         Wraps "LightningModel.forward", indicating stage as "train".
         
@@ -80,9 +80,9 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="train", return_predicted=return_predicted)
+        return self.forward(self, batch, stage="train")
 
-    def validation_step(self, batch, batch_idx, return_predicted=False):
+    def validation_step(self, batch, batch_idx):
         """
         Wraps "LightningModel.forward", indicating stage as "val".
         
@@ -100,9 +100,9 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="val", return_predicted=return_predicted)
+        return self.forward(self, batch, stage="val")
 
-    def test_step(self, batch, batch_idx, return_predicted=True):
+    def test_step(self, batch, batch_idx):
         """
         Wraps "LightningModel.forward", indicating stage as "test".
         
@@ -120,9 +120,9 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="test", return_predicted=return_predicted)
+        return self.forward(self, batch, stage="test")
 
-    def predict_step(self, batch, batch_idx, return_predicted=True):
+    def predict_step(self, batch, batch_idx):
         """
         Wraps "LightningModel.forward", indicating stage as "predict".
         
@@ -140,7 +140,7 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="predict", return_predicted=return_predicted)
+        return self.forward(self, batch, stage="predict")
 
     def configure_optimizers(self):
         """

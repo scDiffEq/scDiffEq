@@ -13,6 +13,7 @@ import os
 
 # -- import local dependencies: ----------------------------------------------------------
 from ..utils import function_kwargs
+from .. import lightning_callbacks as callbacks
 
 
 # -- Main class: -------------------------------------------------------------------------
@@ -27,6 +28,8 @@ class LightningTrainerConfig:
         max_epochs=1500,
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=5,
+        save_fitting_loss_img=True,
+        ckpt_outputs_frequency=50,
         **kwargs
     ):
         """
@@ -95,6 +98,18 @@ class LightningTrainerConfig:
     
     # -- properties: ---------------------------------------------------------------------
     @property
+    def custom_callbacks(self):
+        return [callbacks.LossAccounting(), callbacks.IntermittentSaves(self.ckpt_outputs_frequency)]
+        
+    @property
+    def callbacks(self):
+        if not hasattr(self, "_callbacks"):
+            self._callbacks = []
+        for cb in self.custom_callbacks:
+            self._callbacks.append(cb)
+        return self._callbacks
+    
+    @property
     def trainer_kwargs(self):
         return self._trainer_kwargs
 
@@ -123,5 +138,5 @@ class LightningTrainerConfig:
     @property
     def trainer(self):
         return pytorch_lightning.Trainer(
-            accelerator=self.accelerator, logger=self.CSVLogger, **self.trainer_kwargs
+            accelerator=self.accelerator, logger=self.CSVLogger, callbacks=self.callbacks, **self.trainer_kwargs
         )
