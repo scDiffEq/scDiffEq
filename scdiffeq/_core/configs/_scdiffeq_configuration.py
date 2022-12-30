@@ -46,7 +46,7 @@ class scDiffEqConfiguration:
         self.KWARGS["MODEL"] = function_kwargs(
             LightningModelConfig, self._PASSED_KWARGS
         )
-        self.KWARGS["MODEL"]["state_size"] = 50  # tmp
+#         self.KWARGS["MODEL"]["state_size"] = 50  # tmp
         self.KWARGS["TRAINER"] = function_kwargs(
             LightningTrainerConfig, self._PASSED_KWARGS
         )
@@ -92,6 +92,7 @@ class scDiffEqConfiguration:
         reload_dataloaders_every_n_epochs=5,
         ckpt_outputs_frequency=50,
         t=None,
+        N=False,
         **kwargs
     ):
 
@@ -112,8 +113,9 @@ class scDiffEqConfiguration:
         return LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
 
     
-    def _reconfigure_LightningDataModule(self, adata):
+    def _reconfigure_LightningDataModule(self, adata, N=False):
         self.KWARGS["DATA"]['adata'] = adata
+        self.KWARGS["DATA"]['N'] = N
         self._PredictionLightningDataModule = LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
         return self._PredictionLightningDataModule
         

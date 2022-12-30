@@ -42,6 +42,7 @@ class LightningDiffEq(LightningModule):
     def __init__(
         self,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
+        expand: bool = False,
         **kwargs,
     ):
         """
@@ -61,6 +62,7 @@ class LightningDiffEq(LightningModule):
         super(LightningDiffEq, self).__init__()
         self.__parse__(locals())
         self.func = func
+        self.expand = expand
 
     def training_step(self, batch, batch_idx)->dict:
         """
@@ -140,7 +142,7 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="predict", t=self.t)
+        return self.forward(self, batch, stage="predict", t=self.t, expand=self.expand)
 
     def configure_optimizers(self):
         """

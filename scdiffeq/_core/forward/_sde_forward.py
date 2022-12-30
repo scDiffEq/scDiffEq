@@ -1,6 +1,7 @@
 
 # -- import packages: ------------------------------------------------------------------
 from torchsde import sdeint
+import torch
 
 
 # -- import local dependencies: --------------------------------------------------------
@@ -30,10 +31,14 @@ class LossLog:
 
 loss_log = LossLog()
 
-# -- default SDE forward: --------------------------------------------------------------
-def SDE_forward(self, batch, stage=None, t=None):
 
-    batch = Batch(batch, stage, func_type="NeuralSDE", t=t)
+# -- default SDE forward: --------------------------------------------------------------
+def SDE_forward(self, batch, stage=None, t=None, expand=False):
+
+    if not isinstance(t, torch.Tensor):
+        t = self.t
+    batch = Batch(batch, stage, func_type="NeuralSDE", t=t, expand=expand)
+    
     X_hat = sdeint(self.func, batch.X0, **batch.t, **{"dt": 0.1})
 
     if not stage in ['predict']:

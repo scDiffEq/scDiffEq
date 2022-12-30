@@ -1,6 +1,13 @@
 
 # -- import local dependencies: --------------------------------------------------------
 from ..utils import sum_normalize
+import torch
+
+
+def _expanded_X0(batch, N=2000):
+    return torch.stack(
+        [self.X0[i].expand(N, 50) for i in range(len(self.X0))]
+    ).reshape(-1, 50)
 
 
 # -- Model-facing Batch: ---------------------------------------------------------------
@@ -11,9 +18,12 @@ class Batch:
         for key, val in kwargs.items():
             setattr(self, "_{}".format(key), val)
     
-    def __init__(self, batch, stage, func_type, t=None):
+    def __init__(self, batch, stage, func_type, t=None, expand=False):
         self.__parse__(locals())
-        self._t = t
+        
+    def _expand_X0(self, N=2000):
+        n_unique, n_dim = self.X.shape[1], self.X.shape[2]        
+        return self.X.expand(N, n_unique, n_dim).reshape(n_unique * N, n_dim)
         
     @property
     def stage(self):
@@ -21,7 +31,7 @@ class Batch:
     
     @property
     def t(self):
-        if not hasattr(self, "_t"):
+        if not isinstance(self._t, torch.Tensor):
             self._t = self._batch[0].unique()
         if self._func_type == "NeuralSDE":
             return {"ts": self._t}
@@ -33,6 +43,8 @@ class Batch:
 
     @property
     def X0(self):
+        if self._expand:
+            return self._expand_X0(N=self._expand)
         return self.X[0]
 
     @property

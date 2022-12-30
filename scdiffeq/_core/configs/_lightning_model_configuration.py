@@ -15,6 +15,7 @@ __email__ = ", ".join(
 # -- import packages: ------------------------------------------------------------------
 from abc import ABC
 from typing import Union, Generator
+import numpy as np
 import torch
 
 
@@ -96,7 +97,9 @@ class LightningModelConfig:
     def __init__(
         self,
         func=None,
-        state_size=None,
+        adata=None,
+        use_key=None,
+        time_key="Time point",
         optimizer="RMSprop",
         lr_scheduler="StepLR",
         lr=1e-4,
@@ -159,7 +162,7 @@ class LightningModelConfig:
     def _configure_func(self, func):
 
         if not func:
-            self._kwargs["state_size"] = self._state_size
+            self._kwargs["state_size"] = self._adata.obsm[self._use_key].shape[1]
             neural_sde_kwargs = extract_func_kwargs(default_NeuralSDE, self._kwargs)
             func = default_NeuralSDE(**neural_sde_kwargs)
             
@@ -194,6 +197,8 @@ class LightningModelConfig:
     
     @property
     def t(self):
+        if not self._t:
+            self._t = torch.Tensor(np.sort(self._adata.obs[self._time_key].unique()))
         return self._t
 
     def _configure_model(self, func):

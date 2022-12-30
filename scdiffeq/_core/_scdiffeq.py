@@ -84,6 +84,7 @@ class scDiffEq:
         reload_dataloaders_every_n_epochs=5,
         ckpt_outputs_frequency=50,
         t=None,
+        N=False,
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):
@@ -134,11 +135,33 @@ class scDiffEq:
     def test(self):
         self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
 
-    def predict(self, adata=None):
+    def predict(self, adata=None, N=2000, save=True):
         if adata:
-            self.config._reconfigure_LightningDataModule(adata)
-            PredictionLightningDataModule = self.config.PredictionLightningDataModule
+            self.config._reconfigure_LightningDataModule(adata, N=N)
+            self.PredictionLightningDataModule = self.config.PredictionLightningDataModule
         else:
-            PredictionLightningDataModule = self.config.LightningDataModule
+            self.PredictionLightningDataModule = self.config.LightningDataModule
         
-        self.predicted = self.LightningTrainer.predict(self.LightingModel, PredictionLightningDataModule)
+        self.LightingModel.expand = N
+        self.predicted = self.LightningTrainer.predict(self.LightingModel,
+                                                       self.PredictionLightningDataModule,
+                                                      )
+        X_pred = self.predicted[0]["pred"]
+        if save:
+            print(self.log_dir)
+
+    @property
+    def log_dir(self):
+        return os.path.join(
+            self.KWARGS["TRAINER"]["model_save_dir"],
+            self.KWARGS["TRAINER"]["log_name"],
+        )
+
+    def load(self, ckpt_path):
+        
+        self.IncompatibleKeys = self.LightingModel.load_state_dict(torch.load(ckpt_path)["state_dict"])
+        if not any([self.IncompatibleKeys.missing_keys, self.IncompatibleKeys.unexpected_keys]):
+            print("Successfully Loaded scDiffEq Model")
+        else:
+            print("Problem loading scDiffEq Model")
+            
