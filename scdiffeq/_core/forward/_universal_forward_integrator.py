@@ -1,45 +1,7 @@
-import neural_diffeqs
-import brownian_diffuser
-import torchdiffeq
-import torchsde
 
 
 from ..utils import extract_func_kwargs
-
-
-class Credentials:
-    def __init__(self, func):
-        self.func = func
-
-    @property
-    def is_NeuralODE(self):
-        return isinstance(self.func, neural_diffeqs.NeuralODE)
-
-    @property
-    def is_NeuralSDE(self):
-        return isinstance(self.func, neural_diffeqs.NeuralSDE)
-
-    @property
-    def is_TorchNet(self):
-        return (not self.is_NeuralODE) and (not self.is_NeuralSDE)
-
-    @property
-    def integrator(self):
-        return self._integrator
-
-    def __call__(self):
-
-        if self.is_NeuralODE:
-            self._integrator = torchdiffeq.odeint
-            return "NeuralODE"
-
-        if self.is_NeuralSDE:
-            self._integrator = torchsde.sdeint
-            return "NeuralSDE"
-
-        if self.is_TorchNet:
-            self._integrator = brownian_diffuser.nn_int
-            return "TorchNet"
+from ._function_credentials import Credentials
         
         
 class UniversalForwardIntegrator:
@@ -55,7 +17,7 @@ class UniversalForwardIntegrator:
 
         self.func = func
         creds = Credentials(self.func)
-        self.func_type = creds()
+        self.func_type, self.mu_is_potential, self.sigma_is_potential = creds()
         self.integrator = creds.integrator
 
     def __call__(self, X0, t, dt=0.1):

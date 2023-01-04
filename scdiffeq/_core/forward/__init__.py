@@ -16,4 +16,5 @@ __email__ = ", ".join(
 from ._forward import forward
 from ._batch import Batch
 from ._loss_log import LossLog
-from ._universal_forward_integrator import Credentials, UniversalForwardIntegrator
+from ._universal_forward_integrator import UniversalForwardIntegrator
+from ._function_credentials import Credentials

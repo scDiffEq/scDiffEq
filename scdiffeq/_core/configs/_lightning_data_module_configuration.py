@@ -250,10 +250,16 @@ class LightningAnnDataModule(LightningDataModule):
 
     # -- Supporting methods --------------------------------------------------------------
     def _return_loader(self, dataset_key):
+        if dataset_key == "test":
+            if not hasattr(self, "n_test_cells"):
+                self.setup(stage="test")
+            batch_size = self.n_test_cells
+        else:
+            batch_size = self.hparams["batch_size"]
         return DataLoader(
             getattr(self, "{}_dataset".format(dataset_key)),
             num_workers=self.hparams["num_workers"],
-            batch_size=self.hparams["batch_size"],
+            batch_size=batch_size,
         )
 
     # -- Properties: ---------------------------------------------------------------------
@@ -296,6 +302,7 @@ class LightningAnnDataModule(LightningDataModule):
 
         elif stage == "test":
             self.test_dataset = self.data.test_dataset
+            self.n_test_cells = len(self.test_dataset)
         elif stage in [None, "predict"]:
             self.predict_dataset = self.data.predict_dataset
         else:

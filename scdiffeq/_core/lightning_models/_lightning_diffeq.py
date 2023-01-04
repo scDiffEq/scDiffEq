@@ -38,6 +38,11 @@ class LightningDiffEq(LightningModule):
                 if key == "kwargs":
                     for k, v in val.items():
                         self.kwargs[k] = v
+                        
+                        
+    def enable_grad(self):
+        if any([self.mu_is_potential, self.sigma_is_potential]):
+            torch.set_grad_enabled(True)
 
     def __init__(
         self,
@@ -102,7 +107,8 @@ class LightningDiffEq(LightningModule):
         forward_out
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
-        """
+        """        
+        self.enable_grad()
         return self.forward(self, batch, stage="val")
 
     def test_step(self, batch, batch_idx):
@@ -123,6 +129,7 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
+        self.enable_grad()
         return self.forward(self, batch, stage="test")
 
     def predict_step(self, batch, batch_idx):
@@ -143,6 +150,7 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
+        self.enable_grad()
         return self.forward(self, batch, stage="predict", t=self.t, expand=self.expand)
 
     def configure_optimizers(self):

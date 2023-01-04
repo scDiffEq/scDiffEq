@@ -133,7 +133,13 @@ class scDiffEq:
         self.LightningTrainer.fit(self.LightingModel, self.LightningDataModule)
         
     def test(self):
-        self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
+        if self.LightingModel.mu_is_potential:
+            self.LightningTestTrainer.fit(self.LightingModel,
+                                         train_dataloaders=self.LightningDataModule.train_dataloader(),
+                                         val_dataloaders=self.LightningDataModule.test_dataloader(),
+                                         )
+        else:
+            self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
 
     def predict(self, adata=None, N=2000, save=True):
         if adata:

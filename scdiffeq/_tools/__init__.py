@@ -13,3 +13,4 @@ __email__ = ", ".join(
 
 
 # import functions accessed as sdq.tl.<func>: --------------------------------------------
+from ._annotate_predict_cells import annotate_predict_cells

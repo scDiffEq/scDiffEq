@@ -99,7 +99,10 @@ class LightningTrainerConfig:
     # -- properties: ---------------------------------------------------------------------
     @property
     def custom_callbacks(self):
-        return [callbacks.LossAccounting(), callbacks.IntermittentSaves(self.ckpt_outputs_frequency)]
+        return [
+            callbacks.LossAccounting(),
+            callbacks.IntermittentSaves(self.ckpt_outputs_frequency),
+        ]
         
     @property
     def callbacks(self):
@@ -139,4 +142,18 @@ class LightningTrainerConfig:
     def trainer(self):
         return pytorch_lightning.Trainer(
             accelerator=self.accelerator, logger=self.CSVLogger, callbacks=self.callbacks, **self.trainer_kwargs
+        )
+    
+    @property
+    def test_trainer(self):
+        """
+        Quasi test trainer - serves as a workaround for evaluating test data
+        while retaining gradients.
+        """
+        return pytorch_lightning.Trainer(
+            accelerator=self.accelerator,
+            devices=self.n_devices,
+            max_epochs=0,
+            num_sanity_val_steps=-1,
+            callbacks=[callbacks.GradientPotentialTest()],
         )

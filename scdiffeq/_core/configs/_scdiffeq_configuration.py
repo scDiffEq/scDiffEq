@@ -107,6 +107,10 @@ class scDiffEqConfiguration:
     @property
     def LightningTrainer(self):
         return LightningTrainerConfig(**self.KWARGS["TRAINER"]).trainer
+    
+    @property
+    def LightningTestTrainer(self):
+        return LightningTrainerConfig(**self.KWARGS["TRAINER"]).test_trainer
 
     @property
     def LightningDataModule(self):

@@ -14,3 +14,4 @@ __email__ = ", ".join(
 # -- import: -----------------------------------------------------------------------------
 from ._loss_accounting import LossAccounting
 from ._intermittent_saves import IntermittentSaves
+from ._gradient_potential_callback import GradientPotentialTest

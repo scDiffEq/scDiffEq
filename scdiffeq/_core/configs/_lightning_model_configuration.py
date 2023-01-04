@@ -22,9 +22,8 @@ import torch
 # -- import local dependencies: --------------------------------------------------------
 from ._extract_func_kwargs import extract_func_kwargs
 from ..loss import Loss
-from ..forward import forward
+from ..forward import forward, Credentials
 from ..lightning_models import LightningDiffEq, default_NeuralSDE
-
 
 # -- import packages: ------------------------------------------------------------------
 class FunctionFetch(ABC):
@@ -141,6 +140,11 @@ class LightningModelConfig:
         self.config_optimizer = self._fetch_optimizer(optimizer)(
             self._params, lr=self._lr, **self._optimizer_kwargs
         )
+        
+    @property
+    def is_potential_net(self, net):
+        """Assumes potential is 1-D"""
+        return list(net.parameters())[-1].shape[0] == 1
 
     @property
     def optimizer(self):
@@ -201,7 +205,7 @@ class LightningModelConfig:
         return self._t
 
     def _configure_model(self, func):
-
+        
         self._LIGHTNING_MODEL = LightningDiffEq(func)
         self._LIGHTNING_MODEL.optimizer = self.optimizer
         self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
@@ -209,6 +213,13 @@ class LightningModelConfig:
         self._LIGHTNING_MODEL.forward = self.forward
         self._LIGHTNING_MODEL.t = self.t
         self._LIGHTNING_MODEL.dt = self.dt
+        
+        # -- function credentialling: ----------------------------------------------------
+        creds = Credentials(func)
+        self.func_type, self.mu_is_potential, self.sigma_is_potential = creds()
+        self._LIGHTNING_MODEL.func_type = self.func_type
+        self._LIGHTNING_MODEL.mu_is_potential = self.mu_is_potential
+        self._LIGHTNING_MODEL.sigma_is_potential = self.sigma_is_potential
 
     @property
     def LightningModel(self):
