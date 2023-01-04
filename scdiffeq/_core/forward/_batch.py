@@ -38,10 +38,6 @@ class Batch:
         if not isinstance(self._t, torch.Tensor):
             self._t = self._batch[0].unique()
         return self._t
-            
-#         if self._func_type == "NeuralSDE":
-#             return {"ts": self._t}
-#         return {"t": self._t}
 
     @property
     def X(self):

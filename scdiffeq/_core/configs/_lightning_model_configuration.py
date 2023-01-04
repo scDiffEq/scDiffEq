@@ -22,7 +22,7 @@ import torch
 # -- import local dependencies: --------------------------------------------------------
 from ._extract_func_kwargs import extract_func_kwargs
 from ..loss import Loss
-from ..forward import general_forward # SDE_forward
+from ..forward import forward
 from ..lightning_models import LightningDiffEq, default_NeuralSDE
 
 
@@ -178,17 +178,13 @@ class LightningModelConfig:
             **self._lr_scheduler_kwargs,
         )
     
-    def _configure_forward(self, func):
-        pass
+    @property
+    def forward(self):
+        return forward
 
     @property
     def lr_scheduler(self):
         return self._configure_lr_scheduler(self._lr_scheduler)
-
-    @property
-    def forward_method(self):
-        # TODO: flexibility towards NeuralODE and TorchNN
-        return general_forward # SDE_forward
 
     @property
     def loss_function(self):
@@ -209,8 +205,8 @@ class LightningModelConfig:
         self._LIGHTNING_MODEL = LightningDiffEq(func)
         self._LIGHTNING_MODEL.optimizer = self.optimizer
         self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
-        self._LIGHTNING_MODEL.forward = self.forward_method
         self._LIGHTNING_MODEL.loss_func = self.loss_function
+        self._LIGHTNING_MODEL.forward = self.forward
         self._LIGHTNING_MODEL.t = self.t
         self._LIGHTNING_MODEL.dt = self.dt
 
