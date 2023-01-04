@@ -24,7 +24,11 @@ class Batch:
     def _expand_X0(self, N=2000):
         n_unique, n_dim = self.X.shape[1], self.X.shape[2]        
         return self.X.expand(N, n_unique, n_dim).reshape(n_unique * N, n_dim)
-        
+    
+    @property
+    def func_type(self):
+        return self._func_type
+    
     @property
     def stage(self):
         return self._stage

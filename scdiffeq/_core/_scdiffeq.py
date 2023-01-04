@@ -149,6 +149,7 @@ class scDiffEq:
         X_pred = self.predicted[0]["pred"]
         if save:
             print(self.log_dir)
+            # TODO: save predicted
 
     @property
     def log_dir(self):

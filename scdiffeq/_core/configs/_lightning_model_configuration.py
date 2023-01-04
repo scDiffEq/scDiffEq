@@ -177,6 +177,9 @@ class LightningModelConfig:
             step_size=self._step_size,
             **self._lr_scheduler_kwargs,
         )
+    
+    def _configure_forward(self, func):
+        pass
 
     @property
     def lr_scheduler(self):
