@@ -14,7 +14,6 @@ __email__ = ", ".join(
 
 # -- import packages: --------------------------------------------------------------------
 from pytorch_lightning import LightningDataModule
-from pytorch_lightning import Trainer
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch.utils.data import DataLoader
 from torch_nets import TorchNet
@@ -58,6 +57,7 @@ class scDiffEq:
         test_key="test",
         predict_key="predict",
         accelerator="gpu",
+        adjoint=False,
         devices=1,
         batch_size=2000,
         num_workers=4,

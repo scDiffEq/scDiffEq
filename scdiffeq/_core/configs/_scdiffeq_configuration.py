@@ -21,6 +21,8 @@ from ._lightning_data_module_configuration import LightningDataModuleConfig # do
 
 from ..utils import function_kwargs, ParseBase
 
+import logging
+logging.getLogger("pytorch_lightning").setLevel(logging.WARNING)
 
 class scDiffEqConfiguration:
     """
@@ -67,6 +69,7 @@ class scDiffEqConfiguration:
         predict_key="predict",
         accelerator="gpu",
         devices=1,
+        adjoint=False,
         batch_size=2000,
         num_workers=4,
         n_groups=None,

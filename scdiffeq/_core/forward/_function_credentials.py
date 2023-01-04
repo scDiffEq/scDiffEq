@@ -6,8 +6,9 @@ import torchsde
 
 
 class Credentials:
-    def __init__(self, func):
+    def __init__(self, func, adjoint=False):
         self.func = func
+        self._adjoint = adjoint
 
     @property
     def is_NeuralODE(self):
@@ -42,11 +43,17 @@ class Credentials:
     def __call__(self):
 
         if self.is_NeuralODE:
-            self._integrator = torchdiffeq.odeint
+            if self._adjoint:
+                self._integrator = torchdiffeq.odeint_adjoint
+            else:
+                self._integrator = torchdiffeq.odeint
             return "NeuralODE", self.mu_is_potential_func, self.sigma_is_potential_func
 
         if self.is_NeuralSDE:
-            self._integrator = torchsde.sdeint
+            if self._adjoint:
+                self._integrator = torchsde.sdeint_adjoint
+            else:
+                self._integrator = torchsde.sdeint
             return "NeuralSDE", self.mu_is_potential_func, self.sigma_is_potential_func
 
         if self.is_TorchNet:

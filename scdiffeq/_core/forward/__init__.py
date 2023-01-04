@@ -13,8 +13,7 @@ __email__ = ", ".join(
 
 
 # -- import base and derived module groups: ----------------------------------------------
-from ._forward import forward
+from ._forward import UniversalForwardIntegrator, forward
 from ._batch import Batch
 from ._loss_log import LossLog
-from ._universal_forward_integrator import UniversalForwardIntegrator
 from ._function_credentials import Credentials

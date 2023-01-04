@@ -101,6 +101,7 @@ class LightningModelConfig:
         time_key="Time point",
         optimizer="RMSprop",
         lr_scheduler="StepLR",
+        adjoint=False,
         lr=1e-4,
         step_size=20,
         dt=0.1,
@@ -111,7 +112,7 @@ class LightningModelConfig:
         self.__parse__(locals())
         self._configure_func(func)
         self._format_model_params(self._params)
-        self._configure_model(self.func)
+        self._configure_model(self.func, adjoint)
 
     def _format_model_params(self, params):
         if isinstance(params, list) and isinstance(
@@ -204,7 +205,7 @@ class LightningModelConfig:
             self._t = torch.Tensor(np.sort(self._adata.obs[self._time_key].unique()))
         return self._t
 
-    def _configure_model(self, func):
+    def _configure_model(self, func, adjoint):
         
         self._LIGHTNING_MODEL = LightningDiffEq(func)
         self._LIGHTNING_MODEL.optimizer = self.optimizer
@@ -213,9 +214,10 @@ class LightningModelConfig:
         self._LIGHTNING_MODEL.forward = self.forward
         self._LIGHTNING_MODEL.t = self.t
         self._LIGHTNING_MODEL.dt = self.dt
+        self._LIGHTNING_MODEL.adjoint = self._adjoint
         
         # -- function credentialling: ----------------------------------------------------
-        creds = Credentials(func)
+        creds = Credentials(func, adjoint)
         self.func_type, self.mu_is_potential, self.sigma_is_potential = creds()
         self._LIGHTNING_MODEL.func_type = self.func_type
         self._LIGHTNING_MODEL.mu_is_potential = self.mu_is_potential
