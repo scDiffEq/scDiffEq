@@ -14,6 +14,6 @@ __email__ = ", ".join(
 
 # -- import base and derived module groups: ----------------------------------------------
 from ._batch import Batch
-from ._sde_forward import SDE_forward
+from ._sde_forward import SDE_forward, general_forward
 from ._loss_log import LossLog
 from ._universal_forward_integrator import Credentials, UniversalForwardIntegrator

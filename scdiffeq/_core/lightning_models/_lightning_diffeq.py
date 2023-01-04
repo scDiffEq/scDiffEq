@@ -43,6 +43,7 @@ class LightningDiffEq(LightningModule):
         self,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
         expand: bool = False,
+        dt = 0.1,
         **kwargs,
     ):
         """

@@ -21,7 +21,6 @@ class Credentials:
 
     @property
     def is_TorchNet(self):
-        self._integrator = sdeint
         return (not self.is_NeuralODE) and (not self.is_NeuralSDE)
 
     @property

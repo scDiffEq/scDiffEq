@@ -15,7 +15,7 @@ class LossLog:
     def positional(self, model, loss, stage, batch):
 
         if not stage in self.unlogged_stages:
-            for i, t in enumerate(batch.t[self.time_key]):
+            for i, t in enumerate(batch.t): # [self.time_key]
                 msg = "{}_loss_{}".format(stage, str(int(t)))
                 val = loss[self.positional_loss_key][i].item()
                 model.log(msg, val)

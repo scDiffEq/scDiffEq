@@ -13,17 +13,14 @@ __email__ = ", ".join(
 
 # -- import packages: --------------------------------------------------------------------
 from geomloss import SamplesLoss
-
-
-# -- import local dependencies: ----------------------------------------------------------
-from ..utils import auto_device
+from autodevice import AutoDevice
 
 
 # -- API-facing class: -------------------------------------------------------------------
 class SinkhornDivergence(SamplesLoss):
     def __init__(
         self,
-        device=auto_device(),
+        device=AutoDevice(),
         loss="sinkhorn",
         backend="auto",  # online
 #         diameter=,
