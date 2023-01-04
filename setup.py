@@ -28,8 +28,8 @@ setup(
         "neural-diffeqs==0.2.0rc0",
         "torch-nets==0.0.1",
         "torch-adata",
-        "auto-device",
-        "brownian-diffuser",
+        "autodevice>=0.0.2",
+        "brownian-diffuser=>0.0.1",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
