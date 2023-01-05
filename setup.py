@@ -26,10 +26,10 @@ setup(
         "umap-learn>=0.5.2",
         "pytorch-lightning>=1.7.7",
         "neural-diffeqs==0.2.0rc0",
-        "torch-nets==0.0.1",
+        "torch-nets>=0.0.2",
         "torch-adata",
         "autodevice>=0.0.2",
-        "brownian-diffuser=>0.0.1",
+        "brownian-diffuser>=0.0.1",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
