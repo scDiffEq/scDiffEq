@@ -61,7 +61,7 @@ class scDiffEqConfiguration:
         adata: anndata.AnnData = None,
         func=None,
         use_key="X_pca",
-        groupby="Time point",
+        time_key="Time point",
         obs_keys=None,
         train_key="train",
         val_key="val",

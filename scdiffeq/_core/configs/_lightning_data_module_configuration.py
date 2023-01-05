@@ -44,7 +44,7 @@ class CellDataManager:
         self,
         adata,
         use_key="X_pca",
-        groupby="Time point",
+        time_key="Time point",
         obs_keys=None,
         train_key="train",
         val_key="val",
@@ -73,11 +73,12 @@ class CellDataManager:
         self.AnnDataset_kwargs = function_kwargs(
             func=AnnDataset, kwargs=kwargs, ignore=["adata"]
         )
+        self.AnnDataset_kwargs['groupby'] = kwargs['time_key']
         self.AnnDataset_kwargs.pop("adata")
         self.__parse__(kwargs, ignore, hide)
         self.df = self.adata.obs.copy()
         self.data_keys = self._get_keys(kwargs)
-
+        
         if not self.n_groups:
             self.n_groups = len(self.train_val_percentages)
 
@@ -220,7 +221,7 @@ class LightningAnnDataModule(LightningDataModule):
         N=False,
         num_workers=os.cpu_count(),
         use_key="X_pca",
-        groupby="Time point",
+        time_key="Time point",
         obs_keys=['W', 'v'],
         train_key="train",
         val_key="val",
@@ -336,7 +337,7 @@ class LightningDataModuleConfig:
         N=False,
         num_workers=os.cpu_count(),
         use_key="X_pca",
-        groupby="Time point",
+        time_key="Time point",
         obs_keys=['W', 'v'],
         train_key="train",
         val_key="val",

@@ -50,7 +50,7 @@ class scDiffEq:
         adata: anndata.AnnData = None,
         func: [NeuralODE, NeuralSDE, torch.nn.Module] = None,
         use_key="X_pca",
-        groupby="Time point",
+        time_key="Time point",
         obs_keys=['W', 'v'],
         train_key="train",
         val_key="val",
