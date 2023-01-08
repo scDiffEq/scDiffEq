@@ -1,9 +1,14 @@
 
-# -- import local dependencies: --------------------------------------------------------
-from ..utils import sum_normalize
+
+# -- import packages: ------------------------------------------------------------------
 import torch
 
 
+# -- import local dependencies: --------------------------------------------------------
+from ..utils import sum_normalize, Base
+
+
+# -- supporting functions: -------------------------------------------------------------
 def _expanded_X0(batch, N=2000):
     return torch.stack(
         [self.X0[i].expand(N, 50) for i in range(len(self.X0))]
@@ -11,15 +16,10 @@ def _expanded_X0(batch, N=2000):
 
 
 # -- Model-facing Batch: ---------------------------------------------------------------
-class Batch:
-    """Catch batch and make sure it's in the right format."""
-    
-    def __parse__(self, kwargs, ignore=['self']):
-        for key, val in kwargs.items():
-            setattr(self, "_{}".format(key), val)
-    
+class Batch(Base):
+    """Catch batch and make sure it's in the right format."""    
     def __init__(self, batch, stage, func_type, t=None, expand=False):
-        self.__parse__(locals())
+        self.__parse__(locals(), public=[None])
         
     def _expand_X0(self, N=2000):
         n_unique, n_dim = self.X.shape[1], self.X.shape[2]        

@@ -18,5 +18,4 @@ from ._scdiffeq_configuration import scDiffEqConfiguration
 from ._lightning_model_configuration import LightningModelConfig
 from ._lightning_trainer_configuration import LightningTrainerConfig
 from ._lightning_data_module_configuration import LightningDataModuleConfig
-
-from ._extract_func_kwargs import func_params, extract_func_kwargs
+from ._configure_time import TimeConfig

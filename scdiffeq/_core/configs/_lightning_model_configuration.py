@@ -20,18 +20,17 @@ import torch
 
 
 # -- import local dependencies: --------------------------------------------------------
-from ._extract_func_kwargs import extract_func_kwargs
-from ..loss import Loss
-from ..forward import forward, Credentials
 from ..lightning_models import LightningDiffEq, default_NeuralSDE
+from ..forward import forward, Credentials
+from ..utils import extract_func_kwargs, Base
+from ..loss import Loss
+
+
+NoneType = type(None)
+
 
 # -- import packages: ------------------------------------------------------------------
-class FunctionFetch(ABC):
-    def __parse__(self, kwargs, ignore=["self"]):
-        for k, v in kwargs.items():
-            if not k in ignore:
-                setattr(self, k, v)
-
+class FunctionFetch(Base):
     def __init__(self, module=None, parent=None):
         self.__parse__(locals())
 
@@ -74,7 +73,7 @@ def fetch_lr_scheduler(func):
 
 
 # -- Main module class: ----------------------------------------------------------------
-class LightningModelConfig:
+class LightningModelConfig(Base):
     """
     Called from within the LightningModule. Handles setup of optimizer, lr_scheduler,
     loss function(s), and the forward function.
@@ -88,11 +87,6 @@ class LightningModelConfig:
           the passed args (if is list) for each keyword argument.
     """
 
-    def __parse__(self, kwargs, ignore=["self", "func"]):
-        for k, v in kwargs.items():
-            if not k in ignore:
-                setattr(self, "_{}".format(k), v)
-
     def __init__(
         self,
         func=None,
@@ -101,15 +95,18 @@ class LightningModelConfig:
         time_key="Time point",
         optimizer="RMSprop",
         lr_scheduler="StepLR",
+        t0_idx = None,
         adjoint=False,
         lr=1e-4,
         step_size=20,
         dt=0.1,
         t=None,
+        n_steps=40,
         *args,
         **kwargs,
     ):
-        self.__parse__(locals())
+                
+        self.__parse__(locals(), ignore=["self", "func"], public=[None])
         self._configure_func(func)
         self._format_model_params(self._params)
         self._configure_model(self.func, adjoint)
@@ -118,7 +115,6 @@ class LightningModelConfig:
         if isinstance(params, list) and isinstance(
             params[0], torch.nn.parameter.Parameter
         ):
-            print("TRUE!")
             self._params = params
 
         elif isinstance(params, Generator):
@@ -164,6 +160,11 @@ class LightningModelConfig:
             self._fetch_lr_scheduler(self._lr_scheduler), self._kwargs
         )
 
+    @property
+    def real_time(self):
+        return isinstance(self._t0_idx, NoneType)
+#         return not hasattr(self, "t0_idx")
+        
     def _configure_func(self, func):
 
         if not func:
@@ -201,8 +202,6 @@ class LightningModelConfig:
     
     @property
     def t(self):
-        if not self._t:
-            self._t = torch.Tensor(np.sort(self._adata.obs[self._time_key].unique()))
         return self._t
 
     def _configure_model(self, func, adjoint):
@@ -215,6 +214,7 @@ class LightningModelConfig:
         self._LIGHTNING_MODEL.t = self.t
         self._LIGHTNING_MODEL.dt = self.dt
         self._LIGHTNING_MODEL.adjoint = self._adjoint
+        self._LIGHTNING_MODEL.real_time = self.real_time
         
         # -- function credentialling: ----------------------------------------------------
         creds = Credentials(func, adjoint)

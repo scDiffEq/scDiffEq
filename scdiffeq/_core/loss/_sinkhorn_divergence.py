@@ -15,14 +15,15 @@ __email__ = ", ".join(
 from geomloss import SamplesLoss
 from autodevice import AutoDevice
 
+from ..utils import Base
 
 # -- API-facing class: -------------------------------------------------------------------
-class SinkhornDivergence(SamplesLoss):
+class SinkhornDivergence(SamplesLoss, Base):
     def __init__(
         self,
         device=AutoDevice(),
         loss="sinkhorn",
-        backend="auto",  # online
+        backend="online", # "auto",
 #         diameter=,
         p=2,
         blur=0.1,
@@ -34,8 +35,3 @@ class SinkhornDivergence(SamplesLoss):
         super(SinkhornDivergence, self).__init__()
 
         self.__parse__(locals())
-
-    def __parse__(self, kwargs, ignore=["self"]):
-        for k, v in kwargs.items():
-            if not k in ignore:
-                setattr(self, k, v)

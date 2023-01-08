@@ -6,7 +6,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import sum_normalize
+from ..utils import sum_normalize, Base
 from ._sinkhorn_divergence import SinkhornDivergence
 
 
@@ -16,18 +16,11 @@ from typing import Union
 
 
 # -- main class: -------------------------------------------------------------------------
-class Loss:
-    def __parse__(self, kwargs, ignore=["self"], explicit=["X", "X_hat"]):
-
-        for key, val in kwargs.items():
-            if not key in ignore:
-                if not key in explicit:
-                    key = "_{}".format(key)
-                setattr(self, key, val)
+class Loss(Base):
 
     def __init__(self):
         """Catch the outputs of the inference function"""
-        self.__parse__(locals())
+        self.__parse__(locals(), public=["X", "X_hat"])
         self.sinkhorn_divergence = SinkhornDivergence()
         self.mse = torch.nn.MSELoss()
 
@@ -80,6 +73,8 @@ class Loss:
         return self._F_hat
 
     def positional(self):
+#         print("W\tX\tW_hat\tX_hat")
+#         print(self.W.shape, self.X.shape, self.W_hat.shape, self.X_hat.shape)
         return self.sinkhorn_divergence(self.W, self.X, self.W_hat, self.X_hat)
 
     def velocity(self):
@@ -101,7 +96,7 @@ class Loss:
         F: Union[torch.Tensor, NoneType] = None,
         F_hat: Union[torch.Tensor, NoneType] = None,
     ):
-        self.__parse__(locals())
+        self.__parse__(locals(), public=["X", "X_hat"])
 
         loss_dict = {}
         loss_dict["positional"] = self.positional()

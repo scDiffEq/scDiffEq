@@ -14,12 +14,14 @@ def _epoch_regex_mean(epoch_df, regex):
 
 # -- Plotting: ---------------------------------------------------------------------------
 class LossPlotter(vinplots.Plot):
-    def __init__(self, time_unit="d", x_label="Epoch", y_label="Wasserstein Distance"):
+    def __init__(self, time_unit="", x_label="Epoch", y_label="Wasserstein Distance"):
 
         self.build()
         self.time_unit = time_unit
         self._colors = np.array(list(vinplots.colors.pbmc3k.values()))
-        self.colors = self._colors[[4, 6, 7]]
+        # self.colors = self._colors[[4, 6, 7]]
+        cc = vinplots.colors.BuOr.colors
+        self.colors = cc[:int(len(cc)/2)][::3]
         self.x_label = x_label
         self.y_label = y_label
         self.y_min = 0
@@ -38,14 +40,14 @@ class LossPlotter(vinplots.Plot):
         ax.tick_params(axis="both", which="both", labelsize=6)
         ax.set_xlabel(self.x_label, fontsize=8)
         ax.set_ylabel(self.y_label, fontsize=8)
-        ax.set_ylim(self.y_min, self.y_max)
+#         ax.set_ylim(self.y_min, self.y_max)
         ax.set_title(title, fontsize=10)
         ax.grid(True, zorder=0, alpha=0.2)
 
     def _plot_ax(self, ax, loss_df, fit=False, title=None):
 
         if not fit:
-            iterable = loss_df.columns[1:]
+            iterable = loss_df.columns[1:-1]
         else:
             iterable = loss_df.columns
         
@@ -55,7 +57,7 @@ class LossPlotter(vinplots.Plot):
             else:
                 label = i
             ax.plot(loss_df[i], c=self.colors[n], label=label)
-            if n == (len(iterable)-1):            
+            if n == (len(iterable)-1):
                 ax.legend(edgecolor="w", fontsize=self.legend_fontsize)
         self._format_ax(ax, title)
 

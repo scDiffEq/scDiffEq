@@ -1,19 +1,22 @@
 
-import anndata
-import inspect
-from torch_adata import AnnDataset
+# -- import packages: --------------------------------------------------------------------
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-import os
-import torch
+from licorice_font import font_format
+from torch_adata import AnnDataset
 from typing import Union, List
 import numpy as np
-from licorice_font import font_format
+import anndata
+import inspect
+import torch
+import os
 
 
-from ..utils import function_kwargs
+# -- import local dependencies: ----------------------------------------------------------
+from ..utils import function_kwargs, Base
 
 
+# -- supporting classes and functions: ---------------------------------------------------
 class SplitSize:
     def __init__(self, n_cells: int, n_groups: int):
 
@@ -37,7 +40,7 @@ class SplitSize:
         return split_lengths
 
 
-class CellDataManager:
+class CellDataManager(Base):
     """Data Manager at the AnnData Level."""
 
     def __init__(
@@ -45,6 +48,7 @@ class CellDataManager:
         adata,
         use_key="X_pca",
         time_key="Time point",
+        t0_key = "t0",
         obs_keys=None,
         train_key="train",
         val_key="val",
@@ -62,20 +66,18 @@ class CellDataManager:
 
         self.__config__(locals())
 
-    def __parse__(self, kwargs, ignore=["self"], hide=[]):
-
-        for key, val in kwargs.items():
-            if not key in ignore:
-                setattr(self, key, val)
-
-    def __config__(self, kwargs, ignore=["self"], hide=[]):
+    def __config__(self, kwargs, ignore=["self"]):
 
         self.AnnDataset_kwargs = function_kwargs(
             func=AnnDataset, kwargs=kwargs, ignore=["adata"]
         )
+        
+        if not kwargs['time_key']:
+            kwargs['time_key'] = "t"
+
         self.AnnDataset_kwargs['groupby'] = kwargs['time_key']
         self.AnnDataset_kwargs.pop("adata")
-        self.__parse__(kwargs, ignore, hide)
+        self.__parse__(kwargs, ignore)
         self.df = self.adata.obs.copy()
         self.data_keys = self._get_keys(kwargs)
         
@@ -121,7 +123,6 @@ class CellDataManager:
             self.n_groups = len(self.train_val_percentages)
 
         train_adata = self.train_adata
-
         n_cells = train_adata.shape[0]
 
         self.data_keys["train"] = "fit_train"
@@ -149,8 +150,11 @@ class CellDataManager:
         self._set_new_idx(self.df, idx=fit_val_idx.astype(int), key_added="fit_val")
 
         self.adata.obs = self.df
-
-    def to_dataset(self, key):
+    
+    
+    # -- key function that transform adata -> torch.utils.data.Dataset: -----------------
+    def to_dataset(self, key: str)->torch.utils.data.Dataset:
+        """adata -> torch.utils.data.Dataset"""
         adata = getattr(self, "{}_adata".format(key))
         return AnnDataset(adata=adata, **self.AnnDataset_kwargs)
 

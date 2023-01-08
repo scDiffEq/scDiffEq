@@ -16,7 +16,7 @@ __email__ = ", ".join(
 from ._scdiffeq import scDiffEq
 from .loss import Loss
 from .lightning_models import LightningDiffEq
-from .utils import ParseBase
+from .utils import Base # ParseBase
 
 
 # -- developer-facing modules: -----------------------------------------------------------

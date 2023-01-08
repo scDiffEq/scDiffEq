@@ -24,23 +24,15 @@ import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from . import configs
+from . import configs, utils
 
 
 # -- API-facing model class: -------------------------------------------------------------
-class scDiffEq:
-    def __parse__(self, kwargs, ignore, hide):
-        
-        self._SCDIFFEQ_PASSED_KWARGS = {}
-        
-        for key, val in kwargs.items():
-            if not key in ignore:
-                self._SCDIFFEQ_PASSED_KWARGS[key] = val
-                    
-    def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"], hide=[]):
+class scDiffEq(utils.Base):
+    def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"]):
 
-        self.__parse__(kwargs, ignore, hide)
-        self.config = configs.scDiffEqConfiguration(**self._SCDIFFEQ_PASSED_KWARGS)
+        self.__parse__(kwargs, ignore=ignore)
+        self.config = configs.scDiffEqConfiguration(**self._KWARGS)
         for attr in self.config.__dir__():
             if (not attr.startswith("_")) and (not attr.startswith("Prediction")):
                 setattr(self, attr, getattr(self.config, attr))
@@ -57,6 +49,8 @@ class scDiffEq:
         test_key="test",
         predict_key="predict",
         accelerator="gpu",
+        t0_idx=None,
+        n_steps=40,
         adjoint=False,
         devices=1,
         batch_size=2000,
@@ -122,8 +116,8 @@ class scDiffEq:
         ------
 
         """
-
-        self.__config__(locals(), ignore=['self'], hide=[])
+        
+        self.__config__(locals())
         
     def __repr__(self):
         # TODO: add a nice self-report method to be returned as a str
