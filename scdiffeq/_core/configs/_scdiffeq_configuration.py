@@ -63,10 +63,12 @@ class scDiffEqConfiguration(Base):
         t0_idx=None,
         dt=0.1,
         n_steps=40,
-        obs_keys=None,
+        obs_keys=['W'],
         t_min=0,
         t_max=1,
+        fate_scale=10,
         t=None,
+        alpha=None,
         train_key="train",
         val_key="val",
         test_key="test",
@@ -98,6 +100,7 @@ class scDiffEqConfiguration(Base):
         reload_dataloaders_every_n_epochs=5,
         ckpt_outputs_frequency=50,
         N=False,
+        tau=1e-06,
         **kwargs
     ):
         

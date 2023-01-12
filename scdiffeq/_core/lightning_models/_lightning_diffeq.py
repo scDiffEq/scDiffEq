@@ -25,6 +25,12 @@ from ._default_neural_sde import default_NeuralSDE
 from ..utils import function_kwargs
 
 
+from ..forward import ForwardManager, LossManager
+
+
+NoneType = type(None)
+
+
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningDiffEq(LightningModule):
     """Pytorch-Lightning model trained within scDiffEq"""
@@ -47,8 +53,10 @@ class LightningDiffEq(LightningModule):
     def __init__(
         self,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
+        stdev: torch.nn.Parameter = None,
         expand: bool = False,
         dt = 0.1,
+        tau=1e-06,
         **kwargs,
     ):
         """
@@ -68,7 +76,30 @@ class LightningDiffEq(LightningModule):
         super(LightningDiffEq, self).__init__()
         self.__parse__(locals())
         self.func = func
+        self.stdev = stdev
         self.expand = expand
+        
+        
+        self.save_hyperparameters(ignore=["adata", "self", "func", "stdev"])
+        self.hparams['func_description'] = str(func)
+        self.save_hyperparameters(self.hparams)
+
+    def forward(self, batch, batch_idx, stage, stdev=0.5, t=None):
+
+        model_pass = {}
+        forward_manager = ForwardManager(
+            model=self, tau=self.tau, burn_steps=self.burn_steps
+        )
+        forward_outs = forward_manager(batch, batch_idx=batch_idx, stdev=stdev) #  t=t, 
+        loss_manager = LossManager(real_time=self.real_time)
+        
+        model_pass['batch'] = forward_manager.batch
+        model_pass['X_hat'] = forward_outs['X_hat']
+
+        forward_outs['fate_scale'] = self.fate_scale
+        model_pass['loss'] = loss_manager(**forward_outs)
+        
+        return model_pass
 
     def training_step(self, batch, batch_idx)->dict:
         """
@@ -88,7 +119,7 @@ class LightningDiffEq(LightningModule):
             Contains at least "loss" key, required for PyTorch-Lightning backprop.
             type: dict
         """
-        return self.forward(self, batch, stage="train")
+        return self.forward(batch, batch_idx, stage="train", stdev=0.5, t=None)
 
     def validation_step(self, batch, batch_idx):
         """
@@ -109,7 +140,7 @@ class LightningDiffEq(LightningModule):
             type: dict
         """        
         self.enable_grad()
-        return self.forward(self, batch, stage="val")
+        return self.forward(self, batch, batch_idx, stage="val", stdev=0.5, t=None)
 
     def test_step(self, batch, batch_idx):
         """
@@ -130,7 +161,7 @@ class LightningDiffEq(LightningModule):
             type: dict
         """
         self.enable_grad()
-        return self.forward(self, batch, stage="test")
+        return self.forward(self, batch, batch_idx, stage="test", stdev=0.5, t=None)
 
     def predict_step(self, batch, batch_idx):
         """
@@ -151,7 +182,7 @@ class LightningDiffEq(LightningModule):
             type: dict
         """
         self.enable_grad()
-        return self.forward(self, batch, stage="predict", t=self.t, expand=self.expand)
+        return self.forward(self, batch, batch_idx, stage="predict", stdev=0.5, t=self.t, expand=self.expand)
 
     def configure_optimizers(self):
         """

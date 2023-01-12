@@ -16,6 +16,9 @@ import os
 from ..utils import function_kwargs, Base
 
 
+NoneType = type(None)
+
+
 # -- supporting classes and functions: ---------------------------------------------------
 class SplitSize:
     def __init__(self, n_cells: int, n_groups: int):
@@ -54,6 +57,7 @@ class CellDataManager(Base):
         val_key="val",
         test_key="test",
         predict_key="predict",
+        velocity_key="velo",
         n_groups=None,
         train_val_percentages=[0.8, 0.2],
         remainder_idx=-1,
@@ -62,12 +66,16 @@ class CellDataManager(Base):
         one_hot=False,
         aux_keys=None,
         silent=True,
+        shuffle=True,
     ):
 
         self.__config__(locals())
 
     def __config__(self, kwargs, ignore=["self"]):
-
+        
+        if isinstance(kwargs['velocity_key'], NoneType):
+            kwargs['aux_keys'] = [kwargs['velocity_key']]
+        
         self.AnnDataset_kwargs = function_kwargs(
             func=AnnDataset, kwargs=kwargs, ignore=["adata"]
         )
@@ -226,7 +234,7 @@ class LightningAnnDataModule(LightningDataModule):
         num_workers=os.cpu_count(),
         use_key="X_pca",
         time_key="Time point",
-        obs_keys=['W', 'v'],
+        obs_keys=['W'],
         train_key="train",
         val_key="val",
         test_key="test",
@@ -261,10 +269,11 @@ class LightningAnnDataModule(LightningDataModule):
             batch_size = self.n_test_cells
         else:
             batch_size = self.hparams["batch_size"]
-        return DataLoader(
-            getattr(self, "{}_dataset".format(dataset_key)),
-            num_workers=self.hparams["num_workers"],
-            batch_size=batch_size,
+            
+        return DataLoader(getattr(self, "{}_dataset".format(dataset_key)),
+                          num_workers=self.hparams["num_workers"],
+                          batch_size=batch_size,
+                          shuffle=self.hparams["batch_size"],
         )
 
     # -- Properties: ---------------------------------------------------------------------
@@ -295,6 +304,10 @@ class LightningAnnDataModule(LightningDataModule):
             return int(self.n_cells / 10)
         return self.hparams["batch_size"]
 
+    @property
+    def allocated_val(self):
+        return self.hparams['train_val_percentages'][1] > 0
+    
     # -- Standard methods: ---------------------------------------------------------------
     def prepare_data(self):
         self.data = CellDataManager(self.adata, **self.cell_data_manager_kwargs)
@@ -302,8 +315,9 @@ class LightningAnnDataModule(LightningDataModule):
     def setup(self, stage=None):
 
         if stage in ["fit", "train", "val"]:
+            if self.allocated_val:                
+                self.val_dataset = self.data.val_dataset
             self.train_dataset = self.data.train_dataset
-            self.val_dataset = self.data.val_dataset
 
         elif stage == "test":
             self.test_dataset = self.data.test_dataset
@@ -342,7 +356,7 @@ class LightningDataModuleConfig:
         num_workers=os.cpu_count(),
         use_key="X_pca",
         time_key="Time point",
-        obs_keys=['W', 'v'],
+        obs_keys=['W'],
         train_key="train",
         val_key="val",
         test_key="test",
@@ -356,7 +370,6 @@ class LightningDataModuleConfig:
         aux_keys=None,
         silent=True,
     ):
-
         kwargs = function_kwargs(LightningAnnDataModule, locals())
         self._LightningDataModule = LightningAnnDataModule(**kwargs)
         

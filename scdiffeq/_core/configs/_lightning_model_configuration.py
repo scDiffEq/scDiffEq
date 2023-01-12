@@ -21,10 +21,11 @@ import torch
 
 # -- import local dependencies: --------------------------------------------------------
 from ..lightning_models import LightningDiffEq, default_NeuralSDE
-from ..forward import forward, Credentials
 from ..utils import extract_func_kwargs, Base
-from ..loss import Loss
+from ..forward import Credentials
 
+
+from autodevice import AutoDevice
 
 NoneType = type(None)
 
@@ -95,19 +96,23 @@ class LightningModelConfig(Base):
         time_key="Time point",
         optimizer="RMSprop",
         lr_scheduler="StepLR",
+        stdev=torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
         t0_idx = None,
         adjoint=False,
         lr=1e-4,
+        fate_scale=10,
         step_size=20,
         dt=0.1,
         t=None,
         n_steps=40,
+        tau=1e-06,
+        burn_steps=100,
         *args,
         **kwargs,
     ):
                 
-        self.__parse__(locals(), ignore=["self", "func"], public=[None])
-        self._configure_func(func)
+        self.__parse__(locals(), ignore=["self", "func", "stdev"], public=[None])
+        self._configure_func(func, stdev)
         self._format_model_params(self._params)
         self._configure_model(self.func, adjoint)
 
@@ -163,17 +168,22 @@ class LightningModelConfig(Base):
     @property
     def real_time(self):
         return isinstance(self._t0_idx, NoneType)
-#         return not hasattr(self, "t0_idx")
         
-    def _configure_func(self, func):
+    def _configure_func(self, func, stdev):
 
         if not func:
             self._kwargs["state_size"] = self._adata.obsm[self._use_key].shape[1]
             neural_sde_kwargs = extract_func_kwargs(default_NeuralSDE, self._kwargs)
             func = default_NeuralSDE(**neural_sde_kwargs)
-            
+        
         self.func = func
-        self._params = self.func.parameters()
+        self.stdev = stdev
+        params = list(self.func.parameters())
+        
+        if isinstance(self.stdev, torch.nn.parameter.Parameter):
+            self._params = params + [self.stdev] 
+        else:
+            self._params = params
         
     def _configure_lr_scheduler(
         self, lr_scheduler: Union[torch.optim.lr_scheduler._LRScheduler, str]
@@ -206,15 +216,19 @@ class LightningModelConfig(Base):
 
     def _configure_model(self, func, adjoint):
         
-        self._LIGHTNING_MODEL = LightningDiffEq(func)
+        self._LIGHTNING_MODEL = LightningDiffEq(func, self.stdev)
         self._LIGHTNING_MODEL.optimizer = self.optimizer
         self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
-        self._LIGHTNING_MODEL.loss_func = self.loss_function
-        self._LIGHTNING_MODEL.forward = self.forward
         self._LIGHTNING_MODEL.t = self.t
         self._LIGHTNING_MODEL.dt = self.dt
         self._LIGHTNING_MODEL.adjoint = self._adjoint
         self._LIGHTNING_MODEL.real_time = self.real_time
+        self._LIGHTNING_MODEL.adata = self._adata
+        self._LIGHTNING_MODEL.time_key = self._time_key
+        self._LIGHTNING_MODEL.use_key = self._use_key
+        self._LIGHTNING_MODEL.tau = self._tau
+        self._LIGHTNING_MODEL.fate_scale = self._fate_scale
+        self._LIGHTNING_MODEL.burn_steps = self._burn_steps
         
         # -- function credentialling: ----------------------------------------------------
         creds = Credentials(func, adjoint)
@@ -222,6 +236,8 @@ class LightningModelConfig(Base):
         self._LIGHTNING_MODEL.func_type = self.func_type
         self._LIGHTNING_MODEL.mu_is_potential = self.mu_is_potential
         self._LIGHTNING_MODEL.sigma_is_potential = self.sigma_is_potential
+        
+        # consider using a function once you figure these all out...
 
     @property
     def LightningModel(self):

@@ -15,3 +15,4 @@ __email__ = ", ".join(
 from ._loss_accounting import LossAccounting
 from ._intermittent_saves import IntermittentSaves
 from ._gradient_potential_callback import GradientPotentialTest
+from ._testing import Testing

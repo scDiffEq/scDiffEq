@@ -36,29 +36,29 @@ class Loss(Base):
             return sum_normalize(torch.ones_like(self.X_hat)[:, :, 0])
         return self._W_hat
 
-    @property
-    def V(self):
-        if not isinstance(self._V, torch.Tensor):
-            return sum_normalize(torch.ones_like(self.W))
-        return self._V
+#     @property
+#     def V(self):
+#         if not isinstance(self._V, torch.Tensor):
+#             return sum_normalize(torch.ones_like(self.W))
+#         return self._V
 
-    @property
-    def V_hat(self):
-        if not isinstance(self._V_hat, torch.Tensor):
-            return sum_normalize(torch.ones_like(self.W_hat))
-        return self._V_hat
+#     @property
+#     def V_hat(self):
+#         if not isinstance(self._V_hat, torch.Tensor):
+#             return sum_normalize(torch.ones_like(self.W_hat))
+#         return self._V_hat
     
-    @property
-    def V_confidence(self):
-        if not isinstance(self._V_confidence, torch.Tensor):
-            return sum_normalize(torch.ones_like(self.V_hat))
-        return self._V_confidence
+#     @property
+#     def V_confidence(self):
+#         if not isinstance(self._V_confidence, torch.Tensor):
+#             return sum_normalize(torch.ones_like(self.V_hat))
+#         return self._V_confidence
     
-    @property
-    def V_hat_confidence(self):
-        if not isinstance(self._V_hat_confidence, torch.Tensor):
-            return sum_normalize(torch.ones_like(self.V_confidence))
-        return self._V_hat_confidence
+#     @property
+#     def V_hat_confidence(self):
+#         if not isinstance(self._V_hat_confidence, torch.Tensor):
+#             return sum_normalize(torch.ones_like(self.V_confidence))
+#         return self._V_hat_confidence
 
     @property
     def F(self):
@@ -77,8 +77,23 @@ class Loss(Base):
 #         print(self.W.shape, self.X.shape, self.W_hat.shape, self.X_hat.shape)
         return self.sinkhorn_divergence(self.W, self.X, self.W_hat, self.X_hat)
 
-    def velocity(self):
-        return self.sinkhorn_divergence(self.V_confidence, self.V, self.V_hat_confidence, self.V_hat)
+    @property
+    def V_hat(self):
+        return torch.diff(self.X_hat, n=1, dim=0, append=self.X_hat[-1:, :, :])
+    
+    def positional_velocity(self):
+        """Meant to be temporary and deleted"""
+        
+        W = torch.concat([self.W, self.W], axis=1)
+        print(self.X.shape, self._V.shape)
+        XV = torch.concat([self.X, self._V], axis=1)
+        W_hat = torch.concat([self.W_hat, self.W_hat], axis=1)
+        XV_hat = torch.concat([self.X_hat, self.V_hat], axis=1)
+        
+        return self.sinkhorn_divergence(W, XV, W_hat, XV_hat)
+        
+#     def velocity(self):
+#         return self.sinkhorn_divergence(self.V_confidence, self.V, self.V_hat_confidence, self.V_hat)
 
     def fate(self):
         return self.mse(self.F, self.F_hat)
@@ -90,9 +105,9 @@ class Loss(Base):
         W: Union[torch.Tensor, NoneType] = None,
         W_hat: Union[torch.Tensor, NoneType] = None,
         V: Union[torch.Tensor, NoneType] = None,
-        V_hat: Union[torch.Tensor, NoneType] = None,
-        V_confidence: Union[torch.Tensor, NoneType] = None,
-        V_hat_confidence: Union[torch.Tensor, NoneType] = None,
+#         V_hat: Union[torch.Tensor, NoneType] = None,
+#         V_confidence: Union[torch.Tensor, NoneType] = None,
+#         V_hat_confidence: Union[torch.Tensor, NoneType] = None,
         F: Union[torch.Tensor, NoneType] = None,
         F_hat: Union[torch.Tensor, NoneType] = None,
     ):
@@ -100,6 +115,7 @@ class Loss(Base):
 
         loss_dict = {}
         loss_dict["positional"] = self.positional()
+        loss_dict['positional_velocity'] = self.positional_velocity()
 #         loss_dict["velocity"] = self.velocity()
 #         loss_dict["fate"] = self.fate()
 

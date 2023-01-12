@@ -25,12 +25,15 @@ import os
 
 # -- import local dependencies: ----------------------------------------------------------
 from . import configs, utils
+from typing import Union
 
+from autodevice import AutoDevice
 
 # -- API-facing model class: -------------------------------------------------------------
 class scDiffEq(utils.Base):
     def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"]):
-
+        
+        kwargs['aux_keys'] = kwargs['velocity_key']
         self.__parse__(kwargs, ignore=ignore)
         self.config = configs.scDiffEqConfiguration(**self._KWARGS)
         for attr in self.config.__dir__():
@@ -40,15 +43,19 @@ class scDiffEq(utils.Base):
     def __init__(
         self,
         adata: anndata.AnnData = None,
-        func: [NeuralODE, NeuralSDE, torch.nn.Module] = None,
+        func: Union[NeuralODE, NeuralSDE, torch.nn.Module] = None,
         use_key="X_pca",
         time_key="Time point",
-        obs_keys=['W', 'v'],
+        obs_keys=['W'],
         train_key="train",
         val_key="val",
         test_key="test",
         predict_key="predict",
         accelerator="gpu",
+        velocity_key=None,
+        stdev: Union[torch.nn.Parameter, float]=torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
+        velocity_scaling: Union[torch.nn.Parameter, float]=None,
+        tau: Union[torch.nn.Parameter, float]=None,
         t0_idx=None,
         n_steps=40,
         adjoint=False,
@@ -68,6 +75,7 @@ class scDiffEq(utils.Base):
         lr=0.0001,
         step_size=20,
         dt=0.1,
+        fate_scale=10,
         model_save_dir: str = "scDiffEq_model",
         log_name: str = "lightning_logs",
         version=None,

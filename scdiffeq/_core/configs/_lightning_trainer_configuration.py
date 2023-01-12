@@ -16,6 +16,9 @@ from ..utils import function_kwargs
 from .. import lightning_callbacks as callbacks
 
 
+from pytorch_lightning.callbacks import ModelCheckpoint
+
+
 # -- Main class: -------------------------------------------------------------------------
 class LightningTrainerConfig:
     def __init__(
@@ -27,9 +30,12 @@ class LightningTrainerConfig:
         flush_logs_every_n_steps=5,
         max_epochs=1500,
         log_every_n_steps=1,
-        reload_dataloaders_every_n_epochs=5,
+        reload_dataloaders_every_n_epochs=1,
         save_fitting_loss_img=True,
         ckpt_outputs_frequency=50,
+        train_val_percentages=[0.8, 0.2],
+        check_val_every_n_epoch=1,
+        limit_val_batches=None,
         **kwargs
     ):
         """
@@ -68,6 +74,11 @@ class LightningTrainerConfig:
 
     # -- methods: ------------------------------------------------------------------------
     def __parse__(self, kwargs, ignore=["self"]):
+        
+        if not kwargs['train_val_percentages'][1] > 0:
+            kwargs['check_val_every_n_epoch'] = 0
+            kwargs['limit_val_batches'] = 0
+        
         for key, val in kwargs.items():
             if not key in ignore:
                 if key == "kwargs":
@@ -102,6 +113,8 @@ class LightningTrainerConfig:
         return [
             callbacks.LossAccounting(),
             callbacks.IntermittentSaves(self.ckpt_outputs_frequency),
+            callbacks.Testing(),
+            ModelCheckpoint(save_on_train_epoch_end=True),
         ]
         
     @property
