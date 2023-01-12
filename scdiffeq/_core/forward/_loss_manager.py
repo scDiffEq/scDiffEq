@@ -15,13 +15,11 @@ class LossLog(Base):
                 log_msg = "{}_{}_{}".format(stage, 0, loss_type)
                 log_val = log_vals
                 model.log(log_msg, log_val)
-#                 print("Log: {}, {}".format(log_msg, log_val))
             else:
                 for i, val in enumerate(log_vals):
                     log_msg = "{}_{}_{}".format(stage, i, loss_type)
                     log_val = val
                     model.log(log_msg, log_val)
-#                     print("Log: {}, {}".format(log_msg, log_val))
 
 
 class LossManager(Base):
@@ -114,7 +112,7 @@ class LossManager(Base):
 
     def positional_velocity(self):
 
-        W = torch.concat([self.W, self.W], axis=1)
+        W = torch.concat([self.W, self.W], axis=1) # TODO - velocity-specific weights
         X = torch.concat([self.X, self.V], axis=1)
         W_hat = torch.concat([self.W_hat, self.W_hat], axis=1)
         X_hat = torch.concat([self.X_hat, self.V_hat], axis=1)
@@ -160,17 +158,13 @@ class LossManager(Base):
         # -- (5) compute losses: ---------------------------------------
         if self.use_velocity:
             self.LossDict["positional_velocity"] = pv = self.positional_velocity()
-#             print("XY-VELO LOSS: {}".format(pv))
         else:
             self.LossDict["positional"] = p = self.positional()
-#             print("XY LOSS: {}".format(p))
 
         self.LossDict["psi"] = psi = self.psi()
-#         print("PSI: {}".format(psi))
 
         if self.use_fate_bias:
             self.LossDict["fate_bias"]= fb = self.fate_bias()
-#             print("FATE BIAS: {}".format(fb))
 
         # -- (6) log losses: -------------------------------------------
         if not isinstance(model, NoneType):

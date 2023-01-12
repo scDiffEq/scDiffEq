@@ -175,6 +175,7 @@ class ForwardManager(Base):
 
         # -- (3) calculate velocity: ----------------------------------
         if self.use_velocity:
+            # add linear transform for PC -> gene space to calculate velo.
             FORWARD_OUTS["V"] = self.batch.V
             FORWARD_OUTS["V_hat"] = self.calculate_velocity(FORWARD_OUTS["X_hat"])
 

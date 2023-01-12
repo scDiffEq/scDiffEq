@@ -182,7 +182,7 @@ class LightningDiffEq(LightningModule):
             type: dict
         """
         self.enable_grad()
-        return self.forward(self, batch, batch_idx, stage="predict", stdev=0.5, t=self.t, expand=self.expand)
+        return self.forward(batch, batch_idx, stage="predict", stdev=0.5, t=self.t) # , expand=self.expand) TODO: fix
 
     def configure_optimizers(self):
         """

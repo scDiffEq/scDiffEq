@@ -324,6 +324,7 @@ class LightningAnnDataModule(LightningDataModule):
             self.n_test_cells = len(self.test_dataset)
         elif stage in [None, "predict"]:
             self.predict_dataset = self.data.predict_dataset
+            self.train_dataset = self.data.train_dataset
         else:
             print(
                 "CURRENT STAGE: {} - no suitable subset found during `LightningDataModule.setup()`".format(

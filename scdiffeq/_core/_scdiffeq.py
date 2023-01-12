@@ -134,30 +134,42 @@ class scDiffEq(utils.Base):
     def fit(self):
         self.LightningTrainer.fit(self.LightingModel, self.LightningDataModule)
         
-    def test(self):
-        if self.LightingModel.mu_is_potential:
-            self.LightningTestTrainer.fit(self.LightingModel,
-                                         train_dataloaders=self.LightningDataModule.train_dataloader(),
-                                         val_dataloaders=self.LightningDataModule.test_dataloader(),
-                                         )
-        else:
-            self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
+#     def test(self):
+#         if self.LightingModel.mu_is_potential:
+#             self.LightningTestTrainer.fit(self.LightingModel,
+#                                          train_dataloaders=self.LightningDataModule.train_dataloader(),
+#                                          val_dataloaders=self.LightningDataModule.test_dataloader(),
+#                                          )
+#         else:
+#             self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
 
-    def predict(self, adata=None, N=2000, save=True):
-        if adata:
-            self.config._reconfigure_LightningDataModule(adata, N=N)
-            self.PredictionLightningDataModule = self.config.PredictionLightningDataModule
-        else:
-            self.PredictionLightningDataModule = self.config.LightningDataModule
+#     def predict(self, adata=None, N=2000, save=True):
+#         """"""
         
-        self.LightingModel.expand = N
-        self.predicted = self.LightningTrainer.predict(self.LightingModel,
-                                                       self.PredictionLightningDataModule,
-                                                      )
-        X_pred = self.predicted[0]["pred"]
-        if save:
-            print(self.log_dir)
-            # TODO: save predicted
+        
+        
+#         if adata:
+#             self.config._reconfigure_LightningDataModule(adata, N=N)
+#             self.PredictionLightningDataModule = self.config.PredictionLightningDataModule
+#         else:
+#             self.PredictionLightningDataModule = self.config.LightningDataModule
+            
+#         if self.LightingModel.mu_is_potential:
+#             self.LightningTestTrainer.fit(self.LightingModel,
+#                                          train_dataloaders=self.PredictionLightningDataModule.train_dataloader(),
+#                                          val_dataloaders=self.PredictionLightningDataModule.predict_dataloader(),
+#                                          )
+#         else:
+#             self.predicted = self.LightningTrainer.predict(self.LightingModel,
+#                                                        self.PredictionLightningDataModule,
+#                                                       )
+        
+#         self.LightingModel.expand = N
+        
+#         X_pred = self.predicted[0]["pred"]
+#         if save:
+#             print(self.log_dir)
+#             # TODO: save predicted
 
     @property
     def log_dir(self):
