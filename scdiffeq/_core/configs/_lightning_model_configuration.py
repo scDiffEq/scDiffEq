@@ -92,11 +92,14 @@ class LightningModelConfig(Base):
         self,
         func=None,
         adata=None,
+        seed=0,
         use_key=None,
         time_key="Time point",
         optimizer="RMSprop",
         lr_scheduler="StepLR",
         stdev=torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
+        V_scaling=torch.nn.Parameter(torch.tensor(1.0, requires_grad=True, device=AutoDevice())),
+        V_coefficient=0.2,
         t0_idx = None,
         adjoint=False,
         lr=1e-4,
@@ -107,12 +110,25 @@ class LightningModelConfig(Base):
         n_steps=40,
         tau=1e-06,
         burn_steps=100,
+        disable_velocity=False,
+        disable_potential=False,
+        disable_fate_bias=False,
+        skip_positional_backprop=False,
+        skip_positional_velocity_backprop=False,
+        skip_potential_backprop=False,
+        skip_fate_bias_backprop=False,
+        velo_gene_idx = None, # self._adata.uns["velo_gene_idx"]
         *args,
         **kwargs,
     ):
                 
         self.__parse__(locals(), ignore=["self", "func", "stdev"], public=[None])
-        self._configure_func(func, stdev)
+        
+        self.stdev = stdev
+        self.V_scaling = V_scaling
+        self.V_coefficient = V_coefficient
+        
+        self._configure_func(func)
         self._format_model_params(self._params)
         self._configure_model(self.func, adjoint)
 
@@ -169,7 +185,7 @@ class LightningModelConfig(Base):
     def real_time(self):
         return isinstance(self._t0_idx, NoneType)
         
-    def _configure_func(self, func, stdev):
+    def _configure_func(self, func):
 
         if not func:
             self._kwargs["state_size"] = self._adata.obsm[self._use_key].shape[1]
@@ -177,14 +193,13 @@ class LightningModelConfig(Base):
             func = default_NeuralSDE(**neural_sde_kwargs)
         
         self.func = func
-        self.stdev = stdev
-        params = list(self.func.parameters())
+        _params = list(self.func.parameters())
         
-        if isinstance(self.stdev, torch.nn.parameter.Parameter):
-            self._params = params + [self.stdev] 
-        else:
-            self._params = params
-        
+        for p in [self.stdev, self.V_scaling]:
+            if isinstance(p, torch.nn.parameter.Parameter):
+                _params = _params + [p]
+        self._params = _params
+
     def _configure_lr_scheduler(
         self, lr_scheduler: Union[torch.optim.lr_scheduler._LRScheduler, str]
     ):
@@ -216,18 +231,27 @@ class LightningModelConfig(Base):
 
     def _configure_model(self, func, adjoint):
         
-        self._LIGHTNING_MODEL = LightningDiffEq(func, self.stdev)
+        self._LIGHTNING_MODEL = LightningDiffEq(
+            func=func,
+            stdev=self.stdev,
+            expand=False,
+            dt=self.dt,
+            use_key=self._use_key,
+            time_key=self._time_key,
+            tau=self._tau,
+            velo_gene_idx=self._velo_gene_idx,
+            fate_scale=self._fate_scale,
+            V_coefficient = self._V_coefficient,
+            V_scaling = self._V_scaling,
+        )
         self._LIGHTNING_MODEL.optimizer = self.optimizer
         self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
         self._LIGHTNING_MODEL.t = self.t
-        self._LIGHTNING_MODEL.dt = self.dt
         self._LIGHTNING_MODEL.adjoint = self._adjoint
         self._LIGHTNING_MODEL.real_time = self.real_time
         self._LIGHTNING_MODEL.adata = self._adata
-        self._LIGHTNING_MODEL.time_key = self._time_key
-        self._LIGHTNING_MODEL.use_key = self._use_key
-        self._LIGHTNING_MODEL.tau = self._tau
-        self._LIGHTNING_MODEL.fate_scale = self._fate_scale
+#         self._LIGHTNING_MODEL.time_key = self._time_key
+#         self._LIGHTNING_MODEL.use_key = self._use_key
         self._LIGHTNING_MODEL.burn_steps = self._burn_steps
         
         # -- function credentialling: ----------------------------------------------------

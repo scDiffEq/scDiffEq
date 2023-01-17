@@ -1,39 +1,81 @@
 
+__module_name__ = "__init__.py"
+__version__ = "0.0.45"
+__doc__ = """TODO"""
+__author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
+
+
+# -- import packages: --------------------------------------------------------------------
 import torch
+
+
+# -- import local dependencies: ----------------------------------------------------------
 from ..utils import Base, sum_normalize
 from ._sinkhorn_divergence import SinkhornDivergence
+
+
+# -- typing: -----------------------------------------------------------------------------
 NoneType = type(None)
 
-class LossLog(Base):
-    def __init__(self, unlogged_stages=["predict", "test"]):
+
+# -- Logger: -----------------------------------------------------------------------------
+class LossLogger(Base):
+    
+    BackPropDict = {}
+    
+    def __init__(self, backprop_losses=[], unlogged_stages=["predict", "test"]):
         self.__parse__(locals())
 
     def __call__(self, model, LossDict, stage):
-
-        for loss_type, log_vals in LossDict.items():
-            if log_vals.dim() == 0:
-                log_msg = "{}_{}_{}".format(stage, 0, loss_type)
-                log_val = log_vals
-                model.log(log_msg, log_val)
+        
+        for loss_key, loss_vals in LossDict.items():
+            if loss_key in self.backprop_losses:
+                self.BackPropDict[loss_key] = loss_vals
+            if loss_vals.dim() == 0:
+                log_msg = "{}_{}_{}".format(stage, 0, loss_key)
+                model.log(log_msg, loss_vals)
             else:
-                for i, val in enumerate(log_vals):
-                    log_msg = "{}_{}_{}".format(stage, i, loss_type)
-                    log_val = val
-                    model.log(log_msg, log_val)
+                for i, loss_val in enumerate(loss_vals):
+                    log_msg = "{}_{}_{}".format(stage, i, loss_key)
+                    model.log(log_msg, loss_val)
+                    
+        return self.BackPropDict
 
-
+# -- loss manager: -----------------------------------------------------------------------
 class LossManager(Base):
     """Catch the outputs of the forward function and perform corresponding computations."""
-
     LossDict = {}
+    
+    def __init__(self,
+                 real_time,
+                 disable_velocity=False,
+                 disable_potential=False,
+                 disable_fate_bias=False,
+                 skip_positional_backprop=False,
+                 skip_positional_velocity_backprop=False,
+                 skip_potential_backprop=False,
+                 skip_fate_bias_backprop=False,
+                 tau=1e-06,
+                 fate_scale=100,
+                 V_coefficient=1,  # provided
+                 V_scaling=1,      # learned
+                 model=None,
+                 stage="fit",
+                ):
 
-    def __init__(self, real_time):
-
-        sinkhorn_divergence = SinkhornDivergence()
-        mse = torch.nn.MSELoss()
+        SinkDiv = SinkhornDivergence()
+        MSE = torch.nn.MSELoss()
 
         self.__parse__(locals())
 
+    # -- helpers: ------------------------------------------------------------------------
     def _format(self, X_arr):
         if not self.real_time:
             return X_arr[1:].flatten(0, 1)[self.shuffle_idx][None, :, :].contiguous()
@@ -51,7 +93,8 @@ class LossManager(Base):
     def shuffle_idx(self):
         return np.random.choice(range(self.n_cells), size=self.n_cells, replace=False)
 
-    # -- key properties: -------
+    
+    # -- key batch properties: -----------------------------------------------------------
     @property
     def X(self):
         return self._format(self._X)
@@ -71,12 +114,12 @@ class LossManager(Base):
     @property
     def V(self):
         if not isinstance(self._V, NoneType):
-            return self._format(self._V) * self._velo_coef * self._velo_scale
+            return self._format(self._V) * self.V_coefficient * self.V_scaling
 
     @property
     def V_hat(self):
         if not isinstance(self._V_hat, NoneType):
-            return self._format(self._V_hat) * self._velo_coef
+            return self._format(self._V_hat) * self.V_coefficient
 
     @property
     def F(self):
@@ -88,44 +131,85 @@ class LossManager(Base):
         if not isinstance(self._F_hat, NoneType):
             return self._F_hat
 
+    # -- requisite enabling properties for each type of loss: ----------------------------
     @property
-    def use_velocity(self):
-        return (not isinstance(self.V, NoneType)) and (
-            not isinstance(self.V_hat, NoneType)
+    def potential_enabled(self):
+        return (self.tau > 0)
+    
+    @property
+    def velocity_enabled(self):
+        return (
+            (not isinstance(self.V, NoneType)) and
+            (not isinstance(self.V_hat, NoneType))
         )
 
     @property
-    def use_fate_bias(self):
-        return (not isinstance(self.F, NoneType)) and (
-            not isinstance(self.F_hat, NoneType)
+    def fate_bias_enabled(self):
+        return (
+            (not isinstance(self.F, NoneType)) and
+            (not isinstance(self.F_hat, NoneType))
         )
 
-    # -- calculations: ----------
-    def psi(self):
-        if (not isinstance(self._ref_psi, NoneType)) and (
-            not isinstance(self._burn_psi, NoneType)
-        ):
-            return ((self._ref_psi + self._burn_psi) * self._tau).abs()
+    # -- switches: -----------------------------------------------------------------------
+    @property
+    def velocity_switch(self):
+        return (self.velocity_enabled) and (not self.disable_velocity)
+    
+    @property
+    def potential_switch(self):
+        return (self.potential_enabled) and (not self.disable_potential)
+    
+    @property
+    def fate_bias_switch(self):
+        return (self.fate_bias_enabled) and (not self.disable_fate_bias)
 
-    def positional(self):
-        return self.sinkhorn_divergence(self.W, self.X, self.W_hat, self.X_hat)
+    # -- loss computations: --------------------------------------------------------------
+    def compute_positional_loss(self):
+        """Always compute positional loss"""
+        self.LossDict["positional"] = self.SinkDiv(self.W,
+                                                   self.X,
+                                                   self.W_hat,
+                                                   self.X_hat,
+                                                  )
+        
+    def compute_positional_velocity_loss(self):
+        """TODO - velocity-specific weights"""
+        if self.velocity_switch:
+            self.LossDict["positional_velocity"] = self.SinkDiv(
+                self.W,
+                torch.concat([self.X, self.V], axis=-1),
+                self.W_hat,
+                torch.concat([self.X_hat, self.V_hat], axis=-1),
+            )
+            
+    def compute_potential_loss(self):
+        if self.potential_switch:
+            self.LossDict["potential"] = ((self._ref_psi + self._burn_psi) * self.tau).abs()
 
-    def positional_velocity(self):
+    def compute_fate_bias_loss(self):
+        if self.fate_bias_switch:
+            self.LossDict["fate_bias"] = self.MSE(self.F, self.F_hat) * self.fate_scale
+    
+    # -- logging and formatting: ---------------------------------------------------------
+    @property
+    def backprop_losses(self):
+        _backprop_losses = []
+        for key in self.__dir__():
+            if key.startswith("skip_") and (not getattr(self, key)):
+                _backprop_losses.append(key.split("skip_")[1].split("_backprop")[0])                    
+        return _backprop_losses
+    
+    def log_loss_values(self):
+        logger = LossLogger(backprop_losses=self.backprop_losses)
+        self.BackPropDict = logger(model = self.model,
+                                   LossDict = self.LossDict,
+                                   stage = self.stage,
+                                  )
 
-        W = torch.concat([self.W, self.W], axis=1) # TODO - velocity-specific weights
-        X = torch.concat([self.X, self.V], axis=1)
-        W_hat = torch.concat([self.W_hat, self.W_hat], axis=1)
-        X_hat = torch.concat([self.X_hat, self.V_hat], axis=1)
+    def format_for_backprop(self):
+        return torch.hstack(list(self.BackPropDict.values())).sum()
 
-        return self.sinkhorn_divergence(W, X, W_hat, X_hat)
-
-    def fate_bias(self):
-        return self.mse(self.F, self.F_hat) * self._fate_scale
-
-    def __total__(self):
-        return torch.hstack(list(self.LossDict.values())).sum()
-
-    # -- run all: ----------------
+    # -- run all: ------------------------------------------------------------------------
     def __call__(
         self,
         X,
@@ -138,38 +222,30 @@ class LossManager(Base):
         F_hat=None,
         ref_psi=None,
         burn_psi=None,
-        tau=1e-06,
-        fate_scale=100,
-        velo_coef=1,  # provided
-        velo_scale=1,  # learned
-        model=None,
-        stage="fit",
     ):
 
         """
         Notes:
         ------
-        (1) psi loss is already computed by the PotentialRegularizer, so we pass it here to bring
-            all losses together.
+        (1) psi loss is already computed by the PotentialRegularizer, so we pass it here
+            to bring all losses together.
+        (2) For velo, potential, and fate bias loss there are two flags to consider: is
+            it (a) enabled? If so, always compute, unless specifically disabled. Should
+            the value (b) be backprop'd over? If computed, always log.
         """
 
         self.__parse__(locals(), public=[None])
 
-        # -- (5) compute losses: ---------------------------------------
-        if self.use_velocity:
-            self.LossDict["positional_velocity"] = pv = self.positional_velocity()
-        else:
-            self.LossDict["positional"] = p = self.positional()
-
-        self.LossDict["psi"] = psi = self.psi()
-
-        if self.use_fate_bias:
-            self.LossDict["fate_bias"]= fb = self.fate_bias()
-
-        # -- (6) log losses: -------------------------------------------
-        if not isinstance(model, NoneType):
-            loss_log = LossLog()
-            loss_log(model, self.LossDict, stage)
-
-        # -- (7) return loss values for backprop: ----------------------
-        return self.__total__()
+        # -- (1) compute positional loss: ------------------------------------------------
+        self.compute_positional_loss()
+        
+        # -- (2) compute auxiliary loss: -------------------------------------------------
+        self.compute_positional_velocity_loss()
+        self.compute_potential_loss()
+        self.compute_fate_bias_loss()
+        
+        # -- (3) log computed loss vals: -------------------------------------------------
+        self.log_loss_values()
+        
+        # -- (4) format and return for backprop: -----------------------------------------
+        return self.format_for_backprop()

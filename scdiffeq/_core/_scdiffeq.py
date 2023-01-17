@@ -13,7 +13,7 @@ __email__ = ", ".join(
 
 
 # -- import packages: --------------------------------------------------------------------
-from pytorch_lightning import LightningDataModule
+from pytorch_lightning import LightningDataModule, seed_everything
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch.utils.data import DataLoader
 from torch_nets import TorchNet
@@ -44,6 +44,7 @@ class scDiffEq(utils.Base):
         self,
         adata: anndata.AnnData = None,
         func: Union[NeuralODE, NeuralSDE, torch.nn.Module] = None,
+        seed=0,
         use_key="X_pca",
         time_key="Time point",
         obs_keys=['W'],
@@ -54,8 +55,12 @@ class scDiffEq(utils.Base):
         accelerator="gpu",
         velocity_key=None,
         stdev: Union[torch.nn.Parameter, float]=torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
-        velocity_scaling: Union[torch.nn.Parameter, float]=None,
-        tau: Union[torch.nn.Parameter, float]=None,
+        V_coefficient = 0,
+        V_scaling: Union[torch.nn.Parameter, float]=torch.nn.Parameter(torch.tensor(1.0,
+                                                                                    requires_grad=True,
+                                                                                    device=AutoDevice(),
+                                                                                   )),
+        tau: Union[torch.nn.Parameter, float]=0,
         t0_idx=None,
         n_steps=40,
         adjoint=False,
@@ -75,7 +80,7 @@ class scDiffEq(utils.Base):
         lr=0.0001,
         step_size=20,
         dt=0.1,
-        fate_scale=10,
+        fate_scale=0,
         model_save_dir: str = "scDiffEq_model",
         log_name: str = "lightning_logs",
         version=None,
@@ -87,6 +92,13 @@ class scDiffEq(utils.Base):
         ckpt_outputs_frequency=50,
         t=None,
         N=False,
+        disable_velocity=False,
+        disable_potential=False,
+        disable_fate_bias=False,
+        skip_positional_backprop=False,
+        skip_positional_velocity_backprop=False,
+        skip_potential_backprop=False,
+        skip_fate_bias_backprop=False,
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):
@@ -125,6 +137,8 @@ class scDiffEq(utils.Base):
 
         """
         
+        seed = seed_everything(seed)
+        
         self.__config__(locals())
         
     def __repr__(self):
@@ -132,16 +146,21 @@ class scDiffEq(utils.Base):
         return "scDiffEq model"
 
     def fit(self):
-        self.LightningTrainer.fit(self.LightingModel, self.LightningDataModule)
+        self.LightningTrainer.fit(self.LightningModel, self.LightningDataModule)
         
-#     def test(self):
-#         if self.LightingModel.mu_is_potential:
-#             self.LightningTestTrainer.fit(self.LightingModel,
-#                                          train_dataloaders=self.LightningDataModule.train_dataloader(),
-#                                          val_dataloaders=self.LightningDataModule.test_dataloader(),
-#                                          )
-#         else:
-#             self.test_pred = self.LightningTrainer.test(self.LightingModel, self.LightningDataModule)
+    def test(self):
+
+        if self.LightingModel.mu_is_potential:
+
+            self.LightningTestTrainer.fit(
+                self.LightingModel,
+                train_dataloaders=self.LightningDataModule.train_dataloader(),
+                val_dataloaders=self.LightningDataModule.test_dataloader(),
+            )
+        else:
+            self.test_pred = self.LightningTrainer.test(
+                self.LightingModel, self.LightningDataModule
+            )
 
 #     def predict(self, adata=None, N=2000, save=True):
 #         """"""

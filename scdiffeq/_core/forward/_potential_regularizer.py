@@ -19,10 +19,10 @@ class PotentialRegularizer(Base):
         
         self.__parse__(kwargs, ignore=ignore)
         
-        self.time_key = kwargs["model"].time_key
+        self.time_key = kwargs["model"].hparams['time_key']
         self.adata = kwargs["model"].adata
-        self.dt = kwargs["model"].dt
-        self.use_key = kwargs["model"].use_key
+        self.dt = kwargs["model"].hparams['dt']
+        self.use_key = kwargs["model"].hparams['use_key']
         self.df = self.adata.obs.copy()
         self.device = kwargs["model"].device     
 

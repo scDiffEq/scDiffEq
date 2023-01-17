@@ -24,7 +24,7 @@ from ._lightning_data_module_configuration import LightningDataModuleConfig
 from ..utils import function_kwargs, Base
 
 from ._configure_time import TimeConfig
-
+from autodevice import AutoDevice
 import logging
 logging.getLogger("pytorch_lightning").setLevel(logging.WARNING)
 
@@ -67,6 +67,9 @@ class scDiffEqConfiguration(Base):
         t_min=0,
         t_max=1,
         fate_scale=10,
+        V_scaling=torch.nn.Parameter(torch.tensor(1.0, requires_grad=True, device=AutoDevice())),
+        V_coefficient=0.2,
+        velo_gene_idx = None, # self._adata.uns["velo_gene_idx"]
         t=None,
         alpha=None,
         train_key="train",
@@ -99,6 +102,13 @@ class scDiffEqConfiguration(Base):
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=5,
         ckpt_outputs_frequency=50,
+        disable_velocity=False,
+        disable_potential=False,
+        disable_fate_bias=False,
+        skip_positional_backprop=False,
+        skip_positional_velocity_backprop=False,
+        skip_potential_backprop=False,
+        skip_fate_bias_backprop=False,
         N=False,
         tau=1e-06,
         **kwargs
@@ -109,7 +119,7 @@ class scDiffEqConfiguration(Base):
 
     # -- key properties: ------------------------------------------------------------
     @property
-    def LightingModel(self):
+    def LightningModel(self):
         return LightningModelConfig(**self.KWARGS["MODEL"]).LightningModel
 
     @property

@@ -158,6 +158,21 @@ class LightningTrainerConfig:
         )
     
     @property
+    def test_trainer_potential(self):
+        """
+        Quasi test trainer - serves as a workaround for evaluating test data
+        while retaining gradients.
+        """
+        return pytorch_lightning.Trainer(
+            accelerator=self.accelerator,
+            devices=self.n_devices,
+            max_epochs=0,
+            num_sanity_val_steps=-1,
+            enable_progress_bar=False,
+            callbacks=[callbacks.GradientPotentialTest()],
+        )
+
+    @property
     def test_trainer(self):
         """
         Quasi test trainer - serves as a workaround for evaluating test data
@@ -168,5 +183,6 @@ class LightningTrainerConfig:
             devices=self.n_devices,
             max_epochs=0,
             num_sanity_val_steps=-1,
+            enable_progress_bar=False,
             callbacks=[callbacks.GradientPotentialTest()],
         )

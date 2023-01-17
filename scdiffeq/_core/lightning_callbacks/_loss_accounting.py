@@ -91,7 +91,7 @@ class LossReader:
     
     def _adjust_colnames(self, filtered_loss_df):
 
-        cols = [int(col.split("_")[-1]) for col in filtered_loss_df.columns]
+        cols = [int(col.split("_")[1]) for col in filtered_loss_df.columns]
         filtered_loss_df.columns = cols
         filtered_loss_df["sum"] = filtered_loss_df.sum(1).values
 
