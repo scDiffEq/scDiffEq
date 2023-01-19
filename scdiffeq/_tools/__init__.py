@@ -15,3 +15,7 @@ __email__ = ", ".join(
 # import functions accessed as sdq.tl.<func>: --------------------------------------------
 from ._annotate_cells import annotate_cells
 from ._time_free_sampling import time_free_sampling
+from ._hyperparams import HyperParams
+from ._reconstruct_function import reconstruct_function
+from ._versions import Versions, configure_version
+from ._func_from_version import func_from_version

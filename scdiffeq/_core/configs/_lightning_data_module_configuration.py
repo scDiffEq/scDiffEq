@@ -86,14 +86,15 @@ class CellDataManager(Base):
         self.AnnDataset_kwargs['groupby'] = kwargs['time_key']
         self.AnnDataset_kwargs.pop("adata")
         self.__parse__(kwargs, ignore)
+        if not self.train_key in self.adata.obs.columns.tolist():
+            self.adata.obs[self.train_key] = True
         self.df = self.adata.obs.copy()
         self.data_keys = self._get_keys(kwargs)
-        
+                
         if not self.n_groups:
             self.n_groups = len(self.train_val_percentages)
 
         self.split = SplitSize(self.n_cells, self.n_groups)
-
         # configure train-val split if it has train but not val
         if self.has_train_not_val:
             self.n_fit = self.train_adata.shape[0]
@@ -230,6 +231,7 @@ class LightningAnnDataModule(LightningDataModule):
         self,
         adata: [anndata.AnnData] = None,
         batch_size=2000,
+        test_batch_size=10_000,
         N=False,
         num_workers=os.cpu_count(),
         use_key="X_pca",
@@ -239,6 +241,7 @@ class LightningAnnDataModule(LightningDataModule):
         val_key="val",
         test_key="test",
         predict_key="predict",
+        shuffle=True,
         n_groups=None,
         train_val_percentages=[0.8, 0.2],
         remainder_idx=-1,
@@ -266,14 +269,14 @@ class LightningAnnDataModule(LightningDataModule):
         if dataset_key == "test":
             if not hasattr(self, "n_test_cells"):
                 self.setup(stage="test")
-            batch_size = self.n_test_cells
+            batch_size = self.hparams['test_batch_size']
         else:
-            batch_size = self.hparams["batch_size"]
+            batch_size = self.hparams['batch_size']
             
         return DataLoader(getattr(self, "{}_dataset".format(dataset_key)),
                           num_workers=self.hparams["num_workers"],
                           batch_size=batch_size,
-                          shuffle=self.hparams["batch_size"],
+                          shuffle=self.hparams["shuffle"],
         )
 
     # -- Properties: ---------------------------------------------------------------------

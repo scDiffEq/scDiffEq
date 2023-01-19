@@ -16,6 +16,7 @@ __email__ = ", ".join(
 from pytorch_lightning import LightningDataModule, seed_everything
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch.utils.data import DataLoader
+from autodevice import AutoDevice
 from torch_nets import TorchNet
 import torch_adata
 import anndata
@@ -26,8 +27,8 @@ import os
 # -- import local dependencies: ----------------------------------------------------------
 from . import configs, utils
 from typing import Union
+from .lightning_model.forward._test_manager import TestManager
 
-from autodevice import AutoDevice
 
 # -- API-facing model class: -------------------------------------------------------------
 class scDiffEq(utils.Base):
@@ -54,19 +55,18 @@ class scDiffEq(utils.Base):
         predict_key="predict",
         accelerator="gpu",
         velocity_key=None,
-        stdev: Union[torch.nn.Parameter, float]=torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
         V_coefficient = 0,
-        V_scaling: Union[torch.nn.Parameter, float]=torch.nn.Parameter(torch.tensor(1.0,
-                                                                                    requires_grad=True,
-                                                                                    device=AutoDevice(),
-                                                                                   )),
-        tau: Union[torch.nn.Parameter, float]=0,
+        stdev: Union[torch.nn.Parameter, torch.Tensor, float] = torch.Tensor([0.]),
+        # torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
+        V_scaling: Union[torch.nn.Parameter, torch.Tensor, float] = torch.Tensor([0.]),
+        # torch.nn.Parameter(torch.tensor(1.0, requires_grad=True, device=AutoDevice()))
+        tau: Union[torch.nn.Parameter, torch.Tensor, float]= torch.Tensor([0.]),
         t0_idx=None,
         n_steps=40,
         adjoint=False,
         devices=1,
         batch_size=2000,
-        num_workers=4,
+        num_workers=os.cpu_count(),
         n_groups=None,
         train_val_percentages=[0.8, 0.2],
         remainder_idx=-1,
@@ -148,47 +148,26 @@ class scDiffEq(utils.Base):
     def fit(self):
         self.LightningTrainer.fit(self.LightningModel, self.LightningDataModule)
         
-    def test(self):
-
-        if self.LightingModel.mu_is_potential:
-
-            self.LightningTestTrainer.fit(
-                self.LightingModel,
-                train_dataloaders=self.LightningDataModule.train_dataloader(),
-                val_dataloaders=self.LightningDataModule.test_dataloader(),
-            )
-        else:
-            self.test_pred = self.LightningTrainer.test(
-                self.LightingModel, self.LightningDataModule
-            )
-
-#     def predict(self, adata=None, N=2000, save=True):
-#         """"""
+    def test(self,
+             n_predictions = 25,
+             test_adata = None,
+             use_key = "X_pca",
+             groupby = "Time point",
+             batch_size = 10_000,
+             shuffle = True,
+             savename="test_predictions.npy",
+            ):
         
+        self._TestManager = TestManager(diffeq=self,
+                    n_predictions = n_predictions,
+                    test_adata = test_adata,
+                    use_key = use_key,
+                    groupby = groupby,
+                    batch_size = batch_size,
+                    shuffle = shuffle,
+                   )
         
-        
-#         if adata:
-#             self.config._reconfigure_LightningDataModule(adata, N=N)
-#             self.PredictionLightningDataModule = self.config.PredictionLightningDataModule
-#         else:
-#             self.PredictionLightningDataModule = self.config.LightningDataModule
-            
-#         if self.LightingModel.mu_is_potential:
-#             self.LightningTestTrainer.fit(self.LightingModel,
-#                                          train_dataloaders=self.PredictionLightningDataModule.train_dataloader(),
-#                                          val_dataloaders=self.PredictionLightningDataModule.predict_dataloader(),
-#                                          )
-#         else:
-#             self.predicted = self.LightningTrainer.predict(self.LightingModel,
-#                                                        self.PredictionLightningDataModule,
-#                                                       )
-        
-#         self.LightingModel.expand = N
-        
-#         X_pred = self.predicted[0]["pred"]
-#         if save:
-#             print(self.log_dir)
-#             # TODO: save predicted
+        self.test_predictions = self._TestManager(savename=savename)
 
     @property
     def log_dir(self):

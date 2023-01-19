@@ -20,9 +20,9 @@ import torch
 
 
 # -- import local dependencies: --------------------------------------------------------
-from ..lightning_models import LightningDiffEq, default_NeuralSDE
+from ..lightning_model import LightningDiffEq, default_NeuralSDE
+from ..lightning_model.forward import Credentials
 from ..utils import extract_func_kwargs, Base
-from ..forward import Credentials
 
 
 from autodevice import AutoDevice
@@ -228,40 +228,64 @@ class LightningModelConfig(Base):
     @property
     def t(self):
         return self._t
-
+    
+    @property
+    def base_ignore(self):
+        return ['self', '__class__', 'lightning_ignore', 'base_ignore']
+    
+    @property
+    def lightning_ignore(self):
+        return [
+            'self',
+            '__class__',
+            'func',
+            'adata',
+            'stdev',
+            'V_scaling',
+            'ignore',
+            't',
+            'optimizer',
+            'lr_scheduler',
+            'lightning_ignore',
+            'base_ignore',
+               ]
+    
+    # -- function credentialling: --------------------------------------------------------
+    def _configure_function_credentials(self, func, adjoint):
+        
+        creds = Credentials(self.func, adjoint)
+        self.func_type, self.mu_is_potential, self.sigma_is_potential = creds()
+        
     def _configure_model(self, func, adjoint):
         
+        self._configure_function_credentials(func, adjoint)
+        
         self._LIGHTNING_MODEL = LightningDiffEq(
+            adata=self._adata,
             func=func,
+            optimizer=self.optimizer,
+            lr_scheduler=self.lr_scheduler,
             stdev=self.stdev,
             expand=False,
+            t=self.t,
             dt=self.dt,
             use_key=self._use_key,
             time_key=self._time_key,
+            adjoint = self._adjoint,
+            real_time = self.real_time,
+            burn_steps = self._burn_steps,
             tau=self._tau,
             velo_gene_idx=self._velo_gene_idx,
             fate_scale=self._fate_scale,
             V_coefficient = self._V_coefficient,
             V_scaling = self._V_scaling,
+            seed = self._seed,
+            func_type=self.func_type,
+            mu_is_potential=self.mu_is_potential,
+            sigma_is_potential=self.sigma_is_potential,
+            lightning_ignore=self.lightning_ignore,
+            base_ignore=self.base_ignore,
         )
-        self._LIGHTNING_MODEL.optimizer = self.optimizer
-        self._LIGHTNING_MODEL.lr_scheduler = self.lr_scheduler
-        self._LIGHTNING_MODEL.t = self.t
-        self._LIGHTNING_MODEL.adjoint = self._adjoint
-        self._LIGHTNING_MODEL.real_time = self.real_time
-        self._LIGHTNING_MODEL.adata = self._adata
-#         self._LIGHTNING_MODEL.time_key = self._time_key
-#         self._LIGHTNING_MODEL.use_key = self._use_key
-        self._LIGHTNING_MODEL.burn_steps = self._burn_steps
-        
-        # -- function credentialling: ----------------------------------------------------
-        creds = Credentials(func, adjoint)
-        self.func_type, self.mu_is_potential, self.sigma_is_potential = creds()
-        self._LIGHTNING_MODEL.func_type = self.func_type
-        self._LIGHTNING_MODEL.mu_is_potential = self.mu_is_potential
-        self._LIGHTNING_MODEL.sigma_is_potential = self.sigma_is_potential
-        
-        # consider using a function once you figure these all out...
 
     @property
     def LightningModel(self):
