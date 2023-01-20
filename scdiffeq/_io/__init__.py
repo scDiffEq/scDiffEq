@@ -14,3 +14,4 @@ __email__ = ", ".join(
 
 # import functions accessed as sdq.io.<func>: --------------------------------------------
 from ._read_h5ad import read_h5ad
+from ._pickle_io import read_pickle, write_pickle

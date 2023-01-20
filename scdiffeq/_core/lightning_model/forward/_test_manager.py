@@ -11,7 +11,7 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 
-from ...utils import Base
+from ...._utilities import Base
 
 class TestManager(Base):
 

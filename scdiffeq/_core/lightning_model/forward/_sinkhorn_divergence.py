@@ -15,7 +15,7 @@ __email__ = ", ".join(
 from geomloss import SamplesLoss
 from autodevice import AutoDevice
 
-from ...utils import Base
+from ...._utilities import Base
 
 # -- API-facing class: -------------------------------------------------------------------
 class SinkhornDivergence(SamplesLoss, Base):

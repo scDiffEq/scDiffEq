@@ -3,7 +3,8 @@
 import torch
 
 
-from ...utils import Base
+from ...._utilities import Base
+
 
 class PotentialRegularizer(Base):
     """

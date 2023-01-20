@@ -22,7 +22,8 @@ import torch
 
 # -- local impoirts: ---------------------------------------------------------------------
 from ._default_neural_sde import default_NeuralSDE
-from ..utils import Base, function_kwargs, LoggingLearnableHParams
+from ..utils import function_kwargs, LoggingLearnableHParams
+from ..._utilities import Base
 
 from .forward import ForwardManager, LossManager
 

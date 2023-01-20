@@ -5,7 +5,9 @@ import torch
 
 
 # -- import local dependencies: --------------------------------------------------------
-from ...utils import sum_normalize, Base
+from ...utils import sum_normalize
+
+from ...._utilities import Base
 
 
 # -- supporting functions: -------------------------------------------------------------

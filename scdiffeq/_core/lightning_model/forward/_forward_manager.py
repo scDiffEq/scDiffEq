@@ -8,7 +8,8 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ...utils import Base, extract_func_kwargs
+from ...utils import extract_func_kwargs
+from ...._utilities import Base
 from ._function_credentials import Credentials
 from ._potential_regularizer import PotentialRegularizer
 from ._batch import Batch

@@ -1,5 +1,5 @@
 
-from ...utils import Base
+from ...._utilities import Base
 
 
 # -- LossLog: --------------------------------------------------------------------------

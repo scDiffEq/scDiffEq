@@ -21,7 +21,9 @@ from ._lightning_model_configuration import LightningModelConfig
 from ._lightning_trainer_configuration import LightningTrainerConfig
 from ._lightning_data_module_configuration import LightningDataModuleConfig
 
-from ..utils import function_kwargs, Base
+from ..utils import function_kwargs
+from ..._utilities import Base
+
 
 from ._configure_time import TimeConfig
 from autodevice import AutoDevice

@@ -13,7 +13,8 @@ import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import function_kwargs, Base
+from ..utils import function_kwargs
+from ..._utilities import Base
 
 
 NoneType = type(None)

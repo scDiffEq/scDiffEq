@@ -19,3 +19,4 @@ from ._hyperparams import HyperParams
 from ._reconstruct_function import reconstruct_function
 from ._versions import Versions, configure_version
 from ._func_from_version import func_from_version
+from ._umap import UMAP

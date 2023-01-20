@@ -7,7 +7,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import Base
+from ..._utilities import Base
 
 
 # -- define types: -----------------------------------------------------------------------
