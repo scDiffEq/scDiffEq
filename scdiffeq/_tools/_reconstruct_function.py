@@ -2,6 +2,7 @@
 from .._utilities import Base
 import torch, torch_nets, neural_diffeqs
 
+
 class FunctionFromDescription(Base):
     """formatted func name from func_description"""
 
@@ -46,7 +47,7 @@ class FunctionFromDescription(Base):
         activation_line = line.split(":")[1].strip(" ").split("(")
         func, arg = activation_line[0], activation_line[1].strip(")")
         key, val = arg.split("=")
-        arg = {key: val}
+        arg = {key: float(val)}
         return {"activation": getattr(torch.nn, func)(**arg)}
 
     def dropout_function_from_line(self, line):
@@ -71,7 +72,6 @@ class FunctionFromDescription(Base):
         
         # TODO: build detection of output bias
         
-        self._FUNC_KWARGS = {}
         NetworkComponents = {}
         for n, line in enumerate(self.plain_lines):
             _func_key = self._configure_network_key(line)
@@ -94,30 +94,31 @@ class FunctionFromDescription(Base):
         
         
     def _compose_network_kwargs(self, network_key):
-        
-        hidden, activation, dropout = [], [], []
-        
-        for key, layer in self.NetworkComponents[network_key].items():
-    
+                
+        self.hidden, self.activation, self.dropout = [], [], []
+        self._n_hidden = 0
+        for key, layer in self.NetworkComponents[network_key].items():            
             if self._n_hidden == 0:
                 state_size = layer[0]["in_features"]
-                hidden.append(layer[0]["out_features"])
-                if len(layer) > 2:
-                    activation.append(layer[2]['activation'])
-                    dropout.append(layer[1])
-                else:
-                    activation.append(layer[1]['activation'])
-                    dropout.append(0)
-                self._n_hidden += 1
-
+            else:
+                self.hidden.append(layer[0]["in_features"])
+            if len(layer) == 3:
+                self.activation.append(layer[2]['activation'])
+                self.dropout.append(layer[1])
+            elif len(layer) == 2:
+                self.activation.append(layer[1]['activation'])
+                self.dropout.append(0)
+            self._n_hidden += 1
+            
         if not self.func_type == "NeuralSDE":
             fmt = ""
         else:
             fmt = "{}_".format(network_key)
 
-        self._FUNC_KWARGS["{}hidden".format(fmt)] = hidden
-        self._FUNC_KWARGS["{}activation".format(fmt)] = activation
-        self._FUNC_KWARGS["{}dropout".format(fmt)] = dropout
+        self._FUNC_KWARGS["{}hidden".format(fmt)] = self.hidden
+        self._FUNC_KWARGS["{}activation".format(fmt)] = self.activation
+        self._FUNC_KWARGS["{}dropout".format(fmt)] = self.dropout
+        
         
 
         if not network_key == "sigma":
@@ -142,9 +143,10 @@ class FunctionFromDescription(Base):
     
     def __call__(self):
         
-        self._n_hidden = 0
+        
         self._reconstruct_network_dict()
         
+        self._FUNC_KWARGS = {}        
         for key in self.function_components:
             self._compose_network_kwargs(key)
             

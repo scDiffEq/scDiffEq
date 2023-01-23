@@ -44,6 +44,7 @@ class scDiffEq(Base):
             if (not attr.startswith("_")) and (not attr.startswith("Prediction")):
                 setattr(self, attr, getattr(self.config, attr))
                 
+<<<<<<< HEAD
     def __preflight__(self):
         
         self.UMAP = UMAP(use_key=self.use_key)
@@ -53,6 +54,19 @@ class scDiffEq(Base):
         self.kNN_Graph = kNN(self.adata)
         self.kNN_Graph.build()
         self.kNN_idx = self.kNN_Graph.idx
+=======
+    def __preflight__(self, run_preflight = False):
+        
+        if run_preflight:
+        
+            self.UMAP = UMAP(use_key=self.use_key)
+            if 'X_umap' in self.adata.obsm_keys():
+                self.adata.obsm['X_umap_sdq'] = self.UMAP(self.adata)
+            print("Building kNN Graph...")
+            self.kNN_Graph = kNN(self.adata)
+            self.kNN_Graph.build()
+            self.kNN_idx = self.kNN_Graph.idx
+>>>>>>> f443e60c76097e3b5eaab3c0bf3a775861136c7f
         
         
     def __init__(
@@ -113,7 +127,11 @@ class scDiffEq(Base):
         skip_positional_velocity_backprop=False,
         skip_potential_backprop=False,
         skip_fate_bias_backprop=False,
+<<<<<<< HEAD
         do_preflight=True,
+=======
+        run_preflight=False,
+>>>>>>> f443e60c76097e3b5eaab3c0bf3a775861136c7f
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):
@@ -155,8 +173,12 @@ class scDiffEq(Base):
         seed = seed_everything(seed)
         
         self.__config__(locals())
+<<<<<<< HEAD
         if do_preflight:
             self.__preflight__()
+=======
+        self.__preflight__(run_preflight)
+>>>>>>> f443e60c76097e3b5eaab3c0bf3a775861136c7f
         
     def __repr__(self):
         # TODO: add a nice self-report method to be returned as a str
@@ -195,7 +217,7 @@ class scDiffEq(Base):
 
     def load(self, ckpt_path):
         
-        self.IncompatibleKeys = self.LightingModel.load_state_dict(torch.load(ckpt_path)["state_dict"])
+        self.IncompatibleKeys = self.LightningModel.load_state_dict(torch.load(ckpt_path)["state_dict"])
         if not any([self.IncompatibleKeys.missing_keys, self.IncompatibleKeys.unexpected_keys]):
             print("Successfully Loaded scDiffEq Model")
         else:
