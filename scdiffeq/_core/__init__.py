@@ -15,7 +15,6 @@ __email__ = ", ".join(
 # -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
 from .lightning_model import LightningDiffEq
-from .utils import Base
 
 
 # -- developer-facing modules: -----------------------------------------------------------

@@ -18,6 +18,7 @@ from neural_diffeqs import NeuralODE, NeuralSDE
 from torch.utils.data import DataLoader
 from autodevice import AutoDevice
 from torch_nets import TorchNet
+from annoyance import kNN
 import torch_adata
 import anndata
 import torch
@@ -26,12 +27,14 @@ import os
 
 # -- import local dependencies: ----------------------------------------------------------
 from . import configs, utils
+from .._utilities import Base
 from typing import Union
 from .lightning_model.forward._test_manager import TestManager
+from .._tools import UMAP
 
 
 # -- API-facing model class: -------------------------------------------------------------
-class scDiffEq(utils.Base):
+class scDiffEq(Base):
     def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"]):
         
         kwargs['aux_keys'] = kwargs['velocity_key']
@@ -40,7 +43,18 @@ class scDiffEq(utils.Base):
         for attr in self.config.__dir__():
             if (not attr.startswith("_")) and (not attr.startswith("Prediction")):
                 setattr(self, attr, getattr(self.config, attr))
-
+                
+    def __preflight__(self):
+        
+        self.UMAP = UMAP(use_key=self.use_key)
+        if 'X_umap' in self.adata.obsm_keys():
+            self.adata.obsm['X_umap_sdq'] = self.UMAP(self.adata)
+        print("Building kNN Graph...")
+        self.kNN_Graph = kNN(self.adata)
+        self.kNN_Graph.build()
+        self.kNN_idx = self.kNN_Graph.idx
+        
+        
     def __init__(
         self,
         adata: anndata.AnnData = None,
@@ -99,6 +113,7 @@ class scDiffEq(utils.Base):
         skip_positional_velocity_backprop=False,
         skip_potential_backprop=False,
         skip_fate_bias_backprop=False,
+        do_preflight=True,
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):
@@ -140,6 +155,8 @@ class scDiffEq(utils.Base):
         seed = seed_everything(seed)
         
         self.__config__(locals())
+        if do_preflight:
+            self.__preflight__()
         
     def __repr__(self):
         # TODO: add a nice self-report method to be returned as a str

@@ -1,6 +1,7 @@
 
 import os, glob, numpy as np
-from .._core import Base
+from .._utilities import Base
+
 
 class Versions(Base):
     def __init__(

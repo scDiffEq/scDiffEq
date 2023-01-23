@@ -3,7 +3,7 @@
 import yaml
 
 
-from .._core import Base
+from .._utilities import Base
 
 
 class HyperParams(Base):

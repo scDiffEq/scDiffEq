@@ -22,7 +22,9 @@ import torch
 # -- import local dependencies: --------------------------------------------------------
 from ..lightning_model import LightningDiffEq, default_NeuralSDE
 from ..lightning_model.forward import Credentials
-from ..utils import extract_func_kwargs, Base
+from ..utils import extract_func_kwargs
+from ..._utilities import Base
+
 
 
 from autodevice import AutoDevice
@@ -121,6 +123,7 @@ class LightningModelConfig(Base):
         *args,
         **kwargs,
     ):
+        super(LightningModelConfig, self).__init__()
                 
         self.__parse__(locals(), ignore=["self", "func", "stdev"], public=[None])
         
@@ -149,7 +152,7 @@ class LightningModelConfig(Base):
 
     @property
     def _optimizer_kwargs(self):
-        return extract_func_kwargs(self._fetch_optimizer(self._optimizer), self._kwargs)
+        return extract_func_kwargs(self._fetch_optimizer(self._optimizer), self._KWARGS)
 
     def _fetch_optimizer(self, optimizer: Union[torch.optim.Optimizer, str]):
         return fetch_optimizer(optimizer)
@@ -178,7 +181,7 @@ class LightningModelConfig(Base):
     @property
     def _lr_scheduler_kwargs(self):
         return extract_func_kwargs(
-            self._fetch_lr_scheduler(self._lr_scheduler), self._kwargs
+            self._fetch_lr_scheduler(self._lr_scheduler), self._KWARGS
         )
 
     @property
@@ -188,8 +191,8 @@ class LightningModelConfig(Base):
     def _configure_func(self, func):
 
         if not func:
-            self._kwargs["state_size"] = self._adata.obsm[self._use_key].shape[1]
-            neural_sde_kwargs = extract_func_kwargs(default_NeuralSDE, self._kwargs)
+            self._KWARGS["state_size"] = self._adata.obsm[self._use_key].shape[1]
+            neural_sde_kwargs = extract_func_kwargs(default_NeuralSDE, self._KWARGS)
             func = default_NeuralSDE(**neural_sde_kwargs)
         
         self.func = func

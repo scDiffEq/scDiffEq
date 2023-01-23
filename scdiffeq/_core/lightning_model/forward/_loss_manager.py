@@ -18,7 +18,8 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ...utils import Base, sum_normalize
+from ...utils import sum_normalize
+from ...._utilities import Base
 from ._sinkhorn_divergence import SinkhornDivergence
 
 

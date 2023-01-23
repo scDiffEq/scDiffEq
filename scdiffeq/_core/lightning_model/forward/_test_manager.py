@@ -11,7 +11,7 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 
-from ...utils import Base
+from ...._utilities import Base
 
 class TestManager(Base):
 
@@ -100,7 +100,7 @@ class TestManager(Base):
                     self.model,
                     train_dataloaders=self._train_loader,
                     val_dataloaders=self._val_loader,
-                    verbose=False,
+#                     verbose=False,
                 )
             else:
                 predicted = self.forward(self.model, self._loader, verbose=False)[0][

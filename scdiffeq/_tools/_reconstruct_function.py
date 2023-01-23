@@ -1,5 +1,5 @@
 
-from .._core import Base
+from .._utilities import Base
 import torch, torch_nets, neural_diffeqs
 
 class FunctionFromDescription(Base):

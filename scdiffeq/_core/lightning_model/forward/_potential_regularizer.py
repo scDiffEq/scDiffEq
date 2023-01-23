@@ -3,7 +3,8 @@
 import torch
 
 
-from ...utils import Base
+from ...._utilities import Base
+
 
 class PotentialRegularizer(Base):
     """
@@ -100,12 +101,18 @@ class PotentialRegularizer(Base):
         return X_burn[-1]
 
     def ref_potential(self, func):
+        if self.func_type == "TorchNet":
+            return func(self.X_final).sum() * -1
         return func.potential(func.mu, self.X_final).sum() * -1
 
     def burn_potential(self, func, X_burn):
+        if self.func_type == "TorchNet":
+            return func(self.X_final).sum() * self.sample_size_factor
         return func.potential(func.mu, X_burn).sum() * self.sample_size_factor
 
     def __call__(self, _forward, stdev):
+        
+        self.func_type = _forward.func_type
         
         func = _forward.func
         X_burn = self.forward_burn(_forward, stdev)
