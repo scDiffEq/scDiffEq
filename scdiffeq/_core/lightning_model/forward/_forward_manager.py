@@ -81,14 +81,10 @@ class ForwardManager(Base):
             self._t = self.batch.t
 
     @property
-    def forward_func(self):
+    def forward_integrator(self):
         return UniversalForwardIntegrator(
             func=self.model.func, adjoint=self.model.adjoint
         )
-
-#     @property
-#     def func_type(self):
-#         return self.forward_func.func_type
 
     @property
     def t(self):
@@ -107,10 +103,8 @@ class ForwardManager(Base):
     @property
     def potential_regularizer(self):
         return PotentialRegularizer(
-            self.batch,
-            self.model,
-            tau=self.tau,
-            burn_steps=self.burn_steps,
+            batch = self.batch,
+            model = self.model,
         )
 
     @property
@@ -176,37 +170,52 @@ class ForwardManager(Base):
     def __call__(self, batch, batch_idx=0, stage="fit"):
 
         self.__parse__(locals(), private=["batch"])
+        
+        if self.model.pretrain:
+            pretrain_outs = self.potential_regularizer.diff(
+                        func=self.model.func,
+                        ForwardIntegrator=self.forward_integrator,
+                        stdev=0.1, # TODO: add pre-train param
+                        tau = 1,   # TODO: add pre-train param
+                        burn_steps = self.burn_steps, # TODO: add pre-train param
+                    )
+            return pretrain_outs
+        else:
+            FORWARD_OUTS = {}
 
-        FORWARD_OUTS = {}
-
-        # -- (1) run forward inference: --------------------------------------------------
-        FORWARD_OUTS["X"] = self.batch.X
-        FORWARD_OUTS["X_hat"] = self.forward_func(
-            X0=self.batch.X0,
-            t=self.batch.t,
-            dt=self.dt,
-            stdev=self.model.stdev,
-            device=self.model.device,
-        )
-
-        # -- (2) run regularizer: ------------------------------------------------------
-        if self.potential_switch:
-            (
-                FORWARD_OUTS["ref_psi"],
-                FORWARD_OUTS["burn_psi"],
-            ) = self.potential_regularizer(self.forward_func, self.model.stdev)
-
-        # -- (3) calculate velocity: ---------------------------------------------------
-        if self.velocity_switch:
-            # add linear transform for PC -> gene space to calculate velo.
-            FORWARD_OUTS["V"] = self.batch.V[:, :, self.velo_gene_idx]
-            FORWARD_OUTS["V_hat"] = self.calculate_velocity(FORWARD_OUTS["X_hat"])
-
-        # -- (4) calculate fate bias: --------------------------------------------------
-        if self.fate_bias_switch:
-            FORWARD_OUTS["F"] = self.F
-            FORWARD_OUTS["F_hat"] = self.Linear(
-                FORWARD_OUTS["X_hat"][1:][0, self.fated_mask, :].to(self.model.device)
+            # -- (1) run forward inference: --------------------------------------------------
+            FORWARD_OUTS["X"] = self.batch.X
+            FORWARD_OUTS["X_hat"] = self.forward_integrator(
+                X0=self.batch.X0,
+                t=self.batch.t,
+                dt=self.dt,
+                stdev=self.model.stdev,
+                device=self.model.device,
             )
+
+            # -- (2) run regularizer: ------------------------------------------------------
+            if self.potential_switch:
+                (
+                    FORWARD_OUTS["ref_psi"],
+                    FORWARD_OUTS["burn_psi"],
+                ) = self.potential_regularizer(
+                    func=self.model.func,
+                    ForwardIntegrator=self.forward_integrator,
+                    stdev=self.model.stdev,
+                    tau = self.model.hparams['tau'],
+                    burn_steps = self.burn_steps, # TODO: add pre-train param
+                )
+            # -- (3) calculate velocity: ---------------------------------------------------
+            if self.velocity_switch:
+                # add linear transform for PC -> gene space to calculate velo.
+                FORWARD_OUTS["V"] = self.batch.V[:, :, self.velo_gene_idx]
+                FORWARD_OUTS["V_hat"] = self.calculate_velocity(FORWARD_OUTS["X_hat"])
+
+            # -- (4) calculate fate bias: --------------------------------------------------
+            if self.fate_bias_switch:
+                FORWARD_OUTS["F"] = self.F
+                FORWARD_OUTS["F_hat"] = self.Linear(
+                    FORWARD_OUTS["X_hat"][1:][0, self.fated_mask, :].to(self.model.device)
+                )
             
         return FORWARD_OUTS

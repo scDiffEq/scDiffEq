@@ -13,7 +13,7 @@ __email__ = ", ".join(
 
 
 # -- import packages: --------------------------------------------------------------------
-from pytorch_lightning import LightningDataModule, seed_everything
+from pytorch_lightning import LightningDataModule, seed_everything, Trainer
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch.utils.data import DataLoader
 from autodevice import AutoDevice
@@ -116,6 +116,7 @@ class scDiffEq(Base):
         skip_potential_backprop=False,
         skip_fate_bias_backprop=False,
         run_preflight=True,
+        pretrain_epochs=0,
         **kwargs
         # TODO: ENCODER/DECODER KWARGS
     ):
@@ -164,6 +165,15 @@ class scDiffEq(Base):
         return "scDiffEq model"
 
     def fit(self):
+        
+        if self.pretrain_epochs > 0:
+            self.LightningModel.pretrain = True
+            if not self.train_val_percentages[1] > 0:
+                kw = {'check_val_every_n_epoch': 0, 'limit_val_batches': 0}
+            self.PreTrainer = Trainer(max_epochs=self.pretrain_epochs, accelerator="gpu", devices=1, **kw)
+            self.PreTrainer.fit(model=self.LightningModel, datamodule=self.LightningDataModule)
+            self.LightningModel.pretrain = False
+        
         self.LightningTrainer.fit(self.LightningModel, self.LightningDataModule)
         
     def test(self,

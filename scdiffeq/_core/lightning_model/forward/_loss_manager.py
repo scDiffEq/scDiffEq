@@ -202,12 +202,15 @@ class LossManager(Base):
     
     def log_loss_values(self):
         logger = LossLogger(backprop_losses=self.backprop_losses)
-        self.BackPropDict = logger(model = self.model,
-                                   LossDict = self.LossDict,
-                                   stage = self.stage,
-                                  )
+        self.BackPropDict = logger(
+            model = self.model,
+            LossDict = self.LossDict,
+            stage = self.stage,
+        )
 
     def format_for_backprop(self):
+        for k, v in self.BackPropDict.items():
+            print("{} | {}".format(k, v))
         return torch.hstack(list(self.BackPropDict.values())).sum()
 
     # -- run all: ------------------------------------------------------------------------

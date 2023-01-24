@@ -21,13 +21,14 @@ class PotentialRegularizer(Base):
         self.__parse__(kwargs, ignore=ignore)
         
         self.time_key = kwargs["model"].hparams['time_key']
+        self.func_type = kwargs["model"].hparams['func_type']
         self.adata = kwargs["model"].adata
         self.dt = kwargs["model"].hparams['dt']
         self.use_key = kwargs["model"].hparams['use_key']
         self.df = self.adata.obs.copy()
         self.device = kwargs["model"].device     
 
-    def __init__(self, batch, model, tau=1e-6, burn_steps=100):
+    def __init__(self, batch, model):
 
         self.__config__(locals(), ignore=["self", "model"])
 
@@ -110,14 +111,18 @@ class PotentialRegularizer(Base):
             return func(self.X_final).sum() * self.sample_size_factor
         return func.potential(func.mu, X_burn).sum() * self.sample_size_factor
 
-    def __call__(self, _forward, stdev):
+    def __call__(self, func, ForwardIntegrator, stdev, tau=1, burn_steps=100):
         
-        self.func_type = _forward.func_type
+        self.__parse__(locals())
         
-        func = _forward.func
-        X_burn = self.forward_burn(_forward, stdev)
+        X_burn = self.forward_burn(ForwardIntegrator, stdev)
         ref_psi = self.ref_potential(func)
         burn_psi = self.burn_potential(func, X_burn)
         
         return ref_psi, burn_psi
+    
+    def diff(self, func, ForwardIntegrator, stdev, tau=1, burn_steps=100):
+        
+        ref_psi, burn_psi = self.__call__(func, ForwardIntegrator, stdev, tau, burn_steps)
+        return torch.mul(torch.sum(ref_psi + burn_psi), self.tau).abs()
         

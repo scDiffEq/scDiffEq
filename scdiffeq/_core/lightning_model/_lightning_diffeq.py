@@ -106,14 +106,26 @@ class LightningDiffEq(LightningModule, Base):
             self.hparams[param] = log_learnable_param()
             
         self.save_hyperparameters(self.hparams, ignore=kwargs['lightning_ignore'])
+        self._pretrain = False
+        
+    @property
+    def pretrain(self):
+        return self._pretrain
+    
+    @pretrain.setter
+    def pretrain(self, val):
+        self._pretrain = val
 
     def forward(self, batch, batch_idx, stage=None):
 
         
         forward_manager = ForwardManager(model=self)
-        loss_manager = LossManager(model=self, stage=stage)
-        
         forward_outs = forward_manager(batch, batch_idx=batch_idx, stage=stage)
+        
+        if self.pretrain:
+            return forward_outs
+        
+        loss_manager = LossManager(model=self, stage=stage)
         return {
             'batch': forward_manager.batch,
             'X_hat': forward_outs['X_hat'],
