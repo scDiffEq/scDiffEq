@@ -13,8 +13,7 @@ import os
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import function_kwargs
-from ..._utilities import Base
+from ..utils import function_kwargs, AutoParseBase
 
 
 NoneType = type(None)
@@ -44,7 +43,7 @@ class SplitSize:
         return split_lengths
 
 
-class CellDataManager(Base):
+class CellDataManager(AutoParseBase):
     """Data Manager at the AnnData Level."""
 
     def __init__(

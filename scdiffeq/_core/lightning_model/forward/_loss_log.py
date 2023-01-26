@@ -1,9 +1,9 @@
 
-from ...._utilities import Base
+from ...utils import AutoParseBase
 
 
 # -- LossLog: --------------------------------------------------------------------------
-class LossLog(Base):
+class LossLog(AutoParseBase):
 
     def __init__(self, unlogged_stages=["predict", "test"], positional_loss_key="positional"):
 

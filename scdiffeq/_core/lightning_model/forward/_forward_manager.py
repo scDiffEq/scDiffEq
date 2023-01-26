@@ -8,8 +8,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ...utils import extract_func_kwargs
-from ...._utilities import Base
+from ...utils import AutoParseBase, extract_func_kwargs
 from ._function_credentials import Credentials
 from ._potential_regularizer import PotentialRegularizer
 from ._batch import Batch
@@ -20,10 +19,9 @@ NoneType = type(None)
 
 
 # -- supporting classes / functions: -----------------------------------------------------
-class UniversalForwardIntegrator(Base):
+class UniversalForwardIntegrator(AutoParseBase):
     def __init__(self, func, adjoint=False):
-        super(Base, self).__init__()
-
+        
         self.func = func
         creds = Credentials(self.func, adjoint=adjoint)
         self.func_type, self.mu_is_potential, self.sigma_is_potential = creds()
@@ -57,7 +55,7 @@ class UniversalForwardIntegrator(Base):
         return self.integrator(self.func, X0, t, **int_kwargs)
 
 
-class ForwardManager(Base):
+class ForwardManager(AutoParseBase):
     """passed and executed during Lightningmodel.forward()"""
     
     def __init__(self, model):
@@ -175,9 +173,9 @@ class ForwardManager(Base):
             pretrain_outs = self.potential_regularizer.diff(
                         func=self.model.func,
                         ForwardIntegrator=self.forward_integrator,
-                        stdev=0.1, # TODO: add pre-train param
-                        tau = 1,   # TODO: add pre-train param
-                        burn_steps = self.burn_steps, # TODO: add pre-train param
+                        stdev=self.model.hparams['pretrain_stdev'],   # TODO: add pre-train param
+                        tau = self.model.hparams['pretrain_tau'],   # TODO: add pre-train param
+                        burn_steps = self.model.hparams['pretrain_burn_steps'], # TODO: add pre-train param
                     )
             return pretrain_outs
         else:

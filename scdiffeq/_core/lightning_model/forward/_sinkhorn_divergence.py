@@ -15,10 +15,10 @@ __email__ = ", ".join(
 from geomloss import SamplesLoss
 from autodevice import AutoDevice
 
-from ...._utilities import Base
+from ...utils import AutoParseBase
 
 # -- API-facing class: -------------------------------------------------------------------
-class SinkhornDivergence(SamplesLoss, Base):
+class SinkhornDivergence(SamplesLoss, AutoParseBase):
     def __init__(
         self,
         device=AutoDevice(),

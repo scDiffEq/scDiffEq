@@ -6,8 +6,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ...utils import sum_normalize
-from ...._utilities import Base
+from ...utils import sum_normalize, AutoParseBase
 from ._sinkhorn_divergence import SinkhornDivergence
 
 
@@ -17,7 +16,7 @@ from typing import Union
 
 
 # -- main class: -------------------------------------------------------------------------
-class Loss(Base):
+class Loss(AutoParseBase):
 
     def __init__(self):
         """Catch the outputs of the inference function"""

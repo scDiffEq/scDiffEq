@@ -2,7 +2,7 @@ import os
 from tqdm.notebook import tqdm
 import scdiffeq as sdq
 import warnings
-from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning import Trainer #, seed_everything
 from torch.utils.data import DataLoader
 from torch_adata import AnnDataset
 import torch
@@ -11,11 +11,11 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 
-from ...._utilities import Base
+from ...utils import AutoParseBase
 
-class TestManager(Base):
+class TestManager(AutoParseBase):
 
-    global_seet = seed_everything(0)
+#     global_seet = seed_everything(0)
 
     predicted = []
 
@@ -67,8 +67,6 @@ class TestManager(Base):
             else:
                 self._loader = diffeq.LightningDataModule
                 
-#                 Trainer(logger=diffeq.LightningTrainer.logger)
-
     @property
     def test_dataloader(self):
         self._configure_test_dataset()
@@ -100,7 +98,6 @@ class TestManager(Base):
                     self.model,
                     train_dataloaders=self._train_loader,
                     val_dataloaders=self._val_loader,
-#                     verbose=False,
                 )
             else:
                 predicted = self.forward(self.model, self._loader, verbose=False)[0][

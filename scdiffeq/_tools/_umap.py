@@ -1,10 +1,9 @@
 
-from .._utilities import Base
-import scdiffeq as sdq
+from .._core.utils import AutoParseBase, extract_func_kwargs
 import umap
 
 
-class UMAP(Base):
+class UMAP(AutoParseBase):
     def __init__(
         self,
         use_key="X_pca",
@@ -21,7 +20,7 @@ class UMAP(Base):
 
     def __config__(self):
 
-        UMAP_KWARGS = sdq._core.utils.extract_func_kwargs(umap.UMAP, self._KWARGS)
+        UMAP_KWARGS = extract_func_kwargs(umap.UMAP, self._KWARGS)
         self.model = umap.UMAP(**UMAP_KWARGS)
 
     def forward(self, adata):

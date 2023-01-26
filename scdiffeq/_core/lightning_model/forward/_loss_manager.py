@@ -18,8 +18,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ...utils import sum_normalize
-from ...._utilities import Base
+from ...utils import sum_normalize, AutoParseBase
 from ._sinkhorn_divergence import SinkhornDivergence
 
 
@@ -28,7 +27,7 @@ NoneType = type(None)
 
 
 # -- Logger: -----------------------------------------------------------------------------
-class LossLogger(Base):
+class LossLogger(AutoParseBase):
     
     BackPropDict = {}
     
@@ -51,7 +50,7 @@ class LossLogger(Base):
         return self.BackPropDict
 
 # -- loss manager: -----------------------------------------------------------------------
-class LossManager(Base):
+class LossManager(AutoParseBase):
     """Catch the outputs of the forward function and perform corresponding computations."""
     LossDict = {}
     
@@ -209,8 +208,8 @@ class LossManager(Base):
         )
 
     def format_for_backprop(self):
-        for k, v in self.BackPropDict.items():
-            print("{} | {}".format(k, v))
+#         for k, v in self.BackPropDict.items():
+#             print("{} | {}".format(k, v))
         return torch.hstack(list(self.BackPropDict.values())).sum()
 
     # -- run all: ------------------------------------------------------------------------

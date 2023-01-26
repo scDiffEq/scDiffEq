@@ -18,130 +18,75 @@ import anndata
 import torch
 
 from ._lightning_model_configuration import LightningModelConfig
-from ._lightning_trainer_configuration import LightningTrainerConfig
+from ._lightning_trainer_configuration import LightningTrainerConfiguration
 from ._lightning_data_module_configuration import LightningDataModuleConfig
 
-from ..utils import function_kwargs
-from ..._utilities import Base
-
+from ..utils import function_kwargs, AutoParseBase
 
 from ._configure_time import TimeConfig
 from autodevice import AutoDevice
 import logging
+
+
 logging.getLogger("pytorch_lightning").setLevel(logging.WARNING)
 
 
-class scDiffEqConfiguration(Base):
+class scDiffEqConfiguration(AutoParseBase):
     """
     Manage the interaction with: LightningModel, Trainer, and LightningDataModule
     # called from within scDiffEq
     """
-    KWARGS = {}
-    def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"]):
+    
+    CONFIG_KWARGS = {}
+    
+    def __init__(self, **kwargs):
+        super(scDiffEqConfiguration, self).__init__()
+        self.__config__(locals())
 
-        self.__parse__(kwargs, ignore)
+    def __config__(self, kwargs, ignore=["self", "__class__", "hide"]):
+
+        
+        self.__parse__(kwargs['kwargs'], ignore=ignore)
+
         self.config_t = TimeConfig(**function_kwargs(TimeConfig, self._KWARGS))
         time_kwargs = self.config_t()
         self._KWARGS.update(time_kwargs)
         for k, v in time_kwargs.items():
             setattr(self, k, v)
 
-        self.KWARGS["MODEL"] = function_kwargs(
+        self.CONFIG_KWARGS["MODEL"] = function_kwargs(
             LightningModelConfig, self._KWARGS
         )
-        self.KWARGS["TRAINER"] = function_kwargs(
-            LightningTrainerConfig, self._KWARGS
+        self.CONFIG_KWARGS["TRAINER"] = function_kwargs(
+            LightningTrainerConfiguration, self._KWARGS
         )
-        self.KWARGS["DATA"] = function_kwargs(
+        self.CONFIG_KWARGS["DATA"] = function_kwargs(
             LightningDataModuleConfig, self._KWARGS
         )
-
-    def __init__(
-        self,
-        adata: anndata.AnnData = None,
-        func=None,
-        use_key="X_pca",
-        time_key=None,
-        t0_idx=None,
-        dt=0.1,
-        n_steps=40,
-        obs_keys=['W'],
-        t_min=0,
-        t_max=1,
-        fate_scale=10,
-        V_scaling=torch.nn.Parameter(torch.tensor(1.0, requires_grad=True, device=AutoDevice())),
-        V_coefficient=0.2,
-        velo_gene_idx = None, # self._adata.uns["velo_gene_idx"]
-        t=None,
-        alpha=None,
-        train_key="train",
-        val_key="val",
-        test_key="test",
-        predict_key="predict",
-        accelerator="gpu",
-        devices=1,
-        adjoint=False,
-        batch_size=2000,
-        num_workers=4,
-        n_groups=None,
-        train_val_percentages=[0.8, 0.2],
-        remainder_idx=-1,
-        predict_all=True,
-        attr_names={"obs": [], "aux": []},
-        one_hot=False,
-        aux_keys=None,
-        silent=True,
-        optimizer="RMSprop",
-        lr_scheduler="StepLR",
-        lr=0.0001,
-        step_size=20,
-        model_save_dir: str = "scDiffEq_model",
-        log_name: str = "lightning_logs",
-        version=None,
-        prefix="",
-        flush_logs_every_n_steps=5,
-        max_epochs=1500,
-        log_every_n_steps=1,
-        reload_dataloaders_every_n_epochs=5,
-        ckpt_outputs_frequency=50,
-        disable_velocity=False,
-        disable_potential=False,
-        disable_fate_bias=False,
-        skip_positional_backprop=False,
-        skip_positional_velocity_backprop=False,
-        skip_potential_backprop=False,
-        skip_fate_bias_backprop=False,
-        N=False,
-        tau=1e-06,
-        **kwargs
-    ):
-        
-        super(scDiffEqConfiguration, self).__init__()
-        self.__config__(locals())
 
     # -- key properties: ------------------------------------------------------------
     @property
     def LightningModel(self):
-        return LightningModelConfig(**self.KWARGS["MODEL"]).LightningModel
-
-    @property
-    def LightningTrainer(self):
-        return LightningTrainerConfig(**self.KWARGS["TRAINER"]).trainer
+        return LightningModelConfig(**self.CONFIG_KWARGS["MODEL"]).LightningModel
     
     @property
-    def LightningTestTrainer(self):
-        return LightningTrainerConfig(**self.KWARGS["TRAINER"]).test_trainer
-
-    @property
     def LightningDataModule(self):
-        return LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
+        return LightningDataModuleConfig(**self.CONFIG_KWARGS["DATA"]).LightningDataModule
 
-    def _reconfigure_LightningDataModule(self, adata, N=False):
-        self.KWARGS["DATA"]['adata'] = adata
-        self.KWARGS["DATA"]['N'] = N
-        self._PredictionLightningDataModule = LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
-        return self._PredictionLightningDataModule
+#     @property
+#     def LightningTrainer(self):
+#         return LightningTrainerConfig(**self.KWARGS["TRAINER"]).trainer
+    
+#     @property
+#     def LightningTestTrainer(self):
+#         return LightningTrainerConfig(**self.KWARGS["TRAINER"]).test_trainer
+
+#     def _reconfigure_LightningDataModule(self, adata, N=False):
+#         self.KWARGS["DATA"]['adata'] = adata
+#         self.KWARGS["DATA"]['N'] = N
+#         self._PredictionLightningDataModule = LightningDataModuleConfig(**self.KWARGS["DATA"]).LightningDataModule
+#         return self._PredictionLightningDataModule
         
-    @property
-    def PredictionLightningDataModule(self):
-        return self._PredictionLightningDataModule
+#     @property
+#     def PredictionLightningDataModule(self):
+#         return self._PredictionLightningDataModule

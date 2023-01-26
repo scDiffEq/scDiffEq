@@ -3,10 +3,10 @@
 import torch
 
 
-from ...._utilities import Base
+from ...utils import AutoParseBase
 
 
-class PotentialRegularizer(Base):
+class PotentialRegularizer(AutoParseBase):
     """
     Requires time_key to use... for now, limited to real time...
 
@@ -31,6 +31,7 @@ class PotentialRegularizer(Base):
     def __init__(self, batch, model):
 
         self.__config__(locals(), ignore=["self", "model"])
+        self.model = model
 
     @property
     def t_final(self):
@@ -108,7 +109,7 @@ class PotentialRegularizer(Base):
 
     def burn_potential(self, func, X_burn):
         if self.func_type == "TorchNet":
-            return func(self.X_final).sum() * self.sample_size_factor
+            return func(X_burn.detach()).sum() * self.sample_size_factor # .detach()
         return func.potential(func.mu, X_burn).sum() * self.sample_size_factor
 
     def __call__(self, func, ForwardIntegrator, stdev, tau=1, burn_steps=100):
@@ -119,10 +120,25 @@ class PotentialRegularizer(Base):
         ref_psi = self.ref_potential(func)
         burn_psi = self.burn_potential(func, X_burn)
         
+        """
+        fv_tot = pos_fv + neg_fv
+        fv_tot *= config.train_tau
+        """
+        
         return ref_psi, burn_psi
     
     def diff(self, func, ForwardIntegrator, stdev, tau=1, burn_steps=100):
         
         ref_psi, burn_psi = self.__call__(func, ForwardIntegrator, stdev, tau, burn_steps)
-        return torch.mul(torch.sum(ref_psi + burn_psi), self.tau).abs()
+        
+#         print("\tref: {:.1f}\tburn: {:.1f}\tdiff: {:.1f}\t".format(
+#             ref_psi.item(),
+#             burn_psi.item(),
+#             (ref_psi + burn_psi).item(),
+#         ))
+        
+        self.model.log("ref_psi", ref_psi.item())
+        self.model.log("burn_psi", burn_psi.item())
+        
+        return torch.mul(ref_psi + burn_psi, self.tau) # .abs()
         

@@ -21,7 +21,6 @@ from . import _data as data
 from . import _io as io
 from . import _plotting as pl
 from . import _tools as tl
-from . import _utilities as ut
 
 
 # -- developer import: -------------------------------------------------------------------

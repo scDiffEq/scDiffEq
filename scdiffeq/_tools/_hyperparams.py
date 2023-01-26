@@ -3,10 +3,10 @@
 import yaml
 
 
-from .._utilities import Base
+from .._core.utils import AutoParseBase
 
 
-class HyperParams(Base):
+class HyperParams(AutoParseBase):
     def __init__(self, yaml_path):
 
         self.__configure__(locals())

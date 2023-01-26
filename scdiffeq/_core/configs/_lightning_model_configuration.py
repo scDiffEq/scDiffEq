@@ -22,8 +22,7 @@ import torch
 # -- import local dependencies: --------------------------------------------------------
 from ..lightning_model import LightningDiffEq, default_NeuralSDE
 from ..lightning_model.forward import Credentials
-from ..utils import extract_func_kwargs
-from ..._utilities import Base
+from ..utils import extract_func_kwargs, AutoParseBase
 
 
 
@@ -33,7 +32,7 @@ NoneType = type(None)
 
 
 # -- import packages: ------------------------------------------------------------------
-class FunctionFetch(Base):
+class FunctionFetch(AutoParseBase):
     def __init__(self, module=None, parent=None):
         self.__parse__(locals())
 
@@ -74,9 +73,16 @@ def fetch_lr_scheduler(func):
     )
     return fetch(func)
 
+def kwargs_from_private(kwargs):
+    unprivate = {}
+    for k in kwargs.keys():
+        unprivate[k[1:]] = kwargs[k]
+        
+    return unprivate
+
 
 # -- Main module class: ----------------------------------------------------------------
-class LightningModelConfig(Base):
+class LightningModelConfig(AutoParseBase):
     """
     Called from within the LightningModule. Handles setup of optimizer, lr_scheduler,
     loss function(s), and the forward function.
@@ -97,14 +103,14 @@ class LightningModelConfig(Base):
         seed=0,
         use_key=None,
         time_key="Time point",
-        optimizer="RMSprop",
-        lr_scheduler="StepLR",
+        optimizers=["SGD","RMSprop",],
+        lr_schedulers=["StepLR", "StepLR"],
+        learning_rates = [1e-8, 1e-4],
         stdev=torch.nn.Parameter(torch.tensor(0.5, requires_grad=True, device=AutoDevice())),
         V_scaling=torch.nn.Parameter(torch.tensor(1.0, requires_grad=True, device=AutoDevice())),
         V_coefficient=0.2,
         t0_idx = None,
         adjoint=False,
-        lr=1e-4,
         fate_scale=10,
         step_size=20,
         dt=0.1,
@@ -126,6 +132,17 @@ class LightningModelConfig(Base):
         super(LightningModelConfig, self).__init__()
                 
         self.__parse__(locals(), ignore=["self", "func", "stdev"], public=[None])
+                
+        if not isinstance(self._optimizers, list):
+            self._optimizers = [self._optimizers]
+        if not isinstance(self._lr_schedulers, list):
+            self._lr_schedulers = [self._lr_schedulers]
+
+        n_sch = len(self._lr_schedulers)
+        n_opt = len(self._optimizers)
+        if n_sch < n_opt:
+            n_diff = n_opt - n_sch
+            self._lr_schedulers = self._lr_schedulers + [self._lr_schedulers[-1]]+n_diff
         
         self.stdev = stdev
         self.V_scaling = V_scaling
@@ -134,6 +151,8 @@ class LightningModelConfig(Base):
         self._configure_func(func)
         self._format_model_params(self._params)
         self._configure_model(self.func, adjoint)
+        
+        
 
     def _format_model_params(self, params):
         if isinstance(params, list) and isinstance(
@@ -152,15 +171,11 @@ class LightningModelConfig(Base):
 
     @property
     def _optimizer_kwargs(self):
-        return extract_func_kwargs(self._fetch_optimizer(self._optimizer), self._KWARGS)
+        _kw = {}
+        for optim in self._optimizers:
+            _kw.update(extract_func_kwargs(fetch_optimizer(optim), kwargs_from_private(self._KWARGS)))
+        return _kw
 
-    def _fetch_optimizer(self, optimizer: Union[torch.optim.Optimizer, str]):
-        return fetch_optimizer(optimizer)
-
-    def _configure_optimizer(self, optimizer: Union[torch.optim.Optimizer, str]):
-        self.config_optimizer = self._fetch_optimizer(optimizer)(
-            self._params, lr=self._lr, **self._optimizer_kwargs
-        )
         
     @property
     def is_potential_net(self, net):
@@ -168,21 +183,32 @@ class LightningModelConfig(Base):
         return list(net.parameters())[-1].shape[0] == 1
 
     @property
-    def optimizer(self):
-        if not hasattr(self, "config_optimizer"):
-            self._configure_optimizer(self._optimizer)
-        return self.config_optimizer
+    def optimizers(self):
+        if not hasattr(self, "_configured_optimizers"):
+            
+            
 
-    def _fetch_lr_scheduler(
-        self, lr_scheduler: Union[torch.optim.lr_scheduler._LRScheduler, str]
-    ):
-        return fetch_lr_scheduler(lr_scheduler)
+            self._configured_optimizers = [
+                fetch_optimizer(optim)(self._params, lr=self._learning_rates[n],
+                                       **self._optimizer_kwargs)
+                for n, optim in enumerate(self._optimizers)
+            ]
+        return self._configured_optimizers
+
+#     def _fetch_lr_scheduler(
+#         self, lr_scheduler: Union[torch.optim.lr_scheduler._LRScheduler, str]
+#     ):
+#         return fetch_lr_scheduler(LRS) for LRS in self._lr_schedulers
 
     @property
     def _lr_scheduler_kwargs(self):
-        return extract_func_kwargs(
-            self._fetch_lr_scheduler(self._lr_scheduler), self._KWARGS
-        )
+        _kw = {}
+        for LRS in self._lr_schedulers:
+            _kw.update(extract_func_kwargs(fetch_lr_scheduler(LRS), kwargs_from_private(self._KWARGS)))
+        return _kw
+#         return extract_func_kwargs(
+#             self._fetch_lr_scheduler(self._lr_scheduler), self._KWARGS
+#         )
 
     @property
     def real_time(self):
@@ -217,8 +243,10 @@ class LightningModelConfig(Base):
         return forward
 
     @property
-    def lr_scheduler(self):
-        return self._configure_lr_scheduler(self._lr_scheduler)
+    def lr_schedulers(self):
+        schedulers = [fetch_lr_scheduler(LRS) for LRS in self._lr_schedulers]
+        return [scheduler(optim, **self._lr_scheduler_kwargs) for optim, scheduler in zip(self._configured_optimizers, schedulers)]
+#         return self._configure_lr_scheduler()
 
     @property
     def loss_function(self):
@@ -266,8 +294,8 @@ class LightningModelConfig(Base):
         self._LIGHTNING_MODEL = LightningDiffEq(
             adata=self._adata,
             func=func,
-            optimizer=self.optimizer,
-            lr_scheduler=self.lr_scheduler,
+            optimizers=self.optimizers,
+            lr_schedulers=self.lr_schedulers,
             stdev=self.stdev,
             expand=False,
             t=self.t,
@@ -293,3 +321,4 @@ class LightningModelConfig(Base):
     @property
     def LightningModel(self):
         return self._LIGHTNING_MODEL
+

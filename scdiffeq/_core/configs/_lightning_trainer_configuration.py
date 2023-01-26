@@ -1,188 +1,109 @@
 
-__module_name__ = "_lightning_trainer_configuration.py"
-__doc__ = """To-do"""
-__author__ = "Michael E. Vinyard"
-__email__ = "mvinyard@broadinstitute.org"
+# -- import packages: ----------------------------------------
+from pytorch_lightning import Trainer, loggers
 
 
-# -- import packages: --------------------------------------------------------------------
-import pytorch_lightning
-import torch
-import os
-
-
-# -- import local dependencies: ----------------------------------------------------------
-from ..utils import function_kwargs
+# -- import local dependencies: -----------------
+from ..utils import AutoParseBase, extract_func_kwargs
 from .. import lightning_callbacks as callbacks
 
 
-from pytorch_lightning.callbacks import ModelCheckpoint
+from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
 
 
-# -- Main class: -------------------------------------------------------------------------
-class LightningTrainerConfig:
+# -- define typing: -----------------
+from typing import Union, Dict, List
+NoneType = type(None)
+import torch
+
+# -- Main class: ---------------------------------------------
+class LightningTrainerConfiguration(AutoParseBase):
+
+    """
+    Container class to instantiate trainers as needed.
+    
+    Logger and Callbacks are also configured here since they are passed through the trainer.
+    """
+    
     def __init__(
         self,
-        model_save_dir: str = "scDiffEq_model",
-        log_name: str = "lightning_logs",
-        version=None,
-        prefix="",
-        flush_logs_every_n_steps=5,
-        max_epochs=1500,
+        save_dir: str = "scDiffEq_Model",
+    ):
+        self.__parse__(locals())
+        
+    # -- kwargs: -------------------------------------------------------------------------
+    @property
+    def _CSVLogger_kwargs(self):
+        return extract_func_kwargs(func=loggers.CSVLogger, kwargs=self._KWARGS)
+
+    @property
+    def _Trainer_kwargs(self):
+        return extract_func_kwargs(func=Trainer, kwargs=self._KWARGS)
+    
+    @property
+    def Callbacks(self):
+        callback_config = LightningCallbacksConfiguration()
+        return callback_config(
+            callbacks=self.callbacks,
+            retain_test_gradients=self.retain_test_gradients,
+        )
+    
+    # -- trainers: -----------------------------------------------------------------------
+    @property
+    def Trainer(self):
+        """
+        Main Lightning Trainer used for fitting / testing.
+        If pre-train routine was used, Trainer loads from ckpt path.
+        """
+        
+        self._Trainer_kwargs['callbacks'] = self.Callbacks
+        
+        return Trainer(
+            logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
+            **self._Trainer_kwargs,
+        )
+        
+    @property
+    def GradientsRetainedTestTrainer(self):
+        """
+        Quasi test trainer - serves as a workaround for evaluating test data
+        while retaining gradients.
+        """
+                
+        self._Trainer_kwargs['max_epochs'] = 0
+        self._Trainer_kwargs['callbacks'] = self.Callbacks
+        
+        return Trainer(
+            logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
+            num_sanity_val_steps=-1,
+            enable_progress_bar=False,
+            **self._Trainer_kwargs,
+        )
+
+    def __call__(
+        self,
+        stage=None,
+        max_epochs=500,
+        accelerator="gpu",
+        devices=torch.cuda.device_count(),
+        prefix: str = "",
         log_every_n_steps=1,
-        reload_dataloaders_every_n_epochs=1,
-        save_fitting_loss_img=True,
-        ckpt_outputs_frequency=50,
-        train_val_percentages=[0.8, 0.2],
-        check_val_every_n_epoch=1,
-        limit_val_batches=None,
+        flush_logs_every_n_steps: int = 1,
+        version: Union[int, str, NoneType] = None,
+        callbacks: list = [],
+        potential_model: bool = False,
         **kwargs
     ):
-        """
-        Configure Trainer, including the logger (CSVLogger).
-
-        Parameters:
-        -----------
-        model_save_dir
-
-        log_name
-
-        version
-
-        prefix
-
-        flush_logs_every_n_steps
-
-        max_epochs
-
-        log_every_n_steps
-
-        reload_dataloaders_every_n_epochs
-
-        **kwargs: any additional kwarg accepted by pytorch_lightning.Trainer
-
-        Notes:
-        ------
-        (1) Used as the default logger because it is the least complex and most predictable.
-        (2) This function simply handle the args to pytorch_lighting.loggers.CSVLogger. While
-            not functionally necessary, helps to clean up model code a bit.
-        (3) doesn't change file names rather the logger name and what's added to the front of
-            each log name event within the model.
-        (4) Versioning contained / created automatically within by lightning logger
-        """
-        self.__configure__(locals())
-
-    # -- methods: ------------------------------------------------------------------------
-    def __parse__(self, kwargs, ignore=["self"]):
         
-        if not kwargs['train_val_percentages'][1] > 0:
-            kwargs['check_val_every_n_epoch'] = 0
-            kwargs['limit_val_batches'] = 0
+        self.retain_test_gradients = False
+        if isinstance(stage, NoneType):
+            stage = ""
+            
+        self.__parse__(locals())
+        self._KWARGS['name'] = "{}_logs".format(stage)            
         
-        for key, val in kwargs.items():
-            if not key in ignore:
-                if key == "kwargs":
-                    for _key, _val in val.items():
-                        setattr(self, _key, _val)
-                else:
-                    setattr(self, key, val)
-
-        self._trainer_kwargs = function_kwargs(
-            func=pytorch_lightning.Trainer, kwargs=kwargs
-        )
-
-    def _setup_model_save_dir(self):
-        if not os.path.exists(self.model_save_dir):
-            os.mkdir(self.model_save_dir)
-
-    def __configure__(self, kwargs, ignore=["self"]):
-
-        self.__parse__(kwargs, ignore)
-        self._setup_model_save_dir()
-
-    def _accelerator(self):
-        if torch.cuda.is_available():
-            return "gpu"
-        if torch.backends.mps.is_available():
-            return "mps"
-        return "cpu"
-    
-    # -- properties: ---------------------------------------------------------------------
-    @property
-    def custom_callbacks(self):
-        return [
-            callbacks.LossAccounting(),
-            callbacks.IntermittentSaves(self.ckpt_outputs_frequency),
-            callbacks.Testing(),
-            ModelCheckpoint(save_on_train_epoch_end=True),
-        ]
+        if (potential_model) and (stage in ["test", "predict"]):
+            self.retain_test_gradients = True
+            return self.GradientsRetainedTestTrainer            
         
-    @property
-    def callbacks(self):
-        if not hasattr(self, "_callbacks"):
-            self._callbacks = []
-        for cb in self.custom_callbacks:
-            self._callbacks.append(cb)
-        return self._callbacks
-    
-    @property
-    def trainer_kwargs(self):
-        return self._trainer_kwargs
-
-    @property
-    def log_path(self):
-        return os.path.join(self._model_save_dir, self._log_name)
-
-    @property
-    def accelerator(self):
-        return self._accelerator()
-
-    @property
-    def n_devices(self):
-        return torch.cuda.device_count()
-
-    @property
-    def CSVLogger(self):
-        return pytorch_lightning.loggers.CSVLogger(
-            save_dir=self.model_save_dir,
-            name=self.log_name,
-            version=self.version,
-            prefix=self.prefix,
-            flush_logs_every_n_steps=self.flush_logs_every_n_steps,
-        )
-
-    @property
-    def trainer(self):
-        return pytorch_lightning.Trainer(
-            accelerator=self.accelerator, logger=self.CSVLogger, callbacks=self.callbacks, **self.trainer_kwargs
-        )
-    
-    @property
-    def test_trainer_potential(self):
-        """
-        Quasi test trainer - serves as a workaround for evaluating test data
-        while retaining gradients.
-        """
-        return pytorch_lightning.Trainer(
-            accelerator=self.accelerator,
-            devices=self.n_devices,
-            max_epochs=0,
-            num_sanity_val_steps=-1,
-            enable_progress_bar=False,
-            callbacks=[callbacks.GradientPotentialTest()],
-        )
-
-    @property
-    def test_trainer(self):
-        """
-        Quasi test trainer - serves as a workaround for evaluating test data
-        while retaining gradients.
-        """
-        return pytorch_lightning.Trainer(
-            accelerator=self.accelerator,
-            devices=self.n_devices,
-            max_epochs=0,
-            num_sanity_val_steps=-1,
-            enable_progress_bar=False,
-            callbacks=[callbacks.GradientPotentialTest()],
-        )
+        return self.Trainer

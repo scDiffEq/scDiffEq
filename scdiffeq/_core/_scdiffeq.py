@@ -13,7 +13,8 @@ __email__ = ", ".join(
 
 
 # -- import packages: --------------------------------------------------------------------
-from pytorch_lightning import LightningDataModule, seed_everything, Trainer
+from pytorch_lightning import LightningDataModule, Trainer # seed_everything
+from pytorch_lightning.loggers import CSVLogger
 from neural_diffeqs import NeuralODE, NeuralSDE
 from torch.utils.data import DataLoader
 from autodevice import AutoDevice
@@ -25,16 +26,19 @@ import torch
 import os
 
 
+from . import configs
+
+
 # -- import local dependencies: ----------------------------------------------------------
 from . import configs, utils
-from .._utilities import Base
 from typing import Union
 from .lightning_model.forward._test_manager import TestManager
 from .._tools import UMAP
+from .utils import AutoParseBase
 
 
 # -- API-facing model class: -------------------------------------------------------------
-class scDiffEq(Base):
+class scDiffEq(AutoParseBase):
     def __config__(self, kwargs, ignore=["self", "kwargs", "__class__", "hide"]):
         
         kwargs['aux_keys'] = kwargs['velocity_key']
@@ -91,9 +95,9 @@ class scDiffEq(Base):
         one_hot=False,
         aux_keys=None,
         silent=True,
-        optimizer="RMSprop",
-        lr_scheduler="StepLR",
-        lr=0.0001,
+        optimizers=["SGD","RMSprop",],
+        lr_schedulers=["StepLR", "StepLR"],
+        learning_rates = [1e-9, 1e-4],
         step_size=20,
         dt=0.1,
         fate_scale=0,
@@ -155,26 +159,53 @@ class scDiffEq(Base):
 
         """
         
-        seed = seed_everything(seed)
+#         seed = seed_everything(seed)
         
         self.__config__(locals())
         self.__preflight__(run_preflight)
+        self.LitTrainerConfig = configs.LightningTrainerConfiguration(self.model_save_dir)
         
     def __repr__(self):
         # TODO: add a nice self-report method to be returned as a str
         return "scDiffEq model"
+    
+    def pretrain(self, pretrain_callbacks = []):
+        
+        self.LightningModel.pretrain = True
+        if not self.train_val_percentages[1] > 0:
+                pretrainer_kw = {'check_val_every_n_epoch': 0, 'limit_val_batches': 0}
+                
+        else:
+            pretrainer_kw = {}
+        
+        pretrainer_kw['max_epochs'] = pretrain_epochs
+        
+        self.PreTrainer = self.LitTrainerConfig(
+            stage="pretrain",
+            accelerator=self.accelerator,
+            devices = self.devices,
+            flush_logs_every_n_steps=1,
+            callbacks = pretrain_callbacks,
+            **pretrainer_kw,
+        )
+        self.PreTrainer.fit(model=self.LightningModel, datamodule=self.LightningDataModule)
+        self.LightningModel.pretrain = False
+        
 
-    def fit(self):
+    def fit(self, train_callbacks = [], pretrain_callbacks = []):
         
         if self.pretrain_epochs > 0:
-            self.LightningModel.pretrain = True
-            if not self.train_val_percentages[1] > 0:
-                kw = {'check_val_every_n_epoch': 0, 'limit_val_batches': 0}
-            self.PreTrainer = Trainer(max_epochs=self.pretrain_epochs, accelerator="gpu", devices=1, **kw)
-            self.PreTrainer.fit(model=self.LightningModel, datamodule=self.LightningDataModule)
-            self.LightningModel.pretrain = False
+            self.pretrain(pretrain_callbacks)
         
-        self.LightningTrainer.fit(self.LightningModel, self.LightningDataModule)
+        self.FitTrainer = self.LitTrainerConfig(
+            stage="fit",
+            accelerator=self.accelerator,
+            flush_logs_every_n_steps=self.flush_logs_every_n_steps,
+            callbacks = train_callbacks,
+            **self.config.CONFIG_KWARGS["TRAINER"]
+        )
+        self.FitTrainer.fit(self.LightningModel, self.LightningDataModule)
+        
         
     def test(self,
              n_predictions = 25,

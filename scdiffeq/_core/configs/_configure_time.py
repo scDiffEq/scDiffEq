@@ -7,7 +7,8 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..._utilities import Base
+from ..utils import AutoParseBase
+from ..._tools import time_free_sampling
 
 
 # -- define types: -----------------------------------------------------------------------
@@ -15,7 +16,7 @@ NoneType = type(None)
 
 
 # -- main class: -------------------------------------------------------------------------
-class TimeConfig(Base):
+class TimeConfig(AutoParseBase):
     def __init__(
         self,
         adata: anndata.AnnData,
@@ -42,7 +43,7 @@ class TimeConfig(Base):
         if isinstance(self._time_key, NoneType):
             try:
 
-                sdq.tl.time_free_sampling(
+                time_free_sampling(
                     self._adata,
                     self.t0_idx,
                     n_steps=self.n_steps,

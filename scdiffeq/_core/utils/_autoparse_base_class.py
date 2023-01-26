@@ -1,32 +1,37 @@
 
+
+# -- import packages: --------------------------------------------------------------------
 from abc import ABC
 import inspect
 
 
-class Base(ABC):
+# -- Main class: -------------------------------------------------------------------------
+class AutoParseBase(ABC):
 
     def __init__(self):
-        pass
-    
+        self._KWARGS = {}
     
     def __call__(self):
         pass
     
     def __init_kwargs__(self):
         self._KWARGS = {}
-    
+        
+    def _inspect(self, func):
+        return list(inspect.signature(func).parameters.keys())
+        
     @property
     def _init_params(self):
-        return list(inspect.signature(self.__init__).parameters.keys())
+        return self._inspect(func=self.__init__)
     
     @property
     def _call_params(self):
-        return list(inspect.signature(self.__call__).parameters.keys())
+        return self._inspect(func=self.__call__)
     
     @property
     def _parse_params(self):
-        return list(inspect.signature(self.__parse__).parameters.keys())
-    
+        return self._inspect(func=self.__parse__)
+
     @property
     def _collected_params(self):
         return self._init_params + self._call_params + self._parse_params        
@@ -34,6 +39,7 @@ class Base(ABC):
     def _collect_literal_kwargs(self, kwargs_val):
         
         for key, val in kwargs_val.items():
+            print(key)
             self.__collect__(key, val)
     
     def __hide__(self, key):
@@ -55,8 +61,30 @@ class Base(ABC):
         kwargs_key: str = "kwargs",
     ):
         """
+        Pass `locals()` or some other collection of kwargs to `kwargs` to
+        save them as attributes of the subclass.
+        
         Parameters:
         -----------
+        kwargs
+            typically `locals()`
+            type: dict
+        
+        ignore
+            type: list
+            default: ["self"]
+        
+        private
+            type: list
+            default: ["ignore", "private", "public"]
+        
+        public
+            type: list
+            default: []
+        
+        kwargs_key
+            type: str
+            default: "kwargs"
 
         Notes:
         ------
@@ -68,7 +96,7 @@ class Base(ABC):
             private = list(kwargs.keys())
 
         for key, val in kwargs.items():
-            if (key in self._collected_params) and (not key in ignore):
+            if not key in ignore: # (key in self._collected_params) and ():
                 if key == kwargs_key:
                     self._collect_literal_kwargs(val)
                 else:

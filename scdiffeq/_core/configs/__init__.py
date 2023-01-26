@@ -16,6 +16,7 @@ __email__ = ", ".join(
 from ._scdiffeq_configuration import scDiffEqConfiguration
 
 from ._lightning_model_configuration import LightningModelConfig
-from ._lightning_trainer_configuration import LightningTrainerConfig
 from ._lightning_data_module_configuration import LightningDataModuleConfig
+from ._lightning_trainer_configuration import LightningTrainerConfiguration
+from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
 from ._configure_time import TimeConfig

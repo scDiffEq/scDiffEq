@@ -5,9 +5,7 @@ import torch
 
 
 # -- import local dependencies: --------------------------------------------------------
-from ...utils import sum_normalize
-
-from ...._utilities import Base
+from ...utils import sum_normalize, AutoParseBase
 
 
 # -- supporting functions: -------------------------------------------------------------
@@ -18,7 +16,7 @@ def _expanded_X0(batch, N=2000):
 
 
 # -- Model-facing Batch: ---------------------------------------------------------------
-class Batch(Base):
+class Batch(AutoParseBase):
     """Catch batch and make sure it's in the right format."""    
     def __init__(self, batch, stage, func_type, t=None, expand=False):
         self.__parse__(locals(), public=[None])
