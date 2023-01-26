@@ -178,7 +178,7 @@ class scDiffEq(AutoParseBase):
         else:
             pretrainer_kw = {}
         
-        pretrainer_kw['max_epochs'] = pretrain_epochs
+        pretrainer_kw['max_epochs'] = self.pretrain_epochs
         
         self.PreTrainer = self.LitTrainerConfig(
             stage="pretrain",

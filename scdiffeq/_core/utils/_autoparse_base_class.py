@@ -39,7 +39,6 @@ class AutoParseBase(ABC):
     def _collect_literal_kwargs(self, kwargs_val):
         
         for key, val in kwargs_val.items():
-            print(key)
             self.__collect__(key, val)
     
     def __hide__(self, key):
