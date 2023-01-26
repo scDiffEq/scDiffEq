@@ -18,7 +18,6 @@ from ._batch import Batch
 from ._loss_log import LossLog
 from ._function_credentials import Credentials
 from ._potential_regularizer import PotentialRegularizer
-from ._loss import Loss
 from ._sinkhorn_divergence import SinkhornDivergence
 
 from ._loss_manager import LossManager
