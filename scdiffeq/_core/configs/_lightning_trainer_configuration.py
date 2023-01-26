@@ -101,6 +101,7 @@ class LightningTrainerConfiguration(AutoParseBase):
             
         self.__parse__(locals())
         self._KWARGS['name'] = "{}_logs".format(stage)            
+            
         
         if (potential_model) and (stage in ["test", "predict"]):
             self.retain_test_gradients = True

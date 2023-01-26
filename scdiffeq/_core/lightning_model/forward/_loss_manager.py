@@ -164,7 +164,7 @@ class LossManager(AutoParseBase):
     # -- loss computations: --------------------------------------------------------------
     def compute_positional_loss(self):
         """Always compute positional loss"""
-#         print("W, X, W_hat, X_hat", self.W.shape, self.X.shape, self.W_hat.shape, self.X_hat.shape)
+#         print("W, X, W_hat, X_hat", self.W, self.X, self.W_hat, self.X_hat)
         self.LossDict["positional"] = self.SinkDiv(self.W,
                                                    self.X,
                                                    self.W_hat,
