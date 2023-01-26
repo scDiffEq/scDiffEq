@@ -1,14 +1,27 @@
 
 __module_name__ = "__init__.py"
-__doc__ = """Main __init__ module - most user-visible API."""
+__version__ = "0.0.45"
+__doc__ = """Top-level __init__ for the scdiffeq package."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
-__email__ = ", ".join(["mvinyard@broadinstitute.org", "arasmuss@broadinstitute.org", "ruitong@broadinstitute.org"])
+__email__ = ", ".join(
+    [
+        "mvinyard@broadinstitute.org",
+        "arasmuss@broadinstitute.org",
+        "ruitong@broadinstitute.org",
+    ]
+)
 
 
-# version: -------------------------------------------------------------------------------
-__version__ = "0.0.44"
+# -- import model API: -------------------------------------------------------------------
+from ._core._scdiffeq import scDiffEq
 
 
+# -- import sub-packages: ----------------------------------------------------------------
+from . import _data as data
 from . import _io as io
-from . import _models as models
-from ._models._base import _core as core
+from . import _plotting as pl
+from . import _tools as tl
+
+
+# -- developer import: -------------------------------------------------------------------
+from . import _core

@@ -1,7 +1,7 @@
 
 __module_name__ = "__init__.py"
+__doc__ = """LightningModels __init__.py"""
 __version__ = "0.0.45"
-__doc__ = """I/O __init__ module. Sub-package of the main scdiffeq API."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
     [
@@ -11,7 +11,5 @@ __email__ = ", ".join(
     ]
 )
 
-
-# import functions accessed as sdq.io.<func>: --------------------------------------------
-from ._read_h5ad import read_h5ad
-from ._pickle_io import read_pickle, write_pickle
+from ._lightning_diffeq import LightningDiffEq
+from ._default_neural_sde import default_NeuralSDE
