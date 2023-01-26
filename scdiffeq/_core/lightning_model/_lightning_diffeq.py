@@ -139,8 +139,11 @@ class LightningDiffEq(LightningModule, AutoParseBase):
     
     def forward(self, batch, batch_idx, stage=None):
         
-        optimizers = {"pretrain": self.optimizers[0], "train": self.optimizers[1]}
-                
+        if len(self.optimizers) > 1:
+            optimizers = {"pretrain": self.optimizers[0], "train": self.optimizers[1]}
+        else:
+            optimizers = {"train": self.optimizers[0]}
+                        
         if self.pretrain:
             optimizers['pretrain'].zero_grad()
             forward_manager = ForwardManager(model=self)

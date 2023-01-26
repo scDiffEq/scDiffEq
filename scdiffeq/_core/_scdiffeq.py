@@ -194,6 +194,10 @@ class scDiffEq(AutoParseBase):
 
     def fit(self, train_callbacks = [], pretrain_callbacks = []):
         
+        trainer_kwargs = self.config.CONFIG_KWARGS["TRAINER"]
+        if not self.train_val_percentages[1] > 0:
+            trainer_kwargs = {'check_val_every_n_epoch': 0, 'limit_val_batches': 0}        
+        
         if self.pretrain_epochs > 0:
             self.pretrain(pretrain_callbacks)
         
@@ -202,7 +206,7 @@ class scDiffEq(AutoParseBase):
             accelerator=self.accelerator,
             flush_logs_every_n_steps=self.flush_logs_every_n_steps,
             callbacks = train_callbacks,
-            **self.config.CONFIG_KWARGS["TRAINER"]
+            **trainer_kwargs,
         )
         self.FitTrainer.fit(self.LightningModel, self.LightningDataModule)
         
