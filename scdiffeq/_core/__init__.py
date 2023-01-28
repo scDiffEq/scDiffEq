@@ -16,7 +16,7 @@ __email__ = ", ".join(
 from ._scdiffeq import scDiffEq
 # from .lightning_model import LightningDiffEq
 
-from .lightning_models import 
+from . import lightning_models
 
 
 
