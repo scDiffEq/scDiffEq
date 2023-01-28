@@ -23,3 +23,6 @@ from ._sinkhorn_divergence import SinkhornDivergence
 from ._loss_manager import LossManager
 from ._forward_manager import ForwardManager
 from ._test_manager import TestManager
+
+from ._universal_forward_integrator import UniversalForwardIntegrator
+from ._loss_logger import LossLogger

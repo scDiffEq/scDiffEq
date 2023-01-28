@@ -24,11 +24,11 @@ import torch
 # -- local impoirts: ---------------------------------------------------------------------
 from ._default_neural_sde import default_NeuralSDE
 from ..utils import AutoParseBase, function_kwargs, LoggingLearnableHParams
-from .forward import ForwardManager, LossManager
+from .forward import ForwardManager, LossManager, SinkhornDivergence
 
 
 NoneType = type(None)
-
+sinkdiv = SinkhornDivergence()
 
 # -- LightningModel: ---------------------------------------------------------------------
 class LightningDiffEq(LightningModule, AutoParseBase):
@@ -42,11 +42,10 @@ class LightningDiffEq(LightningModule, AutoParseBase):
         self,
         adata,
         func: [NeuralSDE, NeuralODE, TorchNet] = None,
-        optimizers=["SGD","RMSprop",],
-        lr_schedulers=["StepLR", "StepLR"],
-        learning_rates = [1e-8, 1e-4],
+        optimizers=['RMSprop'], # ["SGD","RMSprop",]
+        lr_schedulers=["StepLR"], # , "StepLR"],
+        learning_rates = [1e-4], # 1e-8,
         func_type = None,
-        lr=1e-4,
         seed=0,
         stdev: [torch.nn.Parameter, torch.Tensor] = torch.Tensor([0.]),
         pretrain_stdev = torch.Tensor([0.5]).to(AutoDevice()),
@@ -75,7 +74,7 @@ class LightningDiffEq(LightningModule, AutoParseBase):
         skip_positional_velocity_backprop=False,
         skip_potential_backprop=False,
         skip_fate_bias_backprop=False,
-        automatic_optimization=False,
+#         automatic_optimization=False,
         lightning_ignore=["self"],
         base_ignore=["self"],
         **kwargs,
@@ -139,32 +138,49 @@ class LightningDiffEq(LightningModule, AutoParseBase):
     
     def forward(self, batch, batch_idx, stage=None):
         
-        if len(self.optimizers) > 1:
-            optimizers = {"pretrain": self.optimizers[0], "train": self.optimizers[1]}
-        else:
-            optimizers = {"train": self.optimizers[0]}
+#         t = sorted(batch[0].unique())
+        t = torch.Tensor([2, 6])
+        X  = batch[1].transpose(1, 0)
+        
+        X_hat = sdeint(self.func, X[0], t, dt=0.1)
+        
+#         print("X_hat, X: {}, {}".format(X_hat.shape, X.shape))
+        
+        L = sinkdiv(X_hat.contiguous(), X.contiguous())
+#         print(L)
+        for i in range(len(L[1:])):
+            self.log("loss_d{}".format(t[int(i + 1)]), L[i+1])
+            
+        return L.sum()
+    
+#         if len(self.optimizers) > 1:
+#             optimizers = {"pretrain": self.optimizers[0], "train": self.optimizers[1]}
+#         else:
+#             optimizers = {"train": self.optimizers[0]}
                         
-        if self.pretrain:
-            optimizers['pretrain'].zero_grad()
-            forward_manager = ForwardManager(model=self)
-            forward_outs = forward_manager(batch, batch_idx=batch_idx, stage=stage)
-            loss = forward_outs
-            self.manual_backward(loss)
-            optimizers['pretrain'].step()
+#         if self.pretrain:
+#             optimizers['pretrain'].zero_grad()
+#             forward_manager = ForwardManager(model=self)
+#             forward_outs = forward_manager(batch, batch_idx=batch_idx, stage=stage)
+#             loss = forward_outs
+#             if stage in ['pretrain']:
+#                 self.manual_backward(loss)
+#                 optimizers['pretrain'].step()
 
-        else:
-            optimizers['train'].zero_grad()
-            forward_manager = ForwardManager(model=self)
-            forward_outs = forward_manager(batch, batch_idx=batch_idx, stage=stage)
-            loss_manager = LossManager(model=self, stage=stage)
-            loss = {
-                'batch': forward_manager.batch,
-                'X_hat': forward_outs['X_hat'],
-                'loss':  loss_manager(**forward_outs),
-                     }
-            self.manual_backward(loss['loss'])
-            optimizers['train'].step()
-        return loss        
+#         else:
+#             optimizers['train'].zero_grad()
+#             forward_manager = ForwardManager(model=self)
+#             forward_outs = forward_manager(batch, batch_idx=batch_idx, stage=stage)
+#             loss_manager = LossManager(model=self, stage=stage)
+#             loss = {
+#                 'batch': forward_manager.batch,
+#                 'X_hat': forward_outs['X_hat'],
+#                 'loss':  loss_manager(**forward_outs),
+#                      }
+#             if stage in ['train']:
+#                 self.manual_backward(loss['loss'])
+#                 optimizers['train'].step()
+#         return loss        
         
 
     def training_step(self, batch, batch_idx): # , optimizer_idx)->dict:

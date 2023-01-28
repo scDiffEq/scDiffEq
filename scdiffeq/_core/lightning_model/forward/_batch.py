@@ -54,8 +54,12 @@ class Batch(AutoParseBase):
         return sum_normalize(self._batch[2].transpose(1,0))
     
     @property
+    def clone_idx(self):
+        return self._batch[-2].transpose(1,0)
+    
+    @property
     def cell_idx(self):
-        return self._batch[3].transpose(1,0).cpu().numpy().astype(int).astype(str)
+        return self._batch[-1].transpose(1,0)
     
     @property
     def V(self):

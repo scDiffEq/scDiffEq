@@ -13,7 +13,7 @@ class LightningCallbacksConfiguration(AutoParseBase):
 
     @property
     def BuiltInCallbacks(self):
-        return [ModelCheckpoint(), StochasticWeightAveraging(swa_lrs=1e-2)]
+        return [ModelCheckpoint(every_n_epochs=10, save_top_k=-1), StochasticWeightAveraging(swa_lrs=1e-2)]
 
     @property
     def Callbacks(self):
