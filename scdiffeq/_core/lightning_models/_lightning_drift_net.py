@@ -4,7 +4,7 @@ import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._base_lightning_drift_net import BaseLightningDriftNet
+from ._base_lightning_diffeqs import BaseLightningDriftNet
 from ._sinkhorn_divergence import SinkhornDivergence
 
 

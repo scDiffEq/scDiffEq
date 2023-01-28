@@ -4,7 +4,7 @@ import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._base_lightning_ode import BaseLightningODE
+from ._base_lightning_diffeqs import BaseLightningODE
 from ._sinkhorn_divergence import SinkhornDivergence
 
 
