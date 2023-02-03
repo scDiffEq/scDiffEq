@@ -1,6 +1,6 @@
 
 import os, glob, numpy as np
-from .._core.utils import AutoParseBase
+from ..core.utils import AutoParseBase
 
 
 class Versions(AutoParseBase):

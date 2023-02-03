@@ -14,18 +14,16 @@ __email__ = ", ".join(
 
 # -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
-# from .lightning_model import LightningDiffEq
-
 from . import lightning_models
 
 
+from . import utils
+from . import configs
+from . import callbacks
+
 
 # -- developer-facing modules: -----------------------------------------------------------
-from . import configs
-from . import utils
-
-
 # -- import functional units: ------------------------------------------------------------
-from pytorch_lightning import LightningModule
-from neural_diffeqs import NeuralSDE, NeuralODE
-from torch_nets import TorchNet
+# from pytorch_lightning import LightningModule
+# from neural_diffeqs import NeuralSDE, NeuralODE
+# from torch_nets import TorchNet

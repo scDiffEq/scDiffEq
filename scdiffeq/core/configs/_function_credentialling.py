@@ -59,3 +59,15 @@ class Credentials:
         if self.is_TorchNet:
             self._integrator = brownian_diffuser.nn_int
             return "TorchNet", self.mu_is_potential_func, self.sigma_is_potential_func
+
+def function_credentials(func, adjoint=False):
+    
+    creds = Credentials(func, adjoint=adjoint)
+    func_type, mu_is_potential, sigma_is_potential = creds()
+    
+    return {
+        "func_type": func_type,
+        "mu_is_potential": mu_is_potential,
+        "sigma_is_potential": sigma_is_potential,
+        "use_adjoint": adjoint,
+    }

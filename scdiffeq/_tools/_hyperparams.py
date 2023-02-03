@@ -3,7 +3,7 @@
 import yaml
 
 
-from .._core.utils import AutoParseBase
+from ..core.utils import AutoParseBase
 
 
 class HyperParams(AutoParseBase):

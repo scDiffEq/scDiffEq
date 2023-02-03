@@ -1,5 +1,5 @@
 
-from .._core.utils import AutoParseBase
+from ..core.utils import AutoParseBase
 import torch, torch_nets, neural_diffeqs
 
 

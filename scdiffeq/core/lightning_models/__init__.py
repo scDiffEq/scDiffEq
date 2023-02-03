@@ -9,8 +9,9 @@ from ._base_lightning_diffeqs import (
     BaseLightningSDE,
     BaseLightningODE,
     BaseLightningDriftNet,
+    BaseVeloDiffEq,
 )
 
-from ._lightning_ode import LightningODE
-from ._lightning_sde import LightningSDE
-from ._lightning_drift_net import LightningDriftNet
+from ._lightning_ode import LightningODE, LightningPotentialODE
+from ._lightning_sde import LightningSDE, LightningPotentialSDE
+from ._lightning_drift_net import LightningDriftNet, LightningPotentialDriftNet

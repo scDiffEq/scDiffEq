@@ -1,13 +1,12 @@
 
-
 from pytorch_lightning import Callback
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
 
-from .. import lightning_callbacks as callbacks
-from ..utils import AutoParseBase
+from .. import utils, callbacks
 
-class LightningCallbacksConfiguration(AutoParseBase):
+
+class LightningCallbacksConfiguration(utils.AutoParseBase):
     def __init__(self):
         self.cbs = []
 

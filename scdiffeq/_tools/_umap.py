@@ -1,5 +1,5 @@
 
-from .._core.utils import AutoParseBase, extract_func_kwargs
+from ..core.utils import AutoParseBase, extract_func_kwargs
 import umap
 
 

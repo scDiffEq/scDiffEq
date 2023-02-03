@@ -18,3 +18,6 @@ from ._logging_learnable_hparams import LoggingLearnableHParams
 from ._autoparse_base_class import AutoParseBase
 from ._sum_normalize import sum_normalize
 
+from ._scdiffeq_logger import scDiffEqLogger
+
+from ._default_neural_sde import default_NeuralSDE

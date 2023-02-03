@@ -13,15 +13,11 @@ __email__ = ", ".join(
 
 
 # -- import model API: -------------------------------------------------------------------
-from ._core._scdiffeq import scDiffEq
+from .core._scdiffeq import scDiffEq
 
 
 # -- import sub-packages: ----------------------------------------------------------------
-from . import _data as data
-from . import _io as io
+from . import core
+from . import io
 from . import _plotting as pl
 from . import _tools as tl
-
-
-# -- developer import: -------------------------------------------------------------------
-from . import _core
