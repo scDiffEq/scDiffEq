@@ -21,3 +21,5 @@ from ._sum_normalize import sum_normalize
 from ._scdiffeq_logger import scDiffEqLogger
 
 from ._default_neural_sde import default_NeuralSDE
+
+from ._normalize_time_to_range import normalize_time

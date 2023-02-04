@@ -5,14 +5,24 @@ from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveragi
 
 from .. import utils, callbacks
 
-
+# save_top_k=10,
+#     monitor="val_loss",
+#     mode="min",
+#     dirpath="my/path/",
+#     filename="sample-mnist-{epoch:02d}-{val_loss:.2f}",
 class LightningCallbacksConfiguration(utils.AutoParseBase):
     def __init__(self):
         self.cbs = []
 
     @property
     def BuiltInCallbacks(self):
-        return [ModelCheckpoint(every_n_epochs=10, save_top_k=-1), StochasticWeightAveraging(swa_lrs=1e-2)]
+        return [
+        ModelCheckpoint(every_n_epochs=5,
+                        save_top_k=-1,
+                       ),
+        StochasticWeightAveraging(swa_lrs=1e-2),
+        ]        
+#         return [ModelCheckpoint(every_n_epochs=10, save_top_k=-1), StochasticWeightAveraging(swa_lrs=1e-2)]
 
     @property
     def Callbacks(self):

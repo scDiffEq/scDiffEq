@@ -42,7 +42,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
     def Callbacks(self):
         callback_config = LightningCallbacksConfiguration()
         return callback_config(
-            callbacks=self.callbacks,
+            callbacks=self._callbacks,
             retain_test_gradients=self.retain_test_gradients,
         )
     
@@ -64,11 +64,11 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         If pre-train routine was used, Trainer loads from ckpt path.
         """
 
-        self._Trainer_kwargs["callbacks"] = self.Callbacks
-
+#         self._Trainer_kwargs["callbacks"] = self.Callbacks
         return Trainer(
             accelerator=self.accelerator,
             logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
+            callbacks=self.Callbacks,
             **self._Trainer_kwargs,
         )
 
@@ -109,7 +109,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         if isinstance(stage, NoneType):
             stage = ""
 
-        self.__parse__(locals(), private=['accelerator'])
+        self.__parse__(locals(), private=['accelerator', 'callbacks'])
         self._KWARGS["name"] = "{}_logs".format(stage)
 
         if (potential_model) and (stage in ["test", "predict"]):

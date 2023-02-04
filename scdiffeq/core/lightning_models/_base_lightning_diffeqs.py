@@ -32,10 +32,15 @@ class BaseLightningDiffEq(LightningModule, AutoParseBase):
     def loss(self):
         ...
         
-    @abstractmethod
-    def record(self):
-        ...    
-
+    def record(self, loss, stage):
+        """Record loss. called in step"""
+        
+        log_msg = "{}"
+        if not isinstance(stage, NoneType):
+            log_msg = f"{stage}_" + "{}"
+        for i, l in enumerate(loss):
+            self.log(log_msg.format(i), l.item())
+            
     @abstractmethod
     def step(self, batch, batch_idx, stage=None):
         ...
@@ -63,12 +68,6 @@ class BaseLightningDriftNet(BaseLightningDiffEq):
         
         from brownian_diffuser import nn_int
         self.nn_int = nn_int
-
-    def record(self, loss):
-        """called in step"""
-        for i, l in enumerate(loss):
-            self.log(str(i), l.item())
-
             
     def forward(self, X0, t, stage=None, max_steps=None, return_all=False):
         return self.nn_int(
@@ -87,12 +86,7 @@ class BaseLightningODE(BaseLightningDiffEq):
         super(BaseLightningODE, self).__init__()
         from torchdiffeq import odeint
         self.odeint = odeint
-        
-    def record(self, loss):
-        """called in step"""
-        for i, l in enumerate(loss):
-            self.log(str(i), l.item())
-    
+
     def forward(self, X0, t, stage=None, **kwargs):
         """
         We want this to be easily-accesible from the outside, so we
@@ -107,11 +101,6 @@ class BaseLightningSDE(BaseLightningDiffEq):
         super(BaseLightningSDE, self).__init__()
         from torchsde import sdeint
         self.sdeint = sdeint
-
-    def record(self, loss):
-        """called in step"""
-        for i, l in enumerate(loss):
-            self.log(str(i), l.item())
 
     def forward(self, X0, t, stage=None, **kwargs):
         """

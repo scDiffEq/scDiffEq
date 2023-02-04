@@ -41,7 +41,7 @@ class LightningSDE(BaseLightningSDE):
         X_hat = self.forward(X0, t)
         loss = self.loss(X, X_hat)
         if stage in ["training", "validation"]:
-            self.record(loss)
+            self.record(loss, stage)
         
         return loss.sum()
 
