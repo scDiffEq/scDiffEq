@@ -27,7 +27,7 @@ setup(
         "pytorch-lightning>=1.7.7",
         "neural-diffeqs==0.2.0rc0",
         "torch-nets>=0.0.2",
-        "torch-adata",
+        "torch-adata>=0.0.2",
         "autodevice>=0.0.2",
         "brownian-diffuser>=0.0.1",
     ],
