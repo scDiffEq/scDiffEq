@@ -19,5 +19,5 @@ from .core._scdiffeq import scDiffEq
 # -- import sub-packages: ----------------------------------------------------------------
 from . import core
 from . import io
-from . import _plotting as pl
-from . import _tools as tl
+from . import plotting as pl
+from . import tools as tl

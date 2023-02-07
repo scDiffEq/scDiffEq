@@ -7,7 +7,7 @@ import torch
 
 # -- import local dependencies: ----------------------------------------------------------
 from ..utils import AutoParseBase, normalize_time
-from ..._tools import time_free_sampling
+from ...tools import time_free_sampling
 
 
 # -- define types: -----------------------------------------------------------------------

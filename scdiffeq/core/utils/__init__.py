@@ -23,3 +23,5 @@ from ._scdiffeq_logger import scDiffEqLogger
 from ._default_neural_sde import default_NeuralSDE
 
 from ._normalize_time_to_range import normalize_time
+
+from ._not_none_type import not_none

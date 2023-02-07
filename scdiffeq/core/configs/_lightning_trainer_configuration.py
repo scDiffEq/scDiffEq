@@ -2,6 +2,7 @@
 # -- import packages: ----------------------------------------------------------
 from pytorch_lightning import Trainer, loggers
 import torch
+import os
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -111,6 +112,9 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
 
         self.__parse__(locals(), private=['accelerator', 'callbacks'])
         self._KWARGS["name"] = "{}_logs".format(stage)
+        log_save_dir = os.path.join(self.save_dir, self._KWARGS["name"])
+        if not os.path.exists(log_save_dir):
+            os.mkdir(log_save_dir)
 
         if (potential_model) and (stage in ["test", "predict"]):
             self.retain_test_gradients = True

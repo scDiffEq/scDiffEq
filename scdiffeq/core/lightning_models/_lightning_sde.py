@@ -38,12 +38,16 @@ class LightningSDE(BaseLightningSDE):
         """Batch should be from a torch DataLoader"""
         
         X, X0, t = self.process_batch(batch)
+        if stage == "predict":
+            t = self.t
         X_hat = self.forward(X0, t)
-        loss = self.loss(X, X_hat)
-        if stage in ["training", "validation"]:
+        if stage == "predict":
+            return X_hat
+        else:
+            loss = self.loss(X, X_hat)
             self.record(loss, stage)
-        
-        return loss.sum()
+            return loss.sum()
+            
 
 class LightningPotentialSDE(LightningSDE, PotentialMixin):
     def __init__(self, func, dt=0.1, lr=1e-4):
