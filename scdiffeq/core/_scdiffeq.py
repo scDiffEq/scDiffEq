@@ -85,7 +85,7 @@ class scDiffEq(utils.AutoParseBase):
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=1,
         gradient_clip_val=0.25,
-        devices=torch.cuda.device_count(),
+        devices=None,
         **kwargs
     ):
         

@@ -17,18 +17,13 @@ NoneType = type(None)
 
 # -- Main class: ---------------------------------------------------------------
 class LightningTrainerConfiguration(utils.AutoParseBase):
-
-    """
-    Container class to instantiate trainers as needed.
-
-    Logger and Callbacks are also configured here since they are passed through the trainer.
-    """
-
     def __init__(
         self,
         save_dir: str = "scDiffEq_Model",
     ):
         self.__parse__(locals())
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
 
     # -- kwargs: ---------------------------------------------------------------
     @property
@@ -53,8 +48,11 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             return self._accelerator
         if torch.cuda.is_available():
             return "gpu"
-        if torch.backends.mps.is_available():
-            return "mps"
+        # would love to include mps however, currently (torch v1.13)
+        # does not have enough compatability with libraries we depend
+        # on to be used with Apple Silicon.
+        # if torch.backends.mps.is_available():
+        #     return "mps"
         return "cpu"
 
     # -- trainers: -------------------------------------------------------------
@@ -96,7 +94,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         stage=None,
         max_epochs=500,
         accelerator=None,
-        devices=torch.cuda.device_count(),
+        devices=None,
         prefix: str = "",
         log_every_n_steps=1,
         flush_logs_every_n_steps: int = 1,
@@ -105,10 +103,67 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         potential_model: bool = False,
         **kwargs
     ):
+        
+        """
+        Return trainer upon call.
+        
+        Parameters:
+        -----------
+        stage
+            type: str
+            default: None
+        
+        max_epochs
+            type: int
+            default: 500
+        
+        accelerator
+            type: str
+            default: None
+        
+        devices
+            type: int
+            default: None
+        
+        prefix
+            type: str
+            default: ""
+        
+        log_every_n_steps
+            type: int
+            default: 1
+        
+        flush_logs_every_n_steps
+            type: int
+            default: 1
+        
+        version
+            type: [int, str]
+            default: None
+        
+        callbacks
+            type: list
+            default: []
+        
+        potential_model
+            type: bool
+            default: False
+            
+        kwargs:
+        -------
+        Keyword arguments that may be passed to pytorch_lightning.Trainer()
+        
+        Notes:
+        ------
+        """
 
         self.retain_test_gradients = False
         if isinstance(stage, NoneType):
             stage = ""
+            
+        if torch.cuda.device_count() > 0:
+            devices = torch.cuda.device_count()
+            
 
         self.__parse__(locals(), private=['accelerator', 'callbacks'])
         self._KWARGS["name"] = "{}_logs".format(stage)
