@@ -6,7 +6,7 @@ import torch
 # -- import local dependencies: ------------------------------------------------
 from ._base_lightning_diffeqs import BaseLightningSDE
 from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixin
+from ._potential_mixin import PotentialMixIn
 
 
 # -- model class: --------------------------------------------------------------
