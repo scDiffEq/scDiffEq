@@ -6,7 +6,7 @@ import torch
 # -- import local dependencies: ------------------------------------------------
 from ._base_lightning_diffeqs import BaseLightningDriftNet
 from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixin
+from ._potential_mixin import PotentialMixIn
 
 # -- model class: --------------------------------------------------------------
 class LightningDriftNet(BaseLightningDriftNet):
@@ -48,6 +48,6 @@ class LightningDriftNet(BaseLightningDriftNet):
         return loss.sum()
     
 
-class LightningPotentialDriftNet(LightningDriftNet, PotentialMixin):
+class LightningPotentialDriftNet(LightningDriftNet, PotentialMixIn):
     def __init__(self, func):
         super(LightningPotentialDriftNet, self).__init__(func)
