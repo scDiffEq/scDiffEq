@@ -30,6 +30,7 @@ setup(
         "torch-adata>=0.0.2",
         "autodevice>=0.0.2",
         "brownian-diffuser>=0.0.1",
+        "vinplots>=0.0.75",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
