@@ -6,7 +6,7 @@ import torch
 # -- import local dependencies: ------------------------------------------------
 from ._base_lightning_diffeqs import BaseLightningODE
 from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixin
+from ._potential_mixin import PotentialMixIn
 
 
 def min_max_norm(t: torch.Tensor)->torch.Tensor:
@@ -48,6 +48,6 @@ class LightningODE(BaseLightningODE):
             
         return loss.sum()
 
-class LightningPotentialODE(LightningODE, PotentialMixin):
+class LightningPotentialODE(LightningODE, PotentialMixIn):
     def __init__(self, func):
         super(LightningPotentialODE, self).__init__(func)
