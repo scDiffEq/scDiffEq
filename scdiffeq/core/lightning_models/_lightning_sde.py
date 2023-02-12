@@ -49,6 +49,6 @@ class LightningSDE(BaseLightningSDE):
             return loss.sum()
             
 
-class LightningPotentialSDE(LightningSDE, PotentialMixin):
+class LightningPotentialSDE(LightningSDE, PotentialMixIn):
     def __init__(self, func, dt=0.1, lr=1e-4):
         super(LightningPotentialSDE, self).__init__(func, dt=0.1, lr=1e-4)
