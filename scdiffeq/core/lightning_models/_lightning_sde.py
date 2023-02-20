@@ -8,6 +8,7 @@ from ._base_lightning_diffeqs import BaseLightningSDE
 from ._sinkhorn_divergence import SinkhornDivergence
 from ._potential_mixin import PotentialMixIn
 
+from ..utils import sum_normalize
 
 # -- model class: --------------------------------------------------------------
 class LightningSDE(BaseLightningSDE):
@@ -28,23 +29,28 @@ class LightningSDE(BaseLightningSDE):
         X = batch[1].transpose(1, 0)
         X0 = X[0]
         t = batch[0].unique()
+        W = batch[2].transpose(1, 0)
+        W = sum_normalize(W)
 
-        return X, X0, t
+        return X, W, X0, t
 
-    def loss(self, X, X_hat):
-        return self.loss_func(X.contiguous(), X_hat.contiguous())
+    def loss(self, X, X_hat, W, W_hat):
+        X, X_hat = X.contiguous(), X_hat.contiguous()
+        W, W_hat = W.contiguous(), W_hat.contiguous()
+        return self.loss_func(W, X, W_hat, X_hat)
 
     def step(self, batch, batch_idx, stage=None):
         """Batch should be from a torch DataLoader"""
         
-        X, X0, t = self.process_batch(batch)
+        X, W, X0, t = self.process_batch(batch)
         if stage == "predict":
             t = self.t
         X_hat = self.forward(X0, t)
         if stage == "predict":
             return X_hat
         else:
-            loss = self.loss(X, X_hat)
+            W_hat = sum_normalize(torch.ones_like(W))
+            loss = self.loss(X, X_hat, W, W_hat)
             self.record(loss, stage)
             return loss.sum()
             

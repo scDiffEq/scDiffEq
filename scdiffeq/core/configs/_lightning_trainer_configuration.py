@@ -5,6 +5,12 @@ import torch
 import os
 
 
+# from licorice_font import font_format
+
+# debug_fmt = font_format("DEBUG", ['YELLOW'])
+# debug_msg = f"- {debug_fmt} | "
+
+
 # -- import local dependencies: ------------------------------------------------
 from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
 from .. import utils, callbacks
@@ -39,7 +45,10 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         callback_config = LightningCallbacksConfiguration()
         return callback_config(
             callbacks=self._callbacks,
+            ckpt_frequency=self.ckpt_frequency,
+            keep_ckpts=self.keep_ckpts,
             retain_test_gradients=self.retain_test_gradients,
+            monitor = self.monitor,
         )
     
     @property
@@ -62,8 +71,6 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         Main Lightning Trainer used for fitting / testing.
         If pre-train routine was used, Trainer loads from ckpt path.
         """
-
-#         self._Trainer_kwargs["callbacks"] = self.Callbacks
         return Trainer(
             accelerator=self.accelerator,
             logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
@@ -93,11 +100,14 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         self,
         stage=None,
         max_epochs=500,
+        monitor=None,
         accelerator=None,
         devices=None,
         prefix: str = "",
         log_every_n_steps=1,
         flush_logs_every_n_steps: int = 1,
+        ckpt_frequency: int = 25,
+        keep_ckpts: int = -1,
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
         potential_model: bool = False,
@@ -163,7 +173,6 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()
-            
 
         self.__parse__(locals(), private=['accelerator', 'callbacks'])
         self._KWARGS["name"] = "{}_logs".format(stage)

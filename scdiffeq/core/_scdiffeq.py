@@ -7,6 +7,7 @@ from tqdm.notebook import tqdm
 from pytorch_lightning import Trainer
 
 NoneType = type(None)
+import os
 
 
 class scDiffEq(utils.AutoParseBase):
@@ -14,12 +15,22 @@ class scDiffEq(utils.AutoParseBase):
         self,
         adata,
         func=None,
+        h5ad_path=None,
         model_name="scDiffEq_model",
-        use_adjoint=False,
+        use_key='X_pca',
         time_key="Time point",
         t0_idx=None,
         train_val_split=[0.9, 0.1],
         batch_size=2000,
+        num_workers=os.cpu_count(),
+        use_adjoint=False,
+        obs_keys=['W'],
+        groupby='Time point',
+        train_key='train',
+        val_key='val',
+        test_key='test',
+        predict_key='predict',
+        silent=True,
     ):
         super(scDiffEq, self).__init__()
 
@@ -59,13 +70,14 @@ class scDiffEq(utils.AutoParseBase):
         self.time_attributes = configs.configure_time(
             self.adata, time_key=self.time_key, t0_idx=self.t0_idx
         )
-
-        self.LitDataModule = configs.LightningData(
-            self.adata,
-            groupby=self.time_attributes["time_key"], 
-            train_val_split=self.train_val_split,
-            batch_size=self.batch_size,
+        
+        LitDataKwargs = utils.extract_func_kwargs(
+            func = configs.LightningData,
+            kwargs = kwargs,
         )
+
+        self.LitDataModule = configs.LightningData(**LitDataKwargs)
+
         if isinstance(func, NoneType):
             n_dim = self.LitDataModule.train_dataset.X.shape[-1]
             func = utils.default_NeuralSDE(n_dim)
@@ -81,6 +93,9 @@ class scDiffEq(utils.AutoParseBase):
         self,
         epochs=500,
         callbacks=[],
+        ckpt_frequency: int = 25,
+        keep_ckpts: int = -1,
+        monitor = None,
         accelerator=None,
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=1,
@@ -98,7 +113,7 @@ class scDiffEq(utils.AutoParseBase):
 
         trainer_kwargs = utils.extract_func_kwargs(func=self.TrainerGenerator, kwargs=locals())
         trainer_kwargs.update(utils.extract_func_kwargs(func=Trainer, kwargs=kwargs))
-        
+
         self.fit_trainer = self.TrainerGenerator(
             max_epochs=epochs, stage = "fit", **trainer_kwargs
         )

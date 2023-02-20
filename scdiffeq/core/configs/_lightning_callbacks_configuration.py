@@ -5,11 +5,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveragi
 
 from .. import utils, callbacks
 
-# save_top_k=10,
-#     monitor="val_loss",
-#     mode="min",
-#     dirpath="my/path/",
-#     filename="sample-mnist-{epoch:02d}-{val_loss:.2f}",
+
 class LightningCallbacksConfiguration(utils.AutoParseBase):
     def __init__(self):
         self.cbs = []
@@ -17,12 +13,14 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
     @property
     def BuiltInCallbacks(self):
         return [
-        ModelCheckpoint(every_n_epochs=5,
-                        save_top_k=-1,
-                       ),
+        ModelCheckpoint(
+            every_n_epochs=self.every_n_epochs,
+            save_on_train_epoch_end=True,
+            save_top_k=self.save_top_k,
+            monitor=self.monitor,
+        ),
         StochasticWeightAveraging(swa_lrs=1e-2),
-        ]        
-#         return [ModelCheckpoint(every_n_epochs=10, save_top_k=-1), StochasticWeightAveraging(swa_lrs=1e-2)]
+        ]
 
     @property
     def Callbacks(self):
@@ -32,7 +30,18 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
     def GradientRetainedCallbacks(self):
         return [callbacks.GradientPotentialTest()] + self.cbs
 
-    def __call__(self, callbacks=[], retain_test_gradients=False):
+    def __call__(
+        self,
+        callbacks=[],
+        ckpt_frequency=10,
+        keep_ckpts=-1,
+        monitor=None,
+        retain_test_gradients=False,
+    ):
+        
+        self.every_n_epochs = ckpt_frequency
+        self.save_top_k = keep_ckpts
+        self.monitor = monitor
 
         [self.cbs.append(cb) for cb in callbacks]
         if retain_test_gradients:

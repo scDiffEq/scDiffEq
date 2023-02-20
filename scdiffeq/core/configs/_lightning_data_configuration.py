@@ -17,6 +17,7 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         num_workers=os.cpu_count(),
         train_val_split=[0.8, 0.2],
         use_key="X_pca",
+        obs_keys=['W'],
         groupby="Time point",  # TODO: make optional
         train_key="train",
         val_key="val",
@@ -26,6 +27,11 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         **kwargs,
     ):
         super(LightningData, self).__init__()
+        
+        
+        if not 'W' in adata.obs.columns:
+            adata.obs['W'] = (1 / len(adata))
+            
         self.__parse__(locals(), public=[None])
         self.configure_train_val_split()
 
