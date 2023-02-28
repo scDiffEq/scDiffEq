@@ -25,14 +25,13 @@ class LightningSDE(BaseLightningSDE):
 
     def process_batch(self, batch):
         """called in step"""
-        
+
+        t = batch[0].unique()
         X = batch[1].transpose(1, 0)
         X0 = X[0]
-        t = batch[0].unique()
-        W = batch[2].transpose(1, 0)
-        W = sum_normalize(W)
+        W_hat = sum_normalize(batch[2].transpose(1, 0))
 
-        return X, W, X0, t
+        return X, X0, W_hat, t
 
     def loss(self, X, X_hat, W, W_hat):
         X, X_hat = X.contiguous(), X_hat.contiguous()
@@ -42,14 +41,14 @@ class LightningSDE(BaseLightningSDE):
     def step(self, batch, batch_idx, stage=None):
         """Batch should be from a torch DataLoader"""
         
-        X, W, X0, t = self.process_batch(batch)
+        X, X0, W_hat, t = self.process_batch(batch)
         if stage == "predict":
             t = self.t
         X_hat = self.forward(X0, t)
         if stage == "predict":
             return X_hat
         else:
-            W_hat = sum_normalize(torch.ones_like(W))
+            W = sum_normalize(torch.ones_like(W_hat))
             loss = self.loss(X, X_hat, W, W_hat)
             self.record(loss, stage)
             return loss.sum()

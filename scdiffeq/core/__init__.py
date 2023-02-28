@@ -21,6 +21,7 @@ from . import utils
 from . import configs
 from . import callbacks
 
+from .lightning_models import SinkhornDivergence
 
 # -- developer-facing modules: -----------------------------------------------------------
 # -- import functional units: ------------------------------------------------------------
