@@ -23,7 +23,7 @@ class scDiffEq(utils.AutoParseBase):
         train_val_split=[0.9, 0.1],
         batch_size=2000,
         num_workers=os.cpu_count(),
-        use_adjoint=False,
+        adjoint=False,
         obs_keys=['W'],
         groupby='Time point',
         train_key='train',
@@ -35,24 +35,6 @@ class scDiffEq(utils.AutoParseBase):
         super(scDiffEq, self).__init__()
 
         self.__config__(locals())
-
-    def configure_model(self, func):
-        
-        LightningModels = {
-            ("TorchNet",  False): lightning_models.LightningDriftNet,
-            ("TorchNet",  True):  lightning_models.LightningPotentialDriftNet,
-            ("NeuralODE", False): lightning_models.LightningODE,
-            ("NeuralODE", True):  lightning_models.LightningPotentialODE,
-            ("NeuralSDE", False): lightning_models.LightningSDE,
-            ("NeuralSDE", True):  lightning_models.LightningPotentialSDE,
-        }
-
-        self.credentials = configs.function_credentials(
-            func, adjoint=self.use_adjoint
-        )
-        ftype = self.credentials["func_type"]
-        potential = self.credentials["mu_is_potential"]
-        self.DiffEq = LightningModels[(ftype, potential)](func=func)
 
     def _check_passed_time_args(self):
         """If time_key is passed"""
@@ -82,12 +64,15 @@ class scDiffEq(utils.AutoParseBase):
             n_dim = self.LitDataModule.train_dataset.X.shape[-1]
             func = utils.default_NeuralSDE(n_dim)
 
-        self.configure_model(func=func)
+        self.ModelConfig = configs.LightningModelConfiguration(func, self.adjoint)
+        self.DiffEq = self.ModelConfig()
+        
         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self.model_name)
         self.DiffEqLogger()
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             self.DiffEqLogger.versioned_model_outdir
         )
+        
 
     def fit(
         self,

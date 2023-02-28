@@ -5,3 +5,4 @@ from ._lightning_trainer_configuration import LightningTrainerConfiguration
 from ._lightning_data_configuration import LightningData
 from ._function_credentialling import function_credentials
 from ._time_configuration import TimeConfiguration, configure_time
+from ._lightning_model_configuration import LightningModelConfiguration
