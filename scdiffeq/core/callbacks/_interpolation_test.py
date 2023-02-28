@@ -1,18 +1,27 @@
 
+__module_name__ = "_interpolation_test.py"
+__doc__ = """Callback for passing the test set to measure interpolation of a withheld timepoint."""
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["vinyard@g.harvard.edu"])
 
+
+# -- import packages: ----------------------------------------------------------
 from pytorch_lightning import Callback
 import numpy as np
 import torch
 
 
+# -- import local dependencies: ------------------------------------------------
 from ..lightning_models import SinkhornDivergence
 
 
+# -- Main callback class: ------------------------------------------------------
 class InterpolationTest(Callback):
-    def __init__(self, adata, potential=False):
-
-        torch.manual_seed(617)
-        np.random.seed(617)
+    def __init__(self, adata, potential=False, seed: int = 617):
+        
+        if isinstance(seed, int):
+            torch.manual_seed(seed)
+            np.random.seed(seed)
 
         self.adata = adata
         self.Loss = SinkhornDivergence()
