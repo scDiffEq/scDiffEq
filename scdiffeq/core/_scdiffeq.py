@@ -19,6 +19,11 @@ class scDiffEq(utils.AutoParseBase):
         model_name="scDiffEq_model",
         use_key='X_pca',
         time_key="Time point",
+        dt=0.1,
+        lr=1e-4,
+        step_size=10,
+        optimizer=torch.optim.RMSprop,
+        lr_scheduler=torch.optim.lr_scheduler.StepLR,
         t0_idx=None,
         train_val_split=[0.9, 0.1],
         batch_size=2000,
@@ -64,8 +69,15 @@ class scDiffEq(utils.AutoParseBase):
             n_dim = self.LitDataModule.train_dataset.X.shape[-1]
             func = utils.default_NeuralSDE(n_dim)
 
-        self.ModelConfig = configs.LightningModelConfiguration(func, self.adjoint)
-        self.DiffEq = self.ModelConfig()
+        self.ModelConfig = configs.LightningModelConfiguration(
+            func=func,
+            optimizer=torch.optim.RMSprop,
+            lr_scheduler=torch.optim.lr_scheduler.StepLR,
+            adjoint=self.adjoint,
+        )
+                                                               
+                                                               
+        self.DiffEq = self.ModelConfig(kwargs)
         
         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self.model_name)
         self.DiffEqLogger()
@@ -84,7 +96,7 @@ class scDiffEq(utils.AutoParseBase):
         accelerator=None,
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=1,
-        gradient_clip_val=0.25,
+        gradient_clip_val=0.75,
         devices=None,
         **kwargs
     ):

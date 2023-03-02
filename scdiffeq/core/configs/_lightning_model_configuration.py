@@ -4,17 +4,58 @@ import brownian_diffuser
 import neural_diffeqs
 import torchdiffeq
 import torchsde
+import torch
 
 
 # -- import local dependencies: ------
-from .. import lightning_models
+from .. import lightning_models, utils
 
 
-# -- main operator class: ------------
+# -- supporting functions: ------------------------------------
+def fetch_optimizer(func):
+    """
+    Examples:
+    ---------
+    fetch_optimizer("RMSprop")
+    >>> torch.optim.rmsprop.RMSprop
+
+    fetch_optimizer(torch.optim.RMSprop)
+    >>> torch.optim.rmsprop.RMSprop
+    """
+    fetch = utils.FunctionFetch(module=torch.optim, parent=torch.optim.Optimizer)
+    return fetch(func)
+
+
+def fetch_lr_scheduler(func):
+    """
+    Examples:
+    ---------
+    fetch_lr_scheduler("StepLR")
+    >>> torch.optim.lr_scheduler.StepLR
+
+    fetch_lr_scheduler(torch.optim.lr_scheduler.StepLR)
+    >>> torch.optim.lr_scheduler.StepLR
+    """
+    fetch = utils.FunctionFetch(
+        module=torch.optim.lr_scheduler, parent=torch.optim.lr_scheduler._LRScheduler
+    )
+    return fetch(func)
+
+
+# -- main operator class: ------------------------------------------------------------
 class LightningModelConfiguration:
-    def __init__(self, func, adjoint=False):
+    def __init__(
+        self,
+        func,
+        optimizer=torch.optim.RMSprop,
+        lr_scheduler=torch.optim.lr_scheduler.StepLR,
+        adjoint=False,
+    ):
+        
         self.func = func
         self._adjoint = adjoint
+        self._optimizer = optimizer
+        self._lr_scheduler = lr_scheduler
 
         self.func_type, self.mu_is_potential, self.sigma_is_potential = self.function_credentials
 
@@ -72,7 +113,23 @@ class LightningModelConfiguration:
         if self.mu_is_potential:
             return "".join(["LightningPotential"] + [func_type])
         return "".join(["Lightning"] + [func_type])
+    
+    @property
+    def optimizer(self):
+        return fetch_optimizer(self._optimizer)
+    
+    @property
+    def lr_scheduler(self):
+        return fetch_lr_scheduler(self._lr_scheduler)
 
-    def __call__(self):
+
+    def __call__(self, kwargs):
         """Return the LightningModel"""
-        return self.available_models[self.FunctionModuleName](self.func)
+        model = self.available_models[self.FunctionModuleName]
+        MODEL_KWARGS = utils.extract_func_kwargs(func = model, kwargs = kwargs, ignore=['optimizer', 'lr_scheduler'])
+        return model(
+            func=self.func,
+            optimizer = self.optimizer,
+            lr_scheduler = self.lr_scheduler,
+            **MODEL_KWARGS,
+        )

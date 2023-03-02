@@ -25,10 +25,10 @@ class InterpolationTest(Callback):
 
         self.adata = adata
         self.Loss = SinkhornDivergence()
-        self.configure_test_data()
+        self.configure_eval_data()
         self.potential = potential
 
-    def configure_test_data(self):
+    def configure_eval_data(self):
 
         self.df = self.adata.obs.copy()
         self.df_clonal = self.df.loc[self.df["clone_idx"].notna()]
@@ -39,8 +39,15 @@ class InterpolationTest(Callback):
         )
         self.X0 = torch.Tensor(self.adata[self.t0_idx].obsm["X_pca"]).to("cuda:0")
         self.t = torch.Tensor([2, 4, 6]).to("cuda:0")
+        
+        # test
         self.X_d4 = torch.Tensor(
             self.adata[self.df_clonal.loc[self.df_clonal["Time point"] == 4].index].obsm["X_pca"]
+        ).to("cuda:0")
+        
+        # train
+        self.X_d6 = torch.Tensor(
+            self.adata[self.df_clonal.loc[self.df_clonal["Time point"] == 6].index].obsm["X_pca"]
         ).to("cuda:0")
         
     def forward_without_grad(self, DiffEq):
@@ -61,5 +68,8 @@ class InterpolationTest(Callback):
         else:
             X_hat = self.forward_without_grad(DiffEq)
         
-        loss = self.Loss(X_hat[1], self.X_d4)
-        self.log(f"test_loss", loss.item())
+        d4_loss = self.Loss(X_hat[1], self.X_d4)
+        d6_loss = self.Loss(X_hat[2], self.X_d6)
+        
+        self.log(f"eval_d4_loss", d4_loss.item())
+        self.log(f"eval_d6_loss", d6_loss.item())
