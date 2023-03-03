@@ -4,7 +4,7 @@ from .. import tools
 
 import torch
 from tqdm.notebook import tqdm
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 
 NoneType = type(None)
 import os
@@ -21,6 +21,7 @@ class scDiffEq(utils.AutoParseBase):
         time_key="Time point",
         dt=0.1,
         lr=1e-4,
+        seed = 617,
         step_size=10,
         optimizer=torch.optim.RMSprop,
         lr_scheduler=torch.optim.lr_scheduler.StepLR,
@@ -40,6 +41,9 @@ class scDiffEq(utils.AutoParseBase):
         super(scDiffEq, self).__init__()
 
         self.__config__(locals())
+        
+        self.seed = seed
+        seed_everything(seed, workers=True)
 
     def _check_passed_time_args(self):
         """If time_key is passed"""
@@ -98,15 +102,17 @@ class scDiffEq(utils.AutoParseBase):
         reload_dataloaders_every_n_epochs=1,
         gradient_clip_val=0.75,
         devices=None,
+        deterministic=False,
         **kwargs
-    ):
-        
+    ):  
         # bring all kwargs / args into the same place
         kwargs.update(locals())
         kwargs.pop("kwargs")
         
         if self.train_val_split[1] == 0:
             kwargs.update({'check_val_every_n_epoch': 0, 'limit_val_batches': 0})
+            
+        lr = self.lr
 
         trainer_kwargs = utils.extract_func_kwargs(func=self.TrainerGenerator, kwargs=locals())
         trainer_kwargs.update(utils.extract_func_kwargs(func=Trainer, kwargs=kwargs))

@@ -49,6 +49,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             keep_ckpts=self.keep_ckpts,
             retain_test_gradients=self.retain_test_gradients,
             monitor = self.monitor,
+            swa_lrs = self.swa_lrs,
         )
     
     @property
@@ -98,6 +99,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
 
     def __call__(
         self,
+        lr: float = None,
         stage=None,
         max_epochs=500,
         monitor=None,
@@ -111,6 +113,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
         potential_model: bool = False,
+        swa_lrs: float = None,
         **kwargs
     ):
         
@@ -170,6 +173,9 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         self.retain_test_gradients = False
         if isinstance(stage, NoneType):
             stage = ""
+            
+        if isinstance(swa_lrs, NoneType):
+            swa_lrs = lr
             
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()
