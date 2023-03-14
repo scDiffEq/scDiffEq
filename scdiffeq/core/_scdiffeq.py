@@ -94,6 +94,7 @@ class scDiffEq(utils.AutoParseBase):
         epochs=500,
         callbacks=[],
         ckpt_frequency: int = 25,
+        save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
         monitor = None,
         accelerator=None,

@@ -20,7 +20,7 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
             save_last=self.save_last,
             monitor=self.monitor,
         ),
-        StochasticWeightAveraging(swa_lrs=self.swa_lrs),
+        StochasticWeightAveraging(swa_lrs=self.swa_lrs), # considering removal pending better understanding
         ]
 
     @property

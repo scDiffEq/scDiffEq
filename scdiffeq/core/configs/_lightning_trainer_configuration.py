@@ -50,6 +50,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             retain_test_gradients=self.retain_test_gradients,
             monitor = self.monitor,
             swa_lrs = self.swa_lrs,
+            save_last = self.save_last_ckpt,
         )
     
     @property
@@ -109,6 +110,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         log_every_n_steps=1,
         flush_logs_every_n_steps: int = 1,
         ckpt_frequency: int = 25,
+        save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
