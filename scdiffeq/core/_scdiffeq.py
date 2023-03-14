@@ -80,7 +80,6 @@ class scDiffEq(utils.AutoParseBase):
             adjoint=self.adjoint,
         )
                                                                
-                                                               
         self.DiffEq = self.ModelConfig(kwargs)
         
         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self.model_name)
@@ -99,6 +98,7 @@ class scDiffEq(utils.AutoParseBase):
         monitor = None,
         accelerator=None,
         log_every_n_steps=1,
+        swa_lrs=1e-8,
         reload_dataloaders_every_n_epochs=1,
         gradient_clip_val=0.75,
         devices=None,

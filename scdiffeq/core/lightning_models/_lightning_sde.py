@@ -13,6 +13,7 @@ from ..utils import sum_normalize
 
 # -- model class: --------------------------------------------------------------
 class LightningSDE(BaseLightningSDE):
+        
     def __init__(
         self,
         func,
@@ -23,12 +24,13 @@ class LightningSDE(BaseLightningSDE):
         lr_scheduler=torch.optim.lr_scheduler.StepLR,
     ):
         super(LightningSDE, self).__init__()
-
+        
         self.func = func
         self.loss_func = SinkhornDivergence()
         self.optimizers = [optimizer(self.parameters(), lr=lr)]
         self.lr_schedulers = [lr_scheduler(self.optimizers[0], step_size=step_size)]
-        func_description = str(self.func)
+        self.hparams['func_type'] = "NeuralSDE"
+        self.hparams['func_description'] = str(self.func)
         self.save_hyperparameters(ignore=["func"])
 
     def process_batch(self, batch):

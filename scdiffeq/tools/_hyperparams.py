@@ -13,7 +13,7 @@ class HyperParams(AutoParseBase):
 
     def _read(self):
         if not hasattr(self, "_file"):
-            self._yaml_file = yaml.safe_load(open(self._yaml_path))
+            self._yaml_file = yaml.load(open(self._yaml_path), Loader = yaml.Loader)
 
     def __configure__(self, kwargs, private=["yaml_path"]):
 
