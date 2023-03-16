@@ -161,10 +161,37 @@ class scDiffEq(utils.AutoParseBase):
         return self.predictions
 
 
-    def load(self, ckpt_path):
-        """Assmes that self.DiffEq.func is the same as what you are trying to load."""
-        self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path, func=self.DiffEq.func)
+    def load(self, ckpt_path, freeze=True):
+        """
+        Loads a saved checkpoint file specified by ckpt_path into the DiffEq attribute of the input instance.
+        If freeze is True, DiffEq state is frozen to avoid parameter modification.
+
+
+        Parameters:
+        -----------
+        ckpt_path
+            Path to a saved checkpoint file.
+            type: str
         
+        freeze
+            indicates whether or not to freeze the DiffEq attribute after loading the checkpoint.
+            type: bool
+            default: True
+        
+        Returns:
+        --------
+        None, modifies self.DiffEq.state_dict()
+        
+        
+        Notes:
+        ------
+        Assumes that self.DiffEq.func is the same composition as what you are trying to load.
+        """
+        
+        self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path, func=self.DiffEq.func)
+        if freeze:
+            self.DiffEq.freeze()
+            
     def __repr__(self):
         # TODO: add description of model / training status / data / etc.
         return "⏩ scDiffEq Model: {}".format(self.model_name)
