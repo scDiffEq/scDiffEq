@@ -49,6 +49,8 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             keep_ckpts=self.keep_ckpts,
             retain_test_gradients=self.retain_test_gradients,
             monitor = self.monitor,
+            swa_lrs = self.swa_lrs,
+            save_last = self.save_last_ckpt,
         )
     
     @property
@@ -98,6 +100,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
 
     def __call__(
         self,
+        lr: float = None,
         stage=None,
         max_epochs=500,
         monitor=None,
@@ -107,10 +110,12 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         log_every_n_steps=1,
         flush_logs_every_n_steps: int = 1,
         ckpt_frequency: int = 25,
+        save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
         potential_model: bool = False,
+        swa_lrs: float = None,
         **kwargs
     ):
         
@@ -170,6 +175,9 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         self.retain_test_gradients = False
         if isinstance(stage, NoneType):
             stage = ""
+            
+        if isinstance(swa_lrs, NoneType):
+            swa_lrs = lr
             
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()

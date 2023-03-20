@@ -4,7 +4,7 @@ from .. import tools
 
 import torch
 from tqdm.notebook import tqdm
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 
 NoneType = type(None)
 import os
@@ -19,6 +19,12 @@ class scDiffEq(utils.AutoParseBase):
         model_name="scDiffEq_model",
         use_key='X_pca',
         time_key="Time point",
+        dt=0.1,
+        lr=1e-4,
+        seed = 617,
+        step_size=10,
+        optimizer=torch.optim.RMSprop,
+        lr_scheduler=torch.optim.lr_scheduler.StepLR,
         t0_idx=None,
         train_val_split=[0.9, 0.1],
         batch_size=2000,
@@ -35,6 +41,9 @@ class scDiffEq(utils.AutoParseBase):
         super(scDiffEq, self).__init__()
 
         self.__config__(locals())
+        
+        self.seed = seed
+        seed_everything(seed, workers=True)
 
     def _check_passed_time_args(self):
         """If time_key is passed"""
@@ -64,8 +73,14 @@ class scDiffEq(utils.AutoParseBase):
             n_dim = self.LitDataModule.train_dataset.X.shape[-1]
             func = utils.default_NeuralSDE(n_dim)
 
-        self.ModelConfig = configs.LightningModelConfiguration(func, self.adjoint)
-        self.DiffEq = self.ModelConfig()
+        self.ModelConfig = configs.LightningModelConfiguration(
+            func=func,
+            optimizer=torch.optim.RMSprop,
+            lr_scheduler=torch.optim.lr_scheduler.StepLR,
+            adjoint=self.adjoint,
+        )
+                                                               
+        self.DiffEq = self.ModelConfig(kwargs)
         
         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self.model_name)
         self.DiffEqLogger()
@@ -79,22 +94,26 @@ class scDiffEq(utils.AutoParseBase):
         epochs=500,
         callbacks=[],
         ckpt_frequency: int = 25,
+        save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
         monitor = None,
         accelerator=None,
         log_every_n_steps=1,
+        swa_lrs=1e-8,
         reload_dataloaders_every_n_epochs=1,
-        gradient_clip_val=0.25,
+        gradient_clip_val=0.75,
         devices=None,
+        deterministic=False,
         **kwargs
-    ):
-        
+    ):  
         # bring all kwargs / args into the same place
         kwargs.update(locals())
         kwargs.pop("kwargs")
         
         if self.train_val_split[1] == 0:
             kwargs.update({'check_val_every_n_epoch': 0, 'limit_val_batches': 0})
+            
+        lr = self.lr
 
         trainer_kwargs = utils.extract_func_kwargs(func=self.TrainerGenerator, kwargs=locals())
         trainer_kwargs.update(utils.extract_func_kwargs(func=Trainer, kwargs=kwargs))
@@ -142,10 +161,37 @@ class scDiffEq(utils.AutoParseBase):
         return self.predictions
 
 
-    def load(self, ckpt_path):
-        """Assmes that self.DiffEq.func is the same as what you are trying to load."""
-        self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path, func=self.DiffEq.func)
+    def load(self, ckpt_path, freeze=True):
+        """
+        Loads a saved checkpoint file specified by ckpt_path into the DiffEq attribute of the input instance.
+        If freeze is True, DiffEq state is frozen to avoid parameter modification.
+
+
+        Parameters:
+        -----------
+        ckpt_path
+            Path to a saved checkpoint file.
+            type: str
         
+        freeze
+            indicates whether or not to freeze the DiffEq attribute after loading the checkpoint.
+            type: bool
+            default: True
+        
+        Returns:
+        --------
+        None, modifies self.DiffEq.state_dict()
+        
+        
+        Notes:
+        ------
+        Assumes that self.DiffEq.func is the same composition as what you are trying to load.
+        """
+        
+        self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path, func=self.DiffEq.func)
+        if freeze:
+            self.DiffEq.freeze()
+            
     def __repr__(self):
         # TODO: add description of model / training status / data / etc.
         return "⏩ scDiffEq Model: {}".format(self.model_name)

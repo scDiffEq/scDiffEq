@@ -1,4 +1,4 @@
-
+    
 # -- import packages: ----------------------------------------------------------
 import torch
 
@@ -10,17 +10,24 @@ from ._potential_mixin import PotentialMixIn
 
 # -- model class: --------------------------------------------------------------
 class LightningDriftNet(BaseLightningDriftNet):
-    def __init__(self, func, dt=0.1, stdev=torch.Tensor([0.5])):
+    def __init__(
+        self,
+        func,
+        dt=0.1,
+        lr=1e-4,
+        stdev=torch.Tensor([0.5]),
+        step_size=10,
+        optimizer=torch.optim.RMSprop,
+        lr_scheduler=torch.optim.lr_scheduler.StepLR,
+    ):
         super(LightningDriftNet, self).__init__()
 
         self.func = func
         self.loss_func = SinkhornDivergence()
-        self.optimizers = [torch.optim.RMSprop(self.parameters())]  # TODO: replace
-        self.lr_schedulers = [
-            torch.optim.lr_scheduler.StepLR(
-                self.optimizers[0], step_size=10
-            )  # TODO: replace
-        ]
+        self.optimizers = [optimizer(self.parameters(), lr=lr)]
+        self.lr_schedulers = [lr_scheduler(self.optimizers[0], step_size=step_size)]
+        self.hparams['func_type'] = "DriftNet"
+        self.hparams['func_description'] = str(self.func)
         self.save_hyperparameters(ignore=["func"])
 
     def process_batch(self, batch):

@@ -10,17 +10,27 @@ from ._potential_mixin import PotentialMixIn
 
 from ..utils import sum_normalize
 
+
 # -- model class: --------------------------------------------------------------
 class LightningSDE(BaseLightningSDE):
-    def __init__(self, func, dt=0.1, lr=1e-4):
+        
+    def __init__(
+        self,
+        func,
+        dt=0.1,
+        lr=1e-5,
+        step_size=10,
+        optimizer=torch.optim.RMSprop,
+        lr_scheduler=torch.optim.lr_scheduler.StepLR,
+    ):
         super(LightningSDE, self).__init__()
-
+        
         self.func = func
         self.loss_func = SinkhornDivergence()
-        self.optimizers = [torch.optim.RMSprop(self.parameters(), lr=lr)]       # TODO: replace
-        self.lr_schedulers = [
-            torch.optim.lr_scheduler.StepLR(self.optimizers[0], step_size=10)   # TODO: replace
-        ]
+        self.optimizers = [optimizer(self.parameters(), lr=lr)]
+        self.lr_schedulers = [lr_scheduler(self.optimizers[0], step_size=step_size)]
+        self.hparams['func_type'] = "NeuralSDE"
+        self.hparams['func_description'] = str(self.func)
         self.save_hyperparameters(ignore=["func"])
 
     def process_batch(self, batch):
@@ -55,5 +65,20 @@ class LightningSDE(BaseLightningSDE):
             
 
 class LightningPotentialSDE(LightningSDE, PotentialMixIn):
-    def __init__(self, func, dt=0.1, lr=1e-4):
-        super(LightningPotentialSDE, self).__init__(func, dt=0.1, lr=1e-4)
+    def __init__(
+        self,
+        func,
+        dt=0.1,
+        lr=1e-5,
+        step_size=10,
+        optimizer=torch.optim.RMSprop,
+        lr_scheduler=torch.optim.lr_scheduler.StepLR,
+    ):
+        super(LightningPotentialSDE, self).__init__(
+            func=func,
+            dt=dt,
+            lr=lr,
+            step_size=step_size,
+            optimizer=optimizer,
+            lr_scheduler=lr_scheduler,
+        )

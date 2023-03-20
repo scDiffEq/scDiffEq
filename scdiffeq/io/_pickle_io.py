@@ -20,11 +20,11 @@ class PickleIO:
     
 def read_pickle(path, mode="rb"):
 
-    pickle_io = sdq.io.PickleIO()
+    pickle_io = PickleIO()
     return pickle_io.read(path, mode=mode)
 
 
 def write_pickle(obj, path, mode="wb", protocol=pickle.HIGHEST_PROTOCOL):
 
-    pickle_io = sdq.io.PickleIO()
+    pickle_io = PickleIO()
     return pickle_io.write(obj=obj, path=path, mode=mode, protocol=protocol)
