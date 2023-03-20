@@ -81,8 +81,8 @@ class LightningModelConfiguration:
     
     def _is_mu_potential(self):
         """Assumes potential is 1-D"""
-        if not isinstance(self.func, neural_diffeqs.NeuralODE):
-            return False
+#         if not isinstance(self.func, neural_diffeqs.NeuralODE):
+#             return False
         return list(self.func.mu.parameters())[-1].shape[0] == 1
 
     def _is_sigma_potential(self):
