@@ -61,23 +61,3 @@ class LightningSDE(BaseLightningSDE):
             loss = self.loss(X, X_hat, W, W_hat)
             self.record(loss, stage)
             return loss.sum()
-            
-
-class LightningPotentialSDE(LightningSDE, PotentialMixIn):
-    def __init__(
-        self,
-        func,
-        dt=0.1,
-        lr=1e-5,
-        step_size=10,
-        optimizer=torch.optim.RMSprop,
-        lr_scheduler=torch.optim.lr_scheduler.StepLR,
-    ):
-        super(LightningPotentialSDE, self).__init__(
-            func=func,
-            dt=dt,
-            lr=lr,
-            step_size=step_size,
-            optimizer=optimizer,
-            lr_scheduler=lr_scheduler,
-        )

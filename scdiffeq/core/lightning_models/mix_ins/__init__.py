@@ -1,2 +1,2 @@
 
-from ._potential_mixin import PotentialMixIn
+from ._potential_mix_in import PotentialMixIn
