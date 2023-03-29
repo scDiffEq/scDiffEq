@@ -17,9 +17,7 @@ class BaseLightningDiffEq(LightningModule, AutoParseBase):
     """Pytorch-Lightning model trained within scDiffEq"""
     def __init__(self):
         super(BaseLightningDiffEq, self).__init__()
-        
-        self.save_hyperparameters(ignore=['func', 'pca'])
-    
+            
     @abstractmethod
     def process_batch(self):
         ...
