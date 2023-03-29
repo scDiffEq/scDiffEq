@@ -1,9 +1,7 @@
 
 import torch
 
-from ._base_lightning_diffeqs import BaseLightningDiffEq
-
-class PotentialMixIn(BaseLightningDiffEq):
+class PotentialMixIn(object):
     
     def validation_step(self, batch, batch_idx):
         torch.set_grad_enabled(True)

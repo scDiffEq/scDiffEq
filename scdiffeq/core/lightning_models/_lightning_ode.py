@@ -4,13 +4,14 @@ import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._base_lightning_diffeqs import BaseLightningODE
+from .base_models import BaseLightningODE
+from .mix_ins import PotentialMixIn
 from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixIn
 
 
 def min_max_norm(t: torch.Tensor)->torch.Tensor:
     return (t - t.min()) / (t.max() - t.min()) * 1e-3 # TODO: make param
+
 
 # -- model class: --------------------------------------------------------------
 class LightningODE(BaseLightningODE):

@@ -4,9 +4,11 @@ import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._base_lightning_diffeqs import BaseLightningDriftNet
+from .base_models import BaseLightningDriftNet
+from .mix_ins import PotentialMixIn
 from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixIn
+
+
 
 # -- model class: --------------------------------------------------------------
 class LightningDriftNet(BaseLightningDriftNet):

@@ -4,10 +4,9 @@ import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._base_lightning_diffeqs import BaseLightningSDE
+from .base_models import BaseLightningSDE
+from .mix_ins import PotentialMixIn
 from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixIn
-
 from ..utils import sum_normalize
 
 
