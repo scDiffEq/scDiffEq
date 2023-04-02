@@ -11,3 +11,4 @@ from ._lightning_drift_net import LightningDriftNet, LightningPotentialDriftNet
 
 # LightningPotentialODE
 # LightningPotentialSDE
+from ._lightning_vae_sde import LightningVAESDE
