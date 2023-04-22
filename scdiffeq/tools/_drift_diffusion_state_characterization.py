@@ -1,3 +1,11 @@
+
+import torch
+from autodevice import AutoDevice
+
+from ._fetch import fetch
+NoneType = type(None)
+
+# -- Controller class: -----
 class StateCharacterization:
     """Quantify the instantaneous drift / diffusion given a state and model."""
     def __init__(self, SDE, scalar=1):
@@ -15,13 +23,18 @@ class StateCharacterization:
     def diffusion(self, X: torch.Tensor):
         return self.SDE.g(self.t, X).squeeze(dim=-1)
     
+    
+# -- API-facing functions: -----
 def drift(adata, SDE, use_key="X_pca", key_added="X_drift", return_Tensor: bool = False):
     """Accessed as sdq.tl.drift(adata)"""
     
-    X = sdq.tl.fetch(adata, use_key=use_key)
+    X = fetch(adata, use_key=use_key)
     SDE_state = StateCharacterization(SDE)
     X_drift = SDE_state.drift(X)
     adata.obsm[key_added] = X_drift.detach().cpu().numpy()
+    
+    if not isinstance(key_added, NoneType):
+        adata.obsm[key_added] = X_drift.detach().cpu().numpy()
     
     if return_Tensor:
         return X_drift
@@ -30,10 +43,12 @@ def drift(adata, SDE, use_key="X_pca", key_added="X_drift", return_Tensor: bool 
 def diffusion(adata, SDE, use_key="X_pca", key_added="X_diffusion", return_Tensor: bool = False):
     """Accessed as sdq.tl.diffusion(adata)"""
     
-    X = sdq.tl.fetch(adata, use_key=use_key)
+    X = fetch(adata, use_key=use_key)
     SDE_state = StateCharacterization(SDE)
     X_diffusion = SDE_state.diffusion(X)
-    adata.obsm[key_added] = X_diffusion.detach().cpu().numpy()
+    
+    if not isinstance(key_added, NoneType):
+        adata.obsm[key_added] = X_diffusion.detach().cpu().numpy()
     
     if return_Tensor:
         return X_diffusion

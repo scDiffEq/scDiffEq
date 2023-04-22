@@ -1,6 +1,6 @@
 
 # -- import packages: ----------------------------------------------------------
-
+import torch
 
 # -- import local dependencies: ------------------------------------------------
 from ._autoparse_base_class import AutoParseBase
@@ -23,3 +23,33 @@ class FunctionFetch(AutoParseBase):
             return func
         else:
             print("pass something else....")
+            
+# -- supporting functions: -----------------------------------------------------
+def fetch_optimizer(func):
+    """
+    Examples:
+    ---------
+    fetch_optimizer("RMSprop")
+    >>> torch.optim.rmsprop.RMSprop
+
+    fetch_optimizer(torch.optim.RMSprop)
+    >>> torch.optim.rmsprop.RMSprop
+    """
+    fetch = FunctionFetch(module=torch.optim, parent=torch.optim.Optimizer)
+    return fetch(func)
+
+
+def fetch_lr_scheduler(func):
+    """
+    Examples:
+    ---------
+    fetch_lr_scheduler("StepLR")
+    >>> torch.optim.lr_scheduler.StepLR
+
+    fetch_lr_scheduler(torch.optim.lr_scheduler.StepLR)
+    >>> torch.optim.lr_scheduler.StepLR
+    """
+    fetch = FunctionFetch(
+        module=torch.optim.lr_scheduler, parent=torch.optim.lr_scheduler._LRScheduler
+    )
+    return fetch(func)

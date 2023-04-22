@@ -73,14 +73,23 @@ class scDiffEq(utils.AutoParseBase):
             n_dim = self.LitDataModule.train_dataset.X.shape[-1]
             func = utils.default_NeuralSDE(n_dim)
 
-        self.ModelConfig = configs.LightningModelConfiguration(
-            func=func,
+#         self.ModelConfig = configs.LightningModelConfiguration(
+#             func=func,
+#             optimizer=torch.optim.RMSprop,
+#             lr_scheduler=torch.optim.lr_scheduler.StepLR,
+#             adjoint=self.adjoint,
+#         )
+                                                               
+#         self.DiffEq = self.ModelConfig(kwargs)
+        self.DiffEq = lightning_models.LightningSDE_LatentPotential(
+            func,
+            dt=self.dt,
+            lr=self.lr,
+            logqp=True,
+            step_size=self.step_size,
             optimizer=torch.optim.RMSprop,
             lr_scheduler=torch.optim.lr_scheduler.StepLR,
-            adjoint=self.adjoint,
         )
-                                                               
-        self.DiffEq = self.ModelConfig(kwargs)
         
         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self.model_name)
         self.DiffEqLogger()
