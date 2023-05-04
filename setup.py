@@ -5,7 +5,7 @@ import sys
 
 setuptools.setup(
     name="scdiffeq",
-    version="0.0.46rc0",
+    version="0.0.46rc1",
     python_requires=">3.9.0",
     author="Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard",
     author_email="mvinyard@broadinstitute.org",
@@ -29,7 +29,7 @@ setuptools.setup(
         "torch-adata>=0.0.20",
         "autodevice>=0.0.2",
         "brownian-diffuser>=0.0.2",
-        "vinplots>=0.0.76",
+        "vinplots>=0.0.75",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
