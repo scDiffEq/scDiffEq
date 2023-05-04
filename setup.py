@@ -1,9 +1,9 @@
-from setuptools import setup
+import setuptools
 import re
 import os
 import sys
 
-setup(
+setuptools.setup(
     name="scdiffeq",
     version="0.0.46rc0",
     python_requires=">3.9.0",
