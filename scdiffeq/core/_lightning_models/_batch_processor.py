@@ -28,6 +28,9 @@ class BatchProcessor(ABCParse.ABCParse):
         
         self.__parse__(locals(), private=['batch'])
         
+    @property
+    def device(self):
+        return self._batch[0].device
         
     @property
     def n_batch_items(self)->int:
@@ -43,7 +46,7 @@ class BatchProcessor(ABCParse.ABCParse):
     
     @property
     def X(self)->torch.Tensor:
-        return self._batch[1].transpose(1, 0)
+        return self._batch[1].transpose(1, 0).contiguous()
     
     @property
     def X0(self)->torch.Tensor:
@@ -53,12 +56,12 @@ class BatchProcessor(ABCParse.ABCParse):
     def W_hat(self)->torch.Tensor:
         if self.n_batch_items >= 3:
             W = self._batch[2].transpose(1, 0)
-            return utils.sum_normalize(W, sample_axis=1)
-        return utils.sum_normalize(torch.ones([len(self.t), self.batch_size, 1]))
+            return utils.sum_normalize(W, sample_axis=1).contiguous()
+        return utils.sum_normalize(torch.ones([len(self.t), self.batch_size, 1], device=self.device)).contiguous()
         
     @property
     def W(self)->torch.Tensor:
-        return utils.sum_normalize(torch.ones_like(self.W_hat))
+        return utils.sum_normalize(torch.ones_like(self.W_hat)).contiguous()
     
         
     def __repr__(self)->str:

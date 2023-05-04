@@ -1,6 +1,6 @@
 
-from pytorch_lightning import Callback
-from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
+from lightning import Callback
+from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
 
 from .. import utils, callbacks
@@ -20,7 +20,7 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
             save_last=self.save_last,
             monitor=self.monitor,
         ),
-        StochasticWeightAveraging(swa_lrs=self.swa_lrs), # considering removal pending better understanding
+#         StochasticWeightAveraging(swa_lrs=self.swa_lrs), # considering removal pending better understanding
         ]
 
     @property

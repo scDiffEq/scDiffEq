@@ -6,7 +6,7 @@ import torch
 
 
 # -- import local dependencies: ----------------------------------------------------------
-from ..utils import AutoParseBase, normalize_time
+from .. import utils
 from ...tools import time_free_sampling
 
 
@@ -15,7 +15,7 @@ NoneType = type(None)
 
 
 # -- main class: -------------------------------------------------------------------------
-class TimeConfiguration(AutoParseBase):
+class TimeConfiguration(utils.AutoParseBase):
     def __init__(
         self,
         adata: AnnData,
@@ -31,14 +31,22 @@ class TimeConfiguration(AutoParseBase):
         Must provide t0_idx or time_key. if both are provided,
         time_key overrules t0_idx.
         """
-        self._value_pass_check(time_key, t0_idx)
+        self._check_passed_time_args(t0_idx, time_key)
         self.__parse__(locals(), public=[None])
 
     # -- utility funcs: ------------------------------------------------------------------
-    def _value_pass_check(self, time_key, t0_idx):
-        assert any(
-            [not isinstance(time_key, NoneType), not isinstance(t0_idx, NoneType)]
-        ), "Must provide t0_idx or time_key. If both are provided, time_key overrules t0_idx"
+    def _check_passed_time_args(self, t0_idx, time_key):
+        """If time_key is passed"""
+        if utils.not_none(t0_idx):
+            time_key = None
+        elif sum([utils.not_none(time_key), utils.not_none(t0_idx)]) < 1:
+            "Must provide t0_idx or time_key. If both are provided, t0_idx overrules time_key"
+            
+    
+#     def _value_pass_check(self, time_key, t0_idx):
+#         assert any(
+#             [not isinstance(time_key, NoneType), not isinstance(t0_idx, NoneType)]
+#         ), "Must provide t0_idx or time_key. If both are provided, time_key overrules t0_idx"
 
     def _time_from_adata(self):
         return torch.Tensor(sorted(self._adata.obs[self.time_key].unique()))
@@ -55,7 +63,7 @@ class TimeConfiguration(AutoParseBase):
                     t0_key="t0",
                     t_key="t",
                 )
-                normalize_time(
+                utils.normalize_time(
                     self._adata,
                     time_key="t",
                     t_min=self._t_min,

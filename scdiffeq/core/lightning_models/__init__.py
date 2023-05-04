@@ -1,18 +1,24 @@
 
 
 # -- import modules: -----------------------------------------------------------
-from ._sinkhorn_divergence import SinkhornDivergence
+from . import base
 
-from . import base_models, mix_ins
+# -- import supporting sub-packages: -------------------------------------------
+from . import mix_ins
 
+# -- import models: ------------------------------------------------------------
 from ._lightning_ode import LightningODE
 from ._lightning_sde import LightningSDE
-from ._lightning_drift_net import LightningDriftNet, LightningPotentialDriftNet
+from ._lightning_sde_vae import LightningSDE_VAE
+from ._lightning_ode_vae import LightningODE_VAE
 
-# LightningPotentialODE
-# LightningPotentialSDE
-from ._lightning_vae_sde import LightningVAESDE
-from ._lightning_sde_latent_potential import LightningSDE_LatentPotential
+from ._lightning_ode_fixed_potential import LightningODE_FixedPotential
+from ._lightning_sde_fixed_potential import LightningSDE_FixedPotential
+from ._lightning_ode_vae_fixed_potential import LightningODE_VAE_FixedPotential
+from ._lightning_sde_vae_fixed_potential import LightningSDE_VAE_FixedPotential
 
-# -- new: ---
-from ._batch_processor import BatchProcessor
+
+from ._lightning_ode_prior_potential import LightningODE_PriorPotential
+from ._lightning_sde_prior_potential import LightningSDE_PriorPotential
+from ._lightning_ode_vae_prior_potential import LightningODE_VAE_PriorPotential
+from ._lightning_sde_vae_prior_potential import LightningSDE_VAE_PriorPotential

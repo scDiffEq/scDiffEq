@@ -1,6 +1,8 @@
 
 # -- import packages: ----------------------------------------------------------
-from pytorch_lightning import Trainer, loggers
+# from pytorch_lightning import Trainer, loggers
+from lightning import Trainer
+from lightning.pytorch import loggers
 import torch
 import os
 
@@ -49,7 +51,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             keep_ckpts=self.keep_ckpts,
             retain_test_gradients=self.retain_test_gradients,
             monitor = self.monitor,
-            swa_lrs = self.swa_lrs,
+#             swa_lrs = self.swa_lrs,
             save_last = self.save_last_ckpt,
         )
     
@@ -115,7 +117,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
         potential_model: bool = False,
-        swa_lrs: float = None,
+#         swa_lrs: float = None,
         **kwargs
     ):
         
@@ -176,8 +178,8 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         if isinstance(stage, NoneType):
             stage = ""
             
-        if isinstance(swa_lrs, NoneType):
-            swa_lrs = lr
+#         if isinstance(swa_lrs, NoneType):
+#             swa_lrs = lr
             
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()

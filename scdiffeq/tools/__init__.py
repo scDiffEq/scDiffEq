@@ -22,3 +22,5 @@ from ._func_from_version import func_from_version
 from ._umap import UMAP
 from ._fetch import fetch
 from ._drift_diffusion_state_characterization import drift, diffusion
+
+from ._dimension_reduction import DimensionReduction

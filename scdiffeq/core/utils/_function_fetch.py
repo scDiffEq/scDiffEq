@@ -1,4 +1,9 @@
 
+"""
+Flexible fetch of optimizer, LR_scheduler, other functions.
+
+"""
+
 # -- import packages: ----------------------------------------------------------
 import torch
 
@@ -50,6 +55,6 @@ def fetch_lr_scheduler(func):
     >>> torch.optim.lr_scheduler.StepLR
     """
     fetch = FunctionFetch(
-        module=torch.optim.lr_scheduler, parent=torch.optim.lr_scheduler._LRScheduler
+        module=torch.optim.lr_scheduler, parent=torch.optim.lr_scheduler.LRScheduler
     )
     return fetch(func)

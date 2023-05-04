@@ -1,36 +1,30 @@
 
-# -- import packages: ---------------------------------------------
 from abc import abstractmethod
 
-# -- import local dependencies: ----
-from ._base_mix_in import BaseMixIn
-
-
-class PreTrainMixIn(BaseMixIn):
-    """Overrides the training_step from BaseLightningSDE to add a diversion towards the pre-train routine."""
+class PreTrainMixIn(object):
+    """
+    Requires user to:
+    1. pass pretrain_epochs to the model __init__
+    2. def `pretrain_step` method on the model
+    """
 
     def __init__(self, *args, **kwargs):
-        super(PreTrainMixIn, self).__init__()
+        super().__init__()
+        self.automatic_optimization = False
 
-    def training_step(self, batch, batch_idx):
-        
-        """Gives the option to do a separate routine designated as `pretrain_step`"""
-
-        if self.current_epoch < self.pretrain_epochs:
-            return self.pretrain_step(batch, batch_idx, stage="pretraining_train")
-
+    def training_step(self, batch, batch_idx, *args, **kwargs):
+        if self.PRETRAIN:
+            return self.pretrain_step(batch, batch_idx, stage="pretrain")
         return self.step(batch, batch_idx, stage="training")
 
-    def validation_step(self, batch, batch_idx):
-        
-        """Gives the option to do a separate routine designated as `pretrain_step`"""
+    def validation_step(self, batch, batch_idx, *args, **kwargs):
+        if not self.PRETRAIN:
+            return self.step(batch, batch_idx, stage="validation")
 
-        if self.current_epoch < self.pretrain_epochs:
-            return self.pretrain_step(batch, batch_idx, stage="pretraining_validation")
-
-        return self.step(batch, batch_idx, stage="validation")
+    @property
+    def PRETRAIN(self):
+        return self.current_epoch < self.hparams["pretrain_epochs"]
 
     @abstractmethod
-    def pretrain_step(self, batch, batch_idx, stage="pretraining"):
-        """Called within {training/validation}_step Should return loss.sum()"""
+    def pretrain_step(self):
         ...

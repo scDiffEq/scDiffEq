@@ -1,71 +1,57 @@
 
 # -- import packages: ----------------------------------------------------------
+from neural_diffeqs import NeuralSDE
 import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from .base_models import BaseLightningSDE
-from .mix_ins import PotentialMixIn
-from ._sinkhorn_divergence import SinkhornDivergence
-from ..utils import sum_normalize
+from . import base, mix_ins
 
 
-# -- model class: --------------------------------------------------------------
-class LightningSDE(BaseLightningSDE):
-        
+from typing import Union, List
+
+
+# -- lightning model: ----------------------------------------------------------
+class LightningSDE(
+    mix_ins.BaseForwardMixIn,
+    base.BaseLightningDiffEq,
+):
     def __init__(
         self,
-        func,
+        latent_dim,
+        mu_hidden: Union[List[int], int] = [400, 400, 400],
+        sigma_hidden: Union[List[int], int] = [400, 400, 400],
+        mu_activation: Union[str, List[str]] = 'LeakyReLU',
+        sigma_activation: Union[str, List[str]] = 'LeakyReLU',
+        mu_dropout: Union[float, List[float]] = 0.1,
+        sigma_dropout: Union[float, List[float]] = 0.1,
+        mu_bias: bool = True,
+        sigma_bias: List[bool] = True,
+        mu_output_bias: bool = True,
+        sigma_output_bias: bool = True,
+        mu_n_augment: int = 0,
+        sigma_n_augment: int = 0,
+        sde_type='ito',
+        noise_type='general',
+        brownian_dim=1,
+        coef_drift: float = 1.0,
+        coef_diffusion: float = 1.0,
+        train_lr=1e-4,
+        train_optimizer=torch.optim.RMSprop,
+        train_scheduler=torch.optim.lr_scheduler.StepLR,
+        train_step_size=10,
         dt=0.1,
-        lr=1e-5,
-        step_size=10,
-        optimizer=torch.optim.RMSprop,
-        lr_scheduler=torch.optim.lr_scheduler.StepLR,
+        adjoint=False,
+        *args,
+        **kwargs,
     ):
-        super(LightningSDE, self).__init__()
+        super().__init__()
+
+        self.save_hyperparameters()
         
-        self.func = func
-        self.loss_func = SinkhornDivergence()
-        self.optimizers = [optimizer(self.parameters(), lr=lr)]
-        self.lr_schedulers = [lr_scheduler(self.optimizers[0], step_size=step_size)]
-        self.hparams['func_type'] = "NeuralSDE"
-        self.hparams['func_description'] = str(self.func)
-        self.save_hyperparameters(ignore=["func"])
+        # -- torch modules: ----------------------------------------------------
+        self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
+        self._configure_optimizers_schedulers()
 
-    def process_batch(self, batch):
-        """called in step"""
-
-        t = batch[0].unique()
-        X = batch[1].transpose(1, 0)
-        X0 = X[0]
-        W_hat = sum_normalize(batch[2].transpose(1, 0))
-
-        return X, X0, W_hat, t
-
-    def loss(self, X, X_hat, W, W_hat):
-        X, X_hat = X.contiguous(), X_hat.contiguous()
-        W, W_hat = W.contiguous(), W_hat.contiguous()
-        return self.loss_func(W, X, W_hat, X_hat)
-
-    def step(self, batch, batch_idx, stage=None):
-        """Batch should be from a torch DataLoader"""
-        
-        X, X0, W_hat, t = self.process_batch(batch)
-        if stage == "predict":
-            t = self.t
-        X_hat = self.forward(X0, t)
-        if stage == "predict":
-            return X_hat
-        else:
-            W = sum_normalize(torch.ones_like(W_hat))
-            loss = self.loss(X, X_hat, W, W_hat)
-            self.record(loss, stage)
-            return loss.sum()
-        
-    def forward(self, X0, t, **kwargs):
-        """
-        We want this to be easily-accesible from the outside, so we
-        directly define the forward step with the integrator code.
-        """
-                
-        return self.integrate(X0=X0, t=t, dt=self.hparams['dt'], **kwargs)
+    def __repr__(self):
+        return "LightningSDE"
