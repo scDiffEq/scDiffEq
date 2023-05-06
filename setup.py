@@ -5,7 +5,7 @@ import sys
 
 setuptools.setup(
     name="scdiffeq",
-    version="0.0.46rc1",
+    version="0.0.46rc2",
     python_requires=">3.9.0",
     author="Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard",
     author_email="mvinyard@broadinstitute.org",
@@ -26,14 +26,16 @@ setuptools.setup(
         "lightning>=2.0.1",
         "neural-diffeqs==0.3.1rc0",
         "torch-nets>=0.0.4",
-        "torch-adata>=0.0.20",
+        "torch-adata>=0.0.21",
         "autodevice>=0.0.2",
         "brownian-diffuser>=0.0.2",
         "vinplots>=0.0.75",
+	"annoyance==0.0.18",
+	"ABCParse==0.0.3",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],

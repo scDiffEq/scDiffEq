@@ -1,18 +1,20 @@
 
 # -- import packages: ----------------------------------------------------------
 from neural_diffeqs import NeuralSDE
-import torch_nets
 import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from . import mix_ins, base
+from . import base, mix_ins
+
 
 from typing import Union, List
 
 # -- lightning model: ----------------------------------------------------------
-class LightningSDE_VAE(
-    mix_ins.VAEMixIn, 
+class LightningSDE_VAE_FateBiasAware(
+    mix_ins.VAEMixIn,
+    mix_ins.FateBiasVAEMixIn,
+    mix_ins.PotentialMixIn,
     mix_ins.PreTrainMixIn,
     base.BaseLightningDiffEq,
 ):
@@ -31,7 +33,7 @@ class LightningSDE_VAE(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
-
+        
         # -- sde params: -------------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
@@ -66,17 +68,30 @@ class LightningSDE_VAE(
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
+
+        # -- fate bias parameters: ---------------------------------------------
+        t0_idx = None,
+        kNN_Graph=None,
+        fate_bias_csv_path=None,
+        fate_bias_multiplier = 1,
         
         *args,
         **kwargs,
     ):
         super().__init__()
 
-        self.save_hyperparameters()
-        
+        self.save_hyperparameters(ignore=['kNN_Graph'])
+                        
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func = NeuralSDE, kwargs=locals())
+        self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
         self._configure_optimizers_schedulers()
-    
+        
+        self._configure_fate(
+            graph=kNN_Graph,
+            csv_path = fate_bias_csv_path,
+            t0_idx = t0_idx,
+            fate_bias_multiplier = fate_bias_multiplier,
+        )
+
     def __repr__(self):
-        return "LightningSDE-VAE"
+        return "LightningSDE-VAE-FateBiasAware"

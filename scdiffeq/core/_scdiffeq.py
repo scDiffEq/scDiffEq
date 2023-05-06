@@ -3,6 +3,8 @@
 # -- import packages: ----------------------------------------------------------
 from tqdm.notebook import tqdm
 import lightning
+import anndata
+import pandas as pd
 import torch
 import glob
 import os
@@ -21,53 +23,71 @@ NoneType = type(None)
 class scDiffEq(utils.ABCParse):
     def __init__(
         self,
-        adata,
-        # -- general params: ----------------------------------------------------
-        latent_dim=20,
-        model_name="scDiffEq_model",
-        use_key="X_scaled",
-        time_key="Time point",
-        obs_keys=["W"],
-        kNN_key="X_pca_scDiffEq",
-        pretrain_epochs=500,
-        pretrain_lr=1e-3,
+        
+        # -- data params: -------------------------------------------------------
+        adata: anndata.AnnData,
+        latent_dim: int = 20,
+        model_name: str = "scDiffEq_model",
+        use_key: str = "X_scaled",
+        obs_keys: List[str] = ["W"],
+        kNN_key: str = "X_pca_scDiffEq",
+        
+        # -- pretrain params: ---------------------------------------------------
+        pretrain_epochs: int = 500,
+        pretrain_lr: float = 1e-3,
         pretrain_optimizer=torch.optim.Adam,
-        pretrain_step_size=100,
+        pretrain_step_size: int = 100,
         pretrain_scheduler=torch.optim.lr_scheduler.StepLR,
-        train_epochs=1500,
-        train_lr=1e-5,
-        train_optimizer=torch.optim.RMSprop,
-        train_scheduler=torch.optim.lr_scheduler.StepLR,
-        train_step_size=10,
-        dt=0.1,
-        seed=617,
-        t0_idx=None,
-        train_val_split=[0.9, 0.1],
-        batch_size=2000,
-        num_workers=os.cpu_count(),
-        adjoint=False,
-        groupby="Time point",
-        train_key="train",
-        val_key="val",
-        test_key="test",
-        predict_key="predict",
-        silent=True,
-        scale_input_counts=True,
-        reduce_dimensions=True,
-        build_kNN=True,
+        
+        # -- train params: ------------------------------------------------------
+        train_epochs: int =1500,
+        train_lr: float = 1e-5,
+        train_optimizer = torch.optim.RMSprop,
+        train_scheduler = torch.optim.lr_scheduler.StepLR,
+        train_step_size: int = 10,
+        train_val_split: List[float] = [0.9, 0.1],
+        batch_size: int = 2000,
+        
+        train_key: str = "train",
+        val_key: str = "val",
+        test_key: str = "test",
+        predict_key: str = "predict",
+        
+        # -- general params: ----------------------------------------------------
+        seed: int = 617,
+        num_workers: int = os.cpu_count(),
+        silent: bool = True,
+        scale_input_counts: bool = True,
+        reduce_dimensions: bool = True,
+        build_kNN: bool = True,
+        fate_bias_csv_path: Union[str, NoneType] = None,
+        fate_bias_multiplier: float = 1,
+        
+        # -- time params: -------------------------------------------------------
+        time_key: Union[str, NoneType] = None,
+        t0_idx: Union[pd.Index, NoneType] = None,
+        t_min: float = 0,
+        t_max: float = 1,
+        dt: float = 0.1,
+        t0_cluster=None,
+        cluster_key=None,
+        
         # -- DiffEq params: ----------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
-        sigma_hidden: Union[List[int], int] = [400, 400, 400],
         mu_activation: Union[str, List[str]] = "LeakyReLU",
-        sigma_activation: Union[str, List[str]] = "LeakyReLU",
         mu_dropout: Union[float, List[float]] = 0.1,
-        sigma_dropout: Union[float, List[float]] = 0.1,
         mu_bias: bool = True,
-        sigma_bias: List[bool] = True,
         mu_output_bias: bool = True,
-        sigma_output_bias: bool = True,
         mu_n_augment: int = 0,
+        
+        sigma_hidden: Union[List[int], int] = [400, 400, 400],
+        sigma_activation: Union[str, List[str]] = "LeakyReLU",
+        sigma_dropout: Union[float, List[float]] = 0.1,
+        sigma_bias: List[bool] = True,
+        sigma_output_bias: bool = True,
         sigma_n_augment: int = 0,
+        
+        adjoint: bool = False,
         sde_type: str = "ito",
         noise_type: str = "general",
         brownian_dim: int = 1,
@@ -76,6 +96,7 @@ class scDiffEq(utils.ABCParse):
         coef_prior_drift: float = 1.0,
         DiffEq_type: str = "SDE",
         potential_type: str = "prior",
+        
         # -- Encoder params: ---------------------------------------------------
         encoder_n_hidden: int = 4,
         encoder_power: float = 2,
@@ -83,6 +104,7 @@ class scDiffEq(utils.ABCParse):
         encoder_dropout: Union[float, List[float]] = 0.2,
         encoder_bias: bool = True,
         encoder_output_bias: bool = True,
+        
         # -- Decoder params: ---------------------------------------------------
         decoder_n_hidden: int = 4,
         decoder_power: float = 2,
@@ -90,6 +112,9 @@ class scDiffEq(utils.ABCParse):
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
+        
+        *args,
+        **kwargs,
     ):
         super().__init__()
 
@@ -98,27 +123,19 @@ class scDiffEq(utils.ABCParse):
     def _configure_data(self, kwargs):
 
         """Configure data (including time time)"""
-
-        self.time_attributes = configs.configure_time(
-            self.adata, time_key=self._time_key, t0_idx=self._t0_idx
+        
+        self.t, self.t_config = configs.configure_time(
+            **utils.extract_func_kwargs(func = configs.configure_time, kwargs = kwargs),
         )
-
+        kwargs['groupby'] = self.t_config.attributes['time_key']
+        kwargs.update(self.t_config.attributes)
         self.LitDataModule = configs.LightningData(
-            **utils.extract_func_kwargs(func=configs.LightningData, kwargs=kwargs)
+            **utils.extract_func_kwargs(
+                func=configs.LightningData,
+                kwargs=kwargs,
+            )
         )
         self._data_dim = self.LitDataModule.n_dim
-
-    def _configure_model(self, kwargs):
-
-        self._LitModelConfig = configs.LightningModelConfiguration(
-            data_dim=self._data_dim,
-            latent_dim=self._latent_dim,
-            DiffEq_type=self._DiffEq_type,
-            potential_type=self._potential_type,
-        )
-
-        self.DiffEq = self._LitModelConfig(kwargs)
-        self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
 
     def _configure_dimension_reduction(self):
         self.reducer = tools.DimensionReduction(self.adata)
@@ -146,10 +163,33 @@ class scDiffEq(utils.ABCParse):
         )
 
     def _configure_kNN_graph(self):
-        train_adata = self.adata[self.adata.obs[self._train_key]]
+        train_adata = self.adata[self.adata.obs[self._train_key]].copy()
+        
+        train_adata.obs = train_adata.obs.reset_index()
+        train_adata.obs.index = train_adata.obs.index.astype(str)
+        
         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
-        self.kNN_Graph = utils.FastGraph(adata=train_adata, use_key=self._kNN_key)
+        self.kNN_Graph = utils.FastGraph(
+            adata=train_adata,
+            use_key=self._kNN_key,
+        )
 
+    def _configure_model(self, kwargs):
+
+        self._LitModelConfig = configs.LightningModelConfiguration(
+            data_dim=self._data_dim,
+            latent_dim=self._latent_dim,
+            DiffEq_type=self._DiffEq_type,
+            potential_type=self._potential_type,
+            fate_bias_csv_path = self._fate_bias_csv_path,
+        )
+        
+        if hasattr(self, "kNN_Graph"):
+            kwargs['kNN_Graph'] = self.kNN_Graph
+
+        self.DiffEq = self._LitModelConfig(kwargs)
+        self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
+    
     def __config__(self, kwargs):
 
         """
@@ -158,9 +198,9 @@ class scDiffEq(utils.ABCParse):
         Step 0: Parse all kwargs
         Step 1: Set up info messaging [TODO: eventually replace this with more sophisticated logging]
         Step 2: Configure data
-        Step 3: Configure lightning model
         Step 4: Configure dimension reduction models
         Step 5: Configure kNN Graph.
+        Step 3: Configure lightning model
         Step 6: Configure logger
         Step 7: Configure TrainerGenerator
         """
@@ -168,11 +208,11 @@ class scDiffEq(utils.ABCParse):
         self.__parse__(kwargs, public=["adata"])
         self._INFO = utils.InfoMessage()
         self._configure_data(kwargs)
-        self._configure_model(kwargs)
         if kwargs["reduce_dimensions"]:
             self._configure_dimension_reduction()
         if kwargs["build_kNN"]:
             self._configure_kNN_graph()
+        self._configure_model(kwargs)
         self._configure_logger()
         self._configure_trainer_generator()
 
@@ -197,7 +237,9 @@ class scDiffEq(utils.ABCParse):
 
         if not isinstance(epochs, NoneType):
             self._pretrain_epochs = epochs
-            self._PARAMS["_pretrain_epochs"] = epochs
+            self._PARAMS["pretrain_epochs"] = epochs
+            self.DiffEq.hparams['pretrain_epochs'] = epochs
+            self._INFO(f"Pretrain epochs scheduled: {epochs}")
 
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
@@ -232,6 +274,8 @@ class scDiffEq(utils.ABCParse):
         if not isinstance(epochs, NoneType):
             self._train_epochs = epochs
             self._PARAMS["train_epochs"] = epochs
+            self.DiffEq.hparams['train_epochs'] = epochs
+            self._INFO(f"Train epochs scheduled: {epochs}")
 
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
@@ -297,6 +341,17 @@ class scDiffEq(utils.ABCParse):
                 epochs=train_epochs, **utils.extract_func_kwargs(self.train, locals())
             )
 
+        
+#         for key, val in self._time_attributes.items():
+#             setattr(self, f"_{key}", val)
+#             kwargs[key] = val
+#             if key == "time_key":
+#                 kwargs['groupby'] = val
+                
+#         self._INFO(f"Modeling cell dynamics over {self._time_attributes['n_steps']-1} steps from t0={self._time_attributes['t_min']} -> tf={self._time_attributes['t_max']} (dt={self._time_attributes['dt']})")
+
+# ------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------
 
 # class scDiffEq(utils.AutoParseBase):
 #     def __init__(

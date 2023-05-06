@@ -23,7 +23,8 @@ class PreTrainMixIn(object):
 
     @property
     def PRETRAIN(self):
-        return self.current_epoch < self.hparams["pretrain_epochs"]
+        return self.COMPLETED_EPOCHS < self.hparams["pretrain_epochs"]
+#         return self.current_epoch < self.hparams["pretrain_epochs"]
 
     @abstractmethod
     def pretrain_step(self):

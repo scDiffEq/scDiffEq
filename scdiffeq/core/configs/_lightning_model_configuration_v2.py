@@ -1,6 +1,9 @@
 import ABCParse
+import os
 
 from .. import lightning_models, utils
+
+NoneType = type(None)
 
 # -- import packages: ----------------------------------------------------------
 class LightningModelConfiguration(ABCParse.ABCParse):
@@ -15,6 +18,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
         latent_dim: int = 20,
         DiffEq_type: str = "SDE",
         potential_type="prior",
+        fate_bias_csv_path = None,
     ):
 
         self.__parse__(locals(), public=[None])
@@ -39,6 +43,16 @@ class LightningModelConfiguration(ABCParse.ABCParse):
     def potential_type(self):
         if self._potential_type:
             return self._potential_types[self._potential_type]
+        
+    @property
+    def fate_bias_aware(self):
+        if isinstance(self._fate_bias_csv_path, NoneType):
+            return False
+        else:
+            if os.path.exists(self._fate_bias_csv_path):
+                return True
+            else:
+                raise ValueError("Path to fate_bias.csv was passed though not found.")
 
     def __call__(self, kwargs):
 
@@ -49,11 +63,14 @@ class LightningModelConfiguration(ABCParse.ABCParse):
 
         if self.potential_type:
             _model.append(self.potential_type)
+            
+        if self.fate_bias_aware:
+            _model.append("FateBiasAware")
 
         _model = "_".join(_model)
 
         if _model in self.available_lightning_models:
             lit_model = getattr(lightning_models, _model)
             model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
-            # data_dim=self._data_dim, latent_dim=self._latent_dim, 
             return lit_model(data_dim = self._data_dim, **model_kwargs)
+        raise ValueError(f"Configuration tried: {_model} - this does not exist as an available model.")

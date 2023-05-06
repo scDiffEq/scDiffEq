@@ -5,6 +5,15 @@ from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveragi
 
 from .. import utils, callbacks
 
+class InterTrainerEpochCounter(Callback):
+    def __init__(self):
+        ...
+#         self.COMPLETED_EPOCHS = 0
+
+    def on_train_epoch_end(self, trainer, pl_module, *args, **kwargs):
+
+        pl_module.COMPLETED_EPOCHS += 1
+        ce = pl_module.COMPLETED_EPOCHS        
 
 class LightningCallbacksConfiguration(utils.AutoParseBase):
     def __init__(self):
@@ -20,7 +29,9 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
             save_last=self.save_last,
             monitor=self.monitor,
         ),
-#         StochasticWeightAveraging(swa_lrs=self.swa_lrs), # considering removal pending better understanding
+            InterTrainerEpochCounter(),
+            # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
+            # considering rm SWA pending better understanding
         ]
 
     @property

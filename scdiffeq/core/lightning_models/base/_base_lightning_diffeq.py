@@ -20,6 +20,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
         self.sinkhorn_divergence = SinkhornDivergence(backend="auto", **kwargs)
         self.process_batch = BatchProcessor
+        self.COMPLETED_EPOCHS = 0
         
     # -- setup: ----------------------------------------------------------------
     def _configure_optimizers_schedulers(self):
@@ -72,7 +73,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
     # -- custom steps: -------------------------------------------------------------
     @abstractmethod
-    def forward(self, X0, t, **kwargs):
+    def forward(self, Z0, t, **kwargs):
         """most likely over-written in another class"""
         ...
 

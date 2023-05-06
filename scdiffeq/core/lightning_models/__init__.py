@@ -22,3 +22,6 @@ from ._lightning_ode_prior_potential import LightningODE_PriorPotential
 from ._lightning_sde_prior_potential import LightningSDE_PriorPotential
 from ._lightning_ode_vae_prior_potential import LightningODE_VAE_PriorPotential
 from ._lightning_sde_vae_prior_potential import LightningSDE_VAE_PriorPotential
+
+from ._lightning_sde_fate_bias_aware import LightningSDE_FateBiasAware
+from ._lightning_sde_vae_fate_bias_aware import LightningSDE_VAE_FateBiasAware

@@ -32,3 +32,5 @@ from ._info_message import InfoMessage
 from ._abc_parse import ABCParse
 from ._fast_graph import FastGraph
 from ._fetch_format import fetch_format
+
+from ._idx_to_int_str import idx_to_int_str
