@@ -120,9 +120,16 @@ class scDiffEq(utils.ABCParse):
 
         self.__config__(locals())
 
+    def _configure_obs_idx(self):
+        if not self.adata.obs.index[0] == "1":
+            self.adata = utils.idx_to_int_str(self.adata)
+        
+        
     def _configure_data(self, kwargs):
 
         """Configure data (including time time)"""
+        
+        self._configure_obs_idx()
         
         self.t, self.t_config = configs.configure_time(
             **utils.extract_func_kwargs(func = configs.configure_time, kwargs = kwargs),
@@ -252,11 +259,15 @@ class scDiffEq(utils.ABCParse):
         return trainer_kwargs
             
     def _configure_pretrain_step(self, epochs, callbacks=[]):
-
+        
         STAGE = "pretrain"
         self._INFO(f"Configuring fit step: {STAGE}")
 
         if not isinstance(epochs, NoneType):
+            
+            if self._PRETRAIN_CONFIG_COUNT > 0:
+                epochs = epochs + self._pretrain_epochs
+            
             self._pretrain_epochs = epochs
             self._PARAMS["pretrain_epochs"] = epochs
             self.DiffEq.hparams['pretrain_epochs'] = epochs
@@ -290,7 +301,6 @@ class scDiffEq(utils.ABCParse):
             **trainer_kwargs
         )
         self._stage_log_path(STAGE)
-        self._PRETRAIN_CONFIG_COUNT += 1
 
     def pretrain(
         self,
@@ -309,6 +319,9 @@ class scDiffEq(utils.ABCParse):
         self._INFO(f"Configuring fit step: {STAGE}")
 
         if not isinstance(epochs, NoneType):
+            if self._TRAIN_CONFIG_COUNT > 0:
+                epochs = epochs + self._train_epochs
+                
             self._train_epochs = epochs
             self._PARAMS["train_epochs"] = epochs
             self.DiffEq.hparams['train_epochs'] = epochs
@@ -344,7 +357,6 @@ class scDiffEq(utils.ABCParse):
         )
 
         self._stage_log_path(STAGE)
-        self._TRAIN_CONFIG_COUNT += 1
 
     def train(
         self,
@@ -389,257 +401,7 @@ class scDiffEq(utils.ABCParse):
             self.train(
                 epochs=train_epochs, **utils.extract_func_kwargs(self.train, locals())
             )
-
-        
-#         for key, val in self._time_attributes.items():
-#             setattr(self, f"_{key}", val)
-#             kwargs[key] = val
-#             if key == "time_key":
-#                 kwargs['groupby'] = val
-                
-#         self._INFO(f"Modeling cell dynamics over {self._time_attributes['n_steps']-1} steps from t0={self._time_attributes['t_min']} -> tf={self._time_attributes['t_max']} (dt={self._time_attributes['dt']})")
-
-# ------------------------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------------------------
-
-# class scDiffEq(utils.AutoParseBase):
-#     def __init__(
-#         self,
-#         adata,
-#         latent_dim=20,
-        
-#         # -- sde params: ----
-#         mu_hidden: Union[List[int], int] = [400, 400, 400],
-#         sigma_hidden: Union[List[int], int] = [400, 400, 400],
-#         mu_activation: Union[str, List[str]] = 'LeakyReLU',
-#         sigma_activation: Union[str, List[str]] = 'LeakyReLU',
-#         mu_dropout: Union[float, List[float]] = 0.1,
-#         sigma_dropout: Union[float, List[float]] = 0.1,
-#         mu_bias: bool = True,
-#         sigma_bias: List[bool] = True,
-#         mu_output_bias: bool = True,
-#         sigma_output_bias: bool = True,
-#         mu_n_augment: int = 0,
-#         sigma_n_augment: int = 0,
-#         sde_type='ito',
-#         noise_type='general',
-#         brownian_dim=1,
-#         coef_drift: float = 1.0,
-#         coef_diffusion: float = 1.0,
-#         coef_prior_drift: float = 1.0,
-        
-#         DiffEq_type: str = "SDE",
-#         potential_type="prior",
-#         pretrain_epochs=1500,
-# #         func=None,
-# #         h5ad_path=None,
-#         model_name="scDiffEq_model",
-#         use_key='X_scaled',
-#         time_key="Time point",
-#         dt=0.1,
-#         lr=1e-4,
-#         seed = 617,
-#         step_size=10,
-# #         optimizer=torch.optim.RMSprop,
-# #         lr_scheduler=torch.optim.lr_scheduler.StepLR,
-#         t0_idx=None,
-#         train_val_split=[0.9, 0.1],
-#         batch_size=2000,
-#         num_workers=os.cpu_count(),
-#         adjoint=False,
-#         obs_keys=['W'],
-#         groupby='Time point',
-#         train_key='train',
-#         val_key='val',
-#         test_key='test',
-#         predict_key='predict',
-#         silent=True,
-        
-#         # -- encoder parameters: -------
-#         encoder_n_hidden: int = 4,
-#         encoder_power: float = 2,
-#         encoder_activation: Union[str, List[str]] = 'LeakyReLU',
-#         encoder_dropout: Union[float, List[float]] = 0.2,
-#         encoder_bias: bool = True,
-#         encoder_output_bias: bool = True,
-        
-#         # -- decoder parameters: -------
-#         decoder_n_hidden: int = 4,
-#         decoder_power: float = 2,
-#         decoder_activation: Union[str, List[str]] = 'LeakyReLU',
-#         decoder_dropout: Union[float, List[float]] = 0.2,
-#         decoder_bias: bool = True,
-#         decoder_output_bias: bool = True,
-        
-#     ):
-#         super(scDiffEq, self).__init__()
-
-#         self.__config__(locals())        
-
-#     def _check_passed_time_args(self):
-#         """If time_key is passed"""
-#         if utils.not_none(self.t0_idx):
-#             self.time_key = None
-#         elif sum([utils.not_none(self.time_key), utils.not_none(self.t0_idx)]) < 1:
-#             "Must provide t0_idx or time_key. If both are provided, t0_idx overrules time_key"
-
-#     def __config__(self, kwargs):
-
-# #         func = kwargs.pop("func")
-# #         self._check_passed_time_args()
-
-#         self.__parse__(kwargs, ignore=["self"])
-#         seed_everything(self.seed, workers=True)
-#         self.time_attributes = configs.configure_time(
-#             self.adata, time_key=self.time_key, t0_idx=self.t0_idx
-#         )
-        
-#         LitDataKwargs = utils.extract_func_kwargs(
-#             func = configs.LightningData,
-#             kwargs = kwargs,
-#         )
-#         self.LitDataModule = configs.LightningData(**LitDataKwargs)   
-        
-#         self.LitModelConfig = configs.LightningModelConfiguration(
-#             data_dim = self.LitDataModule.n_dim,
-#             latent_dim = kwargs['latent_dim'],
-#             DiffEq_type = kwargs['DiffEq_type'],
-#             potential_type = kwargs['potential_type'],
-#         )
-#         self.DiffEq = self.LitModelConfig(kwargs)
-
-# #         if isinstance(func, NoneType):
-# #             n_dim = self.LitDataModule.train_dataset.X.shape[-1]
-# #             func = utils.default_NeuralSDE(n_dim)
-
-# #         self.ModelConfig = configs.LightningModelConfiguration(
-# #             func=func,
-# #             optimizer=torch.optim.RMSprop,
-# #             lr_scheduler=torch.optim.lr_scheduler.StepLR,
-# #             adjoint=self.adjoint,
-# #         )
-                                                               
-# #         self.DiffEq = self.ModelConfig(kwargs)
-# #         self.DiffEq = lightning_models.LightningSDE(state_size = 50) # _LatentPotential(
-# # #             func,
-# # #             dt=self.dt,
-# # #             lr=self.lr,
-# # #             logqp=True,
-# # #             step_size=self.step_size,
-# # #             optimizer=torch.optim.RMSprop,
-# # #             lr_scheduler=torch.optim.lr_scheduler.StepLR,
-# # #         )
-        
-#         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self.model_name)
-#         self.DiffEqLogger()
-#         self.TrainerGenerator = configs.LightningTrainerConfiguration(
-#             self.DiffEqLogger.versioned_model_outdir
-#         )
-        
-
-#     def fit(
-#         self,
-#         epochs=500,
-#         callbacks=[],
-#         ckpt_frequency: int = 25,
-#         save_last_ckpt: bool = True,
-#         keep_ckpts: int = -1,
-#         monitor = None,
-#         accelerator=None,
-#         log_every_n_steps=1,
-# #         swa_lrs=1e-8,
-#         reload_dataloaders_every_n_epochs=1,
-# #         gradient_clip_val=0.75,
-#         devices=None,
-#         deterministic=False,
-#         **kwargs
-#     ):  
-#         # bring all kwargs / args into the same place
-#         kwargs.update(locals())
-#         kwargs.pop("kwargs")
-        
-#         if self.train_val_split[1] == 0:
-#             kwargs.update({'check_val_every_n_epoch': 0, 'limit_val_batches': 0})
             
-#         lr = self.lr
-
-#         trainer_kwargs = utils.extract_func_kwargs(func=self.TrainerGenerator, kwargs=locals())
-#         trainer_kwargs.update(utils.extract_func_kwargs(func=Trainer, kwargs=kwargs))
-
-#         self.fit_trainer = self.TrainerGenerator(
-#             max_epochs=epochs, stage = "fit", **trainer_kwargs
-#         )
-#         self.fit_trainer.fit(self.DiffEq, self.LitDataModule)
-
-#     def test(self, callbacks=[]):
-        
-#         if hasattr(self, "fit_trainer"):
-#             self.test_trainer = self.fit_trainer
-#         else:
-#             self.test_trainer = self.TrainerGenerator(stage="test", callbacks=callbacks)
-        
-#         self.test_outs = self.test_trainer.test(self.DiffEq, self.LitDataModule)
-        
-#         return self.test_outs
-    
-#     def simulate(self, X0, t, N = 1, device="cuda:0"):
-#         return self.DiffEq.to(device).forward(X0.to(device), t.to(device))
-
-#     def predict(self, t, t0_idx=None,  predict_key="predict", n=2000, callbacks=[]): # use_key="X_pca", 
-        
-#         # (1) Annotate self.LitDataModule.adata with a subset of cells to serve as prediction cells.
-#         #     Re-configure the LitDataModule to serve us with predict_dataloader
-#         tools.annotate_cells(self.LitDataModule.adata, idx=t0_idx, key=predict_key)
-        
-#         # (2) Configure trainer
-#         if hasattr(self, "fit_trainer"):
-#             self.predict_trainer = self.fit_trainer
-#         else:
-#             self.predict_trainer = self.TrainerGenerator(stage="predict", callbacks=callbacks, enable_progress_bar=False)
-        
-#         # (3) adjust t
-#         self.DiffEq.t = t
-        
-#         # (4) loop over range(n) to make predictions
-#         self.predictions = {}
-#         for i in tqdm(range(n)):
-#             predicted = self.predict_trainer.predict(self.DiffEq, self.LitDataModule)
-#             self.predictions[i] = predicted
-        
-#         return self.predictions
-
-
-#     def load(self, ckpt_path, freeze=True):
-#         """
-#         Loads a saved checkpoint file specified by ckpt_path into the DiffEq attribute of the input instance.
-#         If freeze is True, DiffEq state is frozen to avoid parameter modification.
-
-
-#         Parameters:
-#         -----------
-#         ckpt_path
-#             Path to a saved checkpoint file.
-#             type: str
-        
-#         freeze
-#             indicates whether or not to freeze the DiffEq attribute after loading the checkpoint.
-#             type: bool
-#             default: True
-        
-#         Returns:
-#         --------
-#         None, modifies self.DiffEq.state_dict()
-        
-        
-#         Notes:
-#         ------
-#         Assumes that self.DiffEq.func is the same composition as what you are trying to load.
-#         """
-        
-#         self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path, func=self.DiffEq.func)
-#         if freeze:
-#             self.DiffEq.freeze()
-            
-#     def __repr__(self):
-#         # TODO: add description of model / training status / data / etc.
-#         return "⏩ scDiffEq Model: {}".format(self.model_name)
+        # TO-DO: eventually replace how this works...
+        self._PRETRAIN_CONFIG_COUNT += 1
+        self._TRAIN_CONFIG_COUNT += 1

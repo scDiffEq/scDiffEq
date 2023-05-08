@@ -32,9 +32,10 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
                     
         self.__parse__(locals(), public=[None])
         self._format_sinkhorn_weight_key()
-        self._format_train_exposed_data()
+        self._format_train_test_exposed_data()
         self.configure_train_val_split()
         
+
     @property
     def n_dim(self):
         if not hasattr(self, "_n_dim"):
@@ -46,10 +47,12 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
             self._adata.obs[self._weight_key] = 1
         self._obs_keys.append(self._weight_key)
     
-    def _format_train_exposed_data(self):
-
+    def _format_train_test_exposed_data(self):
+        
         if not self._train_key in self._adata.obs.columns:
             self._adata.obs[self._train_key] = True
+        if not self._test_key in self._adata.obs.columns:
+            self._adata.obs[self._test_key] = False
             
     def prepare_data(self):
         ...

@@ -47,17 +47,32 @@ class LightningTrainerConfiguration(utils.ABCParse):
     @property
     def Callbacks(self):
         callback_config = LightningCallbacksConfiguration()
-
+        
         return callback_config(
+            version = self.version,
+            model_name=self.model_name,
+            working_dir=self.working_dir,
+            train_version=self.train_version,
+            pretrain_version=self.pretrain_version,
             callbacks=self._callbacks,
             ckpt_frequency=self.ckpt_frequency,
             keep_ckpts=self.keep_ckpts,
+            monitor=self.monitor,
             retain_test_gradients=self.retain_test_gradients,
-            monitor = self.monitor,
-#             swa_lrs = self.swa_lrs,
-            save_last = self.save_last_ckpt,
-            version = self.version,
+            save_last=self.save_last_ckpt,
+            # swa_lrs=1e-5,
         )
+
+#         return callback_config(
+#             callbacks=self._callbacks,
+#             ckpt_frequency=self.ckpt_frequency,
+#             keep_ckpts=self.keep_ckpts,
+#             retain_test_gradients=self.retain_test_gradients,
+#             monitor = self.monitor,
+# #             swa_lrs = self.swa_lrs,
+#             save_last = self.save_last_ckpt,
+#             version = self.version,
+#         )
     
     @property
     def accelerator(self):
@@ -125,10 +140,10 @@ class LightningTrainerConfiguration(utils.ABCParse):
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
         potential_model: bool = False,
-        check_val_every_n_epoch = 0,
-        limit_val_batches = 0.0,
-        num_sanity_val_steps = 0.0,
-        val_check_interval = 0.0,
+        check_val_every_n_epoch = 1,
+        limit_val_batches = None,
+        num_sanity_val_steps = None,
+        val_check_interval = None,
 #         swa_lrs: float = None,
         **kwargs
     ):

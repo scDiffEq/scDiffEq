@@ -10,6 +10,12 @@ class Logs(utils.ABCParse):
     def __init__(self, path, stage, version=0):
         super().__init__()
         self.__parse__(locals(), public=[None])
+        
+    @property
+    def _BACKUP_BASE_PATH(self):
+        return os.path.join(
+            self._path, f"{self._stage}_logs", f"version_{int(self._version - 1)}"
+        )
 
     @property
     def _BASE_PATH(self):
@@ -19,7 +25,14 @@ class Logs(utils.ABCParse):
 
     @property
     def _METRICS_PATH(self):
-        return os.path.join(self._BASE_PATH, "metrics.csv")
+        _metrics_path = os.path.join(self._BASE_PATH, "metrics.csv")
+        if not os.path.exists(_metrics_path):
+            try:
+                _metrics_path = os.path.join(self._BACKUP_BASE_PATH, "metrics.csv")
+            except:
+                print(f"Cannot find: {_metrics_path}")
+        
+        return _metrics_path
 
     @property
     def _HPARAMS_PATH(self):

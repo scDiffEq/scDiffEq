@@ -249,30 +249,30 @@ class VisualizeTrackedLoss(lightning.Callback):
         working_dir=os.getcwd(),
         train_version=0,
         pretrain_version=0,
+        fname = "scDiffEq_fit_loss_tracking.png",
         *args,
         **kwargs,
     ):
-
         self.model_tracker = ModelTracker(
             **utils.extract_func_kwargs(func=ModelTracker, kwargs=locals())
         )
         self._INFO = utils.InfoMessage()
+        self.fname = fname
+        
+    @property
+    def save_path(self):
+        return os.path.join(self.model_tracker._PATH, self.fname)
+        
+    def _save_plot(self):
+        if not os.path.exists(self.save_path):
+            self._INFO(f"Loss visualization saved to: {self.save_path}")
+        plt.savefig(self.save_path)
+        plt.close()
     
     def on_train_epoch_end(self, trianer, pl_module, *args, **kwargs):
 
-        loss_track_viz = LossTrackingVisualization(self.model_tracker)
-        loss_track_viz.__plot__()
-
         epoch = pl_module.current_epoch
         
-        if hasattr(self.model_tracker._TRAIN, "_BASE_PATH"):
-            base_path = self.model_tracker._TRAIN._BASE_PATH
-        else:
-            base_path = self.model_tracker._PRETRAIN._BASE_PATH
-            
-        save_path = os.path.join(base_path, "scDiffEq_fit_loss_tracking.png")
-        if not os.path.exists(save_path):
-            self._INFO(f"Loss visualization saved to: {save_path}")
-        
-        plt.savefig(save_path)            
-            
+        loss_track_viz = LossTrackingVisualization(self.model_tracker)
+        loss_track_viz.__plot__()
+        self._save_plot()
