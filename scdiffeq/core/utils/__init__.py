@@ -34,3 +34,7 @@ from ._fast_graph import FastGraph
 from ._fetch_format import fetch_format
 
 from ._idx_to_int_str import idx_to_int_str
+
+from ._logs import Logs, PretrainLogs, TrainLogs
+
+from ._filter_df import filter_df

@@ -8,7 +8,7 @@
 ### Still to-do
 
 1. Integrate callback(s) for saving pre-train loss and loss chart(s)
-2. Automatic adjustment of SDE/ODE parameters for all models.
+2. [ x ] Automatic adjustment of SDE/ODE parameters for all models.
 3. Set "automatic" pre-defined params to be closer to ideal values.
 
 ### Tests

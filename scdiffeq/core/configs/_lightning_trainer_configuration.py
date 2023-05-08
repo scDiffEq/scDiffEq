@@ -24,11 +24,13 @@ NoneType = type(None)
 
 
 # -- Main class: ---------------------------------------------------------------
-class LightningTrainerConfiguration(utils.AutoParseBase):
+class LightningTrainerConfiguration(utils.ABCParse):
     def __init__(
         self,
         save_dir: str = "scDiffEq_Model",
     ):
+        super().__init__()
+        
         self.__parse__(locals())
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
@@ -36,15 +38,16 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
     # -- kwargs: ---------------------------------------------------------------
     @property
     def _CSVLogger_kwargs(self):
-        return utils.extract_func_kwargs(func=loggers.CSVLogger, kwargs=self._KWARGS)
+        return utils.extract_func_kwargs(func=loggers.CSVLogger, kwargs=self._PARAMS, ignore=['version'])
 
     @property
     def _Trainer_kwargs(self):
-        return utils.extract_func_kwargs(func=Trainer, kwargs=self._KWARGS)
+        return utils.extract_func_kwargs(func=Trainer, kwargs=self._PARAMS, ignore=["accelerator", "callbacks"])
 
     @property
     def Callbacks(self):
         callback_config = LightningCallbacksConfiguration()
+
         return callback_config(
             callbacks=self._callbacks,
             ckpt_frequency=self.ckpt_frequency,
@@ -53,6 +56,7 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             monitor = self.monitor,
 #             swa_lrs = self.swa_lrs,
             save_last = self.save_last_ckpt,
+            version = self.version,
         )
     
     @property
@@ -103,6 +107,10 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
     def __call__(
         self,
         lr: float = None,
+        model_name="scDiffEq_model",
+        working_dir=os.getcwd(),
+        train_version=0,
+        pretrain_version=0,
         stage=None,
         max_epochs=500,
         monitor=None,
@@ -117,6 +125,10 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
         version: Union[int, str, NoneType] = None,
         callbacks: list = [],
         potential_model: bool = False,
+        check_val_every_n_epoch = 0,
+        limit_val_batches = 0.0,
+        num_sanity_val_steps = 0.0,
+        val_check_interval = 0.0,
 #         swa_lrs: float = None,
         **kwargs
     ):
@@ -185,8 +197,9 @@ class LightningTrainerConfiguration(utils.AutoParseBase):
             devices = torch.cuda.device_count()
 
         self.__parse__(locals(), private=['accelerator', 'callbacks'])
-        self._KWARGS["name"] = "{}_logs".format(stage)
-        log_save_dir = os.path.join(self.save_dir, self._KWARGS["name"])
+        
+        self._PARAMS["name"] = "{}_logs".format(stage)
+        log_save_dir = os.path.join(self.save_dir, self._PARAMS["name"])
         if not os.path.exists(log_save_dir):
             os.mkdir(log_save_dir)
 

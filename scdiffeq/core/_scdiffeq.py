@@ -158,9 +158,12 @@ class scDiffEq(utils.ABCParse):
         self.DiffEqLogger()
 
     def _configure_trainer_generator(self):
+        
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             self.DiffEqLogger.versioned_model_outdir
         )
+        self._PRETRAIN_CONFIG_COUNT = 0
+        self._TRAIN_CONFIG_COUNT = 0
 
     def _configure_kNN_graph(self):
         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
@@ -229,8 +232,26 @@ class scDiffEq(utils.ABCParse):
     def _stage_log_path(self, stage):
         log_path = glob.glob(self.DiffEqLogger.versioned_model_outdir + f"/{stage}*")[0]
         self._INFO(f"Access logs at: {log_path}")
+        
+    @property
+    def _VERSION(self):
+        return int(os.path.basename(self.DiffEqLogger.versioned_model_outdir).split("_")[1])
+    
+    def _check_disable_validation(self, trainer_kwargs):
+        if self._train_val_split[1] == 0:
+            trainer_kwargs.update(
+                {
+                    'check_val_every_n_epoch': 0,
+                    'limit_val_batches': 0.0,
+                    'num_sanity_val_steps': 0.0,
+                    'val_check_interval': 0.0,
+                },
 
-    def _configure_pretrain_step(self, epochs):
+            )
+            
+        return trainer_kwargs
+            
+    def _configure_pretrain_step(self, epochs, callbacks=[]):
 
         STAGE = "pretrain"
         self._INFO(f"Configuring fit step: {STAGE}")
@@ -251,22 +272,38 @@ class scDiffEq(utils.ABCParse):
                 kwargs=self._PARAMS,
             )
         )
+        trainer_kwargs.update(
+            utils.extract_func_kwargs(
+                func=lightning.Trainer,
+                kwargs=locals(),
+            )
+        )
+        trainer_kwargs = self._check_disable_validation(trainer_kwargs)
+        
         self.pre_trainer = self.TrainerGenerator(
-            max_epochs=self._pretrain_epochs, stage=STAGE, **trainer_kwargs
+            max_epochs=self._pretrain_epochs,
+            stage=STAGE,
+            working_dir = self.DiffEqLogger.wd,
+            version = self._VERSION,
+            pretrain_version=self._PRETRAIN_CONFIG_COUNT,
+            train_version=self._TRAIN_CONFIG_COUNT,
+            **trainer_kwargs
         )
         self._stage_log_path(STAGE)
+        self._PRETRAIN_CONFIG_COUNT += 1
 
     def pretrain(
         self,
         epochs=None,
+        callbacks = [],
     ):
         """If any of the keyword arguments are passed, they will replace the previously-stated arguments from __init__ and re-configure the DiffEq."""
 
-        self._configure_pretrain_step(epochs)
+        self._configure_pretrain_step(epochs, callbacks)
         self.pre_trainer.fit(self.DiffEq, self.LitDataModule)
 
     def _configure_train_step(self, epochs, kwargs):
-
+                    
         STAGE = "train"
 
         self._INFO(f"Configuring fit step: {STAGE}")
@@ -287,16 +324,27 @@ class scDiffEq(utils.ABCParse):
                 kwargs=self._PARAMS,
             )
         )
-        if self._train_val_split[1] == 0:
-            trainer_kwargs.update(
-                {"check_val_every_n_epoch": 0, "limit_val_batches": 0}
+        trainer_kwargs.update(
+            utils.extract_func_kwargs(
+                func=lightning.Trainer,
+                kwargs=kwargs,
             )
-
+        )
+        
+        trainer_kwargs = self._check_disable_validation(trainer_kwargs)
+        
         self.trainer = self.TrainerGenerator(
-            max_epochs=self._train_epochs, stage=STAGE, **trainer_kwargs
+            max_epochs=self._train_epochs,
+            stage=STAGE,
+            working_dir = self.DiffEqLogger.wd,
+            version = self._VERSION,
+            pretrain_version=self._PRETRAIN_CONFIG_COUNT,
+            train_version=self._TRAIN_CONFIG_COUNT,
+            **trainer_kwargs,
         )
 
         self._stage_log_path(STAGE)
+        self._TRAIN_CONFIG_COUNT += 1
 
     def train(
         self,
@@ -335,7 +383,8 @@ class scDiffEq(utils.ABCParse):
     ):
 
         if pretrain_epochs > 0:
-            self.pretrain(epochs=pretrain_epochs)
+            self.pretrain(
+                epochs=pretrain_epochs, **utils.extract_func_kwargs(self.pretrain, locals()))
         if train_epochs > 0:
             self.train(
                 epochs=train_epochs, **utils.extract_func_kwargs(self.train, locals())
