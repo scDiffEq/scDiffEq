@@ -145,7 +145,7 @@ class scDiffEq(utils.ABCParse):
         self._data_dim = self.LitDataModule.n_dim
 
     def _configure_dimension_reduction(self):
-        self.reducer = tools.DimensionReduction(self.adata)
+        self.reducer = tools.DimensionReduction(self.adata, save_path = self.DiffEqLogger.default_model_outdir)
         if self._scale_input_counts:
             self._INFO("Scaling input counts (for dimension reduction).")
             self.reducer.scale()
@@ -218,12 +218,12 @@ class scDiffEq(utils.ABCParse):
         self.__parse__(kwargs, public=["adata"])
         self._INFO = utils.InfoMessage()
         self._configure_data(kwargs)
+        self._configure_logger()
         if kwargs["reduce_dimensions"]:
             self._configure_dimension_reduction()
         if kwargs["build_kNN"]:
             self._configure_kNN_graph()
         self._configure_model(kwargs)
-        self._configure_logger()
         self._configure_trainer_generator()
 
     def freeze(self):
