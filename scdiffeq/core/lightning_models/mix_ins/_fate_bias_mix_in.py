@@ -18,6 +18,7 @@ class FateBiasMixIn(object):
         t0_idx,
         fate_bias_multiplier = 1,
         undiff_key = "Undifferentiated",
+        PCA = None,
     ):
         
         self.graph = graph

@@ -25,7 +25,7 @@ class TimeConfiguration(utils.ABCParse):
         dt=0.1,
         t0_idx=None,
         t0_cluster=None,
-        cluster_key=None,
+        time_cluster_key=None,
     ):
         super().__init__()
         self.__parse__(kwargs=locals(), public=["adata"])
@@ -57,11 +57,11 @@ class TimeConfiguration(utils.ABCParse):
         if not isinstance(self._t0_idx, NoneType):
             return self._t0_idx
 
-        if (not isinstance(self._cluster_key, NoneType)) and (
+        if (not isinstance(self._time_cluster_key, NoneType)) and (
             not isinstance(self._t0_cluster, NoneType)
         ):
             return self.adata.obs[
-                self.adata.obs[self._cluster_key] == self._t0_cluster
+                self.adata.obs[self._time_cluster_key] == self._t0_cluster
             ].index
 
     def time_sampling(self):
@@ -156,7 +156,7 @@ def configure_time(
     t0_idx: pd.Index = None,
     dt: float = 0.1,
     t0_cluster=None,
-    cluster_key=None,
+    time_cluster_key=None,
 ) -> dict:
 
     """Updates time for AnnData. Returns time_attributes dictionary."""
@@ -169,7 +169,7 @@ def configure_time(
         t0_idx=t0_idx,
         dt=dt,
         t0_cluster=t0_cluster,
-        cluster_key=cluster_key,
+        time_cluster_key=time_cluster_key,
     )
     
     t = time_config()

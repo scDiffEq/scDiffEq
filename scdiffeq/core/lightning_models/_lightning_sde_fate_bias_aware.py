@@ -62,6 +62,7 @@ class LightningSDE_FateBiasAware(
             csv_path = fate_bias_csv_path,
             t0_idx = t0_idx,
             fate_bias_multiplier = fate_bias_multiplier,
+            PCA = None,
         )
 
     def __repr__(self):

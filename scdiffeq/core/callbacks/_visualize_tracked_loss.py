@@ -226,7 +226,9 @@ class LossTrackingVisualization(utils.ABCParse):
     def __plot__(self):
 
         self.__layout__()
-        
+
+        self._COMBINED_PLOT_INPUTS = {}
+
         if self._HAS_PRETRAIN:
             self._COMBINED_PLOT_INPUTS = self._PLOT_INPUTS["pretrain"]
         if self._HAS_TRAIN:

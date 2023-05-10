@@ -40,6 +40,10 @@ class BaseLightningDiffEq(lightning.LightningModule):
         kwargs['state_size'] = self.hparams['latent_dim']
         self.func = func(**utils.function_kwargs(func, kwargs))
         
+    @property
+    def PRETRAIN(self):
+        return False
+    
     # -- integrator stuff: -----------------------------------------------------
     @property
     def _INTEGRATOR(self):
@@ -65,7 +69,8 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
     def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage):
         for i in range(len(t)):
-            msg = f"sinkhorn_{t[i].item()}_{stage}"
+            _t = round(t[i].item(), 3)
+            msg = f"sinkhorn_{_t}_{stage}"
             val = sinkhorn_loss[i]
             self.log(msg, val)
 

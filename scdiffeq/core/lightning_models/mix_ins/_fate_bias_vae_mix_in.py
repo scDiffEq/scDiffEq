@@ -18,8 +18,10 @@ class FateBiasVAEMixIn(object):
         t0_idx,
         fate_bias_multiplier = 1,
         undiff_key = "Undifferentiated",
+        PCA = None,
     ):
         
+        self.PCA = PCA
         self.graph = graph
         self.fate_bias_multiplier = fate_bias_multiplier
         self.fate_df = pd.read_csv(csv_path, index_col=0)
@@ -43,7 +45,7 @@ class FateBiasVAEMixIn(object):
         
         # could add PCA transform step here
         
-        F_pred = self.graph(X_hat)
+        F_pred = self.graph(X_hat, self.PCA)
         F_pred.index = batch_fate_idx
 
         if F_pred.columns.unique().tolist() == [self._undiff_key]:

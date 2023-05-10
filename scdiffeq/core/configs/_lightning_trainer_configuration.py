@@ -94,6 +94,7 @@ class LightningTrainerConfiguration(utils.ABCParse):
         Main Lightning Trainer used for fitting / testing.
         If pre-train routine was used, Trainer loads from ckpt path.
         """
+
         return Trainer(
             accelerator=self.accelerator,
             logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
@@ -145,6 +146,7 @@ class LightningTrainerConfiguration(utils.ABCParse):
         num_sanity_val_steps = None,
         val_check_interval = None,
 #         swa_lrs: float = None,
+        reload_dataloaders_every_n_epochs = 1,
         **kwargs
     ):
         

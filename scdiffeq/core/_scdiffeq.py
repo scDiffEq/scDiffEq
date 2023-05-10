@@ -69,8 +69,9 @@ class scDiffEq(utils.ABCParse):
         t_min: float = 0,
         t_max: float = 1,
         dt: float = 0.1,
+        time_cluster_key=None,
         t0_cluster=None,
-        cluster_key=None,
+        shuffle_time_labels = False,
         
         # -- DiffEq params: ----------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
@@ -175,7 +176,7 @@ class scDiffEq(utils.ABCParse):
     def _configure_kNN_graph(self):
         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
         
-        train_adata.obs = train_adata.obs.reset_index()
+        train_adata.obs = train_adata.obs.reset_index(drop=True)
         train_adata.obs.index = train_adata.obs.index.astype(str)
         
         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
@@ -193,6 +194,8 @@ class scDiffEq(utils.ABCParse):
             potential_type=self._potential_type,
             fate_bias_csv_path = self._fate_bias_csv_path,
         )
+        if hasattr(self, "reducer"):
+            kwargs['PCA'] = self.reducer.PCA
         
         if hasattr(self, "kNN_Graph"):
             kwargs['kNN_Graph'] = self.kNN_Graph
@@ -381,6 +384,7 @@ class scDiffEq(utils.ABCParse):
         self,
         train_epochs=200,
         pretrain_epochs=500,
+        train_lr = None,
         callbacks=[],
         ckpt_frequency: int = 25,
         save_last_ckpt: bool = True,
@@ -393,6 +397,10 @@ class scDiffEq(utils.ABCParse):
         deterministic=False,
         **kwargs,
     ):
+        
+        if pretrain_epochs > 0 and (not self._LitModelConfig.use_vae):
+            pretrain_epochs = 0
+            
 
         if pretrain_epochs > 0:
             self.pretrain(
@@ -405,3 +413,10 @@ class scDiffEq(utils.ABCParse):
         # TO-DO: eventually replace how this works...
         self._PRETRAIN_CONFIG_COUNT += 1
         self._TRAIN_CONFIG_COUNT += 1
+        
+        
+    @property
+    def loss(self):
+        # scDiffEq_fit_loss_tracking.png
+        utils.display_tracked_loss(self.DiffEqLogger)
+        

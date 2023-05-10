@@ -1,20 +1,24 @@
 
 # -- import packages: ----------------------------------------------------------
-from neural_diffeqs import NeuralSDE
+from neural_diffeqs import LatentPotentialSDE
+import torch_nets
 import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from . import base, mix_ins
-
+from . import mix_ins
+from . import base
+from .. import utils
 
 from typing import Union, List
 
+
 # -- lightning model: ----------------------------------------------------------
-class LightningSDE_VAE_FateBiasAware(
-    mix_ins.VAEMixIn,
+class LightningSDE_VAE_PriorPotential_FateBiasAware(
     mix_ins.FateBiasVAEMixIn,
+    mix_ins.DriftPriorVAEMixIn,
     mix_ins.PotentialMixIn,
+    mix_ins.VAEMixIn,
     mix_ins.PreTrainMixIn,
     base.BaseLightningDiffEq,
 ):
@@ -34,7 +38,8 @@ class LightningSDE_VAE_FateBiasAware(
         dt=0.1,
         adjoint=False,
         
-        # -- sde params: -------------------------------------------------------
+        # -- sde params: -----
+        
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
@@ -52,8 +57,9 @@ class LightningSDE_VAE_FateBiasAware(
         brownian_dim=1,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
+        coef_prior_drift: float = 1.0,
         
-        # -- encoder parameters: -----------------------------------------------
+        # -- encoder parameters: -------
         encoder_n_hidden: int = 4,
         encoder_power: float = 2,
         encoder_activation: Union[str, List[str]] = 'LeakyReLU',
@@ -61,19 +67,13 @@ class LightningSDE_VAE_FateBiasAware(
         encoder_bias: bool = True,
         encoder_output_bias: bool = True,
         
-        # -- decoder parameters: -----------------------------------------------
+        # -- decoder parameters: -------
         decoder_n_hidden: int = 4,
         decoder_power: float = 2,
         decoder_activation: Union[str, List[str]] = 'LeakyReLU',
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
-
-        # -- fate bias parameters: ---------------------------------------------
-        t0_idx = None,
-        kNN_Graph=None,
-        fate_bias_csv_path=None,
-        fate_bias_multiplier = 1,
         
         PCA = None,
         
@@ -81,11 +81,11 @@ class LightningSDE_VAE_FateBiasAware(
         **kwargs,
     ):
         super().__init__()
-
-        self.save_hyperparameters(ignore=['kNN_Graph'])
-                        
+        
+        self.save_hyperparameters()
+        
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
+        self._configure_torch_modules(func = LatentPotentialSDE, kwargs=locals())
         self._configure_optimizers_schedulers()
         
         self._configure_fate(
@@ -97,4 +97,4 @@ class LightningSDE_VAE_FateBiasAware(
         )
 
     def __repr__(self):
-        return "LightningSDE-VAE-FateBiasAware"
+        return "LightningSDE-VAE-PriorPotential-FateBiasAware"

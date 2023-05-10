@@ -4,6 +4,10 @@ from ._anndata_inspector import AnnDataInspector
 
 import annoyance
 import pandas as pd
+import torch
+import numpy as np
+
+NoneType = type(None)
 
 class FastGraph:
     def __init__(self, adata, use_key, annot_key="Cell type annotation"):
@@ -28,11 +32,21 @@ class FastGraph:
         )
 
     def _query(self, X_fin):
-        return self._fast_count(self.Graph.query(X_fin.detach().cpu().numpy()))
+        return self._fast_count(self.Graph.query(X_fin))
 
     def _fate_df(self, x_lab):
         return pd.DataFrame([x_lab[0].value_counts() for i in range(len(x_lab))])
+    
+    def _DETACH(self, X_hat: torch.Tensor)->np.ndarray:
+        return X_hat[-1].detach().cpu().numpy()
+    
+    def _TRANSFORM(self, dimension_reduction_model, X_fin):
+        return dimension_reduction_model.transform(X_fin)
+        
 
-    def __call__(self, X_hat):
-        x_lab = self._query(X_hat[-1])
-        return self._fate_df(x_lab)
+    def __call__(self, X_hat, dimension_reduction_model = None):
+        
+        X_fin = self._DETACH(X_hat)
+        if not isinstance(dimension_reduction_model, NoneType):
+            X_fin = self._TRANSFORM(dimension_reduction_model, X_fin)
+        return self._fate_df(self._query(X_fin))

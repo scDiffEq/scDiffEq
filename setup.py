@@ -26,7 +26,7 @@ setuptools.setup(
         "lightning>=2.0.1",
         "neural-diffeqs==0.3.1rc0",
         "torch-nets>=0.0.4",
-        "torch-adata>=0.0.22",
+        "torch-adata>=0.0.23",
         "autodevice>=0.0.2",
         "brownian-diffuser>=0.0.2",
         "vinplots>=0.0.75",

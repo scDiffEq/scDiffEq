@@ -25,6 +25,7 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         test_key="test",
         predict_key="predict",
         silent=True,
+        shuffle_time_labels = False,
         **kwargs,
     ):
         super(LightningData, self).__init__()
@@ -41,6 +42,15 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         if not hasattr(self, "_n_dim"):
             self._n_dim = self.train_dataset.X.shape[-1]
         return self._n_dim
+    
+#     def shuffle_t(self):
+        
+#         df = self._adata.obs.copy()
+#         non_t0 = df.loc[df['t'] != 0]['t']
+        
+#         shuffled_t = np.zeros(len(df))
+#         shuffled_t[non_t0.index.astype(int)] = np.random.choice(non_t0.values, len(non_t0))
+#         self._adata.obs["t"] = shuffled_t
     
     def _format_sinkhorn_weight_key(self):
         if not self._weight_key in self._adata.obs.columns:

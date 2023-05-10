@@ -6,10 +6,12 @@ import torch
 from . import base, mix_ins
 from typing import Union, List
 
+
+# -- lightning model: -----------------------------------
 class LightningSDE_FixedPotential(
-    base.BaseLightningDiffEq,
     mix_ins.PotentialMixIn,
     mix_ins.BaseForwardMixIn,
+    base.BaseLightningDiffEq,
 ):
     def __init__(
         self,
