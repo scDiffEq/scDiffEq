@@ -16,7 +16,7 @@ import numpy as np
 NoneType = type(None)
 
 import scdiffeq_plots as sdq_pl
-
+import matplotlib
 
 class VisualizePredictions(lightning.Callback, utils.ABCParse):
     def __init__(
@@ -33,6 +33,7 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
         device=autodevice.AutoDevice(),
         label_cmap=None,
         label_key = None,
+        simulation_cmap = matplotlib.cm.tab20,
         *args,
         **kwargs,
     ):
@@ -41,9 +42,13 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
         X_umap = reducer.X_umap
 
         self.__parse__(locals(), private=[None])
+        self._configure_time(t)
+        
+
+    def _configure_time(self, t):
         self.t = t.to(self.device)
         self.t_cmap = larry.an.temporal_cmap(t=t, pad_left=20, pad_right=10)
-
+    
     @property
     def X0(self):
         return utils.fetch_format(
@@ -91,6 +96,24 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
             return os.path.join(self.outdir, fname)
         return fname
 
+    def _color_outline_by_simulation(self, ax, xu_x, xu_y, i, t, sizes):
+        ax.scatter(
+                    xu_x,
+                    xu_y,
+                    color=self.simulation_cmap[i],
+                    zorder=t + 1,
+                    s=sizes[0],
+                    ec="None",
+                )
+        ax.scatter(
+                    xu_x,
+                    xu_y,
+                    c="w",
+                    zorder=t + 2,
+                    s=sizes[1],
+                    ec="None",
+                )
+    
     def plot(self, X_hat_umap: Dict, X_hat_kNN, sizes=[80, 40, 20]):
 
         fig, axes = self._background()
@@ -106,38 +129,9 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
                 else:
                     xu_x, xu_y = X_umap[t][:, 0], X_umap[t][:, 1]
 
-                axes[0].scatter(
-                    xu_x,
-                    xu_y,
-                    color=cm.tab10.colors[i],
-                    zorder=t + 1,
-                    s=sizes[0],
-                    ec="None",
-                )
-                axes[1].scatter(
-                    xu_x,
-                    xu_y,
-                    color=cm.tab10.colors[i],
-                    zorder=t + 1,
-                    s=sizes[0],
-                    ec="None",
-                )
-                axes[0].scatter(
-                    xu_x,
-                    xu_y,
-                    c="w",
-                    zorder=t + 2,
-                    s=sizes[1],
-                    ec="None",
-                )
-                axes[1].scatter(
-                    xu_x,
-                    xu_y,
-                    c="w",
-                    zorder=t + 2,
-                    s=sizes[1],
-                    ec="None",
-                )
+                self._color_outline_by_simulation(axes[0], xu_x, xu_y, i, t, sizes)
+                self._color_outline_by_simulation(axes[1], xu_x, xu_y, i, t, sizes)
+                
                 axes[0].scatter(
                     xu_x,
                     xu_y,
@@ -153,28 +147,30 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
                     color = "dimgrey"
 
                 axes[1].scatter(
-                    X_umap[t][:, 0], X_umap[t][:, 1], c=color, ec="None", zorder=t + 3
+                    xu_x, xu_y, c=color, ec="None", zorder=t + 3
                 )
         if len(self.t) <= 5:
             axes[0].legend(edgecolor="None", facecolor="None")
+            
+            
         return fig, axes
 
     def __call__(self, DiffEq, t=None, sizes=[80, 40, 20], resimulate=True):
 
         if not isinstance(t, NoneType):
-            self.t = t.to(self.device)
-            self.t_cmap = larry.an.temporal_cmap(
-                t=self.t, pad_left=20, pad_right=10
-            )
+            self._configure_time(t)
 
         X_hat, X_hat_kNN, X_hat_umap = self._FORWARD(
             DiffEq.to(self.device), self.X0, self.t
         )
-        return self.plot(X_hat_umap, X_hat_kNN, sizes=sizes)
+        fig, axes = self.plot(X_hat_umap, X_hat_kNN, sizes=sizes)
+        plt.savefig(self.SAVE_PATH)
+        plt.close()
+
+    def on_fit_start(self, trainer, pl_module, *args, **kwargs):        
+        self.__call__(pl_module)
 
     def on_train_epoch_end(self, trainer, pl_module, *args, **kwargs):
         self.epoch = pl_module.current_epoch
         if self.epoch % self.frequency == 0:
-            fig, axes = self.__call__(pl_module)
-            plt.savefig(self.SAVE_PATH)
-            plt.close()
+            self.__call__(pl_module)        
