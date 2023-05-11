@@ -41,7 +41,7 @@ class FateBiasMixIn(object):
 
         F_true = self.fate_df.loc[batch_fate_idx]
         self.X_hat = X_hat
-        F_pred = self.graph(X_hat)
+        F_pred = self.graph(X_hat, annot_key="Cell type annotation", query_t = -1)[0]
         F_pred.index = batch_fate_idx
 
         if F_pred.columns.unique().tolist() == [self._undiff_key]:

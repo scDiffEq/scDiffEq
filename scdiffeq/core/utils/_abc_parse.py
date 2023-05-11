@@ -1,9 +1,9 @@
 from abc import ABC
 from typing import Dict, List, Any
-
+NoneType = type(None)
 
 class ABCParse(ABC):
-    BUILT = False
+    _BUILT = False
 
     def __init__(self, *args, **kwargs):
         """
@@ -19,7 +19,7 @@ class ABCParse(ABC):
         self._stored_private = []
         self._stored_public = []
 
-        self.BUILT = True
+        self._BUILT = True
 
     def __set__(
         self, key: str, val: Any, public: List = [], private: List = []
@@ -49,7 +49,7 @@ class ABCParse(ABC):
         self, kwargs: Dict, public: List = [], private: List = [], ignore: List = []
     ):
 
-        if not self.BUILT:
+        if not self._BUILT:
             self.__build__()
 
         self._IGNORE += ignore
@@ -63,7 +63,7 @@ class ABCParse(ABC):
 
     def __update__(self, kwargs: dict, public: List = [], private: List = []) -> None:
 
-        if not self.BUILT:
+        if not self._BUILT:
             self.__build__()
 
         for key, val in kwargs.items():

@@ -117,8 +117,6 @@ class scDiffEq(utils.ABCParse):
         *args,
         **kwargs,
     ):
-        super().__init__()
-
         self.__config__(locals())
 
     def _configure_obs_idx(self):
@@ -180,9 +178,8 @@ class scDiffEq(utils.ABCParse):
         train_adata.obs.index = train_adata.obs.index.astype(str)
         
         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
-        self.kNN_Graph = utils.FastGraph(
-            adata=train_adata,
-            use_key=self._kNN_key,
+        self.kNN_Graph = utils.kNNGraphQuery(
+            adata=train_adata, use_key=self._kNN_key,
         )
 
     def _configure_model(self, kwargs):
@@ -265,16 +262,18 @@ class scDiffEq(utils.ABCParse):
         
         STAGE = "pretrain"
         self._INFO(f"Configuring fit step: {STAGE}")
+        
+        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
 
-        if not isinstance(epochs, NoneType):
+#         if not isinstance(epochs, NoneType):
             
-            if self._PRETRAIN_CONFIG_COUNT > 0:
-                epochs = epochs + self._pretrain_epochs
+#             if self._PRETRAIN_CONFIG_COUNT > 0:
+#                 epochs = epochs + self._pretrain_epochs
             
-            self._pretrain_epochs = epochs
-            self._PARAMS["pretrain_epochs"] = epochs
-            self.DiffEq.hparams['pretrain_epochs'] = epochs
-            self._INFO(f"Pretrain epochs scheduled: {epochs}")
+#             self._pretrain_epochs = epochs
+#             self._PARAMS["pretrain_epochs"] = epochs
+#             self.DiffEq.hparams['pretrain_epochs'] = epochs
+#             self._INFO(f"Pretrain epochs scheduled: {epochs}")
 
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
@@ -320,15 +319,17 @@ class scDiffEq(utils.ABCParse):
         STAGE = "train"
 
         self._INFO(f"Configuring fit step: {STAGE}")
+        
+        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
 
-        if not isinstance(epochs, NoneType):
-            if self._TRAIN_CONFIG_COUNT > 0:
-                epochs = epochs + self._train_epochs
+#         if not isinstance(epochs, NoneType):
+#             if self._TRAIN_CONFIG_COUNT > 0:
+#                 epochs = epochs + self._train_epochs
                 
-            self._train_epochs = epochs
-            self._PARAMS["train_epochs"] = epochs
-            self.DiffEq.hparams['train_epochs'] = epochs
-            self._INFO(f"Train epochs scheduled: {epochs}")
+#             self._train_epochs = epochs
+#             self._PARAMS["train_epochs"] = epochs
+#             self.DiffEq.hparams['train_epochs'] = epochs
+#             self._INFO(f"Train epochs scheduled: {epochs}")
 
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
@@ -376,7 +377,8 @@ class scDiffEq(utils.ABCParse):
         deterministic=False,
         **kwargs,
     ):
-
+        
+        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
         self._configure_train_step(epochs, locals())
         self.trainer.fit(self.DiffEq, self.LitDataModule)
 
@@ -385,7 +387,7 @@ class scDiffEq(utils.ABCParse):
         train_epochs=200,
         pretrain_epochs=500,
         train_lr = None,
-        callbacks=[],
+        callbacks: List = [],
         ckpt_frequency: int = 25,
         save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
@@ -397,10 +399,12 @@ class scDiffEq(utils.ABCParse):
         deterministic=False,
         **kwargs,
     ):
-        
+                
         if pretrain_epochs > 0 and (not self._LitModelConfig.use_vae):
             pretrain_epochs = 0
             
+            
+        self.__update__(locals())
 
         if pretrain_epochs > 0:
             self.pretrain(

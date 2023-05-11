@@ -22,6 +22,12 @@ class BaseLightningDiffEq(lightning.LightningModule):
         self.process_batch = BatchProcessor
         self.COMPLETED_EPOCHS = 0
         
+    def _update_lit_diffeq_hparams(self, model_params):
+        for key, val in self.hparams.items():
+            if key in model_params.keys():
+                if val != model_params[key]:
+                    self.hparams.update({key: model_params[key]})
+        
     # -- setup: ----------------------------------------------------------------
     def _configure_optimizers_schedulers(self):
         """Assumes no pre-train - i.e., a single optimizer, scheduler"""

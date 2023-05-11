@@ -38,15 +38,26 @@ class FastGraph:
         return pd.DataFrame([x_lab[0].value_counts() for i in range(len(x_lab))])
     
     def _DETACH(self, X_hat: torch.Tensor)->np.ndarray:
+        return X_hat.detach().cpu().numpy()
+    
+    def _DETACH_FINAL(self, X_hat: torch.Tensor)->np.ndarray:
         return X_hat[-1].detach().cpu().numpy()
     
     def _TRANSFORM(self, dimension_reduction_model, X_fin):
         return dimension_reduction_model.transform(X_fin)
         
 
-    def __call__(self, X_hat, dimension_reduction_model = None):
+    def __call__(self, X_hat, dimension_reduction_model = None, final_timepoint_only=True):
         
-        X_fin = self._DETACH(X_hat)
+        if X_hat.device != "cpu" and (final_timepoint_only):
+            X_hat_ = self._DETACH_FINAL(X_hat)
+        elif X_hat.device != "cpu":
+            X_hat_ = self._DETACH(X_hat)
+        elif final_timepoint_only:
+            X_hat_ = X_hat[-1].numpy()
+        else:
+            X_hat_ = X_hat.numpy()
+            
         if not isinstance(dimension_reduction_model, NoneType):
-            X_fin = self._TRANSFORM(dimension_reduction_model, X_fin)
+            X_hat_ = self._TRANSFORM(dimension_reduction_model, X_hat_)
         return self._fate_df(self._query(X_fin))
