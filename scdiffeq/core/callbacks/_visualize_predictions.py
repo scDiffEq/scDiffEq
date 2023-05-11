@@ -33,7 +33,7 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
         device=autodevice.AutoDevice(),
         label_cmap=None,
         label_key = None,
-        simulation_cmap = matplotlib.cm.tab20,
+        simulation_cmap = matplotlib.cm.tab20.colors,
         *args,
         **kwargs,
     ):
@@ -143,6 +143,8 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
                 )
                 if not isinstance(self.label_cmap, NoneType):
                     color = X_hat_kNN[idx][t].map(self.label_cmap)
+                    if t == 0:
+                        color = color[0]
                 else:
                     color = "dimgrey"
 
@@ -168,9 +170,12 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
         plt.close()
 
     def on_fit_start(self, trainer, pl_module, *args, **kwargs):        
+        self.epoch = pl_module.current_epoch
+        
         self.__call__(pl_module)
 
     def on_train_epoch_end(self, trainer, pl_module, *args, **kwargs):
         self.epoch = pl_module.current_epoch
+        
         if self.epoch % self.frequency == 0:
             self.__call__(pl_module)        
