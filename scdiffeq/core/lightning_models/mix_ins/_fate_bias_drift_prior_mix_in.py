@@ -53,6 +53,7 @@ class FateBiasDriftPriorMixIn(object):
 
     def step(self, batch, batch_idx=None, stage=None):
         
+        # required
         batch = base.BatchProcessor(batch, batch_idx)
         X_hat, kl_div_loss = self.forward(batch.X0, batch.t)
         self.log(f"kl_div_{stage}", kl_div_loss.sum())

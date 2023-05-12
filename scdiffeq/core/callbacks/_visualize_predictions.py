@@ -1,22 +1,24 @@
 
-from typing import Dict
+
+import autodevice
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 import lightning
 import scdiffeq_plots as sdq_pl
-import autodevice
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import os
 from tqdm.notebook import tqdm
+
 
 from .. import utils
 
-import larry
-import numpy as np
 
+from typing import Dict
 NoneType = type(None)
 
-import scdiffeq_plots as sdq_pl
-import matplotlib
+
+
 
 class VisualizePredictions(lightning.Callback, utils.ABCParse):
     def __init__(
@@ -47,7 +49,7 @@ class VisualizePredictions(lightning.Callback, utils.ABCParse):
 
     def _configure_time(self, t):
         self.t = t.to(self.device)
-        self.t_cmap = larry.an.temporal_cmap(t=t, pad_left=20, pad_right=10)
+        self.t_cmap = sdq_pl.temporal_cmap(t=t)
     
     @property
     def X0(self):
