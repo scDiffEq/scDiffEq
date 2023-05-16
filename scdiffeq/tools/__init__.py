@@ -24,3 +24,12 @@ from ._fetch import fetch
 from ._drift_diffusion_state_characterization import drift, diffusion
 
 from ._dimension_reduction import DimensionReduction
+
+
+# -----------
+from ._data_format import DataFormat
+from ._x_use import X_use, fetch_formatted_data
+from ._knn import kNN
+
+from ._negative_cross_entropy import NegativeCrossEntropy
+
