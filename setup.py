@@ -5,7 +5,7 @@ import sys
 
 setuptools.setup(
     name="scdiffeq",
-    version="0.0.46rc4",
+    version="0.0.47rc0",
     python_requires=">3.9.0",
     author="Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard",
     author_email="mvinyard@broadinstitute.org",

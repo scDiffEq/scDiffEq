@@ -1,6 +1,6 @@
 
 __module_name__ = "__init__.py"
-__version__ = __Version__ = "0.0.46rc4"
+__version__ = __Version__ = "0.0.47rc0"
 __doc__ = """Top-level __init__ for the scdiffeq package."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
