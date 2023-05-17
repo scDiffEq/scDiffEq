@@ -62,7 +62,10 @@ class X_use(utils.ABCParse):
     
     def _fetch_X(self, idx = None):
         
-        adata = self._adata[idx]
+        if isinstance(idx, NoneType):
+            adata = self._adata
+        else:
+            adata = self._adata[idx]
         
         if self._use_key in self._OBSM_KEYS:
             return adata.obsm[self._use_key]
@@ -101,12 +104,14 @@ class X_use(utils.ABCParse):
 
     def __call__(
         self,
-        torch: bool = False, groupby: Union[NoneType, str] = None,
-        device: str = autodevice.AutoDevice()):
+        torch: bool = False,
+        groupby: Union[NoneType, str] = None,
+        device: str = autodevice.AutoDevice(),
+    ):
         
         self.__update__(locals(), private = ["torch", "groupby", "device"])
         
-        if not isinstance(self._groupby, NoneType):
+        if not isinstance(groupby, NoneType):
             return self.groupby_forward()
         
         return self.forward(df = None, device = self._device)

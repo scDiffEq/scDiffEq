@@ -62,6 +62,7 @@ class scDiffEq(utils.ABCParse):
         build_kNN: bool = True,
         fate_bias_csv_path: Union[str, NoneType] = None,
         fate_bias_multiplier: float = 1,
+        viz_frequency: int = 1,
         
         # -- time params: -------------------------------------------------------
         time_key: Union[str, NoneType] = None,
@@ -120,7 +121,11 @@ class scDiffEq(utils.ABCParse):
         self.__config__(locals())
 
     def _configure_obs_idx(self):
-        if not self.adata.obs.index[0] == "1":
+        
+        self._PROVIDED_OBS_IDX = self.adata.obs.index
+        self._PROVIDED_VAR_IDX = self.adata.var.index
+        
+        if self.adata.obs.index[0] != "1":
             self.adata = utils.idx_to_int_str(self.adata)
         
         

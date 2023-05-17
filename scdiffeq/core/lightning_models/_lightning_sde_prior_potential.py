@@ -9,8 +9,9 @@ from .. import utils
 from typing import Union, List
 
 class LightningSDE_PriorPotential(
-    base.BaseLightningDiffEq,
     mix_ins.PotentialMixIn,
+    mix_ins.DriftPriorMixIn,
+    base.BaseLightningDiffEq,
 ):
     def __init__(
         self,
@@ -50,30 +51,30 @@ class LightningSDE_PriorPotential(
         self._configure_torch_modules(func=LatentPotentialSDE, kwargs=locals())
         self._configure_optimizers_schedulers()
 
-    def forward(self, X0, t, **kwargs):
-        """Forward step: (0) integrate in latent space"""
-        Z_hat, KL_div = self.integrate(
-            Z0=X0, t=t, dt=self.hparams["dt"], logqp=True, **kwargs
-        )
-        return Z_hat, KL_div
+#     def forward(self, X0, t, **kwargs):
+#         """Forward step: (0) integrate in latent space"""
+#         Z_hat, KL_div = self.integrate(
+#             Z0=X0, t=t, dt=self.hparams["dt"], logqp=True, **kwargs
+#         )
+#         return Z_hat, KL_div
 
-    def log_computed_loss(self, sinkhorn_loss, t, kl_div_loss, stage):
+#     def log_computed_loss(self, sinkhorn_loss, t, kl_div_loss, stage):
         
-        sinkhorn_loss = self.log_sinkhorn_divergence(sinkhorn_loss).sum()
-        self.log(f"kl_div_{stage}", kl_div_loss.sum())
+#         sinkhorn_loss = self.log_sinkhorn_divergence(sinkhorn_loss).sum()
+#         self.log(f"kl_div_{stage}", kl_div_loss.sum())
 
-        return sinkhorn_loss + kl_div_loss.sum()
+#         return sinkhorn_loss + kl_div_loss.sum()
 
-    def step(self, batch, batch_idx, stage=None):
+#     def step(self, batch, batch_idx, stage=None):
 
-        batch = self.process_batch(batch, batch_idx)
-        X_hat, kl_div_loss = self.forward(batch.X0, batch.t)
-        sinkhorn_loss = self.compute_sinkhorn_divergence(
-            batch.X, X_hat, batch.W, batch.W_hat
-        )
-        return self.log_computed_loss(
-            sinkhorn_loss, t=batch.t, kl_div_loss=kl_div_loss, stage=stage
-        )
+#         batch = self.process_batch(batch, batch_idx)
+#         X_hat, kl_div_loss = self.forward(batch.X0, batch.t)
+#         sinkhorn_loss = self.compute_sinkhorn_divergence(
+#             batch.X, X_hat, batch.W, batch.W_hat
+#         )
+#         return self.log_computed_loss(
+#             sinkhorn_loss, t=batch.t, kl_div_loss=kl_div_loss, stage=stage
+#         )
 
         
     def __repr__(self):

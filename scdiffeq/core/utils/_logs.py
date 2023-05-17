@@ -8,31 +8,40 @@ from .. import utils
 # -- Base Class: ------
 class Logs(utils.ABCParse):
     def __init__(self, path, stage, version=0):
-        super().__init__()
         self.__parse__(locals(), public=[None])
-        
+
     @property
-    def _BACKUP_BASE_PATH(self):
-        return os.path.join(
-            self._path, f"{self._stage}_logs", f"version_{int(self._version - 1)}"
-        )
+    def _AVAILABLE_VERSIONS(self):
+        versions = glob.glob(f"{self._path}/{self._stage}*/version_*")
+        n_versions = len(versions)
+        return [int(os.path.basename(v).split("_")[-1]) for v in versions]
+
+    @property
+    def _VERSION(self):
+        """Sometimes the passed version isn't found..."""
+        if self._version in self._AVAILABLE_VERSIONS:
+            return self._version
+        elif len(self._AVAILABLE_VERSIONS) > 0:
+            return max(self._AVAILABLE_VERSIONS)
+        else:
+            return "VERSION NOT FOUND"
 
     @property
     def _BASE_PATH(self):
         return os.path.join(
-            self._path, f"{self._stage}_logs", f"version_{self._version}"
+            self._path, f"{self._stage}_logs", f"version_{self._VERSION}"
         )
 
     @property
     def _METRICS_PATH(self):
         _metrics_path = os.path.join(self._BASE_PATH, "metrics.csv")
-        if not os.path.exists(_metrics_path):
-            try:
-                _metrics_path = os.path.join(self._BACKUP_BASE_PATH, "metrics.csv")
-            except:
-                print(f"Cannot find: {_metrics_path}")
-        
-        return _metrics_path
+        if os.path.exists(_metrics_path):
+            return _metrics_path
+#         else:
+#             _metrics_path = os.path.join(self._BACKUP_BASE_PATH, "metrics.csv")
+#             if os.path.exists(_metrics_path):
+#                 return _metrics_path
+#             raise FileNotFoundError(_metrics_path)
 
     @property
     def _HPARAMS_PATH(self):

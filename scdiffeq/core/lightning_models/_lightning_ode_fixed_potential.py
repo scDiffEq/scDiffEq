@@ -1,11 +1,18 @@
 
+# -- import packages: ----------------------------------------------------------
 from neural_diffeqs import PotentialODE
 import torch
 
+
+# -- import local dependencies: ------------------------------------------------
 from . import base, mix_ins
 
+
+# -- set typing: ---------------------------------------------------------------
 from typing import Union, List
 
+
+# -- DiffEq: -------------------------------------------------------------------
 class LightningODE_FixedPotential(
     mix_ins.BaseForwardMixIn,
     mix_ins.PotentialMixIn,
@@ -29,7 +36,22 @@ class LightningODE_FixedPotential(
         adjoint=False,
         *args,
         **kwargs,
-    ):
+    )->None:
+        """
+        LightningODE_FixedPotential
+        
+        Parameters:
+        -----------
+        
+        Returns:
+        --------
+        
+        Notes:
+        ------
+        
+        Examples:
+        ---------
+        """
         super().__init__()
 
         self.save_hyperparameters()
@@ -37,5 +59,5 @@ class LightningODE_FixedPotential(
         self._configure_torch_modules(func=PotentialODE, kwargs=locals())
         self._configure_optimizers_schedulers()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "LightningODE-FixedPotential"

@@ -32,7 +32,9 @@ class kNN(utils.ABCParse):
     @property
     def X_use(self):
         if not hasattr(self, "_X_use"):
-            self._X_use = X_use(self._adata, self._use_key)()
+            xu = X_use(self._adata, self._use_key)
+            self._X_use = xu(torch = False, groupby = None, device = "cpu")
+            
         return self._X_use
 
     @property

@@ -44,7 +44,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
     def _configure_torch_modules(self, func, kwargs):
         
         kwargs['state_size'] = self.hparams['latent_dim']
-        self.func = func(**utils.function_kwargs(func, kwargs))
+        self.DiffEq = func(**utils.function_kwargs(func, kwargs))
         
     @property
     def PRETRAIN(self):
@@ -59,7 +59,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
     def integrate(self, Z0, t, dt, logqp, **kwargs):
         return self._INTEGRATOR(
-            sde=self.func,
+            sde=self.DiffEq,
             y0=Z0,
             ts=t,
             dt=dt,
@@ -90,6 +90,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
     @abstractmethod
     def step(self, batch, batch_idx, stage=None):
+        print("WARNING: The base (empty) step is being called from `_base_lightning_diffeq.py`")
         ...
 
     # -- LightningModule methods: ----------------------------------------------

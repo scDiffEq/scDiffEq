@@ -13,124 +13,6 @@ NoneType = type(None)
 
 
 # -- MixIn class: --------------------------------------------------------------        
-#     def _configure_pretrain_optimizers(
-#         self,
-#         pretrain_lr=1e-3,
-#         pretrain_step_size=10,
-#         optimizer=torch.optim.Adam,
-#         scheduler=torch.optim.lr_scheduler.StepLR,
-#     ):
-
-#         pretrain_optimizer = optimizer(
-#             list(self.Encoder.parameters()) + list(self.Decoder.parameters()),
-#             lr=pretrain_lr,
-#         )
-
-#         pretrain_scheduler = torch.optim.lr_scheduler.StepLR(
-#             pretrain_optimizer, step_size=pretrain_step_size
-#         )
-#     def _configure_pretrain(
-#         self,
-#         pretrain_epochs=0,
-#         pretrain_lr=1e-3,
-#         pretrain_step_size=10,
-#         optimizer=torch.optim.Adam,
-#         scheduler=torch.optim.lr_scheduler.StepLR,
-#     ):
-#         self.pretrain_epochs = pretrain_epochs
-        
-#         # -- Reconstruction Loss Function: -------------------------------------
-#         self.MSE_RL = torch.nn.MSELoss(reduction="sum")
-
-        
-#         self._configure_pretrain_optimizers(
-#             pretrain_lr=pretrain_lr,
-#             pretrain_step_size=pretrain_step_size,
-#             optimizer=optimizer,
-#             scheduler=scheduler,
-#         )
-        
-#         # -- other necessities: ------------------------------------------------
-#         self.automatic_optimization = False
-        
-#     def configure(
-#         self,
-#         data_dim: int,
-#         latent_dim: int,
-#         pretrain_epochs=0,
-#         pretrain_lr=1e-3,
-#         pretrain_step_size=10,
-#         optimizer=torch.optim.Adam,
-#         scheduler=torch.optim.lr_scheduler.StepLR,
-#         encoder_n_hidden: int = 3,
-#         encoder_power: float = 2,
-#         encoder_activation: Union[str, List[str]] = "LeakyReLU",
-#         encoder_dropout: Union[float, List[float]] = 0.2,
-#         encoder_bias: bool = True,
-#         encoder_output_bias: bool = True,
-#         encoder: Union[NoneType, torch.nn.Sequential] = None,
-#         decoder_n_hidden: int = 3,
-#         decoder_power: float = 2,
-#         decoder_activation: Union[str, List[str]] = "LeakyReLU",
-#         decoder_dropout: Union[float, List[float]] = 0.2,
-#         decoder_bias: bool = True,
-#         decoder_output_bias: bool = True,
-#         decoder: Union[NoneType, torch.nn.Sequential] = None,
-#         mu_hidden: Union[List[int], int] = [2000, 2000],
-#         sigma_hidden: Union[List[int], int] = [400, 400],
-#         mu_activation: Union[str, List[str]] = 'LeakyReLU',
-#         sigma_activation: Union[str, List[str]] = 'LeakyReLU',
-#         mu_dropout: Union[float, List[float]] = 0.2,
-#         sigma_dropout: Union[float, List[float]] = 0.2,
-#         mu_bias: bool = True,
-#         sigma_bias: List[bool] = True,
-#         mu_output_bias: bool = True,
-#         sigma_output_bias: bool = True,
-#         mu_n_augment: int = 0,
-#         sigma_n_augment: int = 0,
-#         sde_type='ito',
-#         noise_type='general',
-#         brownian_dim=1,
-#         coef_drift: float = 1.0,
-#         coef_diffusion: float = 1.0,
-#         coef_prior_drift: float = 1.0,
-#     ):
-        
-#         KWARGS = {}
-        
-#         KWARGS["Encoder"] = utils.function_kwargs(func=torch_nets.Encoder, kwargs=locals())
-#         KWARGS["SDE"] = utils.function_kwargs(func=self._configure_sde, kwargs=locals())
-#         KWARGS["Decoder"] = utils.function_kwargs(func=torch_nets.Decoder, kwargs=locals())
-        
-#         if isinstance(encoder, NoneType):
-#             self.encoder = torch_nets.Encoder(**KWARGS['encoder'])
-#         else:
-#             self.encoder = encoder
-            
-#         self._configure_sde()
-        
-#         if isinstance(decoder, NoneType):
-#             decoder = torch_nets.Decoder(**KWARGS['decoder'])
-#         else:
-#             self.decoder = decoder
-        
-#         self._configure_SDE(
-#             state_size=self.hparams["latent_dim"],
-#             **utils.function_kwargs(
-#                 func=self._configure_SDE,
-#                 kwargs=locals(),
-#                 ignore=['state_size'],
-#         )
-
-#         self._configure_pretrain(
-#             **utils.function_kwargs(
-#                 func=self._configure_pretrain,
-#                 kwargs=locals(),
-#             )
-
-#         self._configure_integrator()
-
-
 class VAEMixIn(object):
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -167,7 +49,7 @@ class VAEMixIn(object):
         kwargs['state_size'] = self.hparams['latent_dim']
         
         self._configure_encoder()
-        self.func = func(**utils.function_kwargs(func, kwargs))
+        self.DiffEq = func(**utils.function_kwargs(func, kwargs))
         self._configure_decoder()
         
     def _configure_optimizers_schedulers(self):

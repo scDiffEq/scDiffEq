@@ -14,6 +14,7 @@ from typing import Union, List
 class LightningSDE_VAE(
     mix_ins.VAEMixIn, 
     mix_ins.PreTrainMixIn,
+    mix_ins.BaseForwardMixIn,
     base.BaseLightningDiffEq,
 ):
     def __init__(

@@ -33,3 +33,4 @@ from ._knn import kNN
 
 from ._negative_cross_entropy import NegativeCrossEntropy
 
+from ._sum_norm_df import sum_norm_df

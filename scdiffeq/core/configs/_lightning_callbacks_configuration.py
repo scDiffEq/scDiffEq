@@ -55,6 +55,7 @@ class LightningCallbacksConfiguration(utils.ABCParse):
     def __call__(
         self,
         version,
+        viz_frequency = 1,
         model_name="scDiffEq_model",
         working_dir=os.getcwd(),
         train_version=0,

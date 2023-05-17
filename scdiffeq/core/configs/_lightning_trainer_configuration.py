@@ -50,6 +50,7 @@ class LightningTrainerConfiguration(utils.ABCParse):
         
         return callback_config(
             version = self.version,
+            viz_frequency = self.viz_frequency,
             model_name=self.model_name,
             working_dir=self.working_dir,
             train_version=self.train_version,
@@ -127,6 +128,7 @@ class LightningTrainerConfiguration(utils.ABCParse):
         working_dir=os.getcwd(),
         train_version=0,
         pretrain_version=0,
+        viz_frequency = 1,
         stage=None,
         max_epochs=500,
         monitor=None,

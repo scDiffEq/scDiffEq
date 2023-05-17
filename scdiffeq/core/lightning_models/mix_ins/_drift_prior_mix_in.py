@@ -4,14 +4,14 @@ class DriftPriorMixIn(object):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
-    def forward(self, X0, t, logqp=False, **kwargs):
+    def forward(self, Z0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""
         
         return self.integrate(
-            Z0=self.Encoder(X0),
+            Z0=Z0,
             t=t,
             dt=self.hparams["dt"],
-            logqp=logqp,
+            logqp=self.logqp,
             **kwargs,
         )
             

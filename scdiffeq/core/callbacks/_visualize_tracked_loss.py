@@ -36,18 +36,18 @@ class ModelTracker(utils.ABCParse):
         )
 
     def _HAS_STAGE_LOGS(self, stage_key):
-        return stage_key in [
-            os.path.basename(fpath)
-            for fpath in glob.glob(os.path.join(self._PATH, "*"))
-        ]
+        for fpath in glob.glob(os.path.join(self._PATH, "*/version_*/metrics.csv")):
+            if stage_key in fpath:
+                return True
+            
 
     @property
     def _HAS_PRETRAIN(self):
-        return self._HAS_STAGE_LOGS("pretrain_logs")
+        return self._HAS_STAGE_LOGS("/pretrain_logs")
 
     @property
     def _HAS_TRAIN(self):
-        return self._HAS_STAGE_LOGS("train_logs")
+        return self._HAS_STAGE_LOGS("/train_logs")
 
     @property
     def _PRETRAIN(self):
@@ -199,7 +199,7 @@ class LossTrackingVisualization(utils.ABCParse):
 
     @property
     def _NPLOTS(self):
-        nplots = 0
+        nplots = 0        
         if self._HAS_TRAIN:
             nplots += len(self._PLOT_INPUTS["train"].keys())
         if self._HAS_PRETRAIN:
@@ -247,6 +247,7 @@ class VisualizeTrackedLoss(lightning.Callback):
     def __init__(
         self,
         version,
+        viz_frequency = 1,
         model_name="scDiffEq_model",
         working_dir=os.getcwd(),
         train_version=0,
@@ -260,6 +261,7 @@ class VisualizeTrackedLoss(lightning.Callback):
         )
         self._INFO = utils.InfoMessage()
         self.fname = fname
+        self.viz_frequency = viz_frequency
         
     @property
     def save_path(self):
@@ -275,6 +277,7 @@ class VisualizeTrackedLoss(lightning.Callback):
 
         epoch = pl_module.current_epoch
         
-        loss_track_viz = LossTrackingVisualization(self.model_tracker)
-        loss_track_viz.__plot__()
-        self._save_plot()
+        if epoch % self.viz_frequency == 0:
+            loss_track_viz = LossTrackingVisualization(self.model_tracker)
+            loss_track_viz.__plot__()
+            self._save_plot()
