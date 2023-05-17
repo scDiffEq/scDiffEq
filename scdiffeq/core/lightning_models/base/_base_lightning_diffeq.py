@@ -31,6 +31,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
     # -- setup: ----------------------------------------------------------------
     def _configure_optimizers_schedulers(self):
         """Assumes no pre-train - i.e., a single optimizer, scheduler"""
+        
         optimizer = self.hparams['train_optimizer']
         scheduler = self.hparams['train_scheduler']
 
@@ -71,7 +72,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
     def compute_sinkhorn_divergence(self, X, X_hat, W, W_hat):
         return self.sinkhorn_divergence(
             W.contiguous(), X.contiguous(), W_hat.contiguous(), X_hat.contiguous()
-        )
+        ).requires_grad_()
 
     def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage):
         for i in range(len(t)):
@@ -81,6 +82,12 @@ class BaseLightningDiffEq(lightning.LightningModule):
             self.log(msg, val)
 
         return sinkhorn_loss.sum()
+    
+    def log_lr(self):
+        
+        for i, opt in enumerate(self.optimizers()):
+            for j, pg in enumerate(opt.optimizer.state_dict()["param_groups"]):
+                self.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
 
     # -- custom steps: -------------------------------------------------------------
     @abstractmethod

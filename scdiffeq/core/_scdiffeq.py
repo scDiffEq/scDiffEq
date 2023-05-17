@@ -11,7 +11,7 @@ import os
 
 
 # -- import local dependencies: ------------------------------------------------
-from . import configs, lightning_models, utils
+from . import configs, lightning_models, utils, callbacks
 from .. import tools
 
 
@@ -423,7 +423,11 @@ class scDiffEq(utils.ABCParse):
         self._PRETRAIN_CONFIG_COUNT += 1
         self._TRAIN_CONFIG_COUNT += 1
         
-        
+    @property
+    def tracker(self):
+        return callbacks.ModelTracker(version=self._VERSION)
+
+
     @property
     def loss(self):
         # scDiffEq_fit_loss_tracking.png

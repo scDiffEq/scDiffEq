@@ -103,8 +103,33 @@ class VAEMixIn(object):
         recon_loss = self.reconstruction_loss(X0_hat, batch.X0).sum()
         self.log("pretrain_rl_mse", recon_loss.item())
         
+        self.log_lr()
+        
         self.manual_backward(recon_loss)
         pretrain_optim.step()
+        pretrain_scheduler = self.lr_schedulers()[0]
+        pretrain_scheduler.step()
+
+    def step(self, batch, batch_idx, stage=None):
+        
+        if stage == "training":
+            train_optim = self.optimizers()[1]
+            train_optim.zero_grad()
+
+        batch = self.process_batch(batch, batch_idx)
+        X_hat = self.forward(batch.X0, batch.t)
+        sinkhorn_loss = self.compute_sinkhorn_divergence(
+            batch.X, X_hat, batch.W, batch.W_hat
+        )
+        loss = self.log_sinkhorn_divergence(sinkhorn_loss, t=batch.t, stage=stage)
+                
+        self.log_lr()
+        
+        if stage == "training":
+            self.manual_backward(loss)
+            train_optim.step()
+            train_scheduler = self.lr_schedulers()[1]
+            train_scheduler.step()
 
     def __repr__(self):
         return "scDiffEq MixIn: VAEMixIn"

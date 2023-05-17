@@ -15,4 +15,5 @@ class BaseForwardMixIn(object):
         sinkhorn_loss = self.compute_sinkhorn_divergence(
             batch.X, X_hat, batch.W, batch.W_hat
         )
+        self.log_lr()
         return self.log_sinkhorn_divergence(sinkhorn_loss, t=batch.t, stage=stage)
