@@ -31,6 +31,7 @@ class scDiffEq(utils.ABCParse):
         use_key: str = "X_scaled",
         obs_keys: List[str] = ["W"],
         kNN_key: str = "X_pca_scDiffEq",
+        seed: int = 0,
         
         # -- pretrain params: ---------------------------------------------------
         pretrain_epochs: int = 500,
@@ -54,7 +55,6 @@ class scDiffEq(utils.ABCParse):
         predict_key: str = "predict",
         
         # -- general params: ----------------------------------------------------
-        seed: int = 617,
         num_workers: int = os.cpu_count(),
         silent: bool = True,
         scale_input_counts: bool = True,
@@ -230,6 +230,8 @@ class scDiffEq(utils.ABCParse):
             self._configure_kNN_graph()
         self._configure_model(kwargs)
         self._configure_trainer_generator()
+        
+        lightning.seed_everything(self._seed)
 
     def freeze(self):
         """Freeze lightning model"""
