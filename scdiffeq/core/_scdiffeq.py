@@ -165,6 +165,7 @@ class scDiffEq(utils.ABCParse):
             self.adata.obsm["X_umap_scDiffEq"] = self.reducer.X_umap
 
     def _configure_logger(self):
+
         self.DiffEqLogger = utils.scDiffEqLogger(model_name=self._model_name)
         self.DiffEqLogger()
 
@@ -177,15 +178,16 @@ class scDiffEq(utils.ABCParse):
         self._TRAIN_CONFIG_COUNT = 0
 
     def _configure_kNN_graph(self):
+        
+        # -- prep data: ------
         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
         
-        train_adata.obs = train_adata.obs.reset_index(drop=True)
-        train_adata.obs.index = train_adata.obs.index.astype(str)
+        # -- doesn't seem necessary any longer: ------
+#         train_adata.obs = train_adata.obs.reset_index(drop=True)
+#         train_adata.obs.index = train_adata.obs.index.astype(str)
         
         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
-        self.kNN_Graph = utils.kNNGraphQuery(
-            adata=train_adata, use_key=self._kNN_key,
-        )
+        self.kNN_Graph = tools.kNN(adata = train_adata, use_key = self._kNN_key)
 
     def _configure_model(self, kwargs):
 
@@ -272,16 +274,6 @@ class scDiffEq(utils.ABCParse):
         
         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
 
-#         if not isinstance(epochs, NoneType):
-            
-#             if self._PRETRAIN_CONFIG_COUNT > 0:
-#                 epochs = epochs + self._pretrain_epochs
-            
-#             self._pretrain_epochs = epochs
-#             self._PARAMS["pretrain_epochs"] = epochs
-#             self.DiffEq.hparams['pretrain_epochs'] = epochs
-#             self._INFO(f"Pretrain epochs scheduled: {epochs}")
-
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
             kwargs=self._PARAMS,
@@ -328,15 +320,6 @@ class scDiffEq(utils.ABCParse):
         self._INFO(f"Configuring fit step: {STAGE}")
         
         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
-
-#         if not isinstance(epochs, NoneType):
-#             if self._TRAIN_CONFIG_COUNT > 0:
-#                 epochs = epochs + self._train_epochs
-                
-#             self._train_epochs = epochs
-#             self._PARAMS["train_epochs"] = epochs
-#             self.DiffEq.hparams['train_epochs'] = epochs
-#             self._INFO(f"Train epochs scheduled: {epochs}")
 
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
@@ -432,6 +415,5 @@ class scDiffEq(utils.ABCParse):
 
     @property
     def loss(self):
-        # scDiffEq_fit_loss_tracking.png
         utils.display_tracked_loss(self.DiffEqLogger)
         
