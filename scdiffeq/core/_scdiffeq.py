@@ -19,6 +19,9 @@ from .. import tools
 from typing import Union, List
 NoneType = type(None)
 
+import warnings
+
+warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
 
 class scDiffEq(utils.ABCParse):
     def __init__(
