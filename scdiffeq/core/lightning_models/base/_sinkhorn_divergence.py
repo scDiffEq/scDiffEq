@@ -5,7 +5,7 @@ from autodevice import AutoDevice
 
 
 # -- import local dependencies: ------------------------------------------------
-from ..utils import AutoParseBase
+from ...utils import AutoParseBase
 
 
 # -- API-facing class: ---------------------------------------------------------

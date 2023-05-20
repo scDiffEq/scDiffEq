@@ -1,17 +1,33 @@
 
-from pytorch_lightning import Callback
-from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
+import os
 
+from lightning import Callback
+from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
+
+"""where built-in callbacks are configured"""
 
 from .. import utils, callbacks
 
 
-class LightningCallbacksConfiguration(utils.AutoParseBase):
+class InterTrainerEpochCounter(Callback):
     def __init__(self):
+        ...
+#         self.COMPLETED_EPOCHS = 0
+
+    def on_train_epoch_end(self, trainer, pl_module, *args, **kwargs):
+
+        pl_module.COMPLETED_EPOCHS += 1
+        ce = pl_module.COMPLETED_EPOCHS
+
+class LightningCallbacksConfiguration(utils.ABCParse):
+    def __init__(self):
+        super().__init__()
+        
         self.cbs = []
 
     @property
     def BuiltInCallbacks(self):
+
         return [
         ModelCheckpoint(
             every_n_epochs=self.every_n_epochs,
@@ -20,19 +36,30 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
             save_last=self.save_last,
             monitor=self.monitor,
         ),
-        StochasticWeightAveraging(swa_lrs=self.swa_lrs), # considering removal pending better understanding
+            InterTrainerEpochCounter(),
+            callbacks.VisualizeTrackedLoss(
+                **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
+            ),
+            # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
+            # considering rm SWA pending better understanding
         ]
 
     @property
     def Callbacks(self):
         return self.cbs + self.BuiltInCallbacks
-
+        
     @property
     def GradientRetainedCallbacks(self):
         return [callbacks.GradientPotentialTest()] + self.cbs
 
     def __call__(
         self,
+        version,
+        viz_frequency = 1,
+        model_name="scDiffEq_model",
+        working_dir=os.getcwd(),
+        train_version=0,
+        pretrain_version=0,
         callbacks=[],
         ckpt_frequency=10,
         keep_ckpts=-1,
@@ -42,13 +69,13 @@ class LightningCallbacksConfiguration(utils.AutoParseBase):
         save_last=True,
     ):
         
+        self.__parse__(locals(), private = [None], ignore=["callbacks"])
+        
         self.every_n_epochs = ckpt_frequency
         self.save_top_k = keep_ckpts
-        self.save_last = save_last
-        self.monitor = monitor
-        self.swa_lrs = swa_lrs
-
+        
         [self.cbs.append(cb) for cb in callbacks]
+        
         if retain_test_gradients:
             return self.GradientRetainedCallbacks
         return self.Callbacks

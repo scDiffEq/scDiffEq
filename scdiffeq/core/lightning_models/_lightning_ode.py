@@ -1,53 +1,51 @@
 
 # -- import packages: ----------------------------------------------------------
+from neural_diffeqs import NeuralODE
 import torch
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._base_lightning_diffeqs import BaseLightningODE
-from ._sinkhorn_divergence import SinkhornDivergence
-from ._potential_mixin import PotentialMixIn
+from . import base, mix_ins
 
 
-def min_max_norm(t: torch.Tensor)->torch.Tensor:
-    return (t - t.min()) / (t.max() - t.min()) * 1e-3 # TODO: make param
+from typing import Union, List
 
-# -- model class: --------------------------------------------------------------
-class LightningODE(BaseLightningODE):
-    def __init__(self, func):
-        super(LightningODE, self).__init__()
-
-        self.func = func
-        self.loss_func = SinkhornDivergence()
-        self.optimizers = [torch.optim.RMSprop(self.parameters())]              # TODO: replace
-        self.lr_schedulers = [
-            torch.optim.lr_scheduler.StepLR(self.optimizers[0], step_size=10)   # TODO: replace
-        ]
-        self.save_hyperparameters(ignore=["func"])    
-
-    def process_batch(self, batch):
-        """called in step"""
+# -- lightning model: ----------------------------------------------------------
+class LightningODE(
+    mix_ins.BaseForwardMixIn,
+    base.BaseLightningDiffEq,
+):
+    def __init__(
+        self,
+        # -- ode params: -------------------------------------------------------
+        latent_dim,
+        mu_hidden: Union[List[int], int] = [2000, 2000],
+        mu_activation: Union[str, List[str]] = 'LeakyReLU',
+        mu_dropout: Union[float, List[float]] = 0.2,
+        mu_bias: bool = True,
+        mu_output_bias: bool = True,
+        mu_n_augment: int = 0,
+        sde_type='ito',
+        noise_type='general',
         
-        X = batch[1].transpose(1, 0)
-        X0 = X[0]
-        t = min_max_norm(batch[0].unique())
-
-        return X, X0, t
-
-    def loss(self, X, X_hat):
-        return self.loss_func(X.contiguous(), X_hat.contiguous())
-
-    def step(self, batch, batch_idx, stage=None):
-        """Batch should be from a torch DataLoader"""
+        # -- general params: ---------------------------------------------------
+        train_lr=1e-4,
+        train_optimizer=torch.optim.RMSprop,
+        train_scheduler=torch.optim.lr_scheduler.StepLR,
+        train_step_size=10,
+        dt=0.1,
+        adjoint=False,
         
-        X, X0, t = self.process_batch(batch)
-        X_hat = self.forward(X0, t)
-        loss = self.loss(X, X_hat)
-        if stage in ["training", "validation"]:
-            self.record(loss, stage)
-            
-        return loss.sum()
+        *args,
+        **kwargs,
+    ):
+        super().__init__()
 
-class LightningPotentialODE(LightningODE, PotentialMixIn):
-    def __init__(self, func):
-        super(LightningPotentialODE, self).__init__(func)
+        self.save_hyperparameters()
+        
+        # -- torch modules: ----------------------------------------------------
+        self._configure_torch_modules(func=NeuralODE, kwargs=locals())
+        self._configure_optimizers_schedulers()
+
+    def __repr__(self):
+        return "LightningODE"

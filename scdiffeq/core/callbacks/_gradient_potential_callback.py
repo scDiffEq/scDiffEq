@@ -1,6 +1,6 @@
 
 
-from pytorch_lightning import Callback
+from lightning import Callback
 
 
 class GradientPotentialTest(Callback):

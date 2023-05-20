@@ -1,5 +1,5 @@
 
-from pytorch_lightning import Callback
+from lightning import Callback
 import pickle
 import os
 
