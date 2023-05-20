@@ -306,16 +306,18 @@ class scDiffEq(utils.ABCParse):
     def pretrain(
         self,
         epochs=None,
-        callbacks = [],
+        pretrain_callbacks = [],
     ):
         """If any of the keyword arguments are passed, they will replace the previously-stated arguments from __init__ and re-configure the DiffEq."""
 
-        self._configure_pretrain_step(epochs, callbacks)
+        self._configure_pretrain_step(epochs, pretrain_callbacks)
         self.pre_trainer.fit(self.DiffEq, self.LitDataModule)
 
     def _configure_train_step(self, epochs, kwargs):
                     
         STAGE = "train"
+        
+        kwargs['callbacks'] = kwargs.pop("train_callbacks")
 
         self._INFO(f"Configuring fit step: {STAGE}")
         
@@ -355,7 +357,7 @@ class scDiffEq(utils.ABCParse):
     def train(
         self,
         epochs=500,
-        callbacks=[],
+        train_callbacks=[],
         ckpt_frequency: int = 25,
         save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
@@ -377,7 +379,8 @@ class scDiffEq(utils.ABCParse):
         train_epochs=200,
         pretrain_epochs=500,
         train_lr = None,
-        callbacks: List = [],
+        pretrain_callbacks: List = [],
+        train_callbacks: List = [],
         ckpt_frequency: int = 25,
         save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
