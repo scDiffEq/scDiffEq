@@ -1,16 +1,10 @@
 
 # -- import packages: ----------------------------------------------------------
-# from pytorch_lightning import Trainer, loggers
+
 from lightning import Trainer
 from lightning.pytorch import loggers
 import torch
 import os
-
-
-# from licorice_font import font_format
-
-# debug_fmt = font_format("DEBUG", ['YELLOW'])
-# debug_msg = f"- {debug_fmt} | "
 
 
 # -- import local dependencies: ------------------------------------------------
