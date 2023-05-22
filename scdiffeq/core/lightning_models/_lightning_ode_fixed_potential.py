@@ -10,6 +10,7 @@ from . import base, mix_ins
 
 # -- set typing: ---------------------------------------------------------------
 from typing import Union, List
+from ... import __version__
 
 
 # -- DiffEq: -------------------------------------------------------------------
@@ -34,6 +35,8 @@ class LightningODE_FixedPotential(
         train_step_size=10,
         
         adjoint=False,
+        version = __version__,
+
         *args,
         **kwargs,
     )->None:

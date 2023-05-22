@@ -10,6 +10,8 @@ from . import mix_ins, base
 
 from typing import Union, List
 
+from ... import __version__
+
 # -- lightning model: ----------------------------------------------------------
 class LightningSDE_VAE(
     mix_ins.VAEMixIn, 
@@ -67,6 +69,8 @@ class LightningSDE_VAE(
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
+        
+        version = __version__,
         
         *args,
         **kwargs,

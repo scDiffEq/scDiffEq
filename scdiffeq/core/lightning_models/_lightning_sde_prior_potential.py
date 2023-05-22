@@ -8,6 +8,8 @@ from .. import utils
 
 from typing import Union, List
 
+from ... import __version__
+
 class LightningSDE_PriorPotential(
     mix_ins.PotentialMixIn,
     mix_ins.DriftPriorMixIn,
@@ -40,6 +42,7 @@ class LightningSDE_PriorPotential(
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
+        version = __version__,
         *args,
         **kwargs,
     ):

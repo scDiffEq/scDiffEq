@@ -10,6 +10,8 @@ from . import mix_ins
 from . import base
 from .. import utils
 
+from ... import __version__
+
 from typing import Union, List
 
 
@@ -76,6 +78,8 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         decoder_output_bias: bool = True,
         
         PCA = None,
+        
+        version = __version__,
         
         *args,
         **kwargs,

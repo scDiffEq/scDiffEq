@@ -42,7 +42,11 @@ class LightningTrainerConfiguration(utils.ABCParse):
 
     @property
     def _Trainer_kwargs(self):
-        return utils.extract_func_kwargs(func=Trainer, kwargs=self._PARAMS, ignore=["accelerator", "callbacks"])
+        return utils.extract_func_kwargs(
+            func=Trainer,
+            kwargs=self._PARAMS,
+            ignore=["accelerator", "callbacks", 'version'],
+        )
 
     @property
     def Callbacks(self):

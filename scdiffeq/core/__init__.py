@@ -11,7 +11,6 @@ __email__ = ", ".join(
     ]
 )
 
-
 # -- import models accessed as sdq.models.<MODEL>: ---------------------------------------
 from ._scdiffeq import scDiffEq
 

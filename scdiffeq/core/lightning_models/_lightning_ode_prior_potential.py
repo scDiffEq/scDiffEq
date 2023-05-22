@@ -7,6 +7,8 @@ from . import base, mix_ins
 from .. import utils
 
 from typing import Union, List
+from ... import __version__
+
 
 class LightningODE_PriorPotential(
     base.BaseLightningDiffEq,
@@ -34,6 +36,8 @@ class LightningODE_PriorPotential(
         sde_type='ito',
         noise_type='general',
         brownian_dim=1,
+        
+        version = __version__,
         
         *args,
         **kwargs,

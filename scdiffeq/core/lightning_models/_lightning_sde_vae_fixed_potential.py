@@ -8,6 +8,8 @@ import torch
 
 from typing import Union, List
 
+from ... import __version__
+
 class LightningSDE_VAE_FixedPotential(
     mix_ins.PreTrainMixIn,
     mix_ins.PotentialMixIn,
@@ -65,6 +67,8 @@ class LightningSDE_VAE_FixedPotential(
         
         dt=0.1,
         adjoint=False,
+        version = __version__,
+        
         *args,
         **kwargs,
     ):

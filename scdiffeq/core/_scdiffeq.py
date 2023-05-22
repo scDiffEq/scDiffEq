@@ -12,7 +12,7 @@ import os
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
-from .. import tools
+from .. import tools, __version__
 
 
 # -- type setting: -------------------------------------------------------------
@@ -117,6 +117,8 @@ class scDiffEq(utils.ABCParse):
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
+        
+        version: str = __version__,
         
         *args,
         **kwargs,
@@ -316,17 +318,20 @@ class scDiffEq(utils.ABCParse):
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
             kwargs=self._PARAMS,
+            ignore = ['version'],
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=self._PARAMS,
+                ignore = ['version'],
             )
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=locals(),
+                ignore = ['version'],
             )
         )
         trainer_kwargs = self._check_disable_validation(trainer_kwargs)
@@ -365,17 +370,20 @@ class scDiffEq(utils.ABCParse):
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
             kwargs=self._PARAMS,
+            ignore = ['version'],
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=self._PARAMS,
+                ignore = ['version'],
             )
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=kwargs,
+                ignore = ['version'],
             )
         )
         

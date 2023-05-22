@@ -10,6 +10,9 @@ from . import base, mix_ins
 
 from typing import Union, List
 
+from ... import __version__
+
+
 # -- lightning model: ----------------------------------------------------------
 class LightningSDE_VAE_FateBiasAware(
     mix_ins.VAEMixIn,
@@ -76,6 +79,8 @@ class LightningSDE_VAE_FateBiasAware(
         fate_bias_multiplier = 1,
         
         PCA = None,
+        
+        version = __version__,
         
         *args,
         **kwargs,

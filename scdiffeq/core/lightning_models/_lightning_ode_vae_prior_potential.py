@@ -11,6 +11,8 @@ from . import base
 
 
 from typing import Union, List
+from ... import __version__
+
 
 # -- lightning model: ----------------------------------------------------------
 class LightningODE_VAE_PriorPotential(
@@ -51,6 +53,8 @@ class LightningODE_VAE_PriorPotential(
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
+        
+        version = __version__,
         
         *args,
         **kwargs,

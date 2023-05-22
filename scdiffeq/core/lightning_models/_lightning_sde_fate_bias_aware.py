@@ -10,6 +10,7 @@ from . import base, mix_ins
 
 
 from typing import Union, List
+from ... import __version__
 
 # -- lightning model: ----------------------------------------------------------
 class LightningSDE_FateBiasAware(
@@ -47,6 +48,9 @@ class LightningSDE_FateBiasAware(
         kNN_Graph=None,
         fate_bias_csv_path=None,
         fate_bias_multiplier = 1,
+        
+        version = __version__,
+        
         *args,
         **kwargs,
     ):

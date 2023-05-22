@@ -9,6 +9,7 @@ from . import base, mix_ins
 
 
 from typing import Union, List
+from ... import __version__
 
 
 # -- lightning model: ----------------------------------------------------------
@@ -42,6 +43,7 @@ class LightningSDE(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        version = __version__,
         *args,
         **kwargs,
     ):

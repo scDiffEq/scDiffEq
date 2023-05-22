@@ -84,10 +84,14 @@ class BaseLightningDiffEq(lightning.LightningModule):
         return sinkhorn_loss.sum()
     
     def log_lr(self):
-        
-        for i, opt in enumerate(self.optimizers()):
-            for j, pg in enumerate(opt.optimizer.state_dict()["param_groups"]):
-                self.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
+                
+        if not isinstance(self.optimizers(), list):
+            lr = self.optimizers().optimizer.state_dict()["param_groups"][0]["lr"]
+            self.log("opt_param_group_lr", lr)
+        else:
+            for i, opt in enumerate(self.optimizers()):
+                for j, pg in enumerate(opt.optimizer.state_dict()["param_groups"]):
+                    self.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
 
     # -- custom steps: -------------------------------------------------------------
     @abstractmethod
