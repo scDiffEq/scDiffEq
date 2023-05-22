@@ -7,4 +7,3 @@ from ._function_credentialling import function_credentials
 from ._time_configuration import TimeConfiguration, configure_time
 
 from ._lightning_model_configuration import LightningModelConfiguration
-from ._lightning_model_configuration_v2 import LightningModelConfiguration

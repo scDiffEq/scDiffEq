@@ -1,7 +1,5 @@
 
-# import brownian_diffuser  # deprecated
 import neural_diffeqs
-# import torchdiffeq # deprecated
 import torchsde
 
 
