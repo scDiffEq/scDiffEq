@@ -209,6 +209,7 @@ class scDiffEq(utils.ABCParse):
 
         self.DiffEq = self._LitModelConfig(kwargs)
         self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
+        self._component_loader = utils.FlexibleComponentLoader(self)
     
     def __config__(self, kwargs):
 
@@ -237,14 +238,49 @@ class scDiffEq(utils.ABCParse):
         self._configure_trainer_generator()
         
         lightning.seed_everything(self._seed)
+        
+    def to(self, device):
+        self.DiffEq.to(device)
 
     def freeze(self):
         """Freeze lightning model"""
         self.DiffEq.freeze()
+               
+    def load_DiffEq_from_ckpt(self, ckpt_path):
+        
+        self._component_loader.load_DiffEq_state(ckpt_path)
+        self._PARAMS[
+            "diffeq_ckpt_path"
+        ] = self._diffeq_ckpt_path = self._component_loader._diffeq_ckpt_path
+        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+                
+    def load_encoder_from_ckpt(self, ckpt_path):
+        
+        self._component_loader.load_encoder_state(ckpt_path)
+        self._PARAMS[
+            "encoder_ckpt_path"
+        ] = self._encoder_ckpt_path = self._component_loader._encoder_ckpt_path
+        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+        
+    def load_decoder_from_ckpt(self, ckpt_path):
+        
+        self._component_loader.load_decoder_state(ckpt_path)
+        self._PARAMS[
+            "decoder_ckpt_path"
+        ] = self._decoder_ckpt_path = self._component_loader._decoder_ckpt_path
+        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+    def load_VAE_from_ckpt(self, ckpt_path):
+        # TODO: add ability to freeze these once loaded
+        
+        self.load_encoder_from_ckpt(ckpt_path)
+        self.load_decoder_from_ckpt(ckpt_path)
 
     def load(self, ckpt_path, freeze=True):
         self.ckpt_path = ckpt_path
-        self.DiffEq.load_from_checkpoint(ckpt_path)
+        self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path)
         if freeze:
             self.DiffEq.freeze()
 
