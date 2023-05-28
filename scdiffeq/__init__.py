@@ -19,3 +19,4 @@ from . import core
 from . import io
 from . import plotting as pl
 from . import tools as tl
+from . import datasets
