@@ -157,16 +157,16 @@ class scDiffEq(utils.ABCParse):
         self.reducer = tools.DimensionReduction(self.adata, save_path = self.DiffEqLogger.default_model_outdir)
         if self._scale_input_counts:
             self._INFO("Scaling input counts (for dimension reduction).")
-            self.reducer.scale()
+            self.reducer.fit_scaler()
             self.adata.obsm["X_scaled_scDiffEq"] = self.reducer.X_scaled
         else:
             self.reducer.X_scaled_train = reducer.X_train
             self.reducer.X_scaled = reducer.X
 
         if self._reduce_dimensions:
-            self.reducer.pca()
+            self.reducer.fit_pca()
             self.adata.obsm["X_pca_scDiffEq"] = self.reducer.X_pca
-            self.reducer.umap()
+            self.reducer.fit_umap()
             self.adata.obsm["X_umap_scDiffEq"] = self.reducer.X_umap
 
     def _configure_logger(self):
