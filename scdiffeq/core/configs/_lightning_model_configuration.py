@@ -3,7 +3,15 @@ import os
 
 from .. import lightning_models, utils
 
+
 NoneType = type(None)
+# figure out how to return model from file wihtout doing anyhhing else - fast, easy
+#     def load_from_ckpt(self):
+        
+#         return 
+#         self.DiffEq = 
+#         def load_model(self):
+#         diffeq = sdq.core.lightning_models.LightningSDE_FixedPotential.
 
 # -- import packages: ----------------------------------------------------------
 class LightningModelConfiguration(ABCParse.ABCParse):
@@ -22,6 +30,8 @@ class LightningModelConfiguration(ABCParse.ABCParse):
     ):
 
         self.__parse__(locals(), public=[None])
+        
+
 
     @property
     def available_lightning_models(self):
@@ -54,7 +64,13 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             else:
                 raise ValueError("Path to fate_bias.csv was passed though not found.")
 
-    def __call__(self, kwargs):
+    @property
+    def _USE_CKPT(self):
+        return isinstance(self._ckpt_path, str)
+    
+    def __call__(self, kwargs, ckpt_path = None):
+        
+        self._ckpt_path = ckpt_path
 
         _model = [self.DiffEq_type]
 
@@ -71,6 +87,12 @@ class LightningModelConfiguration(ABCParse.ABCParse):
 
         if _model in self.available_lightning_models:
             lit_model = getattr(lightning_models, _model)
+            
+            if self._USE_CKPT:
+                return lit_model.load_from_checkpoint(self._ckpt_path)
+            
             model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
+            
             return lit_model(data_dim = self._data_dim, **model_kwargs)
+        
         raise ValueError(f"Configuration tried: {_model} - this does not exist as an available model.")

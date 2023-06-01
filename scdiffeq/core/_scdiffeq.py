@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_w
 
 class scDiffEq(utils.ABCParse):
     def __init__(
-        self,
+        self,        
         
         # -- data params: -------------------------------------------------------
         adata: anndata.AnnData,
@@ -120,6 +120,8 @@ class scDiffEq(utils.ABCParse):
         
         version: str = __version__,
         
+        ckpt_path = None,
+        
         *args,
         **kwargs,
     ):
@@ -127,12 +129,13 @@ class scDiffEq(utils.ABCParse):
 
     def _configure_obs_idx(self):
         
+        
         self._PROVIDED_OBS_IDX = self.adata.obs.index
         self._PROVIDED_VAR_IDX = self.adata.var.index
         
-        if self.adata.obs.index[0] != "1":
+        if self._PROVIDED_OBS_IDX[0] != "0":
+        # if self.adata.obs.index[0] != "0":
             self.adata = utils.idx_to_int_str(self.adata)
-        
         
     def _configure_data(self, kwargs):
 
@@ -209,7 +212,7 @@ class scDiffEq(utils.ABCParse):
         if hasattr(self, "kNN_Graph"):
             kwargs['kNN_Graph'] = self.kNN_Graph
 
-        self.DiffEq = self._LitModelConfig(kwargs)
+        self.DiffEq = self._LitModelConfig(kwargs, self._ckpt_path)
         self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
     
@@ -228,15 +231,20 @@ class scDiffEq(utils.ABCParse):
         Step 7: Configure TrainerGenerator
         """
 
-        self.__parse__(kwargs, public=["adata"])
+        self.adata = kwargs['adata'].copy()
+        
+        self.__parse__(kwargs, public = [None], ignore=["adata"])
         self._INFO = utils.InfoMessage()
         self._configure_data(kwargs)
+        
+        self._configure_model(kwargs) # , self._ckpt_path)
+        
         self._configure_logger()
         if kwargs["reduce_dimensions"]:
             self._configure_dimension_reduction()
         if kwargs["build_kNN"]:
             self._configure_kNN_graph()
-        self._configure_model(kwargs)
+        
         self._configure_trainer_generator()
         
         lightning.seed_everything(self._seed)
