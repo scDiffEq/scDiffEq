@@ -241,18 +241,14 @@ class scDiffEq(utils.ABCParse):
         
         self.__parse__(kwargs, public = [None], ignore=["adata"])
         self._INFO = utils.InfoMessage()
-        self._configure_data(kwargs)
-        
-        self._configure_model(kwargs) # , self._ckpt_path)
-        
+        self._configure_data(kwargs)        
+        self._configure_model(kwargs)
         self._configure_logger()
         if kwargs["reduce_dimensions"]:
             self._configure_dimension_reduction()
         if kwargs["build_kNN"]:
             self._configure_kNN_graph()
-        
         self._configure_trainer_generator()
-        
         lightning.seed_everything(self._seed)
         
     def to(self, device):
@@ -301,12 +297,12 @@ class scDiffEq(utils.ABCParse):
             self.DiffEq.freeze()
 
     def _stage_log_path(self, stage):
-        log_path = glob.glob(self.DiffEqLogger.versioned_model_outdir + f"/{stage}*")[0]
+        log_path = glob.glob(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR + f"/{stage}*")[0]
         self._INFO(f"Access logs at: {log_path}")
         
     @property
     def _VERSION(self):
-        return int(os.path.basename(self.DiffEqLogger.versioned_model_outdir).split("_")[1])
+        return int(os.path.basename(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR).split("_")[1])
     
     def _check_disable_validation(self, trainer_kwargs):
         if self._train_val_split[1] == 0:
@@ -332,20 +328,20 @@ class scDiffEq(utils.ABCParse):
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
             kwargs=self._PARAMS,
-            ignore = ['version'],
+            ignore = ['version', 'working_dir'],
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=self._PARAMS,
-                ignore = ['version'],
+                ignore = ['version', 'working_dir'],
             )
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=locals(),
-                ignore = ['version'],
+                ignore = ['version', 'working_dir'],
             )
         )
         trainer_kwargs = self._check_disable_validation(trainer_kwargs)
@@ -353,7 +349,7 @@ class scDiffEq(utils.ABCParse):
         self.pre_trainer = self.TrainerGenerator(
             max_epochs=self._pretrain_epochs,
             stage=STAGE,
-            working_dir = self.DiffEqLogger.wd,
+            working_dir = self.DiffEqLogger._WORKING_DIR,
             version = self._VERSION,
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
@@ -384,20 +380,20 @@ class scDiffEq(utils.ABCParse):
         trainer_kwargs = utils.extract_func_kwargs(
             func=self.TrainerGenerator,
             kwargs=self._PARAMS,
-            ignore = ['version'],
+            ignore = ['version', 'working_dir'],
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=self._PARAMS,
-                ignore = ['version'],
+                ignore = ['version', 'working_dir'],
             )
         )
         trainer_kwargs.update(
             utils.extract_func_kwargs(
                 func=lightning.Trainer,
                 kwargs=kwargs,
-                ignore = ['version'],
+                ignore = ['version', 'working_dir'],
             )
         )
         
@@ -406,7 +402,7 @@ class scDiffEq(utils.ABCParse):
         self.trainer = self.TrainerGenerator(
             max_epochs=self._train_epochs,
             stage=STAGE,
-            working_dir = self.DiffEqLogger.wd,
+            working_dir = self.DiffEqLogger._WORKING_DIR,
             version = self._VERSION,
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
