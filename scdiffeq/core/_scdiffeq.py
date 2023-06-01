@@ -66,6 +66,7 @@ class scDiffEq(utils.ABCParse):
         fate_bias_csv_path: Union[str, NoneType] = None,
         fate_bias_multiplier: float = 1,
         viz_frequency: int = 1,
+        working_dir=os.getcwd(),
         
         # -- time params: -------------------------------------------------------
         time_key: Union[str, NoneType] = None,
@@ -120,7 +121,7 @@ class scDiffEq(utils.ABCParse):
         
         version: str = __version__,
         
-        ckpt_path = None,
+        ckpt_path: Union[str, NoneType] = None,
         
         *args,
         **kwargs,
@@ -157,7 +158,7 @@ class scDiffEq(utils.ABCParse):
         self._data_dim = self.LitDataModule.n_dim
 
     def _configure_dimension_reduction(self):
-        self.reducer = tools.DimensionReduction(self.adata, save_path = self.DiffEqLogger.default_model_outdir)
+        self.reducer = tools.DimensionReduction(self.adata, save_path = self.DiffEqLogger.PARENT_MODEL_OUTDIR)
         if self._scale_input_counts:
             self._INFO("Scaling input counts (for dimension reduction).")
             self.reducer.fit_scaler()
@@ -174,13 +175,18 @@ class scDiffEq(utils.ABCParse):
 
     def _configure_logger(self):
 
-        self.DiffEqLogger = utils.scDiffEqLogger(model_name=self._model_name)
+        self.DiffEqLogger = utils.scDiffEqLogger(
+            model_name=self._model_name,
+            ckpt_path = self._ckpt_path,
+            working_dir=self._working_dir,
+            
+        )
         self.DiffEqLogger()
 
     def _configure_trainer_generator(self):
         
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
-            self.DiffEqLogger.versioned_model_outdir
+            self.DiffEqLogger.VERSIONED_MODEL_OUTDIR
         )
         self._PRETRAIN_CONFIG_COUNT = 0
         self._TRAIN_CONFIG_COUNT = 0
