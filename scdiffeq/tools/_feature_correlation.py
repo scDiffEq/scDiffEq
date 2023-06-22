@@ -3,6 +3,7 @@
 import scipy
 import anndata
 import tqdm
+import pandas as pd
 
 
 # -- import local dependencies: ------------------------------------------------
