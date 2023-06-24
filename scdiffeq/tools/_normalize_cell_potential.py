@@ -25,12 +25,18 @@ class CellPotentialNormalization(utils.ABCParse):
 
     def __init__(
         self,
-        q=0.05,
-        raw_psi_key="_psi",
-        kNN_use_key="X_pca",
-        knn_smoothing_iters=5,
-        use_tqdm=True,
+        q: float = 0.05,
+        raw_psi_key: str = "_psi",
+        kNN_use_key: str = "X_pca",
+        knn_smoothing_iters: int = 5,
+        use_tqdm: bool = True,
     ):
+
+        """
+        Parameters:
+        -----------
+        q: quantile cutoff
+        """
 
         self.__parse__(locals(), public=[None])
         self._INFO = utils.InfoMessage()
