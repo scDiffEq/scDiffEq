@@ -42,3 +42,5 @@ from ._feature_correlation import (
     diffusion_correlated_features,
     potential_correlated_features,
 )
+
+from ._normalize_cell_potential import normalize_cell_potential
