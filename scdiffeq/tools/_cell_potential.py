@@ -1,11 +1,24 @@
 
+# -- import packages: ----------------------------------------------------------
+import sklearn.preprocessing
+import numpy as np
+import lightning
+import anndata
+import torch
+
+
+# -- import local dependencies: ------------------------------------------------
 from ..core import utils
 from ._knn_smoothing import kNNSmoothing
+from ._fetch import fetch
 from ._knn import kNN
 
-import numpy as np
-import sklearn.preprocessing
 
+# -- set typing: ---------------------------------------------------------------
+from typing import Union
+
+
+# -- operator classes: ---------------------------------------------------------
 class CellPotentialNormalization(utils.ABCParse):
 
     """
@@ -39,7 +52,7 @@ class CellPotentialNormalization(utils.ABCParse):
         """
 
         self.__parse__(locals(), public=[None])
-        self._INFO = utils.InfoMessage()
+        self._INFO = utils.InfoMessage("Cell potential")
 
     @property
     def kNN(self):
@@ -74,6 +87,7 @@ class CellPotentialNormalization(utils.ABCParse):
 
     def _clip_psi(self):
         """STEP 2: Clip outlier values using a quantile"""
+        self._INFO("Quantile-clipping outliers")
         _CLIPPED_PSI = self._POSITIVE_RAW_PSI.copy()
         _CLIPPED_PSI[self._POSITIVE_RAW_PSI < self._Q_MIN_CUTOFF] = self._Q_MIN_CUTOFF
         _CLIPPED_PSI[self._POSITIVE_RAW_PSI > self._Q_MAX_CUTOFF] = self._Q_MAX_CUTOFF
@@ -95,7 +109,7 @@ class CellPotentialNormalization(utils.ABCParse):
             n_iters=self._knn_smoothing_iters,
             use_tqdm=self._use_tqdm,
         )
-        self._INFO("kNN smoothing...")
+        self._INFO("kNN smoothing")
         return smoothing(key="_CLIPPED_PSI", add_to_adata=False)
 
     @property
@@ -108,12 +122,14 @@ class CellPotentialNormalization(utils.ABCParse):
     @property
     def _LOG_PSI(self):
         """STEP 4: Log-transform"""
+        self._INFO("Log-transforming")
         if not hasattr(self, "_log_psi"):
             self._log_psi = np.log10(self._SMOOTHED_PSI)
         return self._log_psi
 
     def _min_max_scaling(self):
         """STEP 5: min-max scaling"""
+        self._INFO("Scaling")
         scaler = sklearn.preprocessing.MinMaxScaler()
         return scaler.fit_transform(self._LOG_PSI.reshape(-1, 1))
 
@@ -129,11 +145,47 @@ class CellPotentialNormalization(utils.ABCParse):
 
     def __call__(self, adata, key_added="psi"):
         self.__update__(locals())
+        
 
         adata.obs[key_added] = self._SCALED_PSI
         self._clean_up_adata()
 
 
+class CellPotential(utils.ABCParse):
+    """Calculate [raw] potential values, given cells and a model."""
+
+    def __init__(
+        self,
+        use_key: str = "X_pca",
+        device: Union[str, torch.device] = torch.device("cuda:0"),
+        seed: int = 0,
+    ):
+        self.__parse__(locals(), public=[None])
+        lightning.seed_everything(0)
+        self._INFO = utils.InfoMessage("Cell potential")
+
+    @property
+    def Z_input(self):
+        if not hasattr(self, "_Z_input"):
+            self._Z_input = fetch(
+                adata=self.adata, use_key=self._use_key, device=self._device
+            )
+        return self._Z_input
+
+    def forward(self, model):
+        self._INFO("Computing")
+        return model.DiffEq.DiffEq.mu(self.Z_input).flatten().detach().cpu().numpy()
+
+    def __call__(
+        self, adata: anndata.AnnData, model, key_added: str = "_psi"
+    ):
+
+        self.__update__(locals())
+        self.Z_psi = self.forward(model)
+        adata.obs[key_added] = self.Z_psi
+
+
+# -- API-facing functions: -----------------------------------------------------
 def normalize_cell_potential(
     adata,
     use_key="_psi",
@@ -154,3 +206,36 @@ def normalize_cell_potential(
     )
 
     cell_potential_norm(adata, key_added=key_added)
+    
+def cell_potential(
+    adata: anndata.AnnData,
+    model,
+    use_key: str = "X_pca",
+    raw_key_added: str = "_psi",
+    norm_key_added: str = "psi",
+    device: Union[str, torch.device] = torch.device("cuda:0"),
+    seed: int = 0,
+    normalize: bool = True,
+    return_raw_array: bool = False,
+    q: float = 0.05,
+    knn_smoothing_iters: int = 5,
+    use_tqdm: bool = True
+):
+    """
+    
+    """
+    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed)
+    cell_potential(adata=adata, model=model, key_added=raw_key_added)
+    
+    if normalize:
+        normalize_cell_potential(
+            adata=adata,
+            use_key=raw_key_added,
+            key_added=norm_key_added,
+            q=q,
+            kNN_use_key=use_key,
+            knn_smoothing_iters=knn_smoothing_iters,
+            use_tqdm=use_tqdm,
+        )
+    if return_raw_array:
+        return cell_potential.Z_psi

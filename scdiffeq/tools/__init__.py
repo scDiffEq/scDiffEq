@@ -43,4 +43,4 @@ from ._feature_correlation import (
     potential_correlated_features,
 )
 
-from ._normalize_cell_potential import normalize_cell_potential
+from ._cell_potential import cell_potential, normalize_cell_potential
