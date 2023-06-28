@@ -43,6 +43,10 @@ class UMAPSurfaceScatterPlot3D(utils.ABCParse):
         showscale_surface: bool = False,
         show_surface: bool = True,
         show_scatter: bool = True,
+        backgroundcolor = "white",
+        gridcolor = "grey",
+        showbackground = True,
+        zerolinecolor = "white",
         **kwargs,
     ):
         self.__parse__(locals(), public=[None])
@@ -109,9 +113,18 @@ class UMAPSurfaceScatterPlot3D(utils.ABCParse):
         if self._show_scatter:
             _data_to_plot += list(self.SCATTER)
         return _data_to_plot
+    
+    @property
+    def _AXIS_DICT(self):
+        return dict(
+                    backgroundcolor=self._backgroundcolor,
+                    gridcolor=self._gridcolor,
+                    showbackground=self._showbackground,
+                    zerolinecolor=self._zerolinecolor,
+                )
 
     def plot(self):
-
+        
         fig = go.Figure(data=self._PLOT_DATA)
         fig.update_layout(
             autosize=True,
@@ -123,24 +136,9 @@ class UMAPSurfaceScatterPlot3D(utils.ABCParse):
                 xaxis_title=self._x_label,
                 yaxis_title=self._y_label,
                 zaxis_title=self._z_label,
-                xaxis=dict(
-                    backgroundcolor="white",
-                    gridcolor="grey",
-                    showbackground=True,
-                    zerolinecolor="white",
-                ),
-                yaxis=dict(
-                    backgroundcolor="white",
-                    gridcolor="grey",
-                    showbackground=True,
-                    zerolinecolor="white",
-                ),
-                zaxis=dict(
-                    backgroundcolor="white",
-                    gridcolor="grey",
-                    showbackground=True,
-                    zerolinecolor="white",
-                ),
+                xaxis=self._AXIS_DICT,
+                yaxis=self._AXIS_DICT,
+                zaxis=self._AXIS_DICT,
             ),
         )
         fig.show()
@@ -175,6 +173,10 @@ def potential_landscape(
     showscale_surface: bool = False,
     show_surface: bool = True,
     show_scatter: bool = True,
+    backgroundcolor = "white",
+    gridcolor = "grey",
+    showbackground = True,
+    zerolinecolor = "white",
 ):
     """
     Plot the 3D potential landscape and simulated cells within the landscape.
