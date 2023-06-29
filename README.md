@@ -1,8 +1,9 @@
-# <a href=""><img src=docs/images/scdiffeq.logo.png alt="scdiffeq-logo" width="320"/>
-  
+# <a href=""><img src=https://github.com/scDiffEq/scDiffEq/assets/47393421/c61cd638-911a-42c6-a977-797c097caad1 alt="transparent_scdiffeq_logo" width="320" />
+
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
 [![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 
 An analysis framework for modeling dynamical single-cell data with **neural differential equations**, most notably ***stochastic*** differential equations  allow us to build **generative models** of single-cell dynamics.
