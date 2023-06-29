@@ -1,6 +1,5 @@
 
 __module_name__ = "__init__.py"
-__version__ = "0.0.45"
 __doc__ = """plotting __init__ module. Sub-package of the main scdiffeq API."""
 __author__ = ", ".join(["Michael E. Vinyard", "Anders Rasmussen", "Ruitong Li"])
 __email__ = ", ".join(
@@ -13,3 +12,4 @@ __email__ = ", ".join(
 
 
 # import functions accessed as sdq.pl.<func>: --------------------------------------------
+from ._velocity_stream import velocity_stream
