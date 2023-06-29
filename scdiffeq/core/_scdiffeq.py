@@ -477,3 +477,33 @@ class scDiffEq(utils.ABCParse):
     def loss(self):
         utils.display_tracked_loss(self.DiffEqLogger)
         
+        
+    def cell_potential(
+        self,
+        use_key: str = 'X_pca',
+        raw_key_added: str = '_psi',
+        norm_key_added: str = 'psi',
+        device: Union[str, torch.device] = torch.device('cuda:0'),
+        seed: int = 0,
+        normalize: bool = True,
+        return_raw_array: bool = False,
+        q: float = 0.05,
+        knn_smoothing_iters: int = 5,
+        use_tqdm: bool = True,
+    ):
+        
+        tools.cell_potential(
+            adata = self.adata,
+            model = self,
+            use_key = use_key,
+            raw_key_added = raw_key_added,
+            norm_key_added = norm_key_added,
+            device = device,
+            seed = seed,
+            normalize = normalize,
+            return_raw_array = return_raw_array,
+            q = q,
+            knn_smoothing_iters = knn_smoothing_iters,
+            use_tqdm = use_tqdm,
+        )
+        
