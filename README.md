@@ -1,4 +1,4 @@
-# <a href=""><img src=https://github.com/scDiffEq/scDiffEq/assets/47393421/c61cd638-911a-42c6-a977-797c097caad1 alt="transparent_scdiffeq_logo" width="320" />
+# <a href=""><img src=/docs/images/transparent_scdiffeq_logo.png alt="transparent_scdiffeq_logo" width="320" />
 
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/scdiffeq.svg)](https://pypi.python.org/pypi/scdiffeq/)
 [![PyPI version](https://badge.fury.io/py/scdiffeq.svg)](https://badge.fury.io/py/scdiffeq)
