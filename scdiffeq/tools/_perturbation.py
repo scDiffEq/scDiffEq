@@ -27,8 +27,8 @@ class Perturbation(utils.ABCParse):
         self,
         adata: anndata.AnnData,
         use_key: str = "X_scaled",
-        PCA: Union[Optional, sklearn.decomposition.PCA] = None,
-        UMAP: Union[Optional, umap.UMAP] = None,
+        PCA: Optional[sklearn.decomposition.PCA] = None,
+        UMAP: Optional[umap.UMAP] = None,
     ) -> NoneType:
         
         """ """
@@ -114,8 +114,8 @@ def perturb(
     gene_idx: Union[pd.Index, np.array, list],
     val: float,
     use_key: str = "X_scaled",
-    PCA: Optional = None,
-    UMAP: Optional = None,
+    PCA: Optional[sklearn.decomposition.PCA] = None,
+    UMAP: Optional[umap.UMAP] = None,
     return_array: bool = False,
 ) -> anndata.AnnData:
     
@@ -149,12 +149,12 @@ def perturb(
         
     PCA
         PCA model
-        type: Union[Optional, sklearn.decomposition.PCA]
+        type: Optional[sklearn.decomposition.PCA]
         default: None
         
     UMAP
         UMAP model
-        type: Union[Optional, umap.UMAP]
+        type: Optional[umap.UMAP]
         default: None
         
     return_array
