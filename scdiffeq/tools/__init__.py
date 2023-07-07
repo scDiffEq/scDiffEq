@@ -42,4 +42,4 @@ from ._norm import L2Norm
 
 from ._final_state_per_simulation import FinalStatePerSimulation
 from ._simulator import Simulator, simulate
-from ._perturbation import Perturbation
+from ._perturbation import Perturbation, perturb
