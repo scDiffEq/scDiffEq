@@ -106,6 +106,7 @@ class CellPotentialNormalization(utils.ABCParse):
         smoothing = kNNSmoothing(
             self.adata,
             kNN=self.kNN,
+            use_key = self._kNN_use_key,
             n_iters=self._knn_smoothing_iters,
             use_tqdm=self._use_tqdm,
         )
