@@ -41,4 +41,4 @@ from ._cell_potential import cell_potential, normalize_cell_potential
 from ._norm import L2Norm
 
 from ._final_state_per_simulation import FinalStatePerSimulation
-from ._simulator import Simulator
+from ._simulator import Simulator, simulate

@@ -10,6 +10,7 @@ import os
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
+
 from ._final_state_per_simulation import FinalStatePerSimulation
 from ._cell_potential import normalize_cell_potential
 from ._norm import L2Norm
@@ -18,15 +19,20 @@ from ._fetch import fetch
 
 
 # -- set typing: ---------------------------------------------------------------
-from typing import Union, List
+from typing import Union, List, Optional
 NoneType = type(None)
 
 
 class Simulator(utils.ABCParse):
     """Base class for the simulator containing the core functions."""
-
     def __init__(
         self,
+        adata: Union[anndata.AnnData, NoneType] = None,
+        DiffEq = None,
+        idx = None,
+        use_key: str = "X_pca",
+        UMAP = None,
+        PCA = None,
         t_min: Union[float, NoneType] = None,
         t_max: Union[float, NoneType] = None,
         dt: float = 0.1,
@@ -34,23 +40,30 @@ class Simulator(utils.ABCParse):
         device: Union[torch.device, str] = "cuda:0",
         time_key: str = "Time point",
         ref_cell_type_key="Cell type annotation",
-        time_key_added: str = "t",
+        gene_ids_key: str = "gene_ids",
         simulation_key_added: str = "simulation",
         final_state_key_added: str = "final_state",
+        normalize_potential: bool = True,
+        potential_normalization_kwargs={},
+        time_key_added: str = "t",
         silent: bool = False,
         graph = None,
         ref_kNN_key: str = "X_pca",
-        UMAP = None,
-        PCA = None,
+        obs_mapping_keys: List[str] = ["leiden", "Cell type annotation"],
+        fate_key: str = "Cell type annotation",
+        return_adata: bool = True,
+        name: Union[str, NoneType] = None,
+        save_h5ad: bool = False,
         wd = ".",
         *args,
         **kwargs,
     ):
         """ """
 
-        self.__parse__(locals(), public=[None], ignore=["adata"])
+        self.__parse__(locals(), public=['DiffEq', 'idx'], ignore=["adata"])
         self._INFO = utils.InfoMessage(silent=silent)
         self._L2Norm = L2Norm()
+        self._adata_input = adata.copy()
 
     @property
     def kNN(self):
@@ -233,12 +246,19 @@ class Simulator(utils.ABCParse):
             ID = self.idx
         fname = f"adata.scDiffEq_simulated.{ID}.h5ad"
         return os.path.join(self._wd, fname)
+    
+    @property
+    def _COMPUTE_TIME(self):
+        if not hasattr(self, "_compute_time"):
+            self._T_FINAL = time.time()
+            self._compute_time = self._T_FINAL - self._T_INIT
+        self._INFO("Compute time: {:.2f}".format(self._compute_time))
 
     def __call__(
         self,
-        adata: anndata.AnnData,
-        DiffEq,
-        idx: Union[str, int],
+        adata: Union[anndata.AnnData, NoneType] = None,
+        DiffEq = None,
+        idx: Union[str, int] = None,
         obs_mapping_keys: List[str] = ["leiden"],
         fate_key: str = "Cell type annotation",
         use_key: str = "X_pca",
@@ -249,10 +269,10 @@ class Simulator(utils.ABCParse):
         save_h5ad: bool = False,
         gene_ids_key: str = "gene_ids",
     ) -> anndata.AnnData:
+        
+        """Runs everything, if given."""
 
         # -- inputs: -----------------------------------------------------------
-        obs_mapping_keys += [self._ref_cell_type_key]
-
         self.__update__(
             locals(),
             private=[
@@ -264,6 +284,7 @@ class Simulator(utils.ABCParse):
                 "name",
                 "gene_ids_key",
                 "fate_key",
+                "save_h5ad",
             ],
         )
 
@@ -283,14 +304,68 @@ class Simulator(utils.ABCParse):
 
         # -- outputs: ----------------------------------------------------------
 
-        if save_h5ad:
+        if self._save_h5ad:
             self.adata.write_h5ad(self._H5AD_PATH)
-
-        self._T_FINAL = time.time()
-        self._COMPUTE_TIME = self._T_FINAL - self._T_INIT
 
         if self._return_adata:
             return self.adata
 
     def __repr__(self):
         return "scDiffEq Simulator"
+
+
+def simulate(
+    adata: anndata.AnnData,
+    model,
+    idx,
+    obs_mapping_keys: List[str] = ["leiden", "Cell type annotation"],
+    fate_key: str = "Cell type annotation",
+    use_key: str = "X_pca",
+    return_adata: bool = True,
+    normalize_potential: bool = True,
+    potential_normalization_kwargs={},
+    name: Optional[str] = None,
+    save_h5ad: bool = False,
+    gene_ids_key: str = "gene_ids",
+    t_min: Optional[float] = None,
+    t_max: Optional[float] = None,
+    dt: float = 0.1,
+    N: int = 2000,
+    device: Union[torch.device, str] = "cuda:0",
+    time_key: str = "Time point",
+    ref_cell_type_key="Cell type annotation",
+    time_key_added: str = "t",
+    simulation_key_added: str = "simulation",
+    final_state_key_added: str = "final_state",
+    silent: bool = False,
+    graph=None,
+    ref_kNN_key: str = "X_pca",
+    PCA=None,
+    UMAP=None,
+    wd=".",
+    return_simulator=False,
+    *args,
+    **kwargs
+) -> anndata.AnnData:
+
+    """
+    Parameters:
+    -----------
+
+    Returns:
+    --------
+    """
+
+    KWARGS = utils.function_kwargs(Simulator, locals())
+    KWARGS.update(kwargs)
+    simulator = Simulator(**KWARGS)
+    
+    DiffEq = model.DiffEq
+    KWARGS = utils.function_kwargs(simulator, locals())
+
+    adata_sim = simulator(**KWARGS)
+
+    if return_simulator:
+        return adata_sim, simulator
+
+    return adata_sim
