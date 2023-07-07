@@ -20,3 +20,5 @@ from . import io
 from . import plotting as pl
 from . import tools as tl
 from . import datasets
+
+from . import _backend_utilities as utils
