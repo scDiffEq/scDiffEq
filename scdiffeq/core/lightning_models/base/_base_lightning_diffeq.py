@@ -119,3 +119,6 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
     def configure_optimizers(self):
         return self._optimizers, self._schedulers
+    
+    def __repr__(self):
+        return "LightningDiffEq"

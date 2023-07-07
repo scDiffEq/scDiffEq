@@ -18,3 +18,5 @@ from . import lightning_models
 from . import utils
 from . import configs
 from . import callbacks
+
+from .lightning_models.base import BaseLightningDiffEq as LightningDiffEq
