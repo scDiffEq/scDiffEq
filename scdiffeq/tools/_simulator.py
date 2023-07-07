@@ -58,7 +58,36 @@ class Simulator(utils.ABCParse):
         *args,
         **kwargs,
     ):
-        """ """
+        """ 
+        adata: Union[anndata.AnnData, NoneType] = None,
+        DiffEq = None,
+        idx = None,
+        use_key: str = "X_pca",
+        UMAP = None,
+        PCA = None,
+        t_min: Union[float, NoneType] = None,
+        t_max: Union[float, NoneType] = None,
+        dt: float = 0.1,
+        N: int = 2000,
+        device: Union[torch.device, str] = "cuda:0",
+        time_key: str = "Time point",
+        ref_cell_type_key="Cell type annotation",
+        gene_ids_key: str = "gene_ids",
+        simulation_key_added: str = "simulation",
+        final_state_key_added: str = "final_state",
+        normalize_potential: bool = True,
+        potential_normalization_kwargs={},
+        time_key_added: str = "t",
+        silent: bool = False,
+        graph = None,
+        ref_kNN_key: str = "X_pca",
+        obs_mapping_keys: List[str] = ["leiden", "Cell type annotation"],
+        fate_key: str = "Cell type annotation",
+        return_adata: bool = True,
+        name: Union[str, NoneType] = None,
+        save_h5ad: bool = False,
+        wd = ".",
+        """
 
         self.__parse__(locals(), public=['DiffEq', 'idx'], ignore=["adata"])
         self._INFO = utils.InfoMessage(silent=silent)
