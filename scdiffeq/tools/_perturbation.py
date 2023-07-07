@@ -9,7 +9,7 @@ import umap
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
-
+from .. import _backend_utilities as backend
 
 # -- set typing: ---------------------------------------------------------------
 from typing import Optional, Union, List
@@ -26,20 +26,29 @@ class Perturbation(utils.ABCParse):
     def __init__(
         self,
         adata: anndata.AnnData,
+        gene_id_key: str = "gene_ids",
         use_key: str = "X_scaled",
         PCA: Optional[sklearn.decomposition.PCA] = None,
         UMAP: Optional[umap.UMAP] = None,
+        copy: bool = False,
     ) -> NoneType:
         
         """ """
         
         self.__parse__(locals(), ignore = ['adata'], public = [None])
-        self.adata = adata.copy()
+        
+        if self._copy:
+            self.adata = adata.copy()
+        else:
+            self.adata = adata
+        
+        self.obs_lookup = backend.ObsIndexLookUp()
+        self.var_lookup = backend.VarIndexLookUp(var_name_key = gene_id_key)
 
     @property
     def X(self) -> np.ndarray:
         if not hasattr(self, "_X"):
-            self._X = self._adata.layers[self._use_key].copy()
+            self._X = self.adata.layers[self._use_key].copy()
         return self._X
 
     @property
@@ -56,13 +65,13 @@ class Perturbation(utils.ABCParse):
 
     @property
     def obs_perturbed(self):
-        perturb_indicator = np.zeros(self._adata.shape[0], dtype=bool)
+        perturb_indicator = np.zeros(self.adata.shape[0], dtype=bool)
         perturb_indicator[self.cell_idx] = True
         return perturb_indicator
 
     @property
     def var_perturbed(self):
-        perturb_indicator = np.zeros(self._adata.shape[1], dtype=bool)
+        perturb_indicator = np.zeros(self.adata.shape[1], dtype=bool)
         perturb_indicator[self.gene_idx] = True
         return perturb_indicator
         
@@ -70,18 +79,43 @@ class Perturbation(utils.ABCParse):
         
         self.adata.uns["X_perturb"] = self.X_perturb[self.cell_idx]
         
-        if hasattr(self, "_PCA"):
+        if not isinstance(self._PCA, NoneType):
             self.adata.uns["X_pca_perturb"] = self.X_pca_perturbed
-        if hasattr(self, "_UMAP"):
+        if not isinstance(self._UMAP, NoneType):
             self.adata.uns["X_umap_perturb"] = self.X_umap_perturbed
         
-        self._adata.obs["perturbed"] = self.obs_perturbed
-        self._adata.var["perturbed"] = self.var_perturbed
+        self.adata.obs["perturbed"] = self.obs_perturbed
+        self.adata.var["perturbed"] = self.var_perturbed
+        
+        self.adata.uns['perturbed'] = {
+            "genes": self._gene_idx,
+            "cells": self._cell_idx,
+        }
         
         
     def forward(self, cell_idx: Union[int, List], gene_idx: int, val: float):
         """ """
         self.X_perturb[cell_idx, gene_idx] = val
+        
+    @property
+    def cell_idx(self):
+        return self.obs_lookup(self.adata, self._cell_idx)
+    
+    @property
+    def gene_idx(self):
+        return self.var_lookup(self.adata, self._gene_idx)
+    
+    def _prepare_return(self):
+        
+        return_ = []
+        if self.return_array:
+            return_.append(self.X_perturb)
+        if self._copy:
+            return_.append(self.adata)
+        
+        if len(return_) > 0:
+            return return_
+        
         
     def __call__(
         self,
@@ -92,19 +126,16 @@ class Perturbation(utils.ABCParse):
     ):
         """ """
         
-        self.__update__(locals())
+        self.__update__(locals(), private = ['cell_idx', 'gene_idx'])
         
         self.X_perturb = self.X
         
-        for gene_ix in gene_idx:
-            self.forward(cell_idx, gene_ix, val)
+        for gene_ix in self.gene_idx:
+            self.forward(self.cell_idx, gene_ix, val)
         
         self._update_adata()
-        
-        if self.return_array:
-            return self.X_perturb
-        
-        return self.adata
+            
+        return self._prepare_return()
 
 
 # -- API-facing function: ------------------------------------------------------
@@ -117,6 +148,7 @@ def perturb(
     PCA: Optional[sklearn.decomposition.PCA] = None,
     UMAP: Optional[umap.UMAP] = None,
     return_array: bool = False,
+    copy: bool = False,
 ) -> anndata.AnnData:
     
     """
@@ -157,6 +189,11 @@ def perturb(
         type: Optional[umap.UMAP]
         default: None
         
+    copy
+        If `True`, returns a copy of the input `adata`.
+        type: bool
+        default: False
+        
     return_array
         type: bool
         default: False
@@ -172,6 +209,7 @@ def perturb(
         PCA = PCA,
         UMAP = UMAP,
         use_key = use_key,
+        copy = copy,
     )
     return perturbation(
         cell_idx = cell_idx,
