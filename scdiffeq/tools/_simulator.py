@@ -206,21 +206,25 @@ class Simulator(utils.ABCParse):
             )
 
     def map_obs(self):
-        for obs_key in self._obs_mapping_keys:
-            self._INFO(f"Mapping observed label: `{obs_key}` to simulated cells")
-            mapped = self.kNN.aggregate(self.adata.X, obs_key=obs_key, max_only=True)
-            mapped.index = mapped.index.astype(str)
-            self.adata.obs = pd.concat([self.adata.obs.copy(), mapped], axis=1)
+        
+        mapped = self.kNN.aggregate(self.adata.X, obs_keys=self._obs_mapping_keys, max_only=True)
+        joined_keys = ",` `".join(self._obs_mapping_keys)
+        self._INFO(f"Mapping observed label: [`{joined_keys}`] to simulated cells")
+        mapped.index = mapped.index.astype(str)
+        self.adata.obs = pd.concat([self.adata.obs.copy(), mapped], axis=1)
             
     def map_final_state_obs(self):
         
         df = self.adata.obs.copy()
         tf_idx = df.loc[df[self._time_key_added] == self._T_MAX].index        
-        for obs_key in self._obs_mapping_keys:
-            self._INFO(f"Mapping only the final state observed label: `{obs_key}`")
-            X_final = self.adata[tf_idx].X
-            mapped = self.kNN.aggregate(X_final, obs_key=obs_key, max_only=True)
-            self.adata.uns[f'mapped_final.{obs_key}'] = mapped
+        
+        joined_keys = ",` `".join(self._obs_mapping_keys)
+        self._INFO(f"Mapping only the final state observed label: [`{joined_keys}`]")
+        
+        X_final = self.adata[tf_idx].X
+        mapped = self.kNN.aggregate(X_final, obs_keys=self._obs_mapping_keys, max_only=True)
+        joined_keys = "_".join(self._obs_mapping_keys)
+        self.adata.uns[f'mapped_final.{joined_keys}'] = mapped
 
     def annotate_final_state(self):
 
@@ -248,7 +252,7 @@ class Simulator(utils.ABCParse):
         
         df = self.adata.obs.copy()
         fate_counts = df.loc[df[self._time_key_added] == self._T_MAX][fate_key].value_counts()
-        self.adata.uns["fate_counts"] = fate_counts.to_dict()
+        self.adata.uns[f"fate_counts_{fate_key}"] = fate_counts.to_dict()
         return fate_counts
 
     @property
@@ -344,6 +348,7 @@ class Simulator(utils.ABCParse):
         self.compute_diffusion()
         self.compute_potential()
         self.map_obs()
+        self.map_final_state_obs()
         self.annotate_final_state()
         self.run_inverse_pca()
         self.run_umap()

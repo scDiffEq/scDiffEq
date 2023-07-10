@@ -36,7 +36,7 @@ class NeighborCounter(utils.ABCParse):
 
     def _to_list(self, obs_keys):
         if isinstance(obs_keys, str):
-            obs_keys = list(obs_keys)
+            obs_keys = [obs_keys]
         return obs_keys
 
     def _count_values_enumerate(self, col: pd.Series) -> dict:
