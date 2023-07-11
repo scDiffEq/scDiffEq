@@ -75,15 +75,12 @@ class LightningTrainerConfiguration(utils.ABCParse):
     
     @property
     def accelerator(self):
-        if not isinstance(self._accelerator, NoneType):
+        if not self._accelerator is None:
             return self._accelerator
         if torch.cuda.is_available():
             return "gpu"
-        # would love to include mps however, currently (torch v1.13)
-        # does not have enough compatability with libraries we depend
-        # on to be used with Apple Silicon.
-        # if torch.backends.mps.is_available():
-        #     return "mps"
+        if torch.backends.mps.is_available(): # experimental
+            return "mps"
         return "cpu"
 
     # -- trainers: -------------------------------------------------------------
@@ -131,7 +128,7 @@ class LightningTrainerConfiguration(utils.ABCParse):
         max_epochs=500,
         monitor=None,
         accelerator=None,
-        devices=None,
+        devices=1,
         prefix: str = "",
         log_every_n_steps=1,
         flush_logs_every_n_steps: int = 1,

@@ -44,9 +44,9 @@ class scDiffEqLogger(AutoParseBase):
 
     @property
     def VERSIONED_MODEL_OUTDIR(self):
-        
-        if self._PASSED_CKPT_MATCHES_MODEL_PARENT_DIR:
-            return self.VERSION_FROM_CKPT
+        if not self._ckpt_path is None:
+            if self._PASSED_CKPT_MATCHES_MODEL_PARENT_DIR:
+                return self.VERSION_FROM_CKPT
         
         return os.path.join(
             self.PARENT_MODEL_OUTDIR,
