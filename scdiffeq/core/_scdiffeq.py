@@ -445,7 +445,7 @@ class scDiffEq(utils.ABCParse):
         accelerator=None,
         log_every_n_steps=1,
         reload_dataloaders_every_n_epochs=1,
-        devices=None,
+        devices=1,
         deterministic=False,
         **kwargs,
     ):
