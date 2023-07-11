@@ -204,7 +204,7 @@ class LossTrackingVisualization(utils.ABCParse):
             nplots += len(self._PLOT_INPUTS["train"].keys())
         if self._HAS_PRETRAIN:
             nplots += len(self._PLOT_INPUTS["pretrain"].keys())
-
+        print(f"nplots: {nplots}")
         return nplots
 
     def __layout__(self):
@@ -264,8 +264,8 @@ class VisualizeTrackedLoss(lightning.Callback):
         self.viz_frequency = viz_frequency
         
     @property
-    def _VIZ_DISABLED(self):
-        return not self.viz_frequency is None
+    def _VIZ_DISABLE(self):
+        return not self.vis_frequency is None
         
     @property
     def save_path(self):

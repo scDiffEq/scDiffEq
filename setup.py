@@ -5,7 +5,7 @@ import sys
 
 setuptools.setup(
     name="scdiffeq",
-    version="0.0.47rc1",
+    version="0.0.48rc0",
     python_requires=">3.9.0",
     author="Michael E. Vinyard - Harvard University - Massachussetts General Hospital - Broad Institute of MIT and Harvard",
     author_email="mvinyard@broadinstitute.org",
@@ -33,6 +33,8 @@ setuptools.setup(
         "annoyance==0.0.18",
         "ABCParse==0.0.3",
         "scdiffeq-plots==0.0.1rc2",
+        "plotly==5.15.0",
+        "scvelo==0.2.5",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
