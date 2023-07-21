@@ -1,11 +1,18 @@
 
 # -- import packages: ----------------------------------------------------------
 import anndata
+<<<<<<< HEAD
 import ABCParse
 import adata_query
 
 
 # -- import local dependencies: ------------------------------------------------
+=======
+
+
+# -- import local dependencies: ------------------------------------------------
+from ._x_use import fetch_formatted_data
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
 from ..core import utils
 
 
@@ -14,7 +21,11 @@ from typing import Union, List, Dict
 
 
 # -- controller class: ---------------------------------------------------------
+<<<<<<< HEAD
 class GroupedExpression(ABCParse.ABCParse):
+=======
+class GroupedExpression(utils.ABCParse):
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
     def __init__(
         self,
         adata: anndata.AnnData,
@@ -56,7 +67,11 @@ class GroupedExpression(ABCParse.ABCParse):
         """
         Updates self.adata and self._use_key
         """
+<<<<<<< HEAD
         X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
+=======
+        X_gene = fetch_formatted_data(self.adata, use_key=self._use_key, torch=False)
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
         var_names = self.adata.uns[self._gene_id_key]
         self.adata = anndata.AnnData(
             X=X_gene,
@@ -77,8 +92,13 @@ class GroupedExpression(ABCParse.ABCParse):
 
     def _single_gene_expression(self, df):
 
+<<<<<<< HEAD
         return adata_query.fetch(
             self.adata[df.index, self._gene_id], key=self._use_key, torch=False
+=======
+        return fetch_formatted_data(
+            self.adata[df.index, self._gene_id], use_key=self._use_key, torch=False
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
         ).flatten()
 
     @property

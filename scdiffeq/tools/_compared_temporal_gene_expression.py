@@ -2,14 +2,21 @@ from typing import Optional, Union, List, Dict
 import numpy as np
 import sklearn
 import anndata
+<<<<<<< HEAD
 import ABCParse
+=======
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
 
 from ..core import utils
 from ._annotate_gene_features import annotate_gene_features
 from ._grouped_expression import grouped_expression
 
 
+<<<<<<< HEAD
 class TemporalGeneExpression(ABCParse.ABCParse):
+=======
+class TemporalGeneExpression(utils.ABCParse):
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
     def __init__(
         self,
         adata: anndata.AnnData,

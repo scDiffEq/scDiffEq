@@ -1,8 +1,11 @@
 # -- import packages: ----------------------------------------------------------
 import anndata
 import pandas as pd
+<<<<<<< HEAD
 import ABCParse
 
+=======
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
@@ -14,7 +17,11 @@ from typing import Union, List, Dict, Optional
 
 
 # -- controller class: ---------------------------------------------------------
+<<<<<<< HEAD
 class SmoothedExpression(ABCParse.ABCParse):
+=======
+class SmoothedExpression(utils.ABCParse):
+>>>>>>> 0c2526d (add necessary funcs for smoothing gex)
     def __init__(
         self,
         time_key: str = "t",
