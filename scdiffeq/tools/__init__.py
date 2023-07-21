@@ -43,3 +43,8 @@ from ._norm import L2Norm
 from ._final_state_per_simulation import FinalStatePerSimulation
 from ._simulator import Simulator, simulate
 from ._perturbation import Perturbation, perturb
+
+from ._grouped_expression import GroupedExpression, grouped_expression
+from ._annotate_gene_features import GeneCompatibility, annotate_gene_features
+from ._compared_temporal_gene_expression import TemporalGeneExpression, compared_temporal_gene_expression
+from ._smoothed_expression import SmoothedExpression, smoothed_expression
