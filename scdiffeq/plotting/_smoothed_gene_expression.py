@@ -6,7 +6,10 @@ import scdiffeq_plots as sdq_pl
 import matplotlib
 import numpy as np
 import pathlib
+<<<<<<< HEAD
 import ABCParse
+=======
+>>>>>>> 059fced (Add plotting for smoothed expr)
 import os
 
 from ..core import utils
@@ -64,7 +67,11 @@ class FillBetweenPlot:
         self._plot(label, **kwargs)
 
 
+<<<<<<< HEAD
 class SmoothedGEXPlot(ABCParse.ABCParse):
+=======
+class SmoothedGEXPlot(utils.ABCParse):
+>>>>>>> 059fced (Add plotting for smoothed expr)
     def __init__(
         self,
         smoothed_gex_key: str = "t_smoothed_gex",
