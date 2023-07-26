@@ -24,9 +24,7 @@ class ABCParse(ABC):
         self, key: str, val: Any, public: List = [], private: List = []
     ) -> None:
         self._PARAMS[key] = val
-        print(f"key: {key}")
-        print(f"private: {(key in private)}")
-        print(f"public: {(key in public)}\n")
+        
         if (key in private) and (not key in public):
             self._stored_private.append(key)
             key = f"_{key}"
@@ -35,7 +33,7 @@ class ABCParse(ABC):
         setattr(self, key, val)
 
     def __set_existing__(self, key: str, val: Any) -> None:
-        print(f"ALREADY FOUND: {key}")
+        
         passed_key = key
 
         if key in self._stored_private:
@@ -43,18 +41,16 @@ class ABCParse(ABC):
 
         if passed_key == "kwargs":
             attr = getattr(self, key)
-            print(key, attr)
             attr.update(val)
-            print(key, attr)
             setattr(self, key, attr)
             self._PARAMS.update(val)
+            
         elif passed_key == "args":
             attr = getattr(self, key)
-            print(key, attr)
             attr += val
-            print(key, attr)
             setattr(self, key, attr)
             self._PARAMS[passed_key] += val
+            
         else:
             self._PARAMS[passed_key] = val
             setattr(self, key, val)
