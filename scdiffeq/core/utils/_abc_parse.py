@@ -9,6 +9,25 @@ class ABCParse(ABC):
         """
         we avoid defining things in __init__ because this subsequently
         mandates the use of `super().__init__()`
+        
+        Example
+        -------
+        ```
+        class DataConfiguration(utils.ABCParse):
+            def __init__(self, x=2, y=3, *args, **kwargs):
+                self.__parse__(locals(), public=[None])
+
+            def __call__(self, x=4, y=5, z=3, *args, **kwargs):
+                self.__update__(locals(), private=[None])
+        
+        
+        dc = DataConfiguration(alpha=0.2)
+        dc._PARAMS
+        dc(beta=0.4)
+        dc._PARAMS
+        dc._kwargs
+        dc._PARAMS
+        ```
         """
         pass
 
