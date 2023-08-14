@@ -4,7 +4,8 @@ import anndata
 
 
 # -- import local dependencies: ------------------------------------------------
-from ._x_use import fetch_formatted_data
+# from ._x_use import fetch_formatted_data
+import adata_query
 from ..core import utils
 
 
@@ -55,7 +56,7 @@ class GroupedExpression(utils.ABCParse):
         """
         Updates self.adata and self._use_key
         """
-        X_gene = fetch_formatted_data(self.adata, use_key=self._use_key, torch=False)
+        X_gene = adata_query.fetch(self.adata, use_key=self._use_key, torch=False)
         var_names = self.adata.uns[self._gene_id_key]
         self.adata = anndata.AnnData(
             X=X_gene,
@@ -76,7 +77,7 @@ class GroupedExpression(utils.ABCParse):
 
     def _single_gene_expression(self, df):
 
-        return fetch_formatted_data(
+        return adata_query.fetch(
             self.adata[df.index, self._gene_id], use_key=self._use_key, torch=False
         ).flatten()
 
