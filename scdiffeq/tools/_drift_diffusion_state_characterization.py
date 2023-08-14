@@ -1,9 +1,8 @@
 
 import torch
 from autodevice import AutoDevice
+import adata_query
 
-from ._fetch import fetch
-NoneType = type(None)
 
 # -- Controller class: -----
 class StateCharacterization:
@@ -28,12 +27,12 @@ class StateCharacterization:
 def drift(adata, SDE, use_key="X_pca", key_added="X_drift", return_Tensor: bool = False):
     """Accessed as sdq.tl.drift(adata)"""
     
-    X = fetch(adata, use_key=use_key)
+    X = adata_query.fetch(adata, key=use_key)
     SDE_state = StateCharacterization(SDE)
     X_drift = SDE_state.drift(X)
     adata.obsm[key_added] = X_drift.detach().cpu().numpy()
     
-    if not isinstance(key_added, NoneType):
+    if not (key_added is None):
         adata.obsm[key_added] = X_drift.detach().cpu().numpy()
     
     if return_Tensor:
@@ -47,7 +46,7 @@ def diffusion(adata, SDE, use_key="X_pca", key_added="X_diffusion", return_Tenso
     SDE_state = StateCharacterization(SDE)
     X_diffusion = SDE_state.diffusion(X)
     
-    if not isinstance(key_added, NoneType):
+    if not (key_added is None):
         adata.obsm[key_added] = X_diffusion.detach().cpu().numpy()
     
     if return_Tensor:

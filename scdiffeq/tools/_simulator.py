@@ -2,6 +2,7 @@
 # -- import packages: ----------------------------------------------------------
 import torch
 import anndata
+import adata_query
 import numpy as np
 import pandas as pd
 import time
@@ -15,7 +16,7 @@ from ._final_state_per_simulation import FinalStatePerSimulation
 from ._cell_potential import normalize_cell_potential
 from ._norm import L2Norm
 from ._knn import kNN
-from ._fetch import fetch
+# from ._fetch import fetch
 
 
 # -- set typing: ---------------------------------------------------------------
@@ -126,8 +127,8 @@ class Simulator(utils.ABCParse):
 
     @property
     def Z0(self):
-        return fetch(
-            self._adata_input[self.idx], use_key=self._use_key, device=self._device
+        return adata_query.fetch(
+            self._adata_input[self.idx], key=self._use_key, device=self._device
         ).expand(self._N, -1)
 
     @property
