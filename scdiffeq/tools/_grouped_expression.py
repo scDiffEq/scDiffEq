@@ -11,8 +11,13 @@ import adata_query
 
 
 # -- import local dependencies: ------------------------------------------------
+<<<<<<< HEAD
 from ._x_use import fetch_formatted_data
 >>>>>>> 0c2526d (add necessary funcs for smoothing gex)
+=======
+# from ._x_use import fetch_formatted_data
+import adata_query
+>>>>>>> 80881be (fix resulting break-points fetch)
 from ..core import utils
 
 
@@ -68,10 +73,14 @@ class GroupedExpression(utils.ABCParse):
         Updates self.adata and self._use_key
         """
 <<<<<<< HEAD
+<<<<<<< HEAD
         X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
 =======
         X_gene = fetch_formatted_data(self.adata, use_key=self._use_key, torch=False)
 >>>>>>> 0c2526d (add necessary funcs for smoothing gex)
+=======
+        X_gene = adata_query.fetch(self.adata, use_key=self._use_key, torch=False)
+>>>>>>> 80881be (fix resulting break-points fetch)
         var_names = self.adata.uns[self._gene_id_key]
         self.adata = anndata.AnnData(
             X=X_gene,
@@ -93,10 +102,14 @@ class GroupedExpression(utils.ABCParse):
     def _single_gene_expression(self, df):
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         return adata_query.fetch(
             self.adata[df.index, self._gene_id], key=self._use_key, torch=False
 =======
         return fetch_formatted_data(
+=======
+        return adata_query.fetch(
+>>>>>>> 80881be (fix resulting break-points fetch)
             self.adata[df.index, self._gene_id], use_key=self._use_key, torch=False
 >>>>>>> 0c2526d (add necessary funcs for smoothing gex)
         ).flatten()

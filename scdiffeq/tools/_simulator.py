@@ -130,7 +130,11 @@ class Simulator(ABCParse.ABCParse):
     @property
     def Z0(self):
         return adata_query.fetch(
+<<<<<<< HEAD
             self._adata_input[self.idx], key=self._use_key, torch = self._gpu, device=self._device
+=======
+            self._adata_input[self.idx], key=self._use_key, device=self._device
+>>>>>>> 80881be (fix resulting break-points fetch)
         ).expand(self._N, -1)
 
     @property
