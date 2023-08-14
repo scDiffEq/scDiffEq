@@ -1,7 +1,8 @@
 
 from ..core import utils
 
-from ._x_use import X_use
+# from ._x_use import X_use
+import adata_query
 
 import anndata as a
 import pandas as pd
@@ -32,9 +33,7 @@ class kNN(utils.ABCParse):
     @property
     def X_use(self):
         if not hasattr(self, "_X_use"):
-            xu = X_use(self._adata, self._use_key)
-            self._X_use = xu(torch = False, groupby = None, device = "cpu")
-            
+            self._X_use = adata_query.fetch(self._adata, key = self._use_key, torch = False)            
         return self._X_use
 
     @property

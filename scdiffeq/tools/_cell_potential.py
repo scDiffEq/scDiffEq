@@ -5,12 +5,12 @@ import numpy as np
 import lightning
 import anndata
 import torch
-
+import adata_query
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
 from ._knn_smoothing import kNNSmoothing
-from ._fetch import fetch
+# from ._fetch import fetch
 from ._knn import kNN
 
 
@@ -160,6 +160,7 @@ class CellPotential(utils.ABCParse):
         use_key: str = "X_pca",
         device: Union[str, torch.device] = torch.device("cuda:0"),
         seed: int = 0,
+        gpu = True,
     ):
         self.__parse__(locals(), public=[None])
         lightning.seed_everything(0)
@@ -168,8 +169,8 @@ class CellPotential(utils.ABCParse):
     @property
     def Z_input(self):
         if not hasattr(self, "_Z_input"):
-            self._Z_input = fetch(
-                adata=self.adata, use_key=self._use_key, device=self._device
+            self._Z_input = adata_query.fetch(
+                adata=self.adata, key=self._use_key, torch = self._gpu, device=self._device
             )
         return self._Z_input
 
@@ -220,12 +221,13 @@ def cell_potential(
     return_raw_array: bool = False,
     q: float = 0.05,
     knn_smoothing_iters: int = 5,
-    use_tqdm: bool = True
+    use_tqdm: bool = True,
+    gpu: bool = True,
 ):
     """
     
     """
-    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed)
+    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed, gpu = gpu)
     cell_potential(adata=adata, model=model, key_added=raw_key_added)
     
     if normalize:
