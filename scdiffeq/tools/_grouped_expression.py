@@ -74,6 +74,7 @@ class GroupedExpression(utils.ABCParse):
         """
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
 =======
         X_gene = fetch_formatted_data(self.adata, use_key=self._use_key, torch=False)
@@ -81,6 +82,9 @@ class GroupedExpression(utils.ABCParse):
 =======
         X_gene = adata_query.fetch(self.adata, use_key=self._use_key, torch=False)
 >>>>>>> 80881be (fix resulting break-points fetch)
+=======
+        X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
+>>>>>>> f7d9b63 (small fixes)
         var_names = self.adata.uns[self._gene_id_key]
         self.adata = anndata.AnnData(
             X=X_gene,
@@ -105,6 +109,7 @@ class GroupedExpression(utils.ABCParse):
 <<<<<<< HEAD
         return adata_query.fetch(
             self.adata[df.index, self._gene_id], key=self._use_key, torch=False
+<<<<<<< HEAD
 =======
         return fetch_formatted_data(
 =======
@@ -112,6 +117,8 @@ class GroupedExpression(utils.ABCParse):
 >>>>>>> 80881be (fix resulting break-points fetch)
             self.adata[df.index, self._gene_id], use_key=self._use_key, torch=False
 >>>>>>> 0c2526d (add necessary funcs for smoothing gex)
+=======
+>>>>>>> f7d9b63 (small fixes)
         ).flatten()
 
     @property
