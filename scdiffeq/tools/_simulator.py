@@ -55,6 +55,7 @@ class Simulator(utils.ABCParse):
         return_adata: bool = True,
         name: Union[str, NoneType] = None,
         save_h5ad: bool = False,
+        gpu: bool = True,
         wd = ".",
         *args,
         **kwargs,
@@ -128,7 +129,7 @@ class Simulator(utils.ABCParse):
     @property
     def Z0(self):
         return adata_query.fetch(
-            self._adata_input[self.idx], key=self._use_key, device=self._device
+            self._adata_input[self.idx], key=self._use_key, torch = self._gpu, device=self._device
         ).expand(self._N, -1)
 
     @property
@@ -374,6 +375,7 @@ def simulate(
     UMAP=None,
     wd=".",
     return_simulator=False,
+    gpu: bool = True,
     *args,
     **kwargs
 ) -> anndata.AnnData:
