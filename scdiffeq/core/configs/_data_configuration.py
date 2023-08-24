@@ -261,9 +261,7 @@ class DataConfiguration(utils.ABCParse):
 
     def _configure_lightning_data(self):
         self.LitDataModule = LightningData(**self._LIT_DATA_KWARGS)
-        self._scDiffEq._data_dim = self._scDiffEq_kwargs[
-            "data_dim"
-        ] = self.LitDataModule.n_dim
+        self._scDiffEq_kwargs["data_dim"] = self.LitDataModule.n_dim
 
     def _update_scDiffEq(self, scDiffEq):
         scDiffEq._PARAMS.update(self._scDiffEq_kwargs)
@@ -272,6 +270,7 @@ class DataConfiguration(utils.ABCParse):
         scDiffEq.t_config = self.t_config
         scDiffEq.LitDataModule = self.LitDataModule
         scDiffEq.adata = self.adata
+        scDiffEq._data_dim = self._scDiffEq_kwargs["data_dim"]
 
     def __call__(
         self,
