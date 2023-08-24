@@ -1,8 +1,8 @@
 from datetime import datetime
 from pathlib import Path
 import os, glob
+import ABCParse
 
-from ._autoparse_base_class import AutoParseBase
 from ._info_message import InfoMessage
 
 class scDiffEqLogger(ABCParse.ABCParse):
