@@ -230,9 +230,10 @@ class scDiffEq(ABCParse.ABCParse):
         """
         Run on model.__init__()
 
-        Step 0: Parse all kwargs
-        Step 1: Set up info messaging [TODO: eventually replace this with more sophisticated logging]
-        Step 2: Configure data
+        Step 1: Parse all kwargs
+        Step 2: Set up info messaging [TODO: eventually replace this with more sophisticated logging]
+        Step 3: Configure data
+        
         Step 4: Configure dimension reduction models
         Step 5: Configure kNN Graph.
         Step 3: Configure lightning model
@@ -240,21 +241,35 @@ class scDiffEq(ABCParse.ABCParse):
         Step 7: Configure TrainerGenerator
         """
 
+        # -- Step 1: parse all kwargs ------------------------------------------
         self.adata = kwargs['adata'].copy()
         
         self.__parse__(kwargs, public = [None], ignore=["adata"])
+        
+        
+        # -- Step 2: set up info messaging -------------------------------------
         self._INFO = utils.InfoMessage()
         
+
+        # -- Step 3: configure data --------------------------------------------
+        self._DATA_CONFIG = configs.DataConfiguration()
+        self._DATA_CONFIG(
+            adata = self.adata, scDiffEq = self, scDiffEq_kwargs = self._PARAMS,
+        )
+
+        # -- Step 1: parse all kwargs ------------------------------------------
+        # -- Step 4: configure model
+        self._configure_model(kwargs)
         
-#         self._configure_data(kwargs)        
-#         self._configure_model(kwargs)
 # #         self._configure_logger()
 #         if kwargs["reduce_dimensions"]:
 #             self._configure_dimension_reduction()
 #         if kwargs["build_kNN"]:
 #             self._configure_kNN_graph()
 #         self._configure_trainer_generator()
-#         lightning.seed_everything(self._seed)
+
+
+        lightning.seed_everything(self._seed)
         
     def to(self, device):
         self.DiffEq.to(device)
