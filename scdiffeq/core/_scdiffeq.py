@@ -127,35 +127,7 @@ class scDiffEq(ABCParse.ABCParse):
         **kwargs,
     ):
         self.__config__(locals())
-
-    def _configure_obs_idx(self):
         
-        
-        self._PROVIDED_OBS_IDX = self.adata.obs.index
-        self._PROVIDED_VAR_IDX = self.adata.var.index
-        
-        if self._PROVIDED_OBS_IDX[0] != "0":
-        # if self.adata.obs.index[0] != "0":
-            self.adata = utils.idx_to_int_str(self.adata)
-        
-    def _configure_data(self, kwargs):
-
-        """Configure data (including time time)"""
-        
-        self._configure_obs_idx()
-        
-        self.t, self.t_config = configs.configure_time(
-            **utils.extract_func_kwargs(func = configs.configure_time, kwargs = kwargs),
-        )
-        kwargs['groupby'] = self.t_config.attributes['time_key']
-        kwargs.update(self.t_config.attributes)
-        self.LitDataModule = configs.LightningData(
-            **utils.extract_func_kwargs(
-                func=configs.LightningData,
-                kwargs=kwargs,
-            )
-        )
-        self._data_dim = self.LitDataModule.n_dim
 
     def _configure_dimension_reduction(self):
         self.reducer = tools.DimensionReduction(self.adata, save_path = "TESTING_SCDIFFEQ_MODEL")
@@ -237,6 +209,7 @@ class scDiffEq(ABCParse.ABCParse):
         Step 4: Configure dimension reduction models
         Step 5: Configure kNN Graph.
         Step 3: Configure lightning model
+        
         Step 6: Configure logger
         Step 7: Configure TrainerGenerator
         """

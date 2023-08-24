@@ -5,7 +5,7 @@ import os, glob
 from ._autoparse_base_class import AutoParseBase
 from ._info_message import InfoMessage
 
-class scDiffEqLogger(AutoParseBase):
+class scDiffEqLogger(ABCParse.ABCParse):
     """
     While Lightning uses automatic logging, we need something one step removed from this to take full
     advantage of their setup within the constraints of our model.
