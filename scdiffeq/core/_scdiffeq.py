@@ -14,7 +14,10 @@ import pathlib
 =======
 
 import ABCParse
+<<<<<<< HEAD
 >>>>>>> b1af157 (->ABCParse pkg)
+=======
+>>>>>>> 3b4c31a (->ABCParse pkg)
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
