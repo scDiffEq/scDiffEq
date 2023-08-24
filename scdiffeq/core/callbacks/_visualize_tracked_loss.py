@@ -265,7 +265,7 @@ class VisualizeTrackedLoss(lightning.Callback):
         
     @property
     def _VIZ_DISABLE(self):
-        return not (self.vis_frequency is None)
+        return not self.vis_frequency is None
         
     @property
     def save_path(self):
@@ -276,12 +276,13 @@ class VisualizeTrackedLoss(lightning.Callback):
             self._INFO(f"Loss visualization saved to: {self.save_path}")
         plt.savefig(self.save_path)
         plt.close()
-    
+        
     def on_train_epoch_end(self, trianer, pl_module, *args, **kwargs):
-
+        
         epoch = pl_module.current_epoch
         
-        if epoch % self.viz_frequency == 0:
+        if not self._VIZ_DISABLED and (epoch % self.viz_frequency == 0):
+            
             loss_track_viz = LossTrackingVisualization(self.model_tracker)
             loss_track_viz.__plot__()
             self._save_plot()

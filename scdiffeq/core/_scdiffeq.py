@@ -158,7 +158,8 @@ class scDiffEq(utils.ABCParse):
         self._data_dim = self.LitDataModule.n_dim
 
     def _configure_dimension_reduction(self):
-        self.reducer = tools.DimensionReduction(self.adata, save_path = self.DiffEqLogger.PARENT_MODEL_OUTDIR)
+        self.reducer = tools.DimensionReduction(self.adata, save_path = "TESTING_SCDIFFEQ_MODEL")
+#         self.DiffEqLogger.PARENT_MODEL_OUTDIR)
         if self._scale_input_counts:
             self._INFO("Scaling input counts (for dimension reduction).")
             self.reducer.fit_scaler()
@@ -173,15 +174,15 @@ class scDiffEq(utils.ABCParse):
             self.reducer.fit_umap()
             self.adata.obsm["X_umap_scDiffEq"] = self.reducer.X_umap
 
-    def _configure_logger(self):
+#     def _configure_logger(self):
 
-        self.DiffEqLogger = utils.scDiffEqLogger(
-            model_name=self._model_name,
-            ckpt_path = self._ckpt_path,
-            working_dir=self._working_dir,
+#         self.DiffEqLogger = utils.scDiffEqLogger(
+#             model_name=self._model_name,
+#             ckpt_path = self._ckpt_path,
+#             working_dir=self._working_dir,
             
-        )
-        self.DiffEqLogger()
+#         )
+#         self.DiffEqLogger()
 
     def _configure_trainer_generator(self):
         
@@ -194,11 +195,13 @@ class scDiffEq(utils.ABCParse):
     def _configure_kNN_graph(self):
         
         # -- prep data: ------
+        
         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
         
         # -- doesn't seem necessary any longer: ------
-#         train_adata.obs = train_adata.obs.reset_index(drop=True)
-#         train_adata.obs.index = train_adata.obs.index.astype(str)
+        
+        # -- train_adata.obs = train_adata.obs.reset_index(drop=True)
+        # -- train_adata.obs.index = train_adata.obs.index.astype(str)
         
         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
         self.kNN_Graph = tools.kNN(adata = train_adata, use_key = self._kNN_key)
@@ -243,7 +246,7 @@ class scDiffEq(utils.ABCParse):
         self._INFO = utils.InfoMessage()
         self._configure_data(kwargs)        
         self._configure_model(kwargs)
-        self._configure_logger()
+#         self._configure_logger()
         if kwargs["reduce_dimensions"]:
             self._configure_dimension_reduction()
         if kwargs["build_kNN"]:
