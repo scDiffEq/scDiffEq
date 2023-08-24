@@ -14,7 +14,6 @@ __email__ = ", ".join(
 # -- import: -----------------------------------------------------------------------------
 from ._function_kwargs import extract_func_kwargs, function_kwargs
 from ._logging_learnable_hparams import LoggingLearnableHParams
-from ._autoparse_base_class import AutoParseBase
 from ._sum_normalize import sum_normalize
 
 from ._scdiffeq_logger import scDiffEqLogger
@@ -29,7 +28,6 @@ from ._function_fetch import FunctionFetch, fetch_optimizer, fetch_lr_scheduler
 
 from ._anndata_inspector import AnnDataInspector
 from ._info_message import InfoMessage
-from ._abc_parse import ABCParse
 from ._fast_graph import FastGraph
 from ._fetch_format import fetch_format
 
