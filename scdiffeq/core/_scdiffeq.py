@@ -8,8 +8,13 @@ import pandas as pd
 import torch
 import glob
 import os
+<<<<<<< HEAD
 import ABCParse
 import pathlib
+=======
+
+import ABCParse
+>>>>>>> b1af157 (->ABCParse pkg)
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
