@@ -72,14 +72,14 @@ class scDiffEqLogger(AutoParseBase):
         if not os.path.exists(self.VERSIONED_MODEL_OUTDIR):
             if not self.creation_count:
                 os.mkdir(self.VERSIONED_MODEL_OUTDIR)
-                f = open(self.LOG_PATH, mode="a")
-                v_path = self.VERSIONED_MODEL_OUTDIR
-                v = os.path.basename(v_path)
-                line = f"\t{v}\t{datetime.now()}\t{v_path}\n"
-                f.write(line)
-                f.close()
-                self.creation_count += 1
-                
+            f = open(self.LOG_PATH, mode="a")
+            v_path = self.VERSIONED_MODEL_OUTDIR
+            v = os.path.basename(v_path)
+            line = f"\t{v}\t{datetime.now()}\t{v_path}\n"
+            f.write(line)
+            f.close()
+            self.creation_count += 1
+
         elif self._PASSED_CKPT_MATCHES_MODEL_PARENT_DIR:
             if len(self.CKPT_PATH) < 65:
                 self._INFO(f"Loading from checkpoint: {self.CKPT_PATH}")

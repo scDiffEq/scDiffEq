@@ -37,9 +37,9 @@ class LightningCallbacksConfiguration(utils.ABCParse):
             monitor=self.monitor,
         ),
             InterTrainerEpochCounter(),
-            callbacks.VisualizeTrackedLoss(
-                **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
-            ),
+#             callbacks.VisualizeTrackedLoss(
+#                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
+#             ),
             # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
             # considering rm SWA pending better understanding
         ]
