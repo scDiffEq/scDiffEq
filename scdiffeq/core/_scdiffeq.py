@@ -9,6 +9,7 @@ import torch
 import glob
 import os
 
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
@@ -23,7 +24,7 @@ import warnings
 
 warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
 
-class scDiffEq(utils.ABCParse):
+class scDiffEq(ABCParse.ABCParse):
     def __init__(
         self,        
         
