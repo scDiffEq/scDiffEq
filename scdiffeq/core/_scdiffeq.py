@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 import glob
 import os
-
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
@@ -23,7 +23,7 @@ import warnings
 
 warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
 
-class scDiffEq(utils.ABCParse):
+class scDiffEq(ABCParse.ABCParse):
     def __init__(
         self,        
         
@@ -244,15 +244,17 @@ class scDiffEq(utils.ABCParse):
         
         self.__parse__(kwargs, public = [None], ignore=["adata"])
         self._INFO = utils.InfoMessage()
-        self._configure_data(kwargs)        
-        self._configure_model(kwargs)
-#         self._configure_logger()
-        if kwargs["reduce_dimensions"]:
-            self._configure_dimension_reduction()
-        if kwargs["build_kNN"]:
-            self._configure_kNN_graph()
-        self._configure_trainer_generator()
-        lightning.seed_everything(self._seed)
+        
+        
+#         self._configure_data(kwargs)        
+#         self._configure_model(kwargs)
+# #         self._configure_logger()
+#         if kwargs["reduce_dimensions"]:
+#             self._configure_dimension_reduction()
+#         if kwargs["build_kNN"]:
+#             self._configure_kNN_graph()
+#         self._configure_trainer_generator()
+#         lightning.seed_everything(self._seed)
         
     def to(self, device):
         self.DiffEq.to(device)
