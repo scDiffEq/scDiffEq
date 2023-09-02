@@ -1,6 +1,8 @@
 # -- import packages: ----------------------------------------------------------
 import anndata
 import pandas as pd
+import ABCParse
+
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
@@ -12,7 +14,7 @@ from typing import Union, List, Dict, Optional
 
 
 # -- controller class: ---------------------------------------------------------
-class SmoothedExpression(utils.ABCParse):
+class SmoothedExpression(ABCParse.ABCParse):
     def __init__(
         self,
         time_key: str = "t",

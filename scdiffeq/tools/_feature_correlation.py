@@ -4,6 +4,7 @@ import scipy
 import anndata
 import tqdm
 import pandas as pd
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -15,7 +16,7 @@ from types import FunctionType
 
 
 # -- Controller Class: ---------------------------------------------------------
-class FeatureCorrelation(utils.ABCParse):
+class FeatureCorrelation(ABCParse.ABCParse):
     """
     Calculate the per-cell correlation of a gene feature with a column
     in `adata.obs`.

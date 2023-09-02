@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import time
 import os
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -24,7 +25,7 @@ from typing import Union, List, Optional
 NoneType = type(None)
 
 
-class Simulator(utils.ABCParse):
+class Simulator(ABCParse.ABCParse):
     """Base class for the simulator containing the core functions."""
     def __init__(
         self,

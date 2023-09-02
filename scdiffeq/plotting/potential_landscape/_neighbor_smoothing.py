@@ -2,6 +2,8 @@
 import sklearn
 import pandas as pd
 import numpy as np
+import ABCParse
+
 
 from ...core import utils
 
@@ -9,8 +11,9 @@ from ...core import utils
 NoneType = type(None)
 
 
+
 # -- Operational class: --------------------------------------------------------
-class NeighborSmoothing(utils.ABCParse):
+class NeighborSmoothing(ABCParse.ABCParse):
     _FIT = False
 
     def __init__(

@@ -15,9 +15,10 @@ from .. import utils
 from typing import List
 import scdiffeq_plots as sdq_pl
 import matplotlib.pyplot as plt
+import ABCParse
 
 
-class ModelTracker(utils.ABCParse):
+class ModelTracker(ABCParse.ABCParse):
     def __init__(
         self,
         version,
@@ -111,7 +112,7 @@ class ModelTracker(utils.ABCParse):
             return self._subset_df_for_plotting(self.train_df)
 
 
-class LossTrackingVisualization(utils.ABCParse):
+class LossTrackingVisualization(ABCParse.ABCParse):
     def __init__(
         self,
         tracker,

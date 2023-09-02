@@ -1,8 +1,8 @@
 
 from ..core import utils
 
-# from ._x_use import X_use
 import adata_query
+import ABCParse
 
 import anndata as a
 import pandas as pd
@@ -14,7 +14,7 @@ from typing import List, Optional
 NoneType = type(None)
 
 
-class kNN(utils.ABCParse):
+class kNN(ABCParse.ABCParse):
     _IDX_BUILT = False
 
     def __init__(

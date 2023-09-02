@@ -6,6 +6,7 @@ import sklearn
 import pickle
 import umap
 import os
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -18,7 +19,7 @@ NoneType = type(None)
 
 
 # -- controller class: ---------------------------------------------------------
-class DimensionReduction(utils.ABCParse):
+class DimensionReduction(ABCParse.ABCParse):
     _SCALER_FIT, _PCA_FIT, _UMAP_FIT = [False] * 3
 
     def __init__(
@@ -66,7 +67,7 @@ class DimensionReduction(utils.ABCParse):
         PARAMS.update(self._PARAMS[kwarg_subset_key])
         if not isinstance(specific_kwarg, NoneType):
             PARAMS.update(specific_kwarg)
-        return utils.function_kwargs(func=func, kwargs=PARAMS)
+        return ABCParse.function_kwargs(func=func, kwargs=PARAMS)
 
     @property
     def _SCALER_MODULE(self):

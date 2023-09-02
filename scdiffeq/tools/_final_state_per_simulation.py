@@ -2,10 +2,11 @@
 
 import scdiffeq_plots as sdq_pl
 import numpy as np
+import ABCParse
 
 from ..core import utils
         
-class FinalStatePerSimulation(utils.ABCParse):
+class FinalStatePerSimulation(ABCParse.ABCParse):
     """"""
 
     def __init__(

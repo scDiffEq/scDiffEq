@@ -12,14 +12,14 @@ from ..core import utils
 from ._knn_smoothing import kNNSmoothing
 # from ._fetch import fetch
 from ._knn import kNN
-
+import ABCParse
 
 # -- set typing: ---------------------------------------------------------------
 from typing import Union
 
 
 # -- operator classes: ---------------------------------------------------------
-class CellPotentialNormalization(utils.ABCParse):
+class CellPotentialNormalization(ABCParse.ABCParse):
 
     """
     Procedure occurs in 5 steps:
@@ -152,7 +152,7 @@ class CellPotentialNormalization(utils.ABCParse):
         self._clean_up_adata()
 
 
-class CellPotential(utils.ABCParse):
+class CellPotential(ABCParse.ABCParse):
     """Calculate [raw] potential values, given cells and a model."""
 
     def __init__(

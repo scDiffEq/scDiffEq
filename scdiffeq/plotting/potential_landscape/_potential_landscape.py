@@ -3,7 +3,7 @@
 import plotly.express as px
 import plotly.graph_objects as go
 import anndata
-
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from ...core import utils
@@ -19,7 +19,7 @@ NoneType = type(None)
 
 
 # -- Operational class: --------------------------------------------------------
-class UMAPSurfaceScatterPlot3D(utils.ABCParse):
+class UMAPSurfaceScatterPlot3D(ABCParse.ABCParse):
     """Manager class of both the surface and the scatter"""
 
     def __init__(

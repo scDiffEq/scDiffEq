@@ -6,6 +6,7 @@ import numpy as np
 import anndata
 import torch
 import os
+import ABCParse
 
 
 # -- import local dependencies: ----------------------------------------------------------
@@ -17,7 +18,7 @@ from ... import tools
 from typing import Optional, Dict
 
 
-class TimeConfiguration(utils.ABCParse):
+class TimeConfiguration(ABCParse.ABCParse):
     def __init__(
         self,
         adata: anndata.AnnData,
@@ -167,7 +168,7 @@ def configure_time(
     
     return t, time_config
 
-class LightningData(LightningAnnDataModule, utils.AutoParseBase):
+class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
     def __init__(
         self,
         adata=None,
@@ -222,7 +223,7 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         ...
 
 
-class DataConfiguration(utils.ABCParse):
+class DataConfiguration(ABCParse.ABCParse):
     """Should be called during config steps of scDiffEq model instantiation."""
 
     def __init__(self, *args, **kwargs):

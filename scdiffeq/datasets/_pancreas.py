@@ -4,12 +4,12 @@ import os
 from scanpy import read
 from pathlib import Path
 from typing import Union
-
+import ABCParse
 
 from ..core import utils
 
 
-class PancreaticEndocrinogenesisDataset(utils.ABCParse):
+class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
     """
     Pancreatic endocrinogenesis:
 

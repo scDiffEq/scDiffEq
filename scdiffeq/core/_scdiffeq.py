@@ -9,6 +9,7 @@ import torch
 import glob
 import os
 import ABCParse
+import pathlib
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
@@ -146,35 +147,21 @@ class scDiffEq(ABCParse.ABCParse):
             self.reducer.fit_umap()
             self.adata.obsm["X_umap_scDiffEq"] = self.reducer.X_umap
 
-#     def _configure_logger(self):
-
-#         self.DiffEqLogger = utils.scDiffEqLogger(
-#             model_name=self._model_name,
-#             ckpt_path = self._ckpt_path,
-#             working_dir=self._working_dir,
-            
-#         )
-#         self.DiffEqLogger()
 
     def _configure_trainer_generator(self):
         
-        self.TrainerGenerator = configs.LightningTrainerConfiguration(
-            self.DiffEqLogger.VERSIONED_MODEL_OUTDIR
-        )
+        self.TrainerGenerator = configs.LightningTrainerConfiguration(self._model_name)
+#             self.DiffEqLogger.VERSIONED_MODEL_OUTDIR
+#         )
         self._PRETRAIN_CONFIG_COUNT = 0
         self._TRAIN_CONFIG_COUNT = 0
 
     def _configure_kNN_graph(self):
         
-        # -- prep data: ------
-        
+      
         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
         
-        # -- doesn't seem necessary any longer: ------
-        
-        # -- train_adata.obs = train_adata.obs.reset_index(drop=True)
-        # -- train_adata.obs.index = train_adata.obs.index.astype(str)
-        
+
         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
         self.kNN_Graph = tools.kNN(adata = train_adata, use_key = self._kNN_key)
 
@@ -203,15 +190,9 @@ class scDiffEq(ABCParse.ABCParse):
         Run on model.__init__()
 
         Step 1: Parse all kwargs
-        Step 2: Set up info messaging [TODO: eventually replace this with more sophisticated logging]
+        Step 2: Set up info messaging
         Step 3: Configure data
-        
-        Step 4: Configure dimension reduction models
-        Step 5: Configure kNN Graph.
-        Step 3: Configure lightning model
-        
-        Step 6: Configure logger
-        Step 7: Configure TrainerGenerator
+        Step 4: 
         """
 
         # -- Step 1: parse all kwargs ------------------------------------------
@@ -219,8 +200,8 @@ class scDiffEq(ABCParse.ABCParse):
         
         self.__parse__(kwargs, public = [None], ignore=["adata"])
         
-        
         # -- Step 2: set up info messaging -------------------------------------
+        # -- TODO: eventually replace this with more sophisticated logging -----
         self._INFO = utils.InfoMessage()
         
 
@@ -230,17 +211,20 @@ class scDiffEq(ABCParse.ABCParse):
             adata = self.adata, scDiffEq = self, scDiffEq_kwargs = self._PARAMS,
         )
 
-        # -- Step 1: parse all kwargs ------------------------------------------
-        # -- Step 4: configure model
+        # -- Step 4: configure model -------------------------------------------
         self._configure_model(kwargs)
         
-# #         self._configure_logger()
+        
+        # -- Step 5: configure bridge to lightning logger ----------------------
+        self._LOGGING = utils.LoggerBridge(self.DiffEq)
+        self._configure_trainer_generator()
+        
+        
 #         if kwargs["reduce_dimensions"]:
 #             self._configure_dimension_reduction()
 #         if kwargs["build_kNN"]:
 #             self._configure_kNN_graph()
 #         self._configure_trainer_generator()
-
 
         lightning.seed_everything(self._seed)
         
@@ -395,14 +379,14 @@ class scDiffEq(ABCParse.ABCParse):
         self.trainer = self.TrainerGenerator(
             max_epochs=self._train_epochs,
             stage=STAGE,
-            working_dir = self.DiffEqLogger._WORKING_DIR,
-            version = self._VERSION,
+            working_dir = os.getcwd(), # self.DiffEqLogger._WORKING_DIR,
+            version = 0, # self._VERSION,
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
             **trainer_kwargs,
         )
 
-        self._stage_log_path(STAGE)
+#         self._stage_log_path(STAGE)
 
     def train(
         self,

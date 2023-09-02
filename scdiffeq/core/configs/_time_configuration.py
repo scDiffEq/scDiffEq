@@ -4,6 +4,7 @@ import anndata
 import pandas as pd
 import numpy as np
 import torch
+import ABCParse
 
 
 # -- import local dependencies: ----------------------------------------------------------
@@ -15,7 +16,7 @@ from ... import tools
 NoneType = type(None)
 
 
-class TimeConfiguration(utils.ABCParse):
+class TimeConfiguration(ABCParse.ABCParse):
     def __init__(
         self,
         adata: anndata.AnnData,

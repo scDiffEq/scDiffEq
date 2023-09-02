@@ -5,6 +5,7 @@ from lightning import Trainer
 from lightning.pytorch import loggers
 import torch
 import os
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -18,7 +19,7 @@ NoneType = type(None)
 
 
 # -- Main class: ---------------------------------------------------------------
-class LightningTrainerConfiguration(utils.ABCParse):
+class LightningTrainerConfiguration(ABCParse.ABCParse):
     def __init__(
         self,
         save_dir: str = "scDiffEq_Model",
@@ -32,15 +33,21 @@ class LightningTrainerConfiguration(utils.ABCParse):
     # -- kwargs: ---------------------------------------------------------------
     @property
     def _CSVLogger_kwargs(self):
-        return utils.extract_func_kwargs(func=loggers.CSVLogger, kwargs=self._PARAMS, ignore=['version'])
+        return ABCParse.function_kwargs(
+            func=loggers.CSVLogger, kwargs=self._PARAMS, ignore=['version'],
+        )
 
     @property
     def _Trainer_kwargs(self):
-        return utils.extract_func_kwargs(
+        ignore=["accelerator", "callbacks", 'version']
+        tk = ABCParse.function_kwargs(
             func=Trainer,
             kwargs=self._PARAMS,
-            ignore=["accelerator", "callbacks", 'version'],
         )
+        for val in ignore:
+            if val in tk.keys():
+                tk.pop(val)
+        return tk
 
     @property
     def Callbacks(self):

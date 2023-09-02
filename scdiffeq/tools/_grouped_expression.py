@@ -1,11 +1,11 @@
 
 # -- import packages: ----------------------------------------------------------
 import anndata
+import ABCParse
+import adata_query
 
 
 # -- import local dependencies: ------------------------------------------------
-# from ._x_use import fetch_formatted_data
-import adata_query
 from ..core import utils
 
 
@@ -14,7 +14,7 @@ from typing import Union, List, Dict
 
 
 # -- controller class: ---------------------------------------------------------
-class GroupedExpression(utils.ABCParse):
+class GroupedExpression(ABCParse.ABCParse):
     def __init__(
         self,
         adata: anndata.AnnData,

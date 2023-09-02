@@ -2,7 +2,7 @@
 # -- import packages: ----------------------------------------------------------
 import sklearn
 import anndata
-
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
@@ -13,7 +13,7 @@ from typing import Optional
 
 
 # -- controller class: ---------------------------------------------------------
-class GeneCompatibility(utils.ABCParse):
+class GeneCompatibility(ABCParse.ABCParse):
 
     """
     A simulation is produced in a latent space. To study gene-level features, we

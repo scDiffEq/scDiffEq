@@ -2,13 +2,14 @@
 # -- import packages: ----------------------------------------------------------
 import numpy as np
 import anndata
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
 from ...core import utils
 
 
-class MeshGrid(utils.ABCParse):
+class MeshGrid(ABCParse.ABCParse):
     def __init__(self, adata: anndata.AnnData, gridpoints: int = 250, use_key: str = "X_umap"):
 
         self.__parse__(locals(), public=[None])

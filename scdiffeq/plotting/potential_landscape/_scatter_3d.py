@@ -4,11 +4,12 @@ from ...core import utils
 
 import pandas as pd
 import numpy as np
+import ABCParse
 
 
 NoneType = type(None)
 
-class Scatter3D(utils.ABCParse):
+class Scatter3D(ABCParse.ABCParse):
     def __init__(self, z_key="psi", use_key="X_umap", z_adj=0.01, color=None):
 
         self.__parse__(locals(), public=[None])

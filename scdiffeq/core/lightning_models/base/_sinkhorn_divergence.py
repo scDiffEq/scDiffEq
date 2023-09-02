@@ -2,14 +2,14 @@
 # -- import packages: ----------------------------------------------------------
 from geomloss import SamplesLoss
 from autodevice import AutoDevice
-
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
-from ...utils import AutoParseBase
+
 
 
 # -- API-facing class: ---------------------------------------------------------
-class SinkhornDivergence(SamplesLoss, AutoParseBase):
+class SinkhornDivergence(SamplesLoss, ABCParse.ABCParse):
     def __init__(
         self,
         device=AutoDevice(),

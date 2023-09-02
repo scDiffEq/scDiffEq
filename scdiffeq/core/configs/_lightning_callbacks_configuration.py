@@ -1,6 +1,6 @@
 
 import os
-
+import ABCParse
 from lightning import Callback
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
@@ -19,7 +19,7 @@ class InterTrainerEpochCounter(Callback):
         pl_module.COMPLETED_EPOCHS += 1
         ce = pl_module.COMPLETED_EPOCHS
 
-class LightningCallbacksConfiguration(utils.ABCParse):
+class LightningCallbacksConfiguration(ABCParse.ABCParse):
     def __init__(self):
         super().__init__()
         

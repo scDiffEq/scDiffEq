@@ -1,9 +1,9 @@
 
-from ..core.utils import AutoParseBase
+import ABCParse
 import torch, torch_nets, neural_diffeqs
 
 
-class FunctionFromDescription(AutoParseBase):
+class FunctionFromDescription(ABCParse.ABCParse):
     """formatted func name from func_description"""
 
     def __init__(self, func_description, func_type):
