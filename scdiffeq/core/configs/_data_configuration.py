@@ -18,20 +18,112 @@ from ... import tools
 from typing import Optional, Dict
 
 
+<<<<<<< HEAD
 class TimeConfiguration(ABCParse.ABCParse):
+=======
+# -- import packages: --------------------------------------------------------------------
+import anndata
+import pandas as pd
+import numpy as np
+import torch
+
+
+# -- import local dependencies: ----------------------------------------------------------
+from .. import utils
+from ... import tools
+
+
+# -- define types: -----------------------------------------------------------------------
+from typing import Optional, Dict
+
+
+class TimeKey:
+    def __init__(
+        self,
+        auto_detected_time_cols=[
+            "t",
+            "Time point",
+            "time",
+            "time_pt",
+            "t_info",
+            "time_info",
+        ],
+    ):
+        self._auto_detected_time_cols = auto_detected_time_cols
+
+    @property
+    def _OBS_COLS(self):
+        return self._adata.obs.columns
+
+    @property
+    def _PASSED(self) -> bool:
+        return not (self._time_key is None)
+
+    @property
+    def _PASSED_VALID(self) -> bool:
+        return self._time_key in self._OBS_COLS
+
+    @property
+    def _DETECTED(self) -> bool:
+        return self._OBS_COLS[
+            [col in self._auto_detected_time_cols for col in self._OBS_COLS]
+        ].tolist()
+
+    @property
+    def _DETECTED_VALID(self) -> bool:
+        return len(self._DETECTED) == 1
+
+    @property
+    def _VALID(self):
+        return any([self._PASSED_VALID, self._DETECTED_VALID])
+
+    def __call__(self, adata: anndata.AnnData, time_key: Optional[str] = None) -> str:
+        
+        self._time_key = time_key
+        self._adata = adata
+
+        if self._PASSED:
+            if self._PASSED_VALID:
+                return self._time_key
+            else:
+                raise KeyError(
+                    f"Passed `time_key`: {self._time_key} not found in adata.obs"
+                )
+
+        elif self._DETECTED:
+            if self._DETECTED_VALID:
+                return self._DETECTED[0]
+            else:
+                print(
+                    f"More than one possible time column inferred: {found}\nPlease specify the desired time column in adata.obs."
+                )
+        return "t"
+
+
+class TimeConfiguration(utils.ABCParse):
+>>>>>>> 5eb4d5a (update time config)
     def __init__(
         self,
         adata: anndata.AnnData,
+        time_key: Optional[str] = None,
         t_min: float = 0,
         t_max: float = 1,
         dt: float = 0.1,
-        time_key: Optional[str] = None,
         t0_idx: Optional[pd.Index] = None,
         t0_cluster: Optional[str] = None,
         time_cluster_key: Optional[str] = None,
     ):
         super().__init__()
         self.__parse__(kwargs=locals(), public=["adata"])
+<<<<<<< HEAD
+=======
+        
+        
+        self._time_key_config = TimeKey()
+        self._time_key = self._time_key_config(adata = self.adata, time_key = self._time_key)
+        print(self._time_key_config._PASSED_VALID, self._time_key_config._DETECTED_VALID)
+        print(self._time_key)
+>>>>>>> 5eb4d5a (update time config)
 
     @property
     def t0_idx(self):
@@ -48,10 +140,12 @@ class TimeConfiguration(ABCParse.ABCParse):
                 self.adata.obs[self._time_key] == self.adata.obs[self._time_key].min()
             ].index
 
-        if not self._t0_idx is None:
+        if not isinstance(self._t0_idx, NoneType):
             return self._t0_idx
 
-        if (not self._time_cluster_key is None) and (not self._t0_cluster is None):
+        if (not isinstance(self._time_cluster_key, NoneType)) and (
+            not isinstance(self._t0_cluster, NoneType)
+        ):
             return self.adata.obs[
                 self.adata.obs[self._time_cluster_key] == self._t0_cluster
             ].index
@@ -59,7 +153,7 @@ class TimeConfiguration(ABCParse.ABCParse):
     def time_sampling(self):
         if not self.has_time_key:
             self.adata.obs["t0"] = self.adata.obs.index.isin(self.t0_idx)
-
+#         else:
         tools.time_free_sampling(
             adata=self.adata,
             t0_idx=self.t0_idx,
@@ -70,15 +164,20 @@ class TimeConfiguration(ABCParse.ABCParse):
 
     @property
     def has_time_key(self):
-        return (not self._time_key is None) and (
-            self._time_key in self.adata.obs_keys()
-        )
+        return self._time_key_config._VALID
+        
+#         return (not isinstance(self._time_key, NoneType)) and (
+#             self._time_key in self.adata.obs_keys()
+#         )
 
     @property
     def time_key(self):
-        if self.has_time_key:
-            return self._time_key
-        return "t"
+        return self._time_key
+
+#         time_key = time_key_id(adata, time_key=self._time_key)
+#         if self.has_time_key:
+#             return self._time_key
+#         return "t"
 
     @property
     def t_min(self):
@@ -142,11 +241,11 @@ class TimeConfiguration(ABCParse.ABCParse):
 
 def configure_time(
     adata: anndata.AnnData,
+    time_key: str = None,
     t_min: float = 0,
     t_max: float = 1,
-    dt: float = 0.1,
     t0_idx: Optional[pd.Index] = None,
-    time_key: Optional[str] = None,
+    dt: float = 0.1,
     t0_cluster: Optional[str] = None,
     time_cluster_key: Optional[str] = None,
 ) -> Dict:
@@ -168,7 +267,14 @@ def configure_time(
     
     return t, time_config
 
+<<<<<<< HEAD
 class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
+=======
+
+
+
+class LightningData(LightningAnnDataModule, utils.AutoParseBase):
+>>>>>>> 5eb4d5a (update time config)
     def __init__(
         self,
         adata=None,

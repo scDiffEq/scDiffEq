@@ -39,7 +39,7 @@ class scDiffEq(ABCParse.ABCParse):
         # -- data params: -------------------------------------------------------
         adata: anndata.AnnData,
         latent_dim: int = 20,
-        model_name: str = "scDiffEq_model",
+        model_name: str = "scdiffeq",
         use_key: str = "X_scaled",
         obs_keys: List[str] = ["W"],
         kNN_key: str = "X_pca_scDiffEq",
@@ -154,6 +154,22 @@ class scDiffEq(ABCParse.ABCParse):
             self.adata.obsm["X_pca_scDiffEq"] = self.reducer.X_pca
             self.reducer.fit_umap()
             self.adata.obsm["X_umap_scDiffEq"] = self.reducer.X_umap
+            
+            
+    @property
+    def logger(self):
+        if not hasattr(self, "_logger"):
+            self._logger = lightning.pytorch.loggers.CSVLogger(
+                save_dir=os.getcwd(),
+                name=f"scdiffeq_dev_logs",
+                version=None,
+                prefix="",
+                flush_logs_every_n_steps=1,
+            )
+        return self._logger
+    @property
+    def version(self)->int:
+        return self.logger.version
 
 
     def _configure_trainer_generator(self):
