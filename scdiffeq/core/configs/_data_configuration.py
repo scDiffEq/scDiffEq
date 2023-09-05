@@ -332,6 +332,7 @@ class DataConfiguration(ABCParse.ABCParse):
 
     @property
     def _LIT_DATA_KWARGS(self) -> Dict:
+        self._PARAMS.update(self._scDiffEq_kwargs)
         return utils.extract_func_kwargs(func=LightningData, kwargs=self._PARAMS)
 
     def _configure_lightning_data(self):
