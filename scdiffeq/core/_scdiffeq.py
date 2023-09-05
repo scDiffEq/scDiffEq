@@ -40,6 +40,7 @@ class scDiffEq(ABCParse.ABCParse):
         obs_keys: List[str] = ["W"],
         kNN_key: str = "X_pca_scDiffEq",
         seed: int = 0,
+        backend: str = "auto",
         
         # -- pretrain params: ---------------------------------------------------
         pretrain_epochs: int = 500,

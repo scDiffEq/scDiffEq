@@ -39,6 +39,7 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
         
         # -- sde params: -----
         
@@ -90,7 +91,7 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func = LatentPotentialSDE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
         
         self._configure_fate(
             graph=kNN_Graph,

@@ -29,6 +29,7 @@ class LightningODE(
         mu_n_augment: int = 0,
         sde_type='ito',
         noise_type='general',
+        backend = "auto",
         
         # -- general params: ---------------------------------------------------
         train_lr=1e-4,
@@ -47,7 +48,7 @@ class LightningODE(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=NeuralODE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningODE"
