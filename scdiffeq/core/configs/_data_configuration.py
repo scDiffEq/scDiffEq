@@ -17,6 +17,7 @@ from ... import tools
 # -- set typing: -------------------------------------------------------------------------
 from typing import Optional, Dict
 
+
 class TimeKey:
     def __init__(
         self,
@@ -114,12 +115,11 @@ class TimeConfiguration(ABCParse.ABCParse):
                 self.adata.obs[self._time_key] == self.adata.obs[self._time_key].min()
             ].index
 
-        if not isinstance(self._t0_idx, NoneType):
+        if not self._t0_idx is None:
             return self._t0_idx
 
-        if (not isinstance(self._time_cluster_key, NoneType)) and (
-            not isinstance(self._t0_cluster, NoneType)
-        ):
+        if (not self._time_cluster_key is None) and (not self._t0_cluster is None):
+            
             return self.adata.obs[
                 self.adata.obs[self._time_cluster_key] == self._t0_cluster
             ].index
@@ -253,7 +253,7 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
         use_key="X_pca",
         obs_keys=[],
         weight_key='W',
-        groupby="Time point",  # TODO: make optional
+        groupby: Optional[str] = None,
         train_key="train",
         val_key="val",
         test_key="test",

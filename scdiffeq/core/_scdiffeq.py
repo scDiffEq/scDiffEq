@@ -11,22 +11,23 @@ import os
 import ABCParse
 import pathlib
 
-import ABCParse
-
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
 from .. import tools, __version__
 
 
-# -- type setting: -------------------------------------------------------------
-from typing import Union, List
-NoneType = type(None)
 
 import warnings
 
 warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
-# warnings.filterwarnings("ignore", ".*ModelCheckpoint*")
 
+
+# -- type setting: -------------------------------------------------------------
+from typing import Union, List, Optional, Dict
+
+
+
+# -- model class, faces API: ---------------------------------------------------
 class scDiffEq(ABCParse.ABCParse):
     def __init__(
         self,        
@@ -43,12 +44,12 @@ class scDiffEq(ABCParse.ABCParse):
         # -- pretrain params: ---------------------------------------------------
         pretrain_epochs: int = 500,
         pretrain_lr: float = 1e-3,
-        pretrain_optimizer=torch.optim.Adam,
+        pretrain_optimizer = torch.optim.Adam,
         pretrain_step_size: int = 100,
-        pretrain_scheduler=torch.optim.lr_scheduler.StepLR,
+        pretrain_scheduler = torch.optim.lr_scheduler.StepLR,
         
         # -- train params: ------------------------------------------------------
-        train_epochs: int =1500,
+        train_epochs: int = 1500,
         train_lr: float = 1e-5,
         train_optimizer = torch.optim.RMSprop,
         train_scheduler = torch.optim.lr_scheduler.StepLR,
@@ -64,23 +65,23 @@ class scDiffEq(ABCParse.ABCParse):
         # -- general params: ----------------------------------------------------
         num_workers: int = os.cpu_count(),
         silent: bool = True,
-        scale_input_counts: bool = True,
-        reduce_dimensions: bool = True,
-        build_kNN: bool = True,
-        fate_bias_csv_path: Union[str, NoneType] = None,
+        scale_input_counts: bool = False,
+        reduce_dimensions: bool = False,
+        build_kNN: bool = False,
+        fate_bias_csv_path: Optional[Union[pathlib.Path, str]] = None,
         fate_bias_multiplier: float = 1,
         viz_frequency: int = 1,
-        working_dir=os.getcwd(),
+        working_dir: Union[pathlib.Path, str] = os.getcwd(),
         
         # -- time params: -------------------------------------------------------
-        time_key: Union[str, NoneType] = None,
-        t0_idx: Union[pd.Index, NoneType] = None,
+        time_key: Optional[str] = None,
+        t0_idx: Optional[pd.Index] = None,
         t_min: float = 0,
         t_max: float = 1,
         dt: float = 0.1,
-        time_cluster_key=None,
-        t0_cluster=None,
-        shuffle_time_labels = False,
+        time_cluster_key: Optional[str] = None,
+        t0_cluster: Optional[str] = None,
+        shuffle_time_labels: bool = False,
         
         # -- DiffEq params: ----------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
@@ -123,9 +124,8 @@ class scDiffEq(ABCParse.ABCParse):
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
         
+        ckpt_path: Optional[Union[pathlib.Path, str]] = None,
         version: str = __version__,
-        
-        ckpt_path: Union[str, NoneType] = None,
         
         *args,
         **kwargs,
@@ -135,7 +135,7 @@ class scDiffEq(ABCParse.ABCParse):
 
     def _configure_dimension_reduction(self):
         self.reducer = tools.DimensionReduction(self.adata, save_path = "TESTING_SCDIFFEQ_MODEL")
-#         self.DiffEqLogger.PARENT_MODEL_OUTDIR)
+
         if self._scale_input_counts:
             self._INFO("Scaling input counts (for dimension reduction).")
             self.reducer.fit_scaler()
@@ -205,6 +205,8 @@ class scDiffEq(ABCParse.ABCParse):
         self.DiffEq = self._LitModelConfig(kwargs, self._ckpt_path)
         self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
+        
+        lightning.seed_everything(self._seed)
     
     def __config__(self, kwargs):
 
@@ -241,14 +243,12 @@ class scDiffEq(ABCParse.ABCParse):
         self._LOGGING = utils.LoggerBridge(self.DiffEq)
         self._configure_trainer_generator()
         
+        # -- Step 6: extras: ---------------------------------------------------
+        if kwargs["reduce_dimensions"]:
+            self._configure_dimension_reduction()
+        if kwargs["build_kNN"]:
+            self._configure_kNN_graph()
         
-#         if kwargs["reduce_dimensions"]:
-#             self._configure_dimension_reduction()
-#         if kwargs["build_kNN"]:
-#             self._configure_kNN_graph()
-#         self._configure_trainer_generator()
-
-        lightning.seed_everything(self._seed)
         
     def to(self, device):
         self.DiffEq = self.DiffEq.to(device)
@@ -440,11 +440,6 @@ class scDiffEq(ABCParse.ABCParse):
     @property
     def tracker(self):
         return callbacks.ModelTracker(version=self.version)
-
-
-#     @property
-#     def loss(self):
-#         utils.display_tracked_loss(self.logger)
         
         
     def cell_potential(
@@ -475,7 +470,12 @@ class scDiffEq(ABCParse.ABCParse):
             knn_smoothing_iters = knn_smoothing_iters,
             use_tqdm = use_tqdm,
         )
-        
+
+
+
+#     @property
+#     def loss(self):
+#         utils.display_tracked_loss(self.logger)
         
 # -- ADD AS MIXINS: ----
 #     def load_DiffEq_from_ckpt(self, ckpt_path):

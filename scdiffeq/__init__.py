@@ -4,20 +4,21 @@ __doc__ = """Top-level __init__ for the scDiffEq package."""
 __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["vinyard@g.harvard.edu"])
 
-import os
 
-class PackageVersion:
+import os as _os
+
+class _PackageVersion:
     
     def __init__(self):
         ...
         
     @property
     def PACKAGE_PATH(self):
-        return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        return _os.path.abspath(_os.path.dirname(_os.path.dirname(__file__)))
     
     @property
     def SETUP_FPATH(self):
-        return os.path.join(self.PACKAGE_PATH, "setup.py")
+        return _os.path.join(self.PACKAGE_PATH, "setup.py")
     
     def _read_setup_dot_py(self):
         f = open(self.SETUP_FPATH)
@@ -33,10 +34,10 @@ class PackageVersion:
     def __call__(self):
         return self.VERSION
     
-package_version = PackageVersion()
-__version__ = __VERSION__ = package_version()
+_package_version = _PackageVersion()
+__version__ = __VERSION__ = __Version__ = _package_version()
 
-os.environ["KEOPS_VERBOSE"] = "0"
+_os.environ["KEOPS_VERBOSE"] = "0"
 
 
 # -- import model API: -------------------------------------------------------------------

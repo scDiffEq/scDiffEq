@@ -14,8 +14,7 @@ from .. import utils, callbacks
 
 
 # -- define typing: ------------------------------------------------------------
-from typing import Union, Dict, List
-NoneType = type(None)
+from typing import Union, Dict, List, Optional
 
 
 # -- Main class: ---------------------------------------------------------------
@@ -143,7 +142,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         ckpt_frequency: int = 25,
         save_last_ckpt: bool = True,
         keep_ckpts: int = -1,
-        version: Union[int, str, NoneType] = None,
+        version: Optional[Union[int, str]] = None,
         callbacks: list = [],
         potential_model: bool = False,
         check_val_every_n_epoch = 1,
@@ -211,7 +210,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         self._logger = logger
 
         self.retain_test_gradients = False
-        if isinstance(stage, NoneType):
+        if stage is None:
             stage = ""
             
 #         if isinstance(swa_lrs, NoneType):
