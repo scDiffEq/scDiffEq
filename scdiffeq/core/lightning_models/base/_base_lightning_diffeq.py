@@ -93,6 +93,10 @@ class BaseLightningDiffEq(lightning.LightningModule):
                 for j, pg in enumerate(opt.optimizer.state_dict()["param_groups"]):
                     self.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
 
+    def log_total_epochs(self):
+        """Train model N times --> N"""
+        self.log("total_epochs", self.COMPLETED_EPOCHS)
+        
     # -- custom steps: -------------------------------------------------------------
     @abstractmethod
     def forward(self, Z0, t, **kwargs):

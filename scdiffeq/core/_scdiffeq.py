@@ -8,16 +8,9 @@ import pandas as pd
 import torch
 import glob
 import os
-<<<<<<< HEAD
 import ABCParse
 import pathlib
-=======
 
-import ABCParse
-<<<<<<< HEAD
->>>>>>> b1af157 (->ABCParse pkg)
-=======
->>>>>>> 3b4c31a (->ABCParse pkg)
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
@@ -31,6 +24,7 @@ NoneType = type(None)
 import warnings
 
 warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
+# warnings.filterwarnings("ignore", ".*ModelCheckpoint*")
 
 class scDiffEq(ABCParse.ABCParse):
     def __init__(
@@ -39,7 +33,7 @@ class scDiffEq(ABCParse.ABCParse):
         # -- data params: -------------------------------------------------------
         adata: anndata.AnnData,
         latent_dim: int = 20,
-        model_name: str = "scdiffeq",
+        name: str = "scdiffeq_model",
         use_key: str = "X_scaled",
         obs_keys: List[str] = ["W"],
         kNN_key: str = "X_pca_scDiffEq",
@@ -160,29 +154,32 @@ class scDiffEq(ABCParse.ABCParse):
     def logger(self):
         if not hasattr(self, "_logger"):
             self._logger = lightning.pytorch.loggers.CSVLogger(
-                save_dir=os.getcwd(),
-                name=f"scdiffeq_dev_logs",
+                save_dir=self._working_dir,
+                name=self._name,
                 version=None,
                 prefix="",
                 flush_logs_every_n_steps=1,
             )
         return self._logger
     @property
-    def version(self)->int:
+    def version(self) -> int:
         return self.logger.version
-
+    
+    @property
+    def _metrics_path(self):
+        return pathlib.Path(self.logger.log_dir).joinpath("metrics.csv")
+    
+    @property
+    def metrics(self):
+        return pd.read_csv(self._metrics_path)
 
     def _configure_trainer_generator(self):
         
-        self.TrainerGenerator = configs.LightningTrainerConfiguration(self._model_name)
-#             self.DiffEqLogger.VERSIONED_MODEL_OUTDIR
-#         )
+        self.TrainerGenerator = configs.LightningTrainerConfiguration(self._name)
         self._PRETRAIN_CONFIG_COUNT = 0
         self._TRAIN_CONFIG_COUNT = 0
 
-    def _configure_kNN_graph(self):
-        
-      
+    def _configure_kNN_graph(self):      
         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
         
 
@@ -253,44 +250,12 @@ class scDiffEq(ABCParse.ABCParse):
         lightning.seed_everything(self._seed)
         
     def to(self, device):
-        self.DiffEq.to(device)
+        self.DiffEq = self.DiffEq.to(device)
 
     def freeze(self):
         """Freeze lightning model"""
         self.DiffEq.freeze()
-               
-    def load_DiffEq_from_ckpt(self, ckpt_path):
         
-        self._component_loader.load_DiffEq_state(ckpt_path)
-        self._PARAMS[
-            "diffeq_ckpt_path"
-        ] = self._diffeq_ckpt_path = self._component_loader._diffeq_ckpt_path
-        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
-        
-                
-    def load_encoder_from_ckpt(self, ckpt_path):
-        
-        self._component_loader.load_encoder_state(ckpt_path)
-        self._PARAMS[
-            "encoder_ckpt_path"
-        ] = self._encoder_ckpt_path = self._component_loader._encoder_ckpt_path
-        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
-        
-        
-    def load_decoder_from_ckpt(self, ckpt_path):
-        
-        self._component_loader.load_decoder_state(ckpt_path)
-        self._PARAMS[
-            "decoder_ckpt_path"
-        ] = self._decoder_ckpt_path = self._component_loader._decoder_ckpt_path
-        self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
-        
-    def load_VAE_from_ckpt(self, ckpt_path):
-        # TODO: add ability to freeze these once loaded
-        
-        self.load_encoder_from_ckpt(ckpt_path)
-        self.load_decoder_from_ckpt(ckpt_path)
-
     def load(self, ckpt_path, freeze=True):
         self.ckpt_path = ckpt_path
         self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path)
@@ -398,17 +363,19 @@ class scDiffEq(ABCParse.ABCParse):
             )
         )
         
-        trainer_kwargs = self._check_disable_validation(trainer_kwargs)
+        self.trainer_kwargs = self._check_disable_validation(trainer_kwargs)
         
         self.trainer = self.TrainerGenerator(
+            logger = self.logger,
             max_epochs=self._train_epochs,
             stage=STAGE,
-            working_dir = os.getcwd(), # self.DiffEqLogger._WORKING_DIR,
-            version = 0, # self._VERSION,
+            working_dir = self._working_dir,
+            version = self.version,
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
-            **trainer_kwargs,
+            **self.trainer_kwargs,
         )
+        self._TRAIN_CONFIG_COUNT += 1
 
 #         self._stage_log_path(STAGE)
 
@@ -427,11 +394,11 @@ class scDiffEq(ABCParse.ABCParse):
         deterministic=False,
         **kwargs,
     ):
-        
+                
         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
         self._configure_train_step(epochs, locals())
         self.trainer.fit(self.DiffEq, self.LitDataModule)
-
+        
     def fit(
         self,
         train_epochs=200,
@@ -467,16 +434,16 @@ class scDiffEq(ABCParse.ABCParse):
             
         # TO-DO: eventually replace how this works...
         self._PRETRAIN_CONFIG_COUNT += 1
-        self._TRAIN_CONFIG_COUNT += 1
+#         self._TRAIN_CONFIG_COUNT += 1
         
     @property
     def tracker(self):
-        return callbacks.ModelTracker(version=self._VERSION)
+        return callbacks.ModelTracker(version=self.version)
 
 
-    @property
-    def loss(self):
-        utils.display_tracked_loss(self.DiffEqLogger)
+#     @property
+#     def loss(self):
+#         utils.display_tracked_loss(self.logger)
         
         
     def cell_potential(
@@ -508,3 +475,36 @@ class scDiffEq(ABCParse.ABCParse):
             use_tqdm = use_tqdm,
         )
         
+        
+# -- ADD AS MIXINS: ----
+#     def load_DiffEq_from_ckpt(self, ckpt_path):
+        
+#         self._component_loader.load_DiffEq_state(ckpt_path)
+#         self._PARAMS[
+#             "diffeq_ckpt_path"
+#         ] = self._diffeq_ckpt_path = self._component_loader._diffeq_ckpt_path
+#         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+                
+#     def load_encoder_from_ckpt(self, ckpt_path):
+        
+#         self._component_loader.load_encoder_state(ckpt_path)
+#         self._PARAMS[
+#             "encoder_ckpt_path"
+#         ] = self._encoder_ckpt_path = self._component_loader._encoder_ckpt_path
+#         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+        
+#     def load_decoder_from_ckpt(self, ckpt_path):
+        
+#         self._component_loader.load_decoder_state(ckpt_path)
+#         self._PARAMS[
+#             "decoder_ckpt_path"
+#         ] = self._decoder_ckpt_path = self._component_loader._decoder_ckpt_path
+#         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+#     def load_VAE_from_ckpt(self, ckpt_path):
+#         # TODO: add ability to freeze these once loaded
+        
+#         self.load_encoder_from_ckpt(ckpt_path)
+#         self.load_decoder_from_ckpt(ckpt_path)

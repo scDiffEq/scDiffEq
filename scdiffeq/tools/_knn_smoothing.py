@@ -3,10 +3,6 @@ import tqdm
 import ABCParse
 from ..core import utils
 from ._knn import kNN
-<<<<<<< HEAD
-=======
-# from ._x_use import fetch_formatted_data
->>>>>>> 80881be (fix resulting break-points fetch)
 import adata_query
 
 NoneType = type(None)

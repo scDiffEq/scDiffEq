@@ -1,23 +1,11 @@
 
 # -- import packages: ----------------------------------------------------------
 import anndata
-<<<<<<< HEAD
 import ABCParse
 import adata_query
 
 
 # -- import local dependencies: ------------------------------------------------
-=======
-
-
-# -- import local dependencies: ------------------------------------------------
-<<<<<<< HEAD
-from ._x_use import fetch_formatted_data
->>>>>>> 0c2526d (add necessary funcs for smoothing gex)
-=======
-# from ._x_use import fetch_formatted_data
-import adata_query
->>>>>>> 80881be (fix resulting break-points fetch)
 from ..core import utils
 
 
@@ -26,11 +14,7 @@ from typing import Union, List, Dict
 
 
 # -- controller class: ---------------------------------------------------------
-<<<<<<< HEAD
 class GroupedExpression(ABCParse.ABCParse):
-=======
-class GroupedExpression(utils.ABCParse):
->>>>>>> 0c2526d (add necessary funcs for smoothing gex)
     def __init__(
         self,
         adata: anndata.AnnData,
@@ -72,19 +56,9 @@ class GroupedExpression(utils.ABCParse):
         """
         Updates self.adata and self._use_key
         """
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+        
         X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
-=======
-        X_gene = fetch_formatted_data(self.adata, use_key=self._use_key, torch=False)
->>>>>>> 0c2526d (add necessary funcs for smoothing gex)
-=======
-        X_gene = adata_query.fetch(self.adata, use_key=self._use_key, torch=False)
->>>>>>> 80881be (fix resulting break-points fetch)
-=======
-        X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
->>>>>>> f7d9b63 (small fixes)
+
         var_names = self.adata.uns[self._gene_id_key]
         self.adata = anndata.AnnData(
             X=X_gene,
@@ -104,22 +78,11 @@ class GroupedExpression(utils.ABCParse):
         self.adata.var_names = self.adata.var[self._gene_id_key]
 
     def _single_gene_expression(self, df):
-
-<<<<<<< HEAD
-<<<<<<< HEAD
         return adata_query.fetch(
-            self.adata[df.index, self._gene_id], key=self._use_key, torch=False
-<<<<<<< HEAD
-=======
-        return fetch_formatted_data(
-=======
-        return adata_query.fetch(
->>>>>>> 80881be (fix resulting break-points fetch)
-            self.adata[df.index, self._gene_id], use_key=self._use_key, torch=False
->>>>>>> 0c2526d (add necessary funcs for smoothing gex)
-=======
->>>>>>> f7d9b63 (small fixes)
-        ).flatten()
+            adata = self.adata[df.index, self._gene_id],
+            key=self._use_key,
+            torch=False,
+        )
 
     @property
     def _GROUPED(self):

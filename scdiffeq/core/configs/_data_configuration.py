@@ -17,26 +17,6 @@ from ... import tools
 # -- set typing: -------------------------------------------------------------------------
 from typing import Optional, Dict
 
-
-<<<<<<< HEAD
-class TimeConfiguration(ABCParse.ABCParse):
-=======
-# -- import packages: --------------------------------------------------------------------
-import anndata
-import pandas as pd
-import numpy as np
-import torch
-
-
-# -- import local dependencies: ----------------------------------------------------------
-from .. import utils
-from ... import tools
-
-
-# -- define types: -----------------------------------------------------------------------
-from typing import Optional, Dict
-
-
 class TimeKey:
     def __init__(
         self,
@@ -99,9 +79,7 @@ class TimeKey:
                 )
         return "t"
 
-
-class TimeConfiguration(utils.ABCParse):
->>>>>>> 5eb4d5a (update time config)
+class TimeConfiguration(ABCParse.ABCParse):
     def __init__(
         self,
         adata: anndata.AnnData,
@@ -115,15 +93,11 @@ class TimeConfiguration(utils.ABCParse):
     ):
         super().__init__()
         self.__parse__(kwargs=locals(), public=["adata"])
-<<<<<<< HEAD
-=======
-        
         
         self._time_key_config = TimeKey()
         self._time_key = self._time_key_config(adata = self.adata, time_key = self._time_key)
-        print(self._time_key_config._PASSED_VALID, self._time_key_config._DETECTED_VALID)
-        print(self._time_key)
->>>>>>> 5eb4d5a (update time config)
+#         print(self._time_key_config._PASSED_VALID, self._time_key_config._DETECTED_VALID)
+#         print(self._time_key)
 
     @property
     def t0_idx(self):
@@ -267,14 +241,8 @@ def configure_time(
     
     return t, time_config
 
-<<<<<<< HEAD
+
 class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
-=======
-
-
-
-class LightningData(LightningAnnDataModule, utils.AutoParseBase):
->>>>>>> 5eb4d5a (update time config)
     def __init__(
         self,
         adata=None,

@@ -2,11 +2,7 @@
 # -- import packages: ----------------------------------------------------------
 import sklearn
 import anndata
-<<<<<<< HEAD
 import ABCParse
-=======
-
->>>>>>> 0c2526d (add necessary funcs for smoothing gex)
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
@@ -17,12 +13,7 @@ from typing import Optional
 
 
 # -- controller class: ---------------------------------------------------------
-<<<<<<< HEAD
 class GeneCompatibility(ABCParse.ABCParse):
-=======
-class GeneCompatibility(utils.ABCParse):
->>>>>>> 0c2526d (add necessary funcs for smoothing gex)
-
     """
     A simulation is produced in a latent space. To study gene-level features, we
     can modify the simulated adata to be annotated with gene-level features (which

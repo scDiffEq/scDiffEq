@@ -31,15 +31,15 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
             os.mkdir(save_dir)
 
     # -- kwargs: ---------------------------------------------------------------
-    @property
-    def _CSVLogger_kwargs(self):
-        return ABCParse.function_kwargs(
-            func=loggers.CSVLogger, kwargs=self._PARAMS, ignore=['version'],
-        )
+#     @property
+#     def _CSVLogger_kwargs(self):
+#         return ABCParse.function_kwargs(
+#             func=loggers.CSVLogger, kwargs=self._PARAMS, ignore=['version'],
+#         )
 
     @property
     def _Trainer_kwargs(self):
-        ignore=["accelerator", "callbacks", 'version']
+        ignore=["accelerator", "callbacks", 'version', 'logger']
         tk = ABCParse.function_kwargs(
             func=Trainer,
             kwargs=self._PARAMS,
@@ -100,7 +100,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
 
         return Trainer(
             accelerator=self.accelerator,
-            logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
+            logger=self._logger, # loggers.CSVLogger(**self._CSVLogger_kwargs),
             callbacks=self.Callbacks,
             **self._Trainer_kwargs,
         )
@@ -117,7 +117,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
 
         return Trainer(
             accelerator=self.accelerator,
-            logger=loggers.CSVLogger(**self._CSVLogger_kwargs),
+            logger=self._logger,# loggers.CSVLogger(**self._CSVLogger_kwargs),
             num_sanity_val_steps=-1,
             enable_progress_bar=False,
             **self._Trainer_kwargs,
@@ -125,6 +125,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
 
     def __call__(
         self,
+        logger,
         lr: float = None,
         model_name="scDiffEq_model",
         working_dir=os.getcwd(),
@@ -206,6 +207,8 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         Notes:
         ------
         """
+        
+        self._logger = logger
 
         self.retain_test_gradients = False
         if isinstance(stage, NoneType):

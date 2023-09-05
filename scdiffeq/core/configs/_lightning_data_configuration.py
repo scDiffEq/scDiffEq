@@ -6,9 +6,10 @@ import os
 
 # -- import local dependencies: -------------------------
 from .. import utils
+import ABCParse
 
 
-class LightningData(LightningAnnDataModule, utils.AutoParseBase):
+class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
     def __init__(
         self,
         adata=None,
