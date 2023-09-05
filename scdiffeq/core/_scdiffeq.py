@@ -11,6 +11,7 @@ import os
 import ABCParse
 import pathlib
 
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
