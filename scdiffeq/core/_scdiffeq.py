@@ -25,7 +25,6 @@ NoneType = type(None)
 import warnings
 
 warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
-# warnings.filterwarnings("ignore", ".*ModelCheckpoint*")
 
 class scDiffEq(ABCParse.ABCParse):
     def __init__(
@@ -39,6 +38,7 @@ class scDiffEq(ABCParse.ABCParse):
         obs_keys: List[str] = ["W"],
         kNN_key: str = "X_pca_scDiffEq",
         seed: int = 0,
+        backend: str = "auto",
         
         # -- pretrain params: ---------------------------------------------------
         pretrain_epochs: int = 500,

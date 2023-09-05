@@ -4,7 +4,7 @@
 import lightning
 import torchsde
 from abc import abstractmethod
-
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from ._batch_processor import BatchProcessor
@@ -17,10 +17,7 @@ from ... import utils
 class BaseLightningDiffEq(lightning.LightningModule):
     def __init__(self, *args, **kwargs):
         super().__init__()
-
-        self.sinkhorn_divergence = SinkhornDivergence(backend="auto", **kwargs)
-        self.process_batch = BatchProcessor
-        self.COMPLETED_EPOCHS = 0
+        
         
     def _update_lit_diffeq_hparams(self, model_params):
         for key, val in self.hparams.items():
@@ -29,7 +26,8 @@ class BaseLightningDiffEq(lightning.LightningModule):
                     self.hparams.update({key: model_params[key]})
         
     # -- setup: ----------------------------------------------------------------
-    def _configure_optimizers_schedulers(self):
+    def _configure_lightning_model(self, kwargs):
+        
         """Assumes no pre-train - i.e., a single optimizer, scheduler"""
         
         optimizer = self.hparams['train_optimizer']
@@ -41,6 +39,10 @@ class BaseLightningDiffEq(lightning.LightningModule):
                 optimizer=self._optimizers[0],
                 step_size=self.hparams['train_step_size']),
         ]
+        sinkhorn_kwargs = ABCParse.function_kwargs(func = SinkhornDivergence, kwargs = kwargs)
+        self.sinkhorn_divergence = SinkhornDivergence(**sinkhorn_kwargs)
+        self.process_batch = BatchProcessor
+        self.COMPLETED_EPOCHS = 0
 
     def _configure_torch_modules(self, func, kwargs):
         
