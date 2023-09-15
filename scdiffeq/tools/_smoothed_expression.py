@@ -26,7 +26,7 @@ class SmoothedExpressionSummary(ABCParse.ABCParse):
     ):
 
         self.__parse__(locals(), public=[None])
-        self._INFO = sdq.core.utils.InfoMessage()
+        self._INFO = utils.InfoMessage()
 
     def _isolate_per_gene(self, key: str):
         """
