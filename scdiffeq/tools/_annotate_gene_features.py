@@ -47,7 +47,11 @@ class GeneCompatibility(ABCParse.ABCParse):
         assert not self._PCA is None, "Must supply PCA model!"
         
         X_gene = self._PCA.inverse_transform(self.adata_sim.X)
-        X_gene = pd.DataFrame(X_gene, columns = self.var_names)
+        X_gene = pd.DataFrame(
+            X_gene,
+            index = self.adata_sim.obs.index,
+            columns = self.var_names,
+        )
         self.adata_sim.obsm[self._key_added] = X_gene
         
         msg = f"Inverted expression added to: `adata_sim.obsm['{self._key_added}']`"

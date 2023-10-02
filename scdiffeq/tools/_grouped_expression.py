@@ -3,6 +3,7 @@
 import anndata
 import ABCParse
 import adata_query
+import pandas as pd
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -58,6 +59,9 @@ class GroupedExpression(ABCParse.ABCParse):
         """
         
         X_gene = adata_query.fetch(self.adata, key=self._use_key, torch=False)
+        
+        if isinstance(X_gene, pd.DataFrame):
+            X_gene = X_gene.values
 
         var_names = self.adata.uns[self._gene_id_key]
         self.adata = anndata.AnnData(

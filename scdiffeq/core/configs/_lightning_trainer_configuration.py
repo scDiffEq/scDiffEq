@@ -1,6 +1,5 @@
 
 # -- import packages: ----------------------------------------------------------
-
 from lightning import Trainer
 from lightning.pytorch import loggers
 import torch
@@ -19,10 +18,7 @@ from typing import Union, Dict, List, Optional
 
 # -- Main class: ---------------------------------------------------------------
 class LightningTrainerConfiguration(ABCParse.ABCParse):
-    def __init__(
-        self,
-        save_dir: str = "scDiffEq_Model",
-    ):
+    def __init__(self, save_dir: str = "scDiffEq_Model"):
         super().__init__()
         
         self.__parse__(locals())
@@ -221,10 +217,10 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
 
         self.__parse__(locals(), private=['accelerator', 'callbacks'])
         
-        self._PARAMS["name"] = "{}_logs".format(stage)
-        log_save_dir = os.path.join(self.save_dir, self._PARAMS["name"])
-        if not os.path.exists(log_save_dir):
-            os.mkdir(log_save_dir)
+#         self._PARAMS["name"] = "{}_logs".format(stage)
+#         log_save_dir = os.path.join(self.save_dir, self._PARAMS["name"])
+#         if not os.path.exists(log_save_dir):
+#             os.mkdir(log_save_dir)
 
         if (potential_model) and (stage in ["test", "predict"]):
             self.retain_test_gradients = True

@@ -130,7 +130,11 @@ class SmoothedExpression(ABCParse.ABCParse):
 
     def _add_to_anndata(self):
 
+        
         uns_key = f"{self._time_key}_smoothed_gex"
+        
+        if hasattr(self, "_suffix"):
+            uns_key = f"{uns_key}_{self._suffix}"
 
         if not uns_key in self._adata_sim.uns:
             self._adata_sim.uns[uns_key] = {}
@@ -141,6 +145,7 @@ class SmoothedExpression(ABCParse.ABCParse):
         self,
         adata_sim: anndata.AnnData,
         gene_id: Optional[Union[List[str], str]] = None,
+        suffix: Optional[str] = None,
         return_dict: bool = False,
         *args,
         **kwargs,
@@ -167,6 +172,7 @@ def smoothed_expression(
     gene_id_key: str = "gene_ids",
     use_key: str = "X_gene",
     return_dict: bool = False,
+    key_added_suffix: str = None,
     *args,
     **kwargs,
 ):
@@ -174,11 +180,20 @@ def smoothed_expression(
     smoothed_expression = SmoothedExpression(
         time_key=time_key, gene_id_key=gene_id_key, use_key=use_key
     )
-    result = smoothed_expression(adata_sim = adata_sim, gene_id=gene_id, return_dict=return_dict)
+    result = smoothed_expression(
+        adata_sim=adata_sim,
+        gene_id=gene_id,
+        suffix = key_added_suffix,
+        return_dict=return_dict,
+    )
+    
+    storage_key = f"{time_key}_smoothed_gex"
+    if not key_added_suffix is None:
+        storage_key = "_".join([storage_key, key_added_suffix])
     
     summarize_smoothed_expression(
         adata_sim = adata_sim,
-        storage_key = f"{time_key}_smoothed_gex",
+        storage_key = storage_key,
         keys = ["mean", "std"],
     )
 
