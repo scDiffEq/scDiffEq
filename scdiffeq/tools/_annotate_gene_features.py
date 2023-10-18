@@ -61,7 +61,7 @@ class GeneCompatibility(ABCParse.ABCParse):
         self, adata: anndata.AnnData, adata_sim: anndata.AnnData, *args, **kwargs
     ):
 
-        self.__update__(locals())
+        self.__update__(locals(), public = ["adata", "adata_sim"])
 
         self._format_var_names()
         if not self._PCA is None:
