@@ -4,7 +4,7 @@ import os
 import numpy as np
 import anndata
 
-from scdiffeq import io
+from ..scdiffeq import io
 
 class TestAnnData:
 #    def __init__(self, *args, **kwargs):
