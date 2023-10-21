@@ -22,8 +22,8 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         super().__init__()
         
         self.__parse__(locals())
-        if not os.path.exists(save_dir):
-            os.mkdir(save_dir)
+        if not os.path.exists(self._save_dir):
+            os.mkdir(self._save_dir)
 
     # -- kwargs: ---------------------------------------------------------------
 #     @property
@@ -49,18 +49,18 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         callback_config = LightningCallbacksConfiguration()
         
         return callback_config(
-            version = self.version,
-            viz_frequency = self.viz_frequency,
-            model_name=self.model_name,
-            working_dir=self.working_dir,
-            train_version=self.train_version,
-            pretrain_version=self.pretrain_version,
+            version = self._version,
+            viz_frequency = self._viz_frequency,
+            model_name=self._model_name,
+            working_dir=self._working_dir,
+            train_version=self._train_version,
+            pretrain_version=self._pretrain_version,
             callbacks=self._callbacks,
-            ckpt_frequency=self.ckpt_frequency,
-            keep_ckpts=self.keep_ckpts,
-            monitor=self.monitor,
-            retain_test_gradients=self.retain_test_gradients,
-            save_last=self.save_last_ckpt,
+            ckpt_frequency=self._ckpt_frequency,
+            keep_ckpts=self._keep_ckpts,
+            monitor=self._monitor,
+            retain_test_gradients=self._retain_test_gradients,
+            save_last=self._save_last_ckpt,
             # swa_lrs=1e-5,
         )
 
@@ -205,7 +205,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         
         self._logger = logger
 
-        self.retain_test_gradients = False
+        self._retain_test_gradients = False
         if stage is None:
             stage = ""
             
@@ -215,7 +215,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()
 
-        self.__parse__(locals(), private=['accelerator', 'callbacks'])
+        self.__parse__(locals()) #  private=['accelerator', 'callbacks'])
         
 #         self._PARAMS["name"] = "{}_logs".format(stage)
 #         log_save_dir = os.path.join(self.save_dir, self._PARAMS["name"])
@@ -223,7 +223,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
 #             os.mkdir(log_save_dir)
 
         if (potential_model) and (stage in ["test", "predict"]):
-            self.retain_test_gradients = True
+            self._retain_test_gradients = True
             return self.GradientsRetainedTestTrainer
 
         return self.Trainer

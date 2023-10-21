@@ -30,11 +30,11 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
 
         return [
         ModelCheckpoint(
-            every_n_epochs=self.every_n_epochs,
+            every_n_epochs=self._every_n_epochs,
             save_on_train_epoch_end=True,
-            save_top_k=self.save_top_k,
-            save_last=self.save_last,
-            monitor=self.monitor,
+            save_top_k=self._save_top_k,
+            save_last=self._save_last,
+            monitor=self._monitor,
         ),
             InterTrainerEpochCounter(),
 #             callbacks.VisualizeTrackedLoss(
@@ -69,10 +69,10 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
         save_last=True,
     ):
         
-        self.__parse__(locals(), private = [None], ignore=["callbacks"])
+        self.__parse__(locals(), ignore=["callbacks"])
         
-        self.every_n_epochs = ckpt_frequency
-        self.save_top_k = keep_ckpts
+        self._every_n_epochs = ckpt_frequency
+        self._save_top_k = keep_ckpts
         
         [self.cbs.append(cb) for cb in callbacks]
         

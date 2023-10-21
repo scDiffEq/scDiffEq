@@ -64,6 +64,7 @@ class scDiffEq(ABCParse.ABCParse):
         predict_key: str = "predict",
         
         # -- general params: ----------------------------------------------------
+        logger: Optional = None,
         num_workers: int = os.cpu_count(),
         silent: bool = True,
         scale_input_counts: bool = False,
@@ -152,17 +153,21 @@ class scDiffEq(ABCParse.ABCParse):
             self.adata.obsm["X_umap_scDiffEq"] = self.reducer.X_umap
             
             
-    @property
-    def logger(self):
-        if not hasattr(self, "_logger"):
-            self._logger = lightning.pytorch.loggers.CSVLogger(
+    def _configure_CSVLogger(self):
+        return lightning.pytorch.loggers.CSVLogger(
                 save_dir=self._working_dir,
                 name=self._name,
                 version=None,
                 prefix="",
                 flush_logs_every_n_steps=1,
             )
+    
+    @property
+    def logger(self):
+        if not hasattr(self, "_logger"):
+            self._logger = self._configure_CSVLogger()
         return self._logger
+
     @property
     def version(self) -> int:
         return self.logger.version
@@ -338,32 +343,45 @@ class scDiffEq(ABCParse.ABCParse):
     def _configure_train_step(self, epochs, kwargs):
                     
         STAGE = "train"
-        
+        kwargs.update(self._PARAMS)
         kwargs['callbacks'] = kwargs.pop("train_callbacks")
 
         self._INFO(f"Configuring fit step: {STAGE}")
         
         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+        ignore = ['version', 'working_dir', 'logger']
+        funcs = [
+            self.TrainerGenerator,
+            lightning.Trainer
+        ]
+        
+        trainer_kwargs = {}
+        
+        for func in funcs:
+            utils.extract_func_kwargs(
+                func = func, kwargs = kwargs, ignore = ignore,
+            )
 
-        trainer_kwargs = utils.extract_func_kwargs(
-            func=self.TrainerGenerator,
-            kwargs=self._PARAMS,
-            ignore = ['version', 'working_dir'],
-        )
-        trainer_kwargs.update(
-            utils.extract_func_kwargs(
-                func=lightning.Trainer,
-                kwargs=self._PARAMS,
-                ignore = ['version', 'working_dir'],
-            )
-        )
-        trainer_kwargs.update(
-            utils.extract_func_kwargs(
-                func=lightning.Trainer,
-                kwargs=kwargs,
-                ignore = ['version', 'working_dir'],
-            )
-        )
+#         trainer_kwargs = utils.extract_func_kwargs(
+#             func=self.TrainerGenerator,
+#             kwargs=self._PARAMS,
+#             ignore = ignore,
+#         )
+#         trainer_kwargs.update(
+#             utils.extract_func_kwargs(
+#                 func=lightning.Trainer,
+#                 kwargs=self._PARAMS,
+#                 ignore = ignore,
+#             )
+#         )
+#         trainer_kwargs.update(
+#             utils.extract_func_kwargs(
+#                 func=lightning.Trainer,
+#                 kwargs=kwargs,
+#                 ignore = ignore,
+#             )
+#         )
         
         self.trainer_kwargs = self._check_disable_validation(trainer_kwargs)
         
