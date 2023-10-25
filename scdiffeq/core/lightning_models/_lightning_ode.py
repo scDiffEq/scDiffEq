@@ -21,6 +21,7 @@ class LightningODE(
         self,
         # -- ode params: -------------------------------------------------------
         latent_dim,
+        name: str = "scdiffeq_model.ODE",
         mu_hidden: Union[List[int], int] = [2000, 2000],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,
@@ -29,6 +30,7 @@ class LightningODE(
         mu_n_augment: int = 0,
         sde_type='ito',
         noise_type='general',
+        backend = "auto",
         
         # -- general params: ---------------------------------------------------
         train_lr=1e-4,
@@ -47,7 +49,7 @@ class LightningODE(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=NeuralODE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningODE"

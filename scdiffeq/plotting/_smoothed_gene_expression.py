@@ -63,7 +63,6 @@ class FillBetweenPlot:
         self.ax = self._configure_plot(ax)
         self._plot(label, **kwargs)
 
-
 class SmoothedGEXPlot(ABCParse.ABCParse):
     def __init__(
         self,

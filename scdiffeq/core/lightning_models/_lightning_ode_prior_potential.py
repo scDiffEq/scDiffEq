@@ -18,6 +18,7 @@ class LightningODE_PriorPotential(
         self,
         # -- general params: ---------------------------------------------------
         latent_dim,
+        name: str = "scdiffeq_model.ODE.prior_potential",
         train_lr=1e-5,
         train_optimizer=torch.optim.RMSprop,
         train_scheduler=torch.optim.lr_scheduler.StepLR,
@@ -35,6 +36,7 @@ class LightningODE_PriorPotential(
         mu_n_augment: int = 0,
         sde_type='ito',
         noise_type='general',
+        backend = "auto",
         brownian_dim=1,
         
         version = __version__,
@@ -49,7 +51,7 @@ class LightningODE_PriorPotential(
             state_size=latent_dim,
             **utils.extract_func_kwargs(func=LatentPotentialODE, kwargs=locals()),
         )
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
         
     def forward(self, X0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""

@@ -18,6 +18,7 @@ class LightningSDE_FixedPotential(
     def __init__(
         self,
         latent_dim,
+        name: str = "scdiffeq_model.SDE.fixed_potential",
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
@@ -42,6 +43,7 @@ class LightningSDE_FixedPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
         
         version = __version__,
         
@@ -54,7 +56,7 @@ class LightningSDE_FixedPotential(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=PotentialSDE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningSDE-FixedPotential"

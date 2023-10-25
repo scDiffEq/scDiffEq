@@ -31,7 +31,7 @@ setuptools.setup(
         "brownian-diffuser>=0.0.2",
         "vinplots>=0.0.75",
         "annoyance==0.0.18",
-        "ABCParse==0.0.3",
+        "ABCParse==0.0.6",
         "scdiffeq-plots==0.0.1rc2",
         "plotly==5.15.0",
         "scvelo==0.2.5",

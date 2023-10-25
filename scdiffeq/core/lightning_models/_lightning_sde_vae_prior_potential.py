@@ -26,6 +26,7 @@ class LightningSDE_VAE_PriorPotential(
         self,
         data_dim,
         latent_dim,
+        name: str = "scdiffeq_model.SDE_VAE.prior_potential",
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,
@@ -37,6 +38,7 @@ class LightningSDE_VAE_PriorPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
         
         # -- sde params: -----
         
@@ -86,7 +88,7 @@ class LightningSDE_VAE_PriorPotential(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func = LatentPotentialSDE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningSDE-VAE-PriorPotential"

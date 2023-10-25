@@ -1,22 +1,19 @@
 
 # -- import packages: -----------------------------------
 from torch_adata import LightningAnnDataModule
+import ABCParse
 import os
 
 
-# -- import local dependencies: -------------------------
-from .. import utils
-
-
-class LightningData(LightningAnnDataModule, utils.AutoParseBase):
+class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
     def __init__(
         self,
         adata=None,
         h5ad_path=None,
-        batch_size=2000,
+        batch_size: int = 2000,
         num_workers=os.cpu_count(),
         train_val_split=[0.8, 0.2],
-        use_key="X_pca",
+        use_key: str = "X_pca",
         obs_keys=[],
         weight_key='W',
         groupby="Time point",  # TODO: make optional
@@ -31,7 +28,7 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         super(LightningData, self).__init__()
         
                     
-        self.__parse__(locals(), public=[None])
+        self.__parse__(locals())
         self._format_sinkhorn_weight_key()
         self._format_train_test_exposed_data()
         self.configure_train_val_split()

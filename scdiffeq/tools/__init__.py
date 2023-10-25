@@ -46,5 +46,7 @@ from ._perturbation import Perturbation, perturb
 
 from ._grouped_expression import GroupedExpression, grouped_expression
 from ._annotate_gene_features import GeneCompatibility, annotate_gene_features
-from ._compared_temporal_gene_expression import TemporalGeneExpression, compared_temporal_gene_expression
-from ._smoothed_expression import SmoothedExpression, smoothed_expression
+# from ._compared_temporal_gene_expression import TemporalGeneExpression, compared_temporal_gene_expression
+# from ._smoothed_expression import SmoothedExpression, smoothed_expression
+from ._temporal_expression import temporal_expression
+

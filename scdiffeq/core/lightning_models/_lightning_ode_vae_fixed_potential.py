@@ -21,6 +21,7 @@ class LightningODE_VAE_FixedPotential(
         self,
         data_dim,
         latent_dim,
+        name: str = "scdiffeq_model.ODE_VAE.fixed_potential",
         mu_hidden: Union[List[int], int] = [2000, 2000],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,
@@ -38,6 +39,7 @@ class LightningODE_VAE_FixedPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
         version = __version__,
         *args,
         **kwargs,
@@ -48,7 +50,7 @@ class LightningODE_VAE_FixedPotential(
 
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=PotentialODE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def forward(self, X0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""

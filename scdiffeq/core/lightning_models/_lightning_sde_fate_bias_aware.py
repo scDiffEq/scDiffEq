@@ -21,6 +21,7 @@ class LightningSDE_FateBiasAware(
     def __init__(
         self,
         latent_dim,
+        name: str = "scdiffeq_model.SDE.fate_bias_aware",
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
@@ -48,6 +49,7 @@ class LightningSDE_FateBiasAware(
         kNN_Graph=None,
         fate_bias_csv_path=None,
         fate_bias_multiplier = 1,
+        backend = "auto",
         
         version = __version__,
         
@@ -60,7 +62,7 @@ class LightningSDE_FateBiasAware(
                         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
         self._configure_fate(
             graph=kNN_Graph,
             csv_path = fate_bias_csv_path,
