@@ -7,7 +7,7 @@ class BaseForwardMixIn(object):
     def forward(self, Z0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""
         return self.integrate(Z0=Z0, t=t, dt=self.hparams["dt"], logqp=False, **kwargs)
-
+    
     def step(self, batch, batch_idx, stage=None):
 
         batch = self.process_batch(batch, batch_idx)
@@ -16,4 +16,5 @@ class BaseForwardMixIn(object):
             batch.X, X_hat, batch.W, batch.W_hat
         )
         self.log_lr()
+        self.log_total_epochs()
         return self.log_sinkhorn_divergence(sinkhorn_loss, t=batch.t, stage=stage)

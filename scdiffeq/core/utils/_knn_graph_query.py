@@ -1,5 +1,4 @@
 
-from ._abc_parse import ABCParse
 from ._anndata_inspector import AnnDataInspector
 from ._function_kwargs import extract_func_kwargs
 from ._info_message import InfoMessage
@@ -7,10 +6,11 @@ from ._info_message import InfoMessage
 import annoyance
 import pandas as pd
 import torch
+import ABCParse
 
 NoneType = type(None)
 
-class kNNGraphQuery(ABCParse):
+class kNNGraphQuery(ABCParse.ABCParse):
     def __init__(self, adata, use_key, *args, **kwargs):
 
         self.__parse__(locals())

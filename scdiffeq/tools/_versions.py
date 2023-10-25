@@ -1,9 +1,9 @@
 
 import os, glob, numpy as np
-from ..core.utils import AutoParseBase
+import ABCParse
 
 
-class Versions(AutoParseBase):
+class Versions(ABCParse.ABCParse):
     def __init__(
         self, base_dir=".", base_path="scDiffEq_model/lightning_logs/version_{}/hparams.yaml"
     ):

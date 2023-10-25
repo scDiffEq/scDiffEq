@@ -36,6 +36,7 @@ class LightningODE_VAE(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
 
         # -- ode params: -------------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
@@ -72,7 +73,7 @@ class LightningODE_VAE(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func = NeuralODE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningODE-VAE"

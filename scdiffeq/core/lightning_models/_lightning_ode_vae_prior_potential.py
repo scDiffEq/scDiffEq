@@ -37,6 +37,7 @@ class LightningODE_VAE_PriorPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
         
         # -- encoder parameters: -------
         encoder_n_hidden: int = 4,
@@ -65,7 +66,7 @@ class LightningODE_VAE_PriorPotential(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func = LatentPotentialODE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def log_computed_loss(self, sinkhorn_loss, t, kl_div_loss, stage):
         

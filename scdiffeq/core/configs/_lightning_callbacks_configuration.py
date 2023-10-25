@@ -1,6 +1,6 @@
 
 import os
-
+import ABCParse
 from lightning import Callback
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
@@ -19,7 +19,7 @@ class InterTrainerEpochCounter(Callback):
         pl_module.COMPLETED_EPOCHS += 1
         ce = pl_module.COMPLETED_EPOCHS
 
-class LightningCallbacksConfiguration(utils.ABCParse):
+class LightningCallbacksConfiguration(ABCParse.ABCParse):
     def __init__(self):
         super().__init__()
         
@@ -30,16 +30,16 @@ class LightningCallbacksConfiguration(utils.ABCParse):
 
         return [
         ModelCheckpoint(
-            every_n_epochs=self.every_n_epochs,
+            every_n_epochs=self._every_n_epochs,
             save_on_train_epoch_end=True,
-            save_top_k=self.save_top_k,
-            save_last=self.save_last,
-            monitor=self.monitor,
+            save_top_k=self._save_top_k,
+            save_last=self._save_last,
+            monitor=self._monitor,
         ),
             InterTrainerEpochCounter(),
-            callbacks.VisualizeTrackedLoss(
-                **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
-            ),
+#             callbacks.VisualizeTrackedLoss(
+#                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
+#             ),
             # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
             # considering rm SWA pending better understanding
         ]
@@ -69,10 +69,10 @@ class LightningCallbacksConfiguration(utils.ABCParse):
         save_last=True,
     ):
         
-        self.__parse__(locals(), private = [None], ignore=["callbacks"])
+        self.__parse__(locals(), ignore=["callbacks"])
         
-        self.every_n_epochs = ckpt_frequency
-        self.save_top_k = keep_ckpts
+        self._every_n_epochs = ckpt_frequency
+        self._save_top_k = keep_ckpts
         
         [self.cbs.append(cb) for cb in callbacks]
         

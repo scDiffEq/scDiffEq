@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import time
 import os
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -16,7 +17,6 @@ from ._final_state_per_simulation import FinalStatePerSimulation
 from ._cell_potential import normalize_cell_potential
 from ._norm import L2Norm
 from ._knn import kNN
-# from ._fetch import fetch
 
 
 # -- set typing: ---------------------------------------------------------------
@@ -24,7 +24,7 @@ from typing import Union, List, Optional
 NoneType = type(None)
 
 
-class Simulator(utils.ABCParse):
+class Simulator(ABCParse.ABCParse):
     """Base class for the simulator containing the core functions."""
     def __init__(
         self,
@@ -129,9 +129,12 @@ class Simulator(utils.ABCParse):
     @property
     def Z0(self):
         return adata_query.fetch(
-            self._adata_input[self.idx], key=self._use_key, torch = self._gpu, device=self._device
+            adata = self._adata_input[self.idx],
+            key=self._use_key,
+            torch = self._gpu,
+            device=self._device,
         ).expand(self._N, -1)
-
+    
     @property
     def _LATENT_DIMS(self):
         return self.Z0.shape[-1]

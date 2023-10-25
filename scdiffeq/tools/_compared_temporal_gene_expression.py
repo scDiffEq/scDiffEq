@@ -2,13 +2,14 @@ from typing import Optional, Union, List, Dict
 import numpy as np
 import sklearn
 import anndata
+import ABCParse
 
 from ..core import utils
 from ._annotate_gene_features import annotate_gene_features
 from ._grouped_expression import grouped_expression
 
 
-class TemporalGeneExpression(utils.ABCParse):
+class TemporalGeneExpression(ABCParse.ABCParse):
     def __init__(
         self,
         adata: anndata.AnnData,

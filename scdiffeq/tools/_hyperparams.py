@@ -1,12 +1,9 @@
 
 
 import yaml
+import ABCParse
 
-
-from ..core.utils import AutoParseBase
-
-
-class HyperParams(AutoParseBase):
+class HyperParams(ABCParse.ABCParse):
     def __init__(self, yaml_path):
 
         self.__configure__(locals())

@@ -6,9 +6,10 @@ import os
 
 # -- import local dependencies: -------------------------
 from .. import utils
+import ABCParse
 
 
-class LightningData(LightningAnnDataModule, utils.AutoParseBase):
+class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
     def __init__(
         self,
         adata=None,
@@ -31,7 +32,7 @@ class LightningData(LightningAnnDataModule, utils.AutoParseBase):
         super(LightningData, self).__init__()
         
                     
-        self.__parse__(locals(), public=[None])
+        self.__parse__(locals())
         self._format_sinkhorn_weight_key()
         self._format_train_test_exposed_data()
         self.configure_train_val_split()

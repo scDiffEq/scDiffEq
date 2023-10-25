@@ -42,6 +42,7 @@ class LightningSDE_FixedPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
         
         version = __version__,
         
@@ -54,7 +55,7 @@ class LightningSDE_FixedPotential(
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=PotentialSDE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningSDE-FixedPotential"

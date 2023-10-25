@@ -1,11 +1,11 @@
 from datetime import datetime
 from pathlib import Path
 import os, glob
+import ABCParse
 
-from ._autoparse_base_class import AutoParseBase
 from ._info_message import InfoMessage
 
-class scDiffEqLogger(AutoParseBase):
+class scDiffEqLogger(ABCParse.ABCParse):
     """
     While Lightning uses automatic logging, we need something one step removed from this to take full
     advantage of their setup within the constraints of our model.
@@ -72,14 +72,14 @@ class scDiffEqLogger(AutoParseBase):
         if not os.path.exists(self.VERSIONED_MODEL_OUTDIR):
             if not self.creation_count:
                 os.mkdir(self.VERSIONED_MODEL_OUTDIR)
-                f = open(self.LOG_PATH, mode="a")
-                v_path = self.VERSIONED_MODEL_OUTDIR
-                v = os.path.basename(v_path)
-                line = f"\t{v}\t{datetime.now()}\t{v_path}\n"
-                f.write(line)
-                f.close()
-                self.creation_count += 1
-                
+            f = open(self.LOG_PATH, mode="a")
+            v_path = self.VERSIONED_MODEL_OUTDIR
+            v = os.path.basename(v_path)
+            line = f"\t{v}\t{datetime.now()}\t{v_path}\n"
+            f.write(line)
+            f.close()
+            self.creation_count += 1
+
         elif self._PASSED_CKPT_MATCHES_MODEL_PARENT_DIR:
             if len(self.CKPT_PATH) < 65:
                 self._INFO(f"Loading from checkpoint: {self.CKPT_PATH}")

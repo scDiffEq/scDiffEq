@@ -1,20 +1,19 @@
 
 from ..core import utils
 
-# from ._x_use import X_use
 import adata_query
-
+import ABCParse
 import anndata as a
 import pandas as pd
 import numpy as np
 import annoy
 
 
-from typing import List
+from typing import List, Optional
 NoneType = type(None)
 
 
-class kNN(utils.ABCParse):
+class kNN(ABCParse.ABCParse):
     _IDX_BUILT = False
 
     def __init__(
@@ -64,11 +63,14 @@ class kNN(utils.ABCParse):
     def _max_count(self, col: pd.Series) -> str:
         return col.value_counts().idxmax()
 
-    def count(self, query_result, obs_key: str, max_only: bool = False):
+    def count(self, query_result, obs_key: str, max_only: bool = False, n_neighbors: Optional[int] = None):
+        
+        if n_neighbors is None:
+            n_neighbors = self._n_neighbors
+        
         nn_adata = self._adata[query_result.flatten()]
-
         query_df = pd.DataFrame(
-            nn_adata.obs[obs_key].to_numpy().reshape(-1, self._n_neighbors).T
+            nn_adata.obs[obs_key].to_numpy().reshape(-1, n_neighbors).T
         )
         del nn_adata
 
@@ -80,13 +82,14 @@ class kNN(utils.ABCParse):
             self._max_count(query_df[i]) for i in query_df.columns
         ]  # list of values
 
-    def aggregate(self, X_query, obs_key: str, max_only: bool = False):
+    def aggregate(self, X_query, obs_key: str, max_only: bool = False, n_neighbors: Optional[int] = None):
         _df = (
             pd.DataFrame(
                 self.count(
                     query_result=self.query(X_query=X_query),
                     obs_key=obs_key,
                     max_only=max_only,
+                    n_neighbors = n_neighbors,
                 )
             )
             .fillna(0)
@@ -98,13 +101,14 @@ class kNN(utils.ABCParse):
             
 
     def multi_aggregate(
-        self, X_query, obs_key: str, max_only: bool = False
+        self, X_query, obs_key: str, max_only: bool = False, n_neighbors: Optional[int] = None,
     ) -> List[pd.DataFrame]:
         _list_of_dfs = [
             self.aggregate(
                 X_query=X_query[i],
                 obs_key=obs_key,
                 max_only=max_only,
+                n_neighbors = n_neighbors,
             )
             for i in range(len(X_query))
         ]

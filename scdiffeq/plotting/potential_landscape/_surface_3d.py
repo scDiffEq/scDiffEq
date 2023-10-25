@@ -4,8 +4,9 @@ import numpy as np
 
 from ._mesh_grid import MeshGrid
 from ...core import utils
+import ABCParse
 
-class Surface3D(utils.ABCParse):
+class Surface3D(ABCParse.ABCParse):
     """
     Mesh grid surface.
     
