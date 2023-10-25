@@ -1,13 +1,24 @@
 
-ABCParse
+# -- import packages: ---------------------------------------------------------
+import anndata
+import ABCParse
+import matplotlib.pyplot as plt
+import cellplots as cp
+import matplotlib.cm as cm
 
+
+# -- set typing: --------------------------------------------------------------
+from typing import Optional, List, Dict, Union
+
+
+# -- Operational class: -------------------------------------------------------
 class TemporalExpressionPlot(ABCParse.ABCParse):
     def __init__(
         self,
-        height=0.4,
-        width=0.4,
-        delete=[["top", "right"]],
-        plot_kwargs={},
+        height: float = 0.4,
+        width: float = 0.4,
+        delete: List[List[str]] = [["top", "right"]],
+        plot_kwargs: Dict = {},
         *args,
         **kwargs,
     ):
@@ -126,6 +137,7 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
             self.forward(en, group)
 
         self.ax.grid(zorder=0, alpha=0.1)
+        self.ax.set_xlabel("t (d)", fontsize=8)
         self.ax.set_ylabel(self._gene, fontsize=8)
         self.ax.legend(edgecolor="None", facecolor="None", loc=(1.05, 0.25), fontsize=6)
         self.ax.set_title(f"sim idx: {self._sim_idx}", fontsize=10)
@@ -134,8 +146,9 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
             if savename is None:
                 savename = f"scDiffEq.temporal_expression.sim_idx_{self._sim_idx}.{gene}.{save_format}"
             plt.savefig(savename, dpi=dpi)
-            
-            
+
+
+# -- API-facing function: ----------------------------------------------------- 
 def temporal_expression(
     adata_sim: anndata.AnnData,
     gene: str,
