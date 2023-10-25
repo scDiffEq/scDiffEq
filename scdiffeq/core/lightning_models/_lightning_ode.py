@@ -21,6 +21,7 @@ class LightningODE(
         self,
         # -- ode params: -------------------------------------------------------
         latent_dim,
+        name: str = "scdiffeq_model.ODE",
         mu_hidden: Union[List[int], int] = [2000, 2000],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,

@@ -73,31 +73,31 @@ class BaseLightningDiffEq(lightning.LightningModule):
     # -- sinkhorn stuff: -------------------------------------------------------
     def compute_sinkhorn_divergence(self, X, X_hat, W, W_hat):
         return self.sinkhorn_divergence(
-            W.contiguous(), X.contiguous(), W_hat.contiguous(), X_hat.contiguous()
+            W_hat.contiguous(), X_hat.contiguous(), W.contiguous(), X.contiguous(), 
         ).requires_grad_()
 
-    def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage):
-        for i in range(len(t)):
-            _t = round(t[i].item(), 3)
-            msg = f"sinkhorn_{_t}_{stage}"
-            val = sinkhorn_loss[i]
-            self.log(msg, val)
+#     def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage):
+#         for i in range(len(t)):
+#             _t = round(t[i].item(), 3)
+#             msg = f"sinkhorn_{_t}_{stage}"
+#             val = sinkhorn_loss[i]
+#             self.log(msg, val)
 
-        return sinkhorn_loss.sum()
+#         return sinkhorn_loss.sum()
     
-    def log_lr(self):
+#     def log_lr(self):
                 
-        if not isinstance(self.optimizers(), list):
-            lr = self.optimizers().optimizer.state_dict()["param_groups"][0]["lr"]
-            self.log("opt_param_group_lr", lr)
-        else:
-            for i, opt in enumerate(self.optimizers()):
-                for j, pg in enumerate(opt.optimizer.state_dict()["param_groups"]):
-                    self.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
+#         if not isinstance(self.optimizers(), list):
+#             lr = self.optimizers().optimizer.state_dict()["param_groups"][0]["lr"]
+#             self.log("opt_param_group_lr", lr)
+#         else:
+#             for i, opt in enumerate(self.optimizers()):
+#                 for j, pg in enumerate(opt.optimizer.state_dict()["param_groups"]):
+#                     self.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
 
-    def log_total_epochs(self):
-        """Train model N times --> N"""
-        self.log("total_epochs", self.COMPLETED_EPOCHS)
+#     def log_total_epochs(self):
+#         """Train model N times --> N"""
+#         self.log("total_epochs", self.COMPLETED_EPOCHS)
         
     # -- custom steps: -------------------------------------------------------------
     @abstractmethod

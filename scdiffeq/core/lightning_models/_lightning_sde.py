@@ -20,6 +20,7 @@ class LightningSDE(
     def __init__(
         self,
         latent_dim,
+        name: str = "scdiffeq_model.SDE",
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',

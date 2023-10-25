@@ -108,7 +108,7 @@ class scDiffEq(ABCParse.ABCParse):
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
         DiffEq_type: str = "SDE",
-        potential_type: str = "prior",
+        potential_type: Union[None, str] = None, # other options: "fixed" or "prior"
         
         # -- Encoder params: ---------------------------------------------------
         encoder_n_hidden: int = 4,
@@ -143,8 +143,8 @@ class scDiffEq(ABCParse.ABCParse):
             self.reducer.fit_scaler()
             self.adata.obsm["X_scaled_scDiffEq"] = self.reducer.X_scaled
         else:
-            self.reducer.X_scaled_train = reducer.X_train
-            self.reducer.X_scaled = reducer.X
+            self.reducer.X_scaled_train = self.reducer.X_train
+            self.reducer.X_scaled = self.reducer.X
 
         if self._reduce_dimensions:
             self.reducer.fit_pca()
@@ -164,17 +164,22 @@ class scDiffEq(ABCParse.ABCParse):
     
     @property
     def logger(self):
-        if not hasattr(self, "_logger"):
-            self._logger = self._configure_CSVLogger()
-        return self._logger
+        if not hasattr(self, "_LOGGER"):
+            self._csv_logger = self._configure_CSVLogger()
+            if hasattr(self, "_logger") and (not self._logger is None):
+                    self._LOGGER = [self._csv_logger, self._logger]
+            else:
+                self._LOGGER = [self._csv_logger]
+
+        return self._LOGGER
 
     @property
     def version(self) -> int:
-        return self.logger.version
+        return self.logger[0].version
     
     @property
     def _metrics_path(self):
-        return pathlib.Path(self.logger.log_dir).joinpath("metrics.csv")
+        return pathlib.Path(self.logger[0].log_dir).joinpath("metrics.csv")
     
     @property
     def metrics(self):
@@ -269,13 +274,13 @@ class scDiffEq(ABCParse.ABCParse):
         if freeze:
             self.DiffEq.freeze()
 
-    def _stage_log_path(self, stage):
-        log_path = glob.glob(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR + f"/{stage}*")[0]
-        self._INFO(f"Access logs at: {log_path}")
+#     def _stage_log_path(self, stage):
+#         log_path = glob.glob(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR + f"/{stage}*")[0]
+#         self._INFO(f"Access logs at: {log_path}")
         
-    @property
-    def _VERSION(self):
-        return int(os.path.basename(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR).split("_")[1])
+#     @property
+#     def _VERSION(self):
+#         return int(os.path.basename(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR).split("_")[1])
     
     def _check_disable_validation(self, trainer_kwargs):
         if self._train_val_split[1] == 0:
@@ -335,7 +340,10 @@ class scDiffEq(ABCParse.ABCParse):
         epochs=None,
         pretrain_callbacks = [],
     ):
-        """If any of the keyword arguments are passed, they will replace the previously-stated arguments from __init__ and re-configure the DiffEq."""
+        """
+        If any of the keyword arguments are passed, they will replace the previously-stated
+        arguments from __init__ and re-configure the DiffEq.
+        """
 
         self._configure_pretrain_step(epochs, pretrain_callbacks)
         self.pre_trainer.fit(self.DiffEq, self.LitDataModule)
@@ -351,17 +359,17 @@ class scDiffEq(ABCParse.ABCParse):
         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
         
         ignore = ['version', 'working_dir', 'logger']
-        funcs = [
-            self.TrainerGenerator,
-            lightning.Trainer
-        ]
+        funcs = [self.TrainerGenerator, lightning.Trainer]
         
         trainer_kwargs = {}
         
         for func in funcs:
-            utils.extract_func_kwargs(
-                func = func, kwargs = kwargs, ignore = ignore,
+            trainer_kwargs.update(
+                utils.extract_func_kwargs(
+                    func = func, kwargs = kwargs, ignore = ignore,
+                )
             )
+            
 
 #         trainer_kwargs = utils.extract_func_kwargs(
 #             func=self.TrainerGenerator,
@@ -393,6 +401,7 @@ class scDiffEq(ABCParse.ABCParse):
             version = self.version,
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
+#             callbacks = train_callbacks,
             **self.trainer_kwargs,
         )
         self._TRAIN_CONFIG_COUNT += 1

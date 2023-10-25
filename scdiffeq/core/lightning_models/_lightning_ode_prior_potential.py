@@ -18,6 +18,7 @@ class LightningODE_PriorPotential(
         self,
         # -- general params: ---------------------------------------------------
         latent_dim,
+        name: str = "scdiffeq_model.ODE.prior_potential",
         train_lr=1e-5,
         train_optimizer=torch.optim.RMSprop,
         train_scheduler=torch.optim.lr_scheduler.StepLR,

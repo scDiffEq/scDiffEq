@@ -37,6 +37,7 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
             monitor=self._monitor,
         ),
             InterTrainerEpochCounter(),
+            callbacks.ModelLogging(),
 #             callbacks.VisualizeTrackedLoss(
 #                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
 #             ),
