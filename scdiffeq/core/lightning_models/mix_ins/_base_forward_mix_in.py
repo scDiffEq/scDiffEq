@@ -11,10 +11,16 @@ class BaseForwardMixIn(object):
     def step(self, batch, batch_idx, stage=None):
 
         batch = self.process_batch(batch, batch_idx)
+#         print(batch_idx, batch.X0.mean())
         X_hat = self.forward(batch.X0, batch.t)
-        sinkhorn_loss = self.compute_sinkhorn_divergence(
-            batch.X, X_hat, batch.W, batch.W_hat
+        
+#         print("X:", batch.X.shape)
+#         print("X_hat:", X_hat.shape)
+#         print("W (shape, first five):", batch.W.shape, batch.W[2][:5])
+#         print("W_hat (shape, first five):", batch.W_hat.shape, batch.W_hat[2][:5])
+        
+        self.sinkhorn_loss = self.compute_sinkhorn_divergence(
+            X = batch.X, X_hat = X_hat, W = batch.W, W_hat = batch.W_hat
         )
-        self.log_lr()
-        self.log_total_epochs()
-        return self.log_sinkhorn_divergence(sinkhorn_loss, t=batch.t, stage=stage)
+#         print("batch_loss", self.sinkhorn_loss.sum())
+        return self.sinkhorn_loss.sum()

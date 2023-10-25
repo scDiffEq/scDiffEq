@@ -25,6 +25,7 @@ class LightningSDE_VAE_FateBiasAware(
         self,
         data_dim,
         latent_dim,
+        name: str = "scdiffeq_model.SDE_VAE.fate_bias_aware",
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,

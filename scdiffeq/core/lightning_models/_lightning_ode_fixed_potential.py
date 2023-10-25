@@ -22,6 +22,7 @@ class LightningODE_FixedPotential(
     def __init__(
         self,
         latent_dim,
+        name: str = "scdiffeq_model.ODE.fixed_potential",
         dt=0.1,
         mu_hidden: Union[List[int], int] = [400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',

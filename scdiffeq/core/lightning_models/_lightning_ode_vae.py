@@ -25,6 +25,7 @@ class LightningODE_VAE(
         self,
         data_dim,
         latent_dim,
+        name: str = "scdiffeq_model.ODE_VAE",
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,

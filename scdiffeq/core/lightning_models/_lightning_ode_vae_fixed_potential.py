@@ -21,6 +21,7 @@ class LightningODE_VAE_FixedPotential(
         self,
         data_dim,
         latent_dim,
+        name: str = "scdiffeq_model.ODE_VAE.fixed_potential",
         mu_hidden: Union[List[int], int] = [2000, 2000],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,
