@@ -87,10 +87,6 @@ class BatchProcessor(ABCParse.ABCParse):
         if self.n_batch_items >= 3:
             W = self._batch[2].transpose(1, 0)
             
-            # temporary fix, just for LARRY
-#             W[1] = W[0] * np.exp(4 - 2)
-#             W[2] = W[0] * np.exp(6 - 2)
-            
             for i in range(1, len(self.t)):
                 W[i] = W[0] * torch.exp(self.t[i] - self.t[0])
             W[0] = torch.ones_like(W[0])

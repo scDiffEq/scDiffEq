@@ -10,6 +10,7 @@ import glob
 import os
 import ABCParse
 import pathlib
+import autodevice
 
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
@@ -268,11 +269,14 @@ class scDiffEq(ABCParse.ABCParse):
         """Freeze lightning model"""
         self.DiffEq.freeze()
         
-    def load(self, ckpt_path, freeze=True):
-        self.ckpt_path = ckpt_path
-        self.DiffEq = self.DiffEq.load_from_checkpoint(ckpt_path)
+    def load(self, ckpt_path: Union[str, pathlib.Path], freeze=True, device = autodevice.AutoDevice()):
+        
+        self.__update__(locals())
+        
+        self.DiffEq = self.DiffEq.load_from_checkpoint(self._ckpt_path)
+        self.DiffEq = self.to(self._device)
         if freeze:
-            self.DiffEq.freeze()
+            self.freeze()
 
 #     def _stage_log_path(self, stage):
 #         log_path = glob.glob(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR + f"/{stage}*")[0]
@@ -468,8 +472,8 @@ class scDiffEq(ABCParse.ABCParse):
     @property
     def tracker(self):
         return callbacks.ModelTracker(version=self.version)
-        
-        
+
+
     def cell_potential(
         self,
         use_key: str = 'X_pca',

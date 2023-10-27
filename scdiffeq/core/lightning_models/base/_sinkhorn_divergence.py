@@ -13,7 +13,7 @@ class SinkhornDivergence(SamplesLoss, ABCParse.ABCParse):
         loss="sinkhorn",
         backend="auto",
         p=2,
-        blur=0.05,
+        blur=0.1,
         scaling=0.7,
         debias=True,
         sample_axis=1,
