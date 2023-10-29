@@ -33,11 +33,11 @@ class LightningODE(
         backend = "auto",
         
         # -- general params: ---------------------------------------------------
-        train_lr=1e-4,
-        train_optimizer=torch.optim.RMSprop,
-        train_scheduler=torch.optim.lr_scheduler.StepLR,
-        train_step_size=10,
-        dt=0.1,
+        train_lr: float = 1e-4,
+        train_optimizer = torch.optim.RMSprop,
+        train_scheduler = torch.optim.lr_scheduler.StepLR,
+        train_step_size: int = 10,
+        dt: float = 0.1,
         adjoint=False,
         version = __version__,
         *args,

@@ -109,7 +109,8 @@ class scDiffEq(ABCParse.ABCParse):
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
         DiffEq_type: str = "SDE",
-        potential_type: Union[None, str] = None, # other options: "fixed" or "prior"
+        potential_type: Union[None, str] = None,
+        # other options: "fixed" or "prior"
         
         # -- Encoder params: ---------------------------------------------------
         encoder_n_hidden: int = 4,
@@ -274,7 +275,7 @@ class scDiffEq(ABCParse.ABCParse):
         self.__update__(locals())
         
         self.DiffEq = self.DiffEq.load_from_checkpoint(self._ckpt_path)
-        self.DiffEq = self.to(self._device)
+        self.DiffEq = self.DiffEq.to(self._device)
         if freeze:
             self.freeze()
 
