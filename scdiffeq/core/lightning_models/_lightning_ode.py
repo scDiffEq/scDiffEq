@@ -8,7 +8,7 @@ import torch
 from . import base, mix_ins
 
 
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -20,8 +20,8 @@ class LightningODE(
     def __init__(
         self,
         # -- ode params: -------------------------------------------------------
-        latent_dim,
-        name: str = "scdiffeq_model.ODE",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [2000, 2000],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,
@@ -44,6 +44,8 @@ class LightningODE(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         

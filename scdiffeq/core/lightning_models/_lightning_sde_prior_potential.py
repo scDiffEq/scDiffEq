@@ -6,7 +6,7 @@ from . import base, mix_ins
 
 from .. import utils
 
-from typing import Union, List
+from typing import Optional, Union, List
 
 from ... import __version__
 
@@ -17,8 +17,8 @@ class LightningSDE_PriorPotential(
 ):
     def __init__(
         self,
-        latent_dim,
-        name: str = "scdiffeq_model.SDE.prior_potential",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         train_lr=1e-4,
         train_optimizer=torch.optim.RMSprop,
         train_scheduler=torch.optim.lr_scheduler.StepLR,
@@ -49,6 +49,8 @@ class LightningSDE_PriorPotential(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         

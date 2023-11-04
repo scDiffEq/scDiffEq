@@ -10,7 +10,7 @@ from . import mix_ins
 from . import base
 
 
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -25,8 +25,8 @@ class LightningODE_VAE_PriorPotential(
     def __init__(
         self,
         data_dim,
-        latent_dim,
-        name: str = "scdiffeq_model.ODE_VAE.prior_potential",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,
@@ -62,6 +62,8 @@ class LightningODE_VAE_PriorPotential(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         

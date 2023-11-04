@@ -35,8 +35,8 @@ class scDiffEq(ABCParse.ABCParse):
         
         # -- data params: -------------------------------------------------------
         adata: anndata.AnnData,
-        latent_dim: int = 20,
-        name: str = "scdiffeq_model",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         use_key: str = "X_scaled",
         obs_keys: List[str] = ["W"],
         kNN_key: str = "X_pca_scDiffEq",
@@ -409,6 +409,12 @@ class scDiffEq(ABCParse.ABCParse):
 #             callbacks = train_callbacks,
             **self.trainer_kwargs,
         )
+        
+        if hasattr(self, "_csv_logger"):
+            DIR = self._csv_logger.log_dir
+            self._INFO(f"Logging locally to: {DIR}")
+        
+        
         self._TRAIN_CONFIG_COUNT += 1
 
 #         self._stage_log_path(STAGE)
@@ -488,7 +494,7 @@ class scDiffEq(ABCParse.ABCParse):
         knn_smoothing_iters: int = 5,
         use_tqdm: bool = True,
     ):
-        
+
         tools.cell_potential(
             adata = self.adata,
             model = self,

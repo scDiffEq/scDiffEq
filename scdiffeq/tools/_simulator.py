@@ -2,6 +2,7 @@
 # -- import packages: ----------------------------------------------------------
 import torch
 import anndata
+import autodevice
 import adata_query
 import numpy as np
 import pandas as pd
@@ -365,7 +366,7 @@ def simulate(
     t_max: Optional[float] = None,
     dt: float = 0.1,
     N: int = 2000,
-    device: Union[torch.device, str] = "cuda:0",
+    device: Union[torch.device, str] = autodevice.AutoDevice(),
     time_key: str = "Time point",
     ref_cell_type_key="Cell type annotation",
     time_key_added: str = "t",

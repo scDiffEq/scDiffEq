@@ -7,7 +7,7 @@ import torch_nets
 import torch
 
 
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -20,8 +20,8 @@ class LightningODE_VAE_FixedPotential(
     def __init__(
         self,
         data_dim,
-        latent_dim,
-        name: str = "scdiffeq_model.ODE_VAE.fixed_potential",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [2000, 2000],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,
@@ -45,6 +45,8 @@ class LightningODE_VAE_FixedPotential(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
 
