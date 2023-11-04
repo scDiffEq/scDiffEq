@@ -405,15 +405,8 @@ class DataConfiguration(ABCParse.ABCParse):
         scDiffEq.adata = self.adata
         scDiffEq._data_dim = self._scDiffEq_kwargs["data_dim"]
 
-    def __call__(
-        self,
-        adata: anndata.AnnData,
-        scDiffEq,
-        scDiffEq_kwargs: Dict,
-        *args,
-        **kwargs,
-    ) -> None:
-        
+    def __call__(self, scDiffEq, *args, **kwargs) -> None:
+
         """
         Data configuration occurs in four steps:
         (1) input adata is configured
@@ -423,16 +416,18 @@ class DataConfiguration(ABCParse.ABCParse):
         
         Parameters
         ----------
-        adata: anndata.AnnData
-        
         scDiffEq
-        
-        scDiffEq_kwargs: Dict
+            Derived from this are:
+                adata: anndata.AnnData
+                scDiffEq_kwargs: Dict
         
         Returns
         -------
         None, updates scDiffEq model.
         """
+        
+        adata = scDiffEq.adata
+        scDiffEq_kwargs = scDiffEq._PARAMS
         
         self.__update__(locals(), ignore=["adata", "scDiffEq"], public=[None])
 

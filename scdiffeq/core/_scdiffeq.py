@@ -27,21 +27,67 @@ warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_w
 from typing import Union, List, Optional, Dict
 
 
+import anndata
+import ABCParse
+from typing import Optional
+
+class kNNMixIn(ABCParse.ABCParse, object):
+    def __init__(self, *args, **kwargs):
+        self.__parse__(locals())
+        
+    @property
+    def _adata_kNN_fit(self):
+        return self.adata[self.adata.obs[self._kNN_fit_subset]].copy()
+        
+    def _kNN_info_msg(self):
+        
+        self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_fit_subset}']")
+        
+    def configure_kNN(
+        self,
+        adata: Optional[anndata.AnnData] = None,
+        kNN_key: Optional[str] = None,
+        kNN_fit_subset: Optional[str] = None,
+    ):
+        
+        """
+        subset key should point to a col in adata.obs of bool vals
+        """
+        self.__update__(locals())
+        
+        self._kNN_info_msg()
+        self._kNN = tools.kNN(
+            adata = self._adata_kNN_fit, use_key = self._kNN_key,
+        )
+
+    @property
+    def kNN(self):
+        if not hasattr(self, "_kNN"):
+            self.configure_kNN(
+                adata = self._adata_kNN_fit,
+                kNN_key = self._kNN_key,
+                kNN_fit_subset = self._kNN_fit_subset,
+            )
+        return self._kNN
 
 # -- model class, faces API: ---------------------------------------------------
-class scDiffEq(ABCParse.ABCParse):
+class scDiffEq(kNNMixIn, ABCParse.ABCParse):
     def __init__(
         self,        
         
         # -- data params: -------------------------------------------------------
-        adata: anndata.AnnData,
+        adata: anndata.AnnData = None,
         latent_dim: int = 50,
         name: Optional[str] = None,
-        use_key: str = "X_scaled",
+        use_key: str = "X_pca",
         obs_keys: List[str] = ["W"],
-        kNN_key: str = "X_pca_scDiffEq",
         seed: int = 0,
         backend: str = "auto",
+        
+        # -- kNN keys: [optional]: ----------------------------------------------
+        build_kNN: Optional[bool] = False,
+        kNN_key: Optional[str] = "X_pca",
+        kNN_fit_subset: Optional[str] = "train",
         
         # -- pretrain params: ---------------------------------------------------
         pretrain_epochs: int = 500,
@@ -70,7 +116,7 @@ class scDiffEq(ABCParse.ABCParse):
         silent: bool = True,
         scale_input_counts: bool = False,
         reduce_dimensions: bool = False,
-        build_kNN: bool = False,
+        
         fate_bias_csv_path: Optional[Union[pathlib.Path, str]] = None,
         fate_bias_multiplier: float = 1,
         viz_frequency: int = 1,
@@ -87,14 +133,14 @@ class scDiffEq(ABCParse.ABCParse):
         shuffle_time_labels: bool = False,
         
         # -- DiffEq params: ----------------------------------------------------
-        mu_hidden: Union[List[int], int] = [400, 400, 400],
+        mu_hidden: Union[List[int], int] = [400, 400],
         mu_activation: Union[str, List[str]] = "LeakyReLU",
         mu_dropout: Union[float, List[float]] = 0.1,
         mu_bias: bool = True,
         mu_output_bias: bool = True,
         mu_n_augment: int = 0,
         
-        sigma_hidden: Union[List[int], int] = [400, 400, 400],
+        sigma_hidden: Union[List[int], int] = [400, 400],
         sigma_activation: Union[str, List[str]] = "LeakyReLU",
         sigma_dropout: Union[float, List[float]] = 0.1,
         sigma_bias: List[bool] = True,
@@ -193,13 +239,6 @@ class scDiffEq(ABCParse.ABCParse):
         self._PRETRAIN_CONFIG_COUNT = 0
         self._TRAIN_CONFIG_COUNT = 0
 
-    def _configure_kNN_graph(self):      
-        train_adata = self.adata[self.adata.obs[self._train_key]].copy()
-        
-
-        self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")
-        self.kNN_Graph = tools.kNN(adata = train_adata, use_key = self._kNN_key)
-
     def _configure_model(self, kwargs):
 
         self._LitModelConfig = configs.LightningModelConfiguration(
@@ -212,57 +251,66 @@ class scDiffEq(ABCParse.ABCParse):
         if hasattr(self, "reducer"):
             kwargs['PCA'] = self.reducer.PCA
         
-        if hasattr(self, "kNN_Graph"):
-            kwargs['kNN_Graph'] = self.kNN_Graph
+        if hasattr(self, "kNN"):
+            kwargs['kNN'] = self.kNN
 
         self.DiffEq = self._LitModelConfig(kwargs, self._ckpt_path)
+        self._name = self.DiffEq.hparams.name
         self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
         
         lightning.seed_everything(self._seed)
+        
+        # -- Step 5: configure bridge to lightning logger ----------------------
+        # was its own step before: now in-line here, since it
+        # doesn't make sense to separate it, functionally
+        self._LOGGING = utils.LoggerBridge(self.DiffEq)
+        self._configure_trainer_generator()
+
+    def configure_data(self, adata: anndata.AnnData):
+        
+        """Step 3. Can be called internally or externally."""
+        
+        self.adata = adata.copy()
+        
+        self._DATA_CONFIG = configs.DataConfiguration()
+        self._DATA_CONFIG(scDiffEq = self)
     
     def __config__(self, kwargs):
 
         """
         Run on model.__init__()
 
-        Step 1: Parse all kwargs
-        Step 2: Set up info messaging
-        Step 3: Configure data
-        Step 4: 
+        Step 1: Parse kwargs, Set up info messaging
+        Step 2: Configure data
+            If adata is passed, you can do the remaining steps
+            Step 3: Configure kNN [ optional ]
+            Step 4: Configure model
+            Step 5: Configure Logging/Trainer
+            Step 6: extras (dimension reduce)
         """
 
-        # -- Step 1: parse all kwargs ------------------------------------------
-        self.adata = kwargs['adata'].copy()
-        
+        # -- Step 1: parse kwargs, set up info msg -----------------------------
         self.__parse__(kwargs, public = [None], ignore=["adata"])
-        
-        # -- Step 2: set up info messaging -------------------------------------
+
         # -- TODO: eventually replace this with more sophisticated logging -----
-        self._INFO = utils.InfoMessage()
-        
+        self._INFO = utils.InfoMessage()        
 
-        # -- Step 3: configure data --------------------------------------------
-        self._DATA_CONFIG = configs.DataConfiguration()
-        self._DATA_CONFIG(
-            adata = self.adata, scDiffEq = self, scDiffEq_kwargs = self._PARAMS,
-        )
+        # -- Step 2: configure data ------------------------------------------
+        if not kwargs['adata'] is None:
+            self.configure_data(adata = kwargs['adata'])
+            
+            # -- Step 3: configure kNN ---------------------------------------
+            if kwargs["build_kNN"]:
+                kwargs['kNN'] = self.kNN
 
-        # -- Step 4: configure model -------------------------------------------
-        self._configure_model(kwargs)
-        
-        
-        # -- Step 5: configure bridge to lightning logger ----------------------
-        self._LOGGING = utils.LoggerBridge(self.DiffEq)
-        self._configure_trainer_generator()
-        
-        # -- Step 6: extras: ---------------------------------------------------
-        if kwargs["reduce_dimensions"]:
-            self._configure_dimension_reduction()
-        if kwargs["build_kNN"]:
-            self._configure_kNN_graph()
-        
-        
+            # -- Step 4: configure model -------------------------------------------
+            self._configure_model(kwargs)
+
+            # -- Step 6: extras: ---------------------------------------------------
+            if kwargs["reduce_dimensions"]:
+                self._configure_dimension_reduction()
+
     def to(self, device):
         self.DiffEq = self.DiffEq.to(device)
 
@@ -509,6 +557,28 @@ class scDiffEq(ABCParse.ABCParse):
             knn_smoothing_iters = knn_smoothing_iters,
             use_tqdm = use_tqdm,
         )
+
+            
+
+# if you passed adata, configure the rest of the model here:
+        # -- 1a. parse adata: --------------------------------------------------
+#             self._DATA_CONFIG = configs.DataConfiguration()
+#             self._DATA_CONFIG(
+#                 adata = self.adata, scDiffEq = self, scDiffEq_kwargs = self._PARAMS,
+#             )
+        
+#     # -- could cordon off into a kNNMixIn: ----
+#     def _configure_kNN_graph(self):      
+#         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
+#         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")        
+#         self._kNN_graph = tools.kNN(adata = train_adata, use_key = self._kNN_key)
+        
+#     @proprety
+#     def kNN(self):
+#         if not hasattr(self, "_kNN_graph"):
+#             self._configure_kNN_graph()
+#         return self._kNN_graph
+#     # -----------------------------------------
 
 
 
