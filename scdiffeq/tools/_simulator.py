@@ -2,6 +2,7 @@
 # -- import packages: ----------------------------------------------------------
 import torch
 import anndata
+import autodevice
 import adata_query
 import numpy as np
 import pandas as pd
@@ -165,7 +166,8 @@ class Simulator(ABCParse.ABCParse):
         self.adata.uns[self._gene_ids_key] = self._adata_input.var[self._gene_ids_key]
 
     def forward(self):
-        self._INFO("Simulating")
+        n_nonzero_steps = int(self._N_STEPS - 1)
+        self._INFO(f"Simulating {self._N} trajectories over {n_nonzero_steps} steps.")
         self.Z_hat = self.DiffEq(Z0=self.Z0, t=self.t).detach().cpu()
         self.Z_input = self.Z_hat.flatten(0, 1).to(self._device)
         self._compose_core_adata()
@@ -365,7 +367,7 @@ def simulate(
     t_max: Optional[float] = None,
     dt: float = 0.1,
     N: int = 2000,
-    device: Union[torch.device, str] = "cuda:0",
+    device: Union[torch.device, str] = autodevice.AutoDevice(),
     time_key: str = "Time point",
     ref_cell_type_key="Cell type annotation",
     time_key_added: str = "t",

@@ -8,7 +8,7 @@ import torch
 # -- import local dependencies: ------------------------------------------------
 from . import mix_ins, base
 
-from typing import Union, List
+from typing import Optional, Union, List
 
 from ... import __version__
 
@@ -22,8 +22,8 @@ class LightningSDE_VAE(
     def __init__(
         self,
         data_dim,
-        latent_dim,
-        name: str = "scdiffeq_model.SDE_VAE",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,
@@ -78,6 +78,8 @@ class LightningSDE_VAE(
         **kwargs,
     ):
         super().__init__()
+
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         

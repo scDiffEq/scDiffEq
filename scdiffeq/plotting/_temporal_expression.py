@@ -114,7 +114,7 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
         x, y = self._X, self._MEAN[group]
         self.ax.plot(x, y, lw=2, color=color, zorder=en + 2, label=group)
         self.ax.set_xlim(x.min(), x.max())
-        self.ax.set_ylim(0, round(self._global_max))
+#         self.ax.set_ylim(0, round(self._global_max))
 
     def __call__(
         self,
@@ -128,6 +128,12 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
         savename: str = None,
         save_format: str = "svg",
         dpi: int = 250,
+        x_label: str = "t (d)",
+        y_label: str = None,
+        title: str = None,
+        title_fontsize: int = 8,
+        grid: bool = True,
+        show_legend: bool = True,
         *args,
         **kwargs,
     ):
@@ -136,11 +142,21 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
         for en, group in enumerate(self._PLOT_GROUPS):
             self.forward(en, group)
 
-        self.ax.grid(zorder=0, alpha=0.1)
-        self.ax.set_xlabel("t (d)", fontsize=8)
-        self.ax.set_ylabel(self._gene, fontsize=8)
-        self.ax.legend(edgecolor="None", facecolor="None", loc=(1.05, 0.25), fontsize=6)
-        self.ax.set_title(f"sim idx: {self._sim_idx}", fontsize=10)
+        self.ax.set_xlabel(self._x_label, fontsize=8)
+        
+        if y_label is None:
+            y_label = self._gene
+        if title is None:
+            title = f"sim idx: {self._sim_idx}"
+        self.ax.set_ylabel(y_label, fontsize=8)    
+        self.ax.set_title(title, fontsize=title_fontsize)
+            
+        if grid:
+            self.ax.grid(zorder=0, alpha=0.1)
+        
+        if show_legend:
+            self.ax.legend(edgecolor="None", facecolor="None", loc=(1.05, 0.25), fontsize=6)
+        
 
         if save:
             if savename is None:
@@ -163,7 +179,13 @@ def temporal_expression(
     savename: str = None,
     save_format: str = "svg",
     dpi: int = 250,
+    x_label: str = "t (d)",
+    y_label: str = None,
+    title: str = None,
+    grid: bool = True,
+    show_legend: bool = True,
     plot_kwargs: Optional[Dict] = {},
+    title_fontsize: int = 8,
 ):
     """
     Plot smoothed expression over time.
@@ -214,4 +236,14 @@ def temporal_expression(
         show_std=show_std,
         ax=ax,
         cmap=cmap,
+        save=save,
+        savename=savename,
+        save_format=save_format,
+        dpi=dpi,
+        x_label = x_label,
+        y_label = y_label,
+        title = title,
+        grid = grid,
+        show_legend = show_legend,
+        title_fontsize = title_fontsize,
     )

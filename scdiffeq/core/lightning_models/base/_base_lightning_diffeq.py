@@ -13,6 +13,8 @@ from ._sinkhorn_divergence import SinkhornDivergence
 from ... import utils
 
 
+from typing import Optional
+
 # -- DiffEq class: -------------------------------------------------------------
 class BaseLightningDiffEq(lightning.LightningModule):
     def __init__(self, *args, **kwargs):
@@ -106,6 +108,13 @@ class BaseLightningDiffEq(lightning.LightningModule):
     
     def __repr__(self):
         return "LightningDiffEq"
+    
+    def _configure_name(self, name: Optional[str] = None):
+        """ """
+        if not name is None:
+            return f"{self.__repr__()}:{name}"
+        else:
+            return self.__repr__()
 
     
     

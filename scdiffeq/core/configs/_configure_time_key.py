@@ -34,7 +34,8 @@ class TimeKeyConfiguration(ABCParse.ABCParse):
 
     @property
     def _PASSED_VALID(self) -> bool:
-        return self._time_key in self._OBS_COLS
+        if self._PASSED:
+            return self._time_key in self._OBS_COLS
 
     @property
     def _DETECTED(self) -> bool:
