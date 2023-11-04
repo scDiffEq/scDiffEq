@@ -239,22 +239,23 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         self._PRETRAIN_CONFIG_COUNT = 0
         self._TRAIN_CONFIG_COUNT = 0
 
-    def _configure_model(self, kwargs):
-
-        self._LitModelConfig = configs.LightningModelConfiguration(
-            data_dim=self._data_dim,
-            latent_dim=self._latent_dim,
-            DiffEq_type=self._DiffEq_type,
-            potential_type=self._potential_type,
-            fate_bias_csv_path = self._fate_bias_csv_path,
-        )
-        if hasattr(self, "reducer"):
-            kwargs['PCA'] = self.reducer.PCA
+    def configure_model(self, DiffEq: Optional[lightning.LightningModule] = None):
         
-        if hasattr(self, "kNN"):
-            kwargs['kNN'] = self.kNN
-
-        self.DiffEq = self._LitModelConfig(kwargs, self._ckpt_path)
+        if DiffEq is None:
+        
+            self._LitModelConfig = configs.LightningModelConfiguration(
+                data_dim=self._data_dim,
+                latent_dim=self._latent_dim,
+                DiffEq_type=self._DiffEq_type,
+                potential_type=self._potential_type,
+                fate_bias_csv_path = self._fate_bias_csv_path,
+            )
+            if hasattr(self, "reducer"):
+                self._PARAMS['PCA'] = self.reducer.PCA
+            DiffEq = self._LitModelConfig(self._PARAMS, self._ckpt_path)
+            
+        self.DiffEq = DiffEq
+        
         self._name = self.DiffEq.hparams.name
         self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
@@ -275,6 +276,7 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         
         self._DATA_CONFIG = configs.DataConfiguration()
         self._DATA_CONFIG(scDiffEq = self)
+        self._INFO(f"Input data configured.")
     
     def __config__(self, kwargs):
 
@@ -294,22 +296,22 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         self.__parse__(kwargs, public = [None], ignore=["adata"])
 
         # -- TODO: eventually replace this with more sophisticated logging -----
-        self._INFO = utils.InfoMessage()        
+        self._INFO = utils.InfoMessage()
 
         # -- Step 2: configure data ------------------------------------------
         if not kwargs['adata'] is None:
             self.configure_data(adata = kwargs['adata'])
             
             # -- Step 3: configure kNN ---------------------------------------
-            if kwargs["build_kNN"]:
-                kwargs['kNN'] = self.kNN
+            if self._PARAMS["build_kNN"]:
+                self._PARAMS['kNN'] = self.kNN
 
             # -- Step 4: configure model -------------------------------------------
-            self._configure_model(kwargs)
+            self.configure_model(DiffEq = None)
 
             # -- Step 6: extras: ---------------------------------------------------
-            if kwargs["reduce_dimensions"]:
-                self._configure_dimension_reduction()
+#             if kwargs["reduce_dimensions"]:
+#                 self._configure_dimension_reduction()
 
     def to(self, device):
         self.DiffEq = self.DiffEq.to(device)

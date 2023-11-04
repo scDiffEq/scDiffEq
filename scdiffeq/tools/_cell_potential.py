@@ -145,7 +145,8 @@ class CellPotentialNormalization(ABCParse.ABCParse):
         self.adata.obs.drop("_CLIPPED_PSI", axis=1, inplace=True)
 
     def __call__(self, adata, key_added="psi"):
-        self.__update__(locals())
+        
+        self.__update__(locals(), public = ['adata'])
         
 
         adata.obs[key_added] = self._SCALED_PSI
@@ -182,7 +183,7 @@ class CellPotential(ABCParse.ABCParse):
         self, adata: anndata.AnnData, model, key_added: str = "_psi"
     ):
 
-        self.__update__(locals())
+        self.__update__(locals(), public = ['adata'])
         self.Z_psi = self.forward(model)
         adata.obs[key_added] = self.Z_psi
 
