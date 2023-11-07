@@ -1,4 +1,4 @@
-lightning>=2.1.1
+lightning>=2.1
 anndata>=10.3
 torch>=2.1.0
 pykeops>=2.1.2
