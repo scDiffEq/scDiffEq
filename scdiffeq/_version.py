@@ -8,11 +8,11 @@ class _PackageVersion:
         
     @property
     def PACKAGE_PATH(self):
-        return _os.path.abspath(_os.path.dirname(_os.path.dirname(__file__)))
+        return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     
     @property
     def SETUP_FPATH(self):
-        return _os.path.join(self.PACKAGE_PATH, "setup.py")
+        return os.path.join(self.PACKAGE_PATH, "setup.py")
     
     def _read_setup_dot_py(self):
         f = open(self.SETUP_FPATH)
