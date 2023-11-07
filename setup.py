@@ -10,11 +10,14 @@ import sys
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
+with open('scdiffeq/__version__.py') as v:
+    exec(v.read())
+
 
 # -- run setup: ---------------------------------------------------------------
 setuptools.setup(
     name="scdiffeq",
-    version="0.0.48rc6",
+    version=__version__,
     python_requires=">3.9.0",
     author="Michael E. Vinyard",
     author_email="mvinyard.ai@gmail.com",

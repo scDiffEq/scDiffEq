@@ -2,17 +2,12 @@
 __module_name__ = "__init__.py"
 __doc__ = """Top-level __init__ for the scDiffEq package."""
 __author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["vinyard@g.harvard.edu"])
+__email__ = ", ".join(["mvinyard.ai@gmail.com"])
 
+
+from .__version__ import __version__
 
 import os as _os
-
-
-from ._version import _PackageVersion
-
-_package_version = _PackageVersion()
-__version__ = __VERSION__ = __Version__ = _package_version()
-
 _os.environ["KEOPS_VERBOSE"] = "0"
 
 
