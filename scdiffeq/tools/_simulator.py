@@ -163,7 +163,7 @@ class Simulator(ABCParse.ABCParse):
         self.adata = anndata.AnnData(self.X)
         self.adata.obs["t"] = self._TIME
         self.adata.uns["sim_idx"] = self.idx
-        self.adata.uns[self._gene_ids_key] = self._adata_input.var[self._gene_ids_key]
+        self.adata.uns[self._gene_ids_key] = self._adata_input.var[self._gene_ids_key].values
 
     def forward(self):
         n_nonzero_steps = int(self._N_STEPS - 1)
@@ -175,7 +175,7 @@ class Simulator(ABCParse.ABCParse):
     def compute_drift(self):
         self._INFO("Computing per-cell drift")
         self.X_drift = self.DiffEq.DiffEq.drift(self.Z_input).detach().cpu()
-        self.adata.obsm["X_drift"] = self.X_drift
+        self.adata.obsm["X_drift"] = self.X_drift.numpy()
         self.adata.obs["drift"] = self._L2Norm(self.X_drift)
 
     def compute_diffusion(self):
@@ -183,7 +183,7 @@ class Simulator(ABCParse.ABCParse):
         self.X_diffusion = (
             self.DiffEq.DiffEq.diffusion(self.Z_input).detach().cpu().squeeze(-1)
         )
-        self.adata.obsm["X_diffusion"] = self.X_diffusion
+        self.adata.obsm["X_diffusion"] = self.X_diffusion.numpy()
         self.adata.obs["diffusion"] = self._L2Norm(self.X_diffusion)
 
     def compute_potential(self):
@@ -213,11 +213,25 @@ class Simulator(ABCParse.ABCParse):
             )
 
     def map_obs(self):
-        for obs_key in self._obs_mapping_keys:
-            self._INFO(f"Mapping observed label: `{obs_key}` to simulated cells")
-            mapped = self.kNN.aggregate(self.adata.X, obs_key=obs_key, max_only=True)
-            mapped.index = mapped.index.astype(str)
-            self.adata.obs = pd.concat([self.adata.obs.copy(), mapped], axis=1)
+        
+        mapped = self.kNN.aggregate(self.adata.X, obs_keys=self._obs_mapping_keys, max_only=True)
+        joined_keys = ",` `".join(self._obs_mapping_keys)
+        self._INFO(f"Mapping observed label: [`{joined_keys}`] to simulated cells")
+        mapped.index = mapped.index.astype(str)
+        self.adata.obs = pd.concat([self.adata.obs.copy(), mapped], axis=1)
+            
+    def map_final_state_obs(self):
+        
+        df = self.adata.obs.copy()
+        tf_idx = df.loc[df[self._time_key_added] == self._T_MAX].index        
+        
+        joined_keys = ",` `".join(self._obs_mapping_keys)
+        self._INFO(f"Mapping only the final state observed label: [`{joined_keys}`]")
+        
+        X_final = self.adata[tf_idx].X
+        mapped = self.kNN.aggregate(X_final, obs_keys=self._obs_mapping_keys, max_only=True)
+        joined_keys = "_".join(self._obs_mapping_keys)
+        self.adata.uns[f'mapped_final.{joined_keys}'] = mapped
 
     def annotate_final_state(self):
 
@@ -233,17 +247,24 @@ class Simulator(ABCParse.ABCParse):
             final_state.annotate_final_state(key_added=f"final_state.{obs_key}")
             
 
-    def count_fates(self, fate_key):
+    def count_fates(self, fate_key = None):
         """
         Parameters:
         -----------
         fate_key
         """
+        
+        if isinstance(fate_key, NoneType):
+            fate_key = self._fate_key
+        
         df = self.adata.obs.copy()
-        return df.loc[df[self._time_key_added] == self._T_MAX][fate_key].value_counts()
+        fate_counts = df.loc[df[self._time_key_added] == self._T_MAX][fate_key].value_counts()
+        self.adata.uns[f"fate_counts_{fate_key}"] = fate_counts.to_dict()
+        return fate_counts
 
     @property
     def fate_counts(self):
+        """ """
         return self.count_fates(self._fate_key)
     
     def run_umap(self):
@@ -334,9 +355,11 @@ class Simulator(ABCParse.ABCParse):
         self.compute_diffusion()
         self.compute_potential()
         self.map_obs()
+        self.map_final_state_obs()
         self.annotate_final_state()
         self.run_inverse_pca()
         self.run_umap()
+        self.count_fates()
 
         # -- outputs: ----------------------------------------------------------
 
