@@ -3,11 +3,22 @@
 # -- import packages: ----------------------------------------------------------
 import os
 import abc
-import scvelo as scv
+
 import numpy as np
 import anndata
 import ABCParse
 
+# --
+# import scvelo as scv
+import pip
+
+def import_or_install(package: str):
+    try:
+        __import__(package)
+    except ImportError:
+        pip.main(['install', package])  
+        __import__(package)
+# --
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
@@ -331,6 +342,10 @@ def velocity_stream(
     1.  Increased flexibility with passed parameters is a TODO, will
         be mostly through **kwargs.
     """
+    
+    
+    import_or_install("scvelo")
+    
     velo_stream_plot = VelocityStreamPlot(
         state_key=state_key,
         drift_layer_key=drift_layer_key,
