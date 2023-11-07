@@ -7,13 +7,15 @@ import numpy as np
 import pathlib
 import ABCParse
 import os
-
-# import scdiffeq_plots as sdq_pl
+# import cellplots
 
 from ..core import utils
 
 
 class FillBetweenPlot:
+    
+    """KNOWN BUG: CELLPLOTS REQUIRED / NOT YET RELEASED"""
+    
     def __init__(self, *args, **kwargs):
 
         ...
@@ -44,7 +46,8 @@ class FillBetweenPlot:
 
     def _configure_plot(self, ax):
         if ax is None:
-            self.fig, axes = sdq_pl.plot(1, 1, xy_spines=True)
+            # KNOWN BUG
+            self.fig, axes = cellplots.plot(1, 1, delete = [["top", "right"]])
             ax = axes[0]
         return ax
 
