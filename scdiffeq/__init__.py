@@ -8,7 +8,7 @@ __email__ = ", ".join(["vinyard@g.harvard.edu"])
 import os as _os
 
 
-from ._version in import _PackageVersion
+from ._version import _PackageVersion
 
 _package_version = _PackageVersion()
 __version__ = __VERSION__ = __Version__ = _package_version()
