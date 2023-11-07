@@ -14,7 +14,7 @@ with open('requirements.txt') as f:
 # -- run setup: ---------------------------------------------------------------
 setuptools.setup(
     name="scdiffeq",
-    version="0.0.48rc3",
+    version="0.0.48rc4",
     python_requires=">3.9.0",
     author="Michael E. Vinyard",
     author_email="mvinyard.ai@gmail.com",
