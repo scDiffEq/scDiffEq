@@ -8,7 +8,7 @@ import torch
 from . import base, mix_ins
 
 
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -19,10 +19,10 @@ class LightningSDE(
 ):
     def __init__(
         self,
-        latent_dim,
-        name: str = "scdiffeq_model.SDE",
-        mu_hidden: Union[List[int], int] = [400, 400, 400],
-        sigma_hidden: Union[List[int], int] = [400, 400, 400],
+        latent_dim: int = 50,
+        name: Optional[str] = None,
+        mu_hidden: Union[List[int], int] = [2000, 2000],
+        sigma_hidden: Union[List[int], int] = [800, 800],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         sigma_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.1,
@@ -50,6 +50,8 @@ class LightningSDE(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         

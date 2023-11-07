@@ -9,7 +9,7 @@ from . import base, mix_ins
 
 
 # -- set typing: ---------------------------------------------------------------
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -21,8 +21,8 @@ class LightningODE_FixedPotential(
 ):
     def __init__(
         self,
-        latent_dim,
-        name: str = "scdiffeq_model.ODE.fixed_potential",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         dt=0.1,
         mu_hidden: Union[List[int], int] = [400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
@@ -58,6 +58,8 @@ class LightningODE_FixedPotential(
         ---------
         """
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
 

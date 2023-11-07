@@ -13,72 +13,131 @@ import ABCParse
 from .. import utils
 from ... import tools
 
+from ._configure_time_key import TimeKeyConfiguration
+
 
 # -- set typing: -------------------------------------------------------------------------
 from typing import Optional, Dict
 
+## --- OVERVIEW --- ##
+# TimeKey
+# TimeConfiguration
+# configure_time
+# LightningData
+# DataConfiguration
+## ---------------- ##
 
-class TimeKey:
-    def __init__(
-        self,
-        auto_detected_time_cols=[
-            "t",
-            "Time point",
-            "time",
-            "time_pt",
-            "t_info",
-            "time_info",
-        ],
-    ):
-        self._auto_detected_time_cols = auto_detected_time_cols
+# class TimeZeroIdx(ABCParse.ABCParse):
+#     def __init__(self, *args, **kwargs):
+#         self.__parse__(locals())
 
-    @property
-    def _OBS_COLS(self):
-        return self._adata.obs.columns
+#     @property
+#     def _TIME_KEY_CONFIG(self):
+#         if not hasattr(self, "_time_key_config"):
+#             self._time_key_config = (
+#                 sdq.core.configs._configure_time_key.TimeKeyConfiguration()
+#             )
+#         return self._time_key_config
 
-    @property
-    def _PASSED(self) -> bool:
-        return not (self._time_key is None)
+#     @property
+#     def _TIME_KEY(self):
+#         return self._TIME_KEY_CONFIG(self._adata, time_key=self._time_key)
 
-    @property
-    def _PASSED_VALID(self) -> bool:
-        return self._time_key in self._OBS_COLS
+#     @property
+#     def _TIME(self):
+#         return self._adata.obs[self._TIME_KEY]
 
-    @property
-    def _DETECTED(self) -> bool:
-        return self._OBS_COLS[
-            [col in self._auto_detected_time_cols for col in self._OBS_COLS]
-        ].tolist()
+#     @property
+#     def _T_MIN(self):
+#         return self._TIME.min()
 
-    @property
-    def _DETECTED_VALID(self) -> bool:
-        return len(self._DETECTED) == 1
+#     @property
+#     def _HAS_TIME_KEY(self):
+#         return self._TIME_KEY_CONFIG._VALID
 
-    @property
-    def _VALID(self):
-        return any([self._PASSED_VALID, self._DETECTED_VALID])
+#     def _from_time_key(self):
+#         return self._adata.obs[self._TIME == self._T_MIN].index
 
-    def __call__(self, adata: anndata.AnnData, time_key: Optional[str] = None) -> str:
+#     @property
+#     def _T0_IDX_PASSED(self):
+#         return hasattr(self, "_t0_idx")
+
+#     def __call__(self, t0_idx, *args, **kwargs):
+#         self.__update__(locals())
+
+#         if self._T0_IDX_PASSED:
+#             return self._t0_idx
+
+#         if self._HAS_TIME_KEY:
+#             return self._from_time_key()
         
-        self._time_key = time_key
-        self._adata = adata
+#         if (not self._time_cluster_key is None) and (not self._t0_cluster is None):
+            
+#             return self.adata.obs[
+#                 self.adata.obs[self._time_cluster_key] == self._t0_cluster
+#             ].index
 
-        if self._PASSED:
-            if self._PASSED_VALID:
-                return self._time_key
-            else:
-                raise KeyError(
-                    f"Passed `time_key`: {self._time_key} not found in adata.obs"
-                )
+# class TimeKey:
+#     def __init__(
+#         self,
+#         auto_detected_time_cols=[
+#             "t",
+#             "Time point",
+#             "time",
+#             "time_pt",
+#             "t_info",
+#             "time_info",
+#         ],
+#     ):
+#         self._auto_detected_time_cols = auto_detected_time_cols
 
-        elif self._DETECTED:
-            if self._DETECTED_VALID:
-                return self._DETECTED[0]
-            else:
-                print(
-                    f"More than one possible time column inferred: {found}\nPlease specify the desired time column in adata.obs."
-                )
-        return "t"
+#     @property
+#     def _OBS_COLS(self):
+#         return self._adata.obs.columns
+
+#     @property
+#     def _PASSED(self) -> bool:
+#         return not (self._time_key is None)
+
+#     @property
+#     def _PASSED_VALID(self) -> bool:
+#         return self._time_key in self._OBS_COLS
+
+#     @property
+#     def _DETECTED(self) -> bool:
+#         return self._OBS_COLS[
+#             [col in self._auto_detected_time_cols for col in self._OBS_COLS]
+#         ].tolist()
+
+#     @property
+#     def _DETECTED_VALID(self) -> bool:
+#         return len(self._DETECTED) == 1
+
+#     @property
+#     def _VALID(self):
+#         return any([self._PASSED_VALID, self._DETECTED_VALID])
+
+#     def __call__(self, adata: anndata.AnnData, time_key: Optional[str] = None) -> str:
+        
+#         self._time_key = time_key
+#         self._adata = adata
+
+#         if self._PASSED:
+#             if self._PASSED_VALID:
+#                 return self._time_key
+#             else:
+#                 raise KeyError(
+#                     f"Passed `time_key`: {self._time_key} not found in adata.obs"
+#                 )
+
+#         elif self._DETECTED:
+#             if self._DETECTED_VALID:
+#                 return self._DETECTED[0]
+#             else:
+#                 print(
+#                     f"More than one possible time column inferred: {found}\nPlease specify the desired time column in adata.obs."
+#                 )
+#         return "t"
 
 class TimeConfiguration(ABCParse.ABCParse):
     def __init__(
@@ -95,10 +154,8 @@ class TimeConfiguration(ABCParse.ABCParse):
         super().__init__()
         self.__parse__(kwargs=locals(), public=["adata"])
         
-        self._time_key_config = TimeKey()
+        self._time_key_config = TimeKeyConfiguration()
         self._time_key = self._time_key_config(adata = self.adata, time_key = self._time_key)
-#         print(self._time_key_config._PASSED_VALID, self._time_key_config._DETECTED_VALID)
-#         print(self._time_key)
 
     @property
     def t0_idx(self):
@@ -348,15 +405,8 @@ class DataConfiguration(ABCParse.ABCParse):
         scDiffEq.adata = self.adata
         scDiffEq._data_dim = self._scDiffEq_kwargs["data_dim"]
 
-    def __call__(
-        self,
-        adata: anndata.AnnData,
-        scDiffEq,
-        scDiffEq_kwargs: Dict,
-        *args,
-        **kwargs,
-    ) -> None:
-        
+    def __call__(self, scDiffEq, *args, **kwargs) -> None:
+
         """
         Data configuration occurs in four steps:
         (1) input adata is configured
@@ -366,16 +416,18 @@ class DataConfiguration(ABCParse.ABCParse):
         
         Parameters
         ----------
-        adata: anndata.AnnData
-        
         scDiffEq
-        
-        scDiffEq_kwargs: Dict
+            Derived from this are:
+                adata: anndata.AnnData
+                scDiffEq_kwargs: Dict
         
         Returns
         -------
         None, updates scDiffEq model.
         """
+        
+        adata = scDiffEq.adata
+        scDiffEq_kwargs = scDiffEq._PARAMS
         
         self.__update__(locals(), ignore=["adata", "scDiffEq"], public=[None])
 
@@ -385,3 +437,72 @@ class DataConfiguration(ABCParse.ABCParse):
         self._configure_time()
         self._configure_lightning_data()
         self._update_scDiffEq(scDiffEq)
+
+
+# # -- import packages: -----------------------------------
+# from torch_adata import LightningAnnDataModule
+# import ABCParse
+# import os
+
+
+# class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
+#     def __init__(
+#         self,
+#         adata=None,
+#         h5ad_path=None,
+#         batch_size: int = 2000,
+#         num_workers=os.cpu_count(),
+#         train_val_split=[0.8, 0.2],
+#         use_key: str = "X_pca",
+#         obs_keys=[],
+#         weight_key='W',
+#         groupby="Time point",  # TODO: make optional
+#         train_key="train",
+#         val_key="val",
+#         test_key="test",
+#         predict_key="predict",
+#         silent=True,
+#         shuffle_time_labels = False,
+#         **kwargs,
+#     ):
+#         super(LightningData, self).__init__()
+        
+                    
+#         self.__parse__(locals())
+#         self._format_sinkhorn_weight_key()
+#         self._format_train_test_exposed_data()
+#         self.configure_train_val_split()
+        
+
+#     @property
+#     def n_dim(self):
+#         if not hasattr(self, "_n_dim"):
+#             self._n_dim = self.train_dataset.X.shape[-1]
+#         return self._n_dim
+    
+# #     def shuffle_t(self):
+        
+# #         df = self._adata.obs.copy()
+# #         non_t0 = df.loc[df['t'] != 0]['t']
+        
+# #         shuffled_t = np.zeros(len(df))
+# #         shuffled_t[non_t0.index.astype(int)] = np.random.choice(non_t0.values, len(non_t0))
+# #         self._adata.obs["t"] = shuffled_t
+    
+#     def _format_sinkhorn_weight_key(self):
+#         if not self._weight_key in self._adata.obs.columns:
+#             self._adata.obs[self._weight_key] = 1
+#         self._obs_keys.append(self._weight_key)
+    
+#     def _format_train_test_exposed_data(self):
+        
+#         if not self._train_key in self._adata.obs.columns:
+#             self._adata.obs[self._train_key] = True
+#         if not self._test_key in self._adata.obs.columns:
+#             self._adata.obs[self._test_key] = False
+            
+#     def prepare_data(self):
+#         ...
+
+#     def setup(self, stage=None):
+#         ...

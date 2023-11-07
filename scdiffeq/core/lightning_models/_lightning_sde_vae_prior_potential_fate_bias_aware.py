@@ -12,7 +12,7 @@ from .. import utils
 
 from ... import __version__
 
-from typing import Union, List
+from typing import Optional, Union, List
 
 
 # -- lightning model: ----------------------------------------------------------
@@ -27,8 +27,8 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
     def __init__(
         self,
         data_dim,
-        latent_dim,
-        name: str = "scdiffeq_model.SDE_VAE.prior_potential.fate_bias_aware",
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,
@@ -87,6 +87,8 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
         
         self.save_hyperparameters()
         
