@@ -8,7 +8,7 @@ Flexible fetch of optimizer, LR_scheduler, other functions.
 import torch
 
 # -- import local dependencies: ------------------------------------------------
-from ._autoparse_base_class import AutoParseBase
+import ABCParse
 
 
 # -- define types: -------------------------------------------------------------
@@ -16,7 +16,7 @@ from typing import Union, Any
 NoneType = type(None)
 
 
-class FunctionFetch(AutoParseBase):
+class FunctionFetch(ABCParse.ABCParse):
     """Fetch a function from a flexible input."""
     def __init__(self, module=None, parent=None):
         self.__parse__(locals())

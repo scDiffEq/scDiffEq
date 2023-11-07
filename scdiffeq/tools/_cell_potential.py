@@ -5,21 +5,21 @@ import numpy as np
 import lightning
 import anndata
 import torch
-
+import adata_query
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
 from ._knn_smoothing import kNNSmoothing
-from ._fetch import fetch
+# from ._fetch import fetch
 from ._knn import kNN
-
+import ABCParse
 
 # -- set typing: ---------------------------------------------------------------
 from typing import Union
 
 
 # -- operator classes: ---------------------------------------------------------
-class CellPotentialNormalization(utils.ABCParse):
+class CellPotentialNormalization(ABCParse.ABCParse):
 
     """
     Procedure occurs in 5 steps:
@@ -145,14 +145,15 @@ class CellPotentialNormalization(utils.ABCParse):
         self.adata.obs.drop("_CLIPPED_PSI", axis=1, inplace=True)
 
     def __call__(self, adata, key_added="psi"):
-        self.__update__(locals())
+        
+        self.__update__(locals(), public = ['adata'])
         
 
         adata.obs[key_added] = self._SCALED_PSI
         self._clean_up_adata()
 
 
-class CellPotential(utils.ABCParse):
+class CellPotential(ABCParse.ABCParse):
     """Calculate [raw] potential values, given cells and a model."""
 
     def __init__(
@@ -160,6 +161,7 @@ class CellPotential(utils.ABCParse):
         use_key: str = "X_pca",
         device: Union[str, torch.device] = torch.device("cuda:0"),
         seed: int = 0,
+        gpu = True,
     ):
         self.__parse__(locals(), public=[None])
         lightning.seed_everything(0)
@@ -168,8 +170,8 @@ class CellPotential(utils.ABCParse):
     @property
     def Z_input(self):
         if not hasattr(self, "_Z_input"):
-            self._Z_input = fetch(
-                adata=self.adata, use_key=self._use_key, device=self._device
+            self._Z_input = adata_query.fetch(
+                adata=self.adata, key=self._use_key, torch = self._gpu, device=self._device
             )
         return self._Z_input
 
@@ -181,7 +183,7 @@ class CellPotential(utils.ABCParse):
         self, adata: anndata.AnnData, model, key_added: str = "_psi"
     ):
 
-        self.__update__(locals())
+        self.__update__(locals(), public = ['adata'])
         self.Z_psi = self.forward(model)
         adata.obs[key_added] = self.Z_psi
 
@@ -220,12 +222,13 @@ def cell_potential(
     return_raw_array: bool = False,
     q: float = 0.05,
     knn_smoothing_iters: int = 5,
-    use_tqdm: bool = True
+    use_tqdm: bool = True,
+    gpu: bool = True,
 ):
     """
     
     """
-    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed)
+    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed, gpu = gpu)
     cell_potential(adata=adata, model=model, key_added=raw_key_added)
     
     if normalize:

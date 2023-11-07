@@ -6,6 +6,7 @@ import abc
 import scvelo as scv
 import numpy as np
 import anndata
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -18,7 +19,7 @@ NoneType = type(None)
 
 
 # -- Helper classes: -----------------------------------------------------------
-class AnnDataAttributeInspector(utils.ABCParse):
+class AnnDataAttributeInspector(ABCParse.ABCParse):
     def __init__(self):
         ...
 
@@ -96,7 +97,7 @@ class VelocityGraphInspector(AnnDataAttributeInspector):
         self.__update__(locals())
         return self._VELO_GRAPH_COMPUTED
     
-class VelocityAnnDataFormatter(utils.ABCParse):
+class VelocityAnnDataFormatter(ABCParse.ABCParse):
     """Reformatted, minimal adata for velo plots"""
 
     def __init__(
@@ -170,7 +171,7 @@ class VelocityAnnDataFormatter(utils.ABCParse):
 
 
 # -- Main operational class: ---------------------------------------------------
-class VelocityStreamPlot(utils.ABCParse):
+class VelocityStreamPlot(ABCParse.ABCParse):
     _GRAPH_COMPUTED = []
 
     def __init__(

@@ -5,7 +5,7 @@ import numpy as np
 import sklearn
 import anndata
 import umap
-
+import ABCParse
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
@@ -18,7 +18,7 @@ NoneType = type(None)
 
 
 # -- Operator class: -----------------------------------------------------------
-class Perturbation(utils.ABCParse):
+class Perturbation(ABCParse.ABCParse):
     """
     Alter the relative expression of one or more genes in one
     or more cells.

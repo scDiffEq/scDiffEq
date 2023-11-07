@@ -1,15 +1,17 @@
 
 
 # -- import packages: ----------------------------------------------------------
+import adata_query
 import sklearn
 import pickle
 import umap
 import os
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
 from ..core import utils
-from ._x_use import fetch_formatted_data
+# from ._x_use import fetch_formatted_data
 
 
 # -- type setting: -------------------------------------------------------------
@@ -17,7 +19,7 @@ NoneType = type(None)
 
 
 # -- controller class: ---------------------------------------------------------
-class DimensionReduction(utils.ABCParse):
+class DimensionReduction(ABCParse.ABCParse):
     _SCALER_FIT, _PCA_FIT, _UMAP_FIT = [False] * 3
 
     def __init__(
@@ -65,7 +67,7 @@ class DimensionReduction(utils.ABCParse):
         PARAMS.update(self._PARAMS[kwarg_subset_key])
         if not isinstance(specific_kwarg, NoneType):
             PARAMS.update(specific_kwarg)
-        return utils.function_kwargs(func=func, kwargs=PARAMS)
+        return ABCParse.function_kwargs(func=func, kwargs=PARAMS)
 
     @property
     def _SCALER_MODULE(self):
@@ -124,9 +126,9 @@ class DimensionReduction(utils.ABCParse):
     @property
     def X_train(self):
         if not hasattr(self, "_X_train"):
-            self._X_train = fetch_formatted_data(
+            self._X_train = adata_query.fetch(
                 adata=self._adata[self.train_idx],
-                use_key=self._use_key,
+                key=self._use_key,
                 torch=False,
             )
 
@@ -135,9 +137,9 @@ class DimensionReduction(utils.ABCParse):
     @property
     def X(self):
         if not hasattr(self, "_X"):
-            self._X = fetch_formatted_data(
+            self._X = adata_query.fetch(
                 adata=self._adata,
-                use_key=self._use_key,
+                key=self._use_key,
                 torch=False,
             )
 

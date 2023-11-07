@@ -6,7 +6,7 @@ from neural_diffeqs import PotentialSDE
 import torch_nets
 import torch
 
-from typing import Union, List
+from typing import Optional, Union, List
 
 from ... import __version__
 
@@ -19,7 +19,8 @@ class LightningSDE_VAE_FixedPotential(
     def __init__(
         self,
         data_dim,
-        latent_dim,
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [400, 400],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.2,
@@ -37,6 +38,7 @@ class LightningSDE_VAE_FixedPotential(
         brownian_dim=1,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
+        backend = "auto",
         
         train_lr=1e-5,
         train_optimizer=torch.optim.RMSprop,
@@ -73,12 +75,14 @@ class LightningSDE_VAE_FixedPotential(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func = PotentialSDE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def pretrain_step(self, batch, batch_idx, stage=None):
 

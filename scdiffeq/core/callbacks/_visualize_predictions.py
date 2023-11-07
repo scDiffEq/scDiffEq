@@ -16,11 +16,11 @@ from .. import utils
 
 from typing import Dict
 NoneType = type(None)
+import ABCParse
 
 
 
-
-class VisualizePredictions(lightning.Callback, utils.ABCParse):
+class VisualizePredictions(lightning.Callback, ABCParse.ABCParse):
     def __init__(
         self,
         reducer,

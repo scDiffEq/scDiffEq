@@ -2,10 +2,10 @@ from collections import OrderedDict
 import torch_nets
 import torch
 
-from ._abc_parse import ABCParse
+import ABCParse
 
 # -- lower-level class: -------
-class ComponentStateLoader(ABCParse):
+class ComponentStateLoader(ABCParse.ABCParse):
     """
     A lower level class, meant to interact with specific model components.
     Used by FlexibleComponentLoader.
@@ -60,7 +60,7 @@ class ComponentStateLoader(ABCParse):
 
 
 # ---- API-facing class: ---------------------------------------------
-class FlexibleComponentLoader(ABCParse):
+class FlexibleComponentLoader(ABCParse.ABCParse):
     """
     Load individual component state dicts. for example just VAE or just DiffEq. Or all of it.
     """

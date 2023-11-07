@@ -2,10 +2,13 @@
 # -- import packages: ----------------------------------------------------------
 import torch
 import anndata
+import autodevice
+import adata_query
 import numpy as np
 import pandas as pd
 import time
 import os
+import ABCParse
 
 
 # -- import local dependencies: ------------------------------------------------
@@ -15,7 +18,6 @@ from ._final_state_per_simulation import FinalStatePerSimulation
 from ._cell_potential import normalize_cell_potential
 from ._norm import L2Norm
 from ._knn import kNN
-from ._fetch import fetch
 
 
 # -- set typing: ---------------------------------------------------------------
@@ -23,7 +25,7 @@ from typing import Union, List, Optional
 NoneType = type(None)
 
 
-class Simulator(utils.ABCParse):
+class Simulator(ABCParse.ABCParse):
     """Base class for the simulator containing the core functions."""
     def __init__(
         self,
@@ -54,6 +56,7 @@ class Simulator(utils.ABCParse):
         return_adata: bool = True,
         name: Union[str, NoneType] = None,
         save_h5ad: bool = False,
+        gpu: bool = True,
         wd = ".",
         *args,
         **kwargs,
@@ -126,10 +129,13 @@ class Simulator(utils.ABCParse):
 
     @property
     def Z0(self):
-        return fetch(
-            self._adata_input[self.idx], use_key=self._use_key, device=self._device
+        return adata_query.fetch(
+            adata = self._adata_input[self.idx],
+            key=self._use_key,
+            torch = self._gpu,
+            device=self._device,
         ).expand(self._N, -1)
-
+    
     @property
     def _LATENT_DIMS(self):
         return self.Z0.shape[-1]
@@ -160,7 +166,8 @@ class Simulator(utils.ABCParse):
         self.adata.uns[self._gene_ids_key] = self._adata_input.var[self._gene_ids_key].values
 
     def forward(self):
-        self._INFO("Simulating")
+        n_nonzero_steps = int(self._N_STEPS - 1)
+        self._INFO(f"Simulating {self._N} trajectories over {n_nonzero_steps} steps.")
         self.Z_hat = self.DiffEq(Z0=self.Z0, t=self.t).detach().cpu()
         self.Z_input = self.Z_hat.flatten(0, 1).to(self._device)
         self._compose_core_adata()
@@ -383,7 +390,7 @@ def simulate(
     t_max: Optional[float] = None,
     dt: float = 0.1,
     N: int = 2000,
-    device: Union[torch.device, str] = "cuda:0",
+    device: Union[torch.device, str] = autodevice.AutoDevice(),
     time_key: str = "Time point",
     ref_cell_type_key="Cell type annotation",
     time_key_added: str = "t",
@@ -396,6 +403,7 @@ def simulate(
     UMAP=None,
     wd=".",
     return_simulator=False,
+    gpu: bool = True,
     *args,
     **kwargs
 ) -> anndata.AnnData:

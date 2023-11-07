@@ -6,7 +6,7 @@ from . import base, mix_ins
 
 from .. import utils
 
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -17,7 +17,8 @@ class LightningODE_PriorPotential(
     def __init__(
         self,
         # -- general params: ---------------------------------------------------
-        latent_dim,
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         train_lr=1e-5,
         train_optimizer=torch.optim.RMSprop,
         train_scheduler=torch.optim.lr_scheduler.StepLR,
@@ -35,6 +36,7 @@ class LightningODE_PriorPotential(
         mu_n_augment: int = 0,
         sde_type='ito',
         noise_type='general',
+        backend = "auto",
         brownian_dim=1,
         
         version = __version__,
@@ -43,13 +45,15 @@ class LightningODE_PriorPotential(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()        
         self.func = LatentPotentialODE(
             state_size=latent_dim,
             **utils.extract_func_kwargs(func=LatentPotentialODE, kwargs=locals()),
         )
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
         
     def forward(self, X0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""

@@ -1,12 +1,12 @@
 
 
 from ..core import utils
-
+import ABCParse
 import numpy as np
 import pandas as pd
 
 
-class NegativeCrossEntropy(utils.ABCParse):
+class NegativeCrossEntropy(ABCParse.ABCParse):
     def __init__(self, epsilon=1e-7):
 
         self.__parse__(locals(), public=[None])

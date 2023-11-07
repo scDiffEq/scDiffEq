@@ -3,10 +3,10 @@ import glob, os
 import pandas as pd
 
 from .. import utils
-
+import ABCParse
 
 # -- Base Class: ------
-class Logs(utils.ABCParse):
+class Logs(ABCParse.ABCParse):
     def __init__(self, path, stage, version=0):
         self.__parse__(locals(), public=[None])
 

@@ -10,7 +10,7 @@ from . import mix_ins
 from . import base
 
 
-from typing import Union, List
+from typing import Optional, Union, List
 from ... import __version__
 
 
@@ -23,8 +23,9 @@ class LightningODE_VAE(
 ):
     def __init__(
         self,
-        data_dim,
-        latent_dim,
+        data_dim: int,
+        latent_dim: int = 50,
+        name: Optional[str] = None,
         train_lr=1e-5,
         pretrain_lr=1e-3,
         pretrain_epochs=100,
@@ -36,6 +37,7 @@ class LightningODE_VAE(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
+        backend = "auto",
 
         # -- ode params: -------------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
@@ -67,12 +69,14 @@ class LightningODE_VAE(
         **kwargs,
     ):
         super().__init__()
+        
+        name = self._configure_name(name)
 
         self.save_hyperparameters()
         
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func = NeuralODE, kwargs=locals())
-        self._configure_optimizers_schedulers()
+        self._configure_lightning_model(kwargs = locals())
 
     def __repr__(self):
         return "LightningODE-VAE"

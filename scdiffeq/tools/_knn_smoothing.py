@@ -1,14 +1,14 @@
 
 import tqdm
-
+import ABCParse
 from ..core import utils
 from ._knn import kNN
-from ._x_use import fetch_formatted_data
+import adata_query
 
 NoneType = type(None)
 
 
-class kNNSmoothing(utils.ABCParse):
+class kNNSmoothing(ABCParse.ABCParse):
     def __init__(
         self,
         adata,
@@ -35,8 +35,8 @@ class kNNSmoothing(utils.ABCParse):
     @property
     def X_use(self):
         if not hasattr(self, "_X_use"):
-            self._X_use = fetch_formatted_data(
-                self._adata, use_key=self._use_key, torch=False,
+            self._X_use = adata_query.fetch(
+                self._adata, key=self._use_key, torch=False,
             )
         return self._X_use
 

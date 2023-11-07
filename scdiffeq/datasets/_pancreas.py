@@ -1,15 +1,19 @@
 
 
+# -- import packages: ----------------------------------------------------------
+import pathlib
 import os
 from scanpy import read
-from pathlib import Path
+import anndata
+import ABCParse
+
+
+# -- set typing: ---------------------------------------------------------------
 from typing import Union
 
 
-from ..core import utils
-
-
-class PancreaticEndocrinogenesisDataset(utils.ABCParse):
+# -- Controller class: ---------------------------------------------------------
+class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
     """
     Pancreatic endocrinogenesis:
 
@@ -26,8 +30,8 @@ class PancreaticEndocrinogenesisDataset(utils.ABCParse):
     _URL_DATADIR = "https://github.com/theislab/scvelo_notebooks/raw/master/"
 
     def __init__(
-        self, fpath: Union[str, Path] = "data/Pancreas/endocrinogenesis_day15.h5ad"
-    ):
+        self, fpath: Union[str, pathlib.Path] = "data/Pancreas/endocrinogenesis_day15.h5ad"
+    ) -> None:
         """
         Parameters:
         -----------
@@ -37,7 +41,6 @@ class PancreaticEndocrinogenesisDataset(utils.ABCParse):
         Returns:
         --------
         None
-            type: NoneType
         """
 
         self.__parse__(locals(), public=[None])
@@ -48,30 +51,53 @@ class PancreaticEndocrinogenesisDataset(utils.ABCParse):
 
     @property
     def _PATH_EXISTS(self):
-        return os.path.exists(self._fpath)
+        return os.path.exists(self._fpath) 
 
     @property
     def _WRITE(self):
-        return not self._PATH_EXISTS
+        return (not self._PATH_EXISTS) and (self._write_h5ad)
 
-    def __call__(self):
+    def __call__(self, write_h5ad: bool = True) -> anndata.AnnData:
         """
-        Returns:
-        --------
-        adata
-            type: anndata.AnnData
+        Parameters
+        ----------
+        write_h5ad: bool, default = True
+        
+        Returns
+        -------
+        adata: anndata.AnnData
         """
-
-        WRITE = self._WRITE
+        
+        self.__update__(locals(), private = [None])
 
         adata = read(self._fpath, backup_url=self.url, sparse=True, cache=True)
         adata.var_names_make_unique()
-        if WRITE:
-            adata.write_h5ad(data._fpath)
+        if self._WRITE:
+            adata.write_h5ad(self._fpath)
 
         return adata
 
+# -- API-facing function: ------------------------------------------------------
+def pancreas(
+    fpath: Union[pathlib.Path, str] = "data/Pancreas/endocrinogenesis_day15.h5ad",
+    write_h5ad: bool = True,
+    *args,
+    **kwargs,
+) -> anndata.AnnData:
 
-def pancreas(fpath: Union[str, Path] = "data/Pancreas/endocrinogenesis_day15.h5ad"):
-    data = PancreaticEndocrinogenesisDataset(fpath=fpath)
-    return data()
+    """
+    Parameters
+    ----------
+    fpath: Union[pathlib.Path, str], default = "data/Pancreas/endocrinogenesis_day15.h5ad"
+            Path where to save dataset and/or subsequently read it from.
+            
+    write_h5ad: bool, default = True
+        If True and the path does not exists, the file will be written to disk.
+
+    Returns
+    -------
+    adata: anndata.AnnData
+    """
+
+    data = PancreaticEndocrinogenesisDataset(fpath = fpath)
+    return data(write_h5ad = write_h5ad)
