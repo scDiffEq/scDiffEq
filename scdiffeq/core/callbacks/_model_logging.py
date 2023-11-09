@@ -10,17 +10,18 @@ class ModelLogging(lightning.Callback):
             
     def on_train_epoch_end(self, trainer, pl_module):
         
-        epoch_train_loss = torch.hstack(self._EPOCH_TRAIN_LOSS).mean()
+        epoch_train_loss = torch.hstack(self._EPOCH_TRAIN_LOSS).mean().to(torch.float32)
+        
         pl_module.log("epoch_train_loss", epoch_train_loss)
         
     def on_validation_epoch_end(self, trainer, pl_module):
         
-        epoch_validation_loss = torch.hstack(self._EPOCH_VALIDATION_LOSS).mean()
+        epoch_validation_loss = torch.hstack(self._EPOCH_VALIDATION_LOSS).mean().to(torch.float32)
         pl_module.log("epoch_validation_loss", epoch_validation_loss)
         
     def log_total_epochs(self, pl_module):
         """Train model N times --> N"""
-        pl_module.log("total_epochs", pl_module.COMPLETED_EPOCHS)
+        pl_module.log("total_epochs", torch.Tensor([pl_module.COMPLETED_EPOCHS]).to(torch.float32))
 
     def log_lr(self, pl_module):
 
