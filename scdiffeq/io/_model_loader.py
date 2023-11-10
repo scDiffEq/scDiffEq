@@ -189,11 +189,12 @@ class ModelLoader(ABCParse.ABCParse):
         return self.hparams["name"].split(":")[0].replace("-", "_")
 
     @property
-    def model(self):
-        if not hasattr(self, "_model"):
-            LitModel = getattr(lightning_models, self._MODEL_TYPE)
-            self._model = LitModel(**self.hparams)
-        return self._model
+    def LightningModule(self):
+        return getattr(lightning_models, self._MODEL_TYPE)
+#         if not hasattr(self, "_model"):
+#             LitModel = getattr(lightning_models, self._MODEL_TYPE)
+#             self._model = LitModel(**self.hparams)
+#         return self._model
 
     @property
     def ckpt(self):
@@ -244,18 +245,19 @@ class ModelLoader(ABCParse.ABCParse):
         self.__update__(locals())
 
         self._validate_epoch()
-
-        model = self.model
-
-        if plot_state_change:
-            torch_nets.pl.weights_and_biases(model.state_dict())
-            
         ckpt_path = self.ckpt.path
-        self._INFO(f"Loading model from ckpt: \n\t'{ckpt_path}'")
-        model = model.load_from_checkpoint(ckpt_path)
+        model = self.LightningModule.load_from_checkpoint(ckpt_path)
+        # self.model
+
+#         if plot_state_change:
+#             torch_nets.pl.weights_and_biases(model.state_dict())
+            
+#         ckpt_path = self.ckpt.path
+#         self._INFO(f"Loading model from ckpt: \n\t'{ckpt_path}'")
+#         model = model.load_from_checkpoint(ckpt_path)
         
-        if plot_state_change:
-            torch_nets.pl.weights_and_biases(model.state_dict())
+#         if plot_state_change:
+#             torch_nets.pl.weights_and_biases(model.state_dict())
 
         return model
     
