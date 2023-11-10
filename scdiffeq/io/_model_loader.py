@@ -222,6 +222,9 @@ class ModelLoader(ABCParse.ABCParse):
         msg = f"{version_key} not found in project. Available versions: {available_versions}"
         assert version_key in self.project._VERSION_PATHS, msg
 
+    def from_ckpt(self, ckpt_path: str):
+        return self.LightningModule.load_from_checkpoint(ckpt_path)
+    
     def __call__(
         self,
         epoch: Optional[Union[str, int]] = None,
@@ -260,9 +263,22 @@ class ModelLoader(ABCParse.ABCParse):
 #             torch_nets.pl.weights_and_biases(model.state_dict())
 
         return model
+
+def _inputs_from_ckpt_path(ckpt_path):
+    """If you give the whole ckpt_path, you can derive the other inputs."""
+    
+    if isinstance(ckpt_path, str):
+        ckpt_path = pathlib.Path(ckpt_path)
+
+    project_path = ckpt_path.parent.parent.parent
+    version = int(ckpt_path.parent.parent.name.split("_")[1])
+#     epoch = int(ckpt_path.name.split("-")[0].split("=")[1])
+    
+    return {"project_path": project_path, "version": version} # , "epoch": epoch}
     
 def load_diffeq(
-    project_path: Union[pathlib.Path, str],
+    ckpt_path: Optional[Union[pathlib.Path, str]] = None,
+    project_path: Optional[Union[pathlib.Path, str]] = None,
     version: Optional[int] = None,
     epoch: Optional[Union[int, str]] = None,
 ) -> lightning.LightningModule:
@@ -282,18 +298,29 @@ def load_diffeq(
     -------
     DiffEq: lightning.LightningModule
     """
+    
+    if not ckpt_path is None:
+        inputs = _inputs_from_ckpt_path(ckpt_path)
+        project_path = inputs['project_path']
+        version = inputs['version']
+#         epoch = inputs['epoch']
 
     model_loader = ModelLoader(project_path=project_path, version=version)
+    
+    if not ckpt_path is None:
+        return model_loader.from_ckpt(ckpt_path)
     return model_loader(epoch=epoch)
 
 def load_model(
     adata: anndata.AnnData,
-    project_path: Union[pathlib.Path, str],
+    ckpt_path: Optional[Union[pathlib.Path, str]] = None,
+    project_path: Optional[Union[pathlib.Path, str]] = None,
     version: Optional[int] = None,
     epoch: Optional[Union[int, str]] = None,
 ):
 
     diffeq = load_diffeq(
+        ckpt_path=ckpt_path,
         project_path=project_path,
         version=version,
         epoch=epoch,
