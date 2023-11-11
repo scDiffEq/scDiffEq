@@ -326,6 +326,8 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
         self._format_sinkhorn_weight_key()
         self._format_train_test_exposed_data()
         self.configure_train_val_split()
+        
+        self.save_hyperparameters(ignore=["adata"])
 
     @property
     def n_dim(self):
