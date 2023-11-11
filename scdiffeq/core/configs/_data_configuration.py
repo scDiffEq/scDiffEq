@@ -327,15 +327,16 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
         self._format_train_test_exposed_data()
         self.configure_train_val_split()
         
+        self.save_hyperparameters(ignore=["adata"])
 
     @property
     def n_dim(self):
         if not hasattr(self, "_n_dim"):
             self._n_dim = self.train_dataset.X.shape[-1]
         return self._n_dim
-
     
     def _format_sinkhorn_weight_key(self):
+              
         if not self._weight_key in self._adata.obs.columns:
             self._adata.obs[self._weight_key] = 1
         self._obs_keys.append(self._weight_key)
