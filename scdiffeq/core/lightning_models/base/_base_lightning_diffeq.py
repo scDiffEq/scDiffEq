@@ -74,8 +74,6 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
     # -- sinkhorn loss: -------------------------------------------------------
     def compute_sinkhorn_divergence(self, X, X_hat, W, W_hat):
-        print(f"W_hat.shape: {W_hat.shape}")
-        print(f"W_hat: {W_hat}")
         return self.sinkhorn_divergence(
             W_hat.contiguous(), X_hat.contiguous(), W.contiguous(), X.contiguous(), 
         ).requires_grad_()

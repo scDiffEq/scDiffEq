@@ -84,17 +84,18 @@ class BatchProcessor(ABCParse.ABCParse):
 
     @property
     def W_hat(self) -> torch.Tensor:
-        if self.n_batch_items >= 3:
-            W = self._batch[2].transpose(1, 0)
-            
-            for i in range(1, len(self.t)):
-                W[i] = W[0] * torch.exp(self.t[i] - self.t[0])
-            W[0] = torch.ones_like(W[0])
-            return self._sum_normalize(W, sample_axis=1).contiguous()
-            
-        return self._sum_normalize(
-            torch.ones([len(self.t), self.batch_size, 1], device=self.device)
-        ).contiguous()
+        if not hasattr(self, "_W_hat"):
+            if self.n_batch_items >= 3:
+                W = self._batch[2].transpose(1, 0)
+                for i in range(1, len(self.t)):
+                    W[i] = W[0] * torch.exp(self.t[i] - self.t[0])
+                W[0] = torch.ones_like(W[0])
+                self._W_hat = self._sum_normalize(W, sample_axis=1).contiguous()
+            else:
+                self._W_hat = self._sum_normalize(
+                    torch.ones([len(self.t), self.batch_size, 1], device=self.device)
+                ).contiguous()
+        return self._W_hat
 
     @property
     def W(self) -> torch.Tensor:
