@@ -88,7 +88,7 @@ class BatchProcessor(ABCParse.ABCParse):
             if self.n_batch_items >= 3:
                 W = self._batch[2].transpose(1, 0)
                 for i in range(1, len(self.t)):
-                    W[i] = W[0] * torch.exp(self.t[i] - self.t[0])
+                    W[i] = torch.exp((self.t[i] - self.t[0]) * W[0])
                 W[0] = torch.ones_like(W[0])
                 self._W_hat = self._sum_normalize(W, sample_axis=1).contiguous()
             else:
