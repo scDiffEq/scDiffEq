@@ -5,13 +5,6 @@ from .. import lightning_models, utils
 
 
 NoneType = type(None)
-# figure out how to return model from file wihtout doing anyhhing else - fast, easy
-#     def load_from_ckpt(self):
-        
-#         return 
-#         self.DiffEq = 
-#         def load_model(self):
-#         diffeq = sdq.core.lightning_models.LightningSDE_FixedPotential.
 
 # -- import packages: ----------------------------------------------------------
 class LightningModelConfiguration(ABCParse.ABCParse):

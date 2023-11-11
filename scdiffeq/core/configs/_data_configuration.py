@@ -336,9 +336,15 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
 
     
     def _format_sinkhorn_weight_key(self):
+        
+        print(f"obs keys: {self._obs_keys}")
+        print(f"weight key: {self._weight_key}")
+              
         if not self._weight_key in self._adata.obs.columns:
             self._adata.obs[self._weight_key] = 1
         self._obs_keys.append(self._weight_key)
+              
+        print(f"obs keys: {self._obs_keys}")
     
     def _format_train_test_exposed_data(self):
         

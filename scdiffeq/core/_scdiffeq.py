@@ -80,7 +80,8 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         latent_dim: int = 50,
         name: Optional[str] = None,
         use_key: str = "X_pca",
-        obs_keys: List[str] = ["W"],
+        weight_key: str = 'W',
+        obs_keys: List[str] = [],
         seed: int = 0,
         backend: str = "auto",
         

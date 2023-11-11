@@ -89,9 +89,9 @@ class BatchProcessor(ABCParse.ABCParse):
             
             for i in range(1, len(self.t)):
                 W[i] = W[0] * torch.exp(self.t[i] - self.t[0])
-            W[0] = torch.ones_like(W[0])
-            
+
             return self._sum_normalize(W, sample_axis=1).contiguous()
+#             W[0] = torch.ones_like(W[0])
 
         return self._sum_normalize(
             torch.ones([len(self.t), self.batch_size, 1], device=self.device)
