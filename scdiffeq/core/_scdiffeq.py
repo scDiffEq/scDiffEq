@@ -84,6 +84,7 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         obs_keys: List[str] = [],
         seed: int = 0,
         backend: str = "auto",
+        gradient_clip_val: float = 0.5,
         
         # -- kNN keys: [optional]: ----------------------------------------------
         build_kNN: Optional[bool] = False,

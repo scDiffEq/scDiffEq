@@ -12,7 +12,6 @@ class BaseForwardMixIn(object):
 
         batch = self.process_batch(batch, batch_idx)
         X_hat = self.forward(batch.X0, batch.t)
-        
         self.sinkhorn_loss = self.compute_sinkhorn_divergence(
             X = batch.X, X_hat = X_hat, W = batch.W, W_hat = batch.W_hat
         )
