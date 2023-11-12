@@ -97,7 +97,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
             accelerator=self.accelerator,
             logger=self._logger, # loggers.CSVLogger(**self._CSVLogger_kwargs),
             callbacks=self.Callbacks,
-            gradient_clip_val = 0.75, #
+            gradient_clip_val = self._gradient_clip_val, # 0.50,
             **self._Trainer_kwargs,
         )
 
@@ -124,6 +124,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         logger,
         lr: float = None,
         model_name="scDiffEq_model",
+        gradient_clip_val: float = 0.5,
         working_dir=os.getcwd(),
         train_version=0,
         pretrain_version=0,
@@ -204,6 +205,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         ------
         """
         
+        self._gradient_clip_val = gradient_clip_val
         self._logger = logger
 
         self._retain_test_gradients = False
