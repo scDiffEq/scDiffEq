@@ -97,7 +97,6 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
             accelerator=self.accelerator,
             logger=self._logger, # loggers.CSVLogger(**self._CSVLogger_kwargs),
             callbacks=self.Callbacks,
-            gradient_clip_val = self._gradient_clip_val, # 0.50,
             **self._Trainer_kwargs,
         )
 
