@@ -19,125 +19,6 @@ from ._configure_time_key import TimeKeyConfiguration
 # -- set typing: -------------------------------------------------------------------------
 from typing import Optional, Dict
 
-## --- OVERVIEW --- ##
-# TimeKey
-# TimeConfiguration
-# configure_time
-# LightningData
-# DataConfiguration
-## ---------------- ##
-
-# class TimeZeroIdx(ABCParse.ABCParse):
-#     def __init__(self, *args, **kwargs):
-#         self.__parse__(locals())
-
-#     @property
-#     def _TIME_KEY_CONFIG(self):
-#         if not hasattr(self, "_time_key_config"):
-#             self._time_key_config = (
-#                 sdq.core.configs._configure_time_key.TimeKeyConfiguration()
-#             )
-#         return self._time_key_config
-
-#     @property
-#     def _TIME_KEY(self):
-#         return self._TIME_KEY_CONFIG(self._adata, time_key=self._time_key)
-
-#     @property
-#     def _TIME(self):
-#         return self._adata.obs[self._TIME_KEY]
-
-#     @property
-#     def _T_MIN(self):
-#         return self._TIME.min()
-
-#     @property
-#     def _HAS_TIME_KEY(self):
-#         return self._TIME_KEY_CONFIG._VALID
-
-#     def _from_time_key(self):
-#         return self._adata.obs[self._TIME == self._T_MIN].index
-
-#     @property
-#     def _T0_IDX_PASSED(self):
-#         return hasattr(self, "_t0_idx")
-
-#     def __call__(self, t0_idx, *args, **kwargs):
-#         self.__update__(locals())
-
-#         if self._T0_IDX_PASSED:
-#             return self._t0_idx
-
-#         if self._HAS_TIME_KEY:
-#             return self._from_time_key()
-        
-#         if (not self._time_cluster_key is None) and (not self._t0_cluster is None):
-            
-#             return self.adata.obs[
-#                 self.adata.obs[self._time_cluster_key] == self._t0_cluster
-#             ].index
-
-# class TimeKey:
-#     def __init__(
-#         self,
-#         auto_detected_time_cols=[
-#             "t",
-#             "Time point",
-#             "time",
-#             "time_pt",
-#             "t_info",
-#             "time_info",
-#         ],
-#     ):
-#         self._auto_detected_time_cols = auto_detected_time_cols
-
-#     @property
-#     def _OBS_COLS(self):
-#         return self._adata.obs.columns
-
-#     @property
-#     def _PASSED(self) -> bool:
-#         return not (self._time_key is None)
-
-#     @property
-#     def _PASSED_VALID(self) -> bool:
-#         return self._time_key in self._OBS_COLS
-
-#     @property
-#     def _DETECTED(self) -> bool:
-#         return self._OBS_COLS[
-#             [col in self._auto_detected_time_cols for col in self._OBS_COLS]
-#         ].tolist()
-
-#     @property
-#     def _DETECTED_VALID(self) -> bool:
-#         return len(self._DETECTED) == 1
-
-#     @property
-#     def _VALID(self):
-#         return any([self._PASSED_VALID, self._DETECTED_VALID])
-
-#     def __call__(self, adata: anndata.AnnData, time_key: Optional[str] = None) -> str:
-        
-#         self._time_key = time_key
-#         self._adata = adata
-
-#         if self._PASSED:
-#             if self._PASSED_VALID:
-#                 return self._time_key
-#             else:
-#                 raise KeyError(
-#                     f"Passed `time_key`: {self._time_key} not found in adata.obs"
-#                 )
-
-#         elif self._DETECTED:
-#             if self._DETECTED_VALID:
-#                 return self._DETECTED[0]
-#             else:
-#                 print(
-#                     f"More than one possible time column inferred: {found}\nPlease specify the desired time column in adata.obs."
-#                 )
-#         return "t"
 
 class TimeConfiguration(ABCParse.ABCParse):
     def __init__(
@@ -196,19 +77,10 @@ class TimeConfiguration(ABCParse.ABCParse):
     @property
     def has_time_key(self):
         return self._time_key_config._VALID
-        
-#         return (not isinstance(self._time_key, NoneType)) and (
-#             self._time_key in self.adata.obs_keys()
-#         )
 
     @property
     def time_key(self):
         return self._time_key
-
-#         time_key = time_key_id(adata, time_key=self._time_key)
-#         if self.has_time_key:
-#             return self._time_key
-#         return "t"
 
     @property
     def t_min(self):
@@ -507,3 +379,132 @@ class DataConfiguration(ABCParse.ABCParse):
 
 #     def setup(self, stage=None):
 #         ...
+
+## --- OVERVIEW --- ##
+# TimeKey
+# TimeConfiguration
+# configure_time
+# LightningData
+# DataConfiguration
+## ---------------- ##
+
+# class TimeZeroIdx(ABCParse.ABCParse):
+#     def __init__(self, *args, **kwargs):
+#         self.__parse__(locals())
+
+#     @property
+#     def _TIME_KEY_CONFIG(self):
+#         if not hasattr(self, "_time_key_config"):
+#             self._time_key_config = (
+#                 sdq.core.configs._configure_time_key.TimeKeyConfiguration()
+#             )
+#         return self._time_key_config
+
+#     @property
+#     def _TIME_KEY(self):
+#         return self._TIME_KEY_CONFIG(self._adata, time_key=self._time_key)
+
+#     @property
+#     def _TIME(self):
+#         return self._adata.obs[self._TIME_KEY]
+
+#     @property
+#     def _T_MIN(self):
+#         return self._TIME.min()
+
+#     @property
+#     def _HAS_TIME_KEY(self):
+#         return self._TIME_KEY_CONFIG._VALID
+
+#     def _from_time_key(self):
+#         return self._adata.obs[self._TIME == self._T_MIN].index
+
+#     @property
+#     def _T0_IDX_PASSED(self):
+#         return hasattr(self, "_t0_idx")
+
+#     def __call__(self, t0_idx, *args, **kwargs):
+#         self.__update__(locals())
+
+#         if self._T0_IDX_PASSED:
+#             return self._t0_idx
+
+#         if self._HAS_TIME_KEY:
+#             return self._from_time_key()
+        
+#         if (not self._time_cluster_key is None) and (not self._t0_cluster is None):
+            
+#             return self.adata.obs[
+#                 self.adata.obs[self._time_cluster_key] == self._t0_cluster
+#             ].index
+
+# class TimeKey:
+#     def __init__(
+#         self,
+#         auto_detected_time_cols=[
+#             "t",
+#             "Time point",
+#             "time",
+#             "time_pt",
+#             "t_info",
+#             "time_info",
+#         ],
+#     ):
+#         self._auto_detected_time_cols = auto_detected_time_cols
+
+#     @property
+#     def _OBS_COLS(self):
+#         return self._adata.obs.columns
+
+#     @property
+#     def _PASSED(self) -> bool:
+#         return not (self._time_key is None)
+
+#     @property
+#     def _PASSED_VALID(self) -> bool:
+#         return self._time_key in self._OBS_COLS
+
+#     @property
+#     def _DETECTED(self) -> bool:
+#         return self._OBS_COLS[
+#             [col in self._auto_detected_time_cols for col in self._OBS_COLS]
+#         ].tolist()
+
+#     @property
+#     def _DETECTED_VALID(self) -> bool:
+#         return len(self._DETECTED) == 1
+
+#     @property
+#     def _VALID(self):
+#         return any([self._PASSED_VALID, self._DETECTED_VALID])
+
+#     def __call__(self, adata: anndata.AnnData, time_key: Optional[str] = None) -> str:
+        
+#         self._time_key = time_key
+#         self._adata = adata
+
+#         if self._PASSED:
+#             if self._PASSED_VALID:
+#                 return self._time_key
+#             else:
+#                 raise KeyError(
+#                     f"Passed `time_key`: {self._time_key} not found in adata.obs"
+#                 )
+
+#         elif self._DETECTED:
+#             if self._DETECTED_VALID:
+#                 return self._DETECTED[0]
+#             else:
+#                 print(
+#                     f"More than one possible time column inferred: {found}\nPlease specify the desired time column in adata.obs."
+#                 )
+#         return "t"
+
+
+#         time_key = time_key_id(adata, time_key=self._time_key)
+#         if self.has_time_key:
+#             return self._time_key
+#         return "t"
+#         return (not isinstance(self._time_key, NoneType)) and (
+#             self._time_key in self.adata.obs_keys()
+#         )
