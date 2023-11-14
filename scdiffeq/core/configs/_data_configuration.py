@@ -211,8 +211,9 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
               
         if not self._weight_key in self._adata.obs.columns:
             self._adata.obs[self._weight_key] = 1
-        self._obs_keys.append(self._weight_key)
-    
+        if not self._weight_key in self._obs_keys:
+            self._obs_keys.append(self._weight_key)
+
     def _format_train_test_exposed_data(self):
         
         if not self._train_key in self._adata.obs.columns:
