@@ -14,82 +14,14 @@ from ..core import lightning_models, utils, scDiffEq
 
 from typing import Optional, Union
 
-
+from ._hparams import HParams
 from ._project import Project
-from ._hparams import HyperParams
-
-
-
-class Checkpoint(ABCParse.ABCParse):
-    def __init__(self, path: pathlib.Path, *args, **kwargs):
-        self.__parse__(locals(), public=["path"])
-
-    @property
-    def _fname(self):
-        return self.path.name.split(".")[0]
-
-    @property
-    def epoch(self):
-        if self._fname != "last":
-            return int(self._fname.split("=")[1].split("-")[0])
-        return self._fname
-
-    @property
-    def state_dict(self):
-        if not hasattr(self, "_ckpt"):
-            self._state_dict = torch.load(self.path)  # ["state_dict"]
-        return self._state_dict
-
-    def __repr__(self):
-        return f"ckpt epoch: {self.epoch}"
-
-
-class Version(ABCParse.ABCParse):
-    def __init__(self, path = None, *args, **kwargs):
-
-        self.__parse__(locals())
-
-    @property
-    def _CONTENTS(self):
-        return list(version_path.glob("*"))
-
-    @property
-    def hparams(self):
-        hparams_path = self._path.joinpath("hparams.yaml")
-        if hparams_path.exists():
-            return HyperParams(hparams_path)
-
-    @property
-    def metrics_df(self):
-        metrics_path = self._path.joinpath("metrics.csv")
-        if metrics_path.exists():
-            return pd.read_csv(metrics_path)
-
-    @property
-    def _CKPT_PATHS(self):
-        _ckpt_paths = list(self._path.joinpath("checkpoints").glob("*"))
-        return [pathlib.Path(path) for path in _ckpt_paths]
-
-    @property
-    def _SORTED_CKPT_KEYS(self):
-        epochs = list(self.ckpts.keys())
-        _epochs = sorted([epoch for epoch in epochs if epoch != "last"])
-        if "last" in epochs:
-            _epochs.append("last")
-        return _epochs
-
-    @property
-    def ckpts(self):
-        if not hasattr(self, "_CHECKPOINTS"):
-            self._CHECKPOINTS = {}
-            for ckpt_path in self._CKPT_PATHS:
-                ckpt = Checkpoint(ckpt_path)
-                self._CHECKPOINTS[ckpt.epoch] = ckpt
-        return self._CHECKPOINTS
+from ._checkpoint import Checkpoint
 
 
 class ModelLoader(ABCParse.ABCParse):
     def __init__(self, project_path = None, version = None, *args, **kwargs):
+        """ """
         self.__parse__(locals())
         self._INFO = utils.InfoMessage()
         self._validate_version()
