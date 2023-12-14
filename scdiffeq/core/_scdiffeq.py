@@ -488,6 +488,57 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
     @property
     def tracker(self):
         return callbacks.ModelTracker(version=self.version)
+    
+    def drift(
+        self,
+        adata: Optional[anndata._core.anndata.AnnData] = None,
+        use_key: Optional[str] = None,
+        obsm_key_added: str = 'X_drift',
+        obs_key_added: str = 'drift',
+        device=autodevice.AutoDevice(),
+        inplace: bool = True,
+    ):
+        
+        if adata is None:
+            adata = self.adata            
+        if use_key is None:
+            use_key = self._use_key
+            
+        return tools.drift(
+            adata=adata,
+            model=self,
+            use_key=use_key,
+            obsm_key_added=obsm_key_added,
+            obs_key_added=obs_key_added,
+            device=device,
+            inplace=inplace,
+        )
+
+    def diffusion(
+        self,
+        adata: Optional[anndata._core.anndata.AnnData] = None,
+        use_key: Optional[str] = None,
+        obsm_key_added: str = 'X_diffusion',
+        obs_key_added: str = 'diffusion',
+        device=autodevice.AutoDevice(),
+        inplace: bool = True,
+    ):
+        
+        if adata is None:
+            adata = self.adata
+            
+        if use_key is None:
+            use_key = self._use_key
+            
+        return tools.diffusion(
+            adata=adata,
+            model=self,
+            use_key=use_key,
+            obsm_key_added=obsm_key_added,
+            obs_key_added=obs_key_added,
+            device=device,
+            inplace=inplace,
+        )
 
 
     def cell_potential(

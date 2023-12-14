@@ -2,7 +2,7 @@
 __module_name__ = "__init__.py"
 __doc__ = """tools __init__ module. Sub-package of the main scdiffeq API."""
 __author__ = ", ".join(["Michael E. Vinyard",])
-__email__ = ", ".join(["mvinyard@broadinstitute.org",])
+__email__ = ", ".join(["mvinyard.ai@gmail.org",])
 
 
 # import functions accessed as sdq.tl.<func>: --------------------------------------------
@@ -41,7 +41,10 @@ from ._cell_potential import cell_potential, normalize_cell_potential
 from ._norm import L2Norm
 
 from ._final_state_per_simulation import FinalStatePerSimulation
-from ._simulator import Simulator, simulate
+
+# from ._simulator import Simulator, simulate
+from ._simulation import Simulation, simulate
+
 from ._perturbation import Perturbation, perturb
 
 from ._grouped_expression import GroupedExpression, grouped_expression
