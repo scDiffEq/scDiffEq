@@ -114,7 +114,7 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
         DiffEq_type: str = "SDE",
-        potential_type: Union[None, str] = None,
+        potential_type: Union[None, str] = "fixed-residual", # None,
         # other options: "fixed" or "prior"
         
         # -- Encoder params: ---------------------------------------------------

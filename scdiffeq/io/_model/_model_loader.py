@@ -9,7 +9,7 @@ import torch_nets
 import yaml
 import pandas as pd
 
-from ..core import lightning_models, utils, scDiffEq
+from ...core import lightning_models, utils, scDiffEq
 
 
 from typing import Optional, Union
@@ -17,6 +17,7 @@ from typing import Optional, Union
 from ._hparams import HParams
 from ._project import Project
 from ._checkpoint import Checkpoint
+from ._version import Version
 
 
 class ModelLoader(ABCParse.ABCParse):

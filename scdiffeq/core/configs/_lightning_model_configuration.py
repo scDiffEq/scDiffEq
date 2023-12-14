@@ -1,13 +1,20 @@
+
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import os
 
+
+# -- import local dependencies: -----------------------------------------------
 from .. import lightning_models, utils
 
 
-NoneType = type(None)
+# -- set typing: --------------------------------------------------------------
+from typing import Dict, Optional
 
-# -- import packages: ----------------------------------------------------------
+
+# -- operational class: -------------------------------------------------------
 class LightningModelConfiguration(ABCParse.ABCParse):
+    """ """
     _potential_types = {
         "fixed": "FixedPotential",
         "prior": "PriorPotential",
@@ -16,15 +23,14 @@ class LightningModelConfiguration(ABCParse.ABCParse):
     def __init__(
         self,
         data_dim,
-        latent_dim: int = 20,
+        latent_dim: int = 50,
         DiffEq_type: str = "SDE",
-        potential_type="prior",
+        potential_type: str = "fixed",
         fate_bias_csv_path = None,
     ):
+        """ """
 
         self.__parse__(locals(), public=[None])
-        
-
 
     @property
     def available_lightning_models(self):
@@ -48,20 +54,24 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             return self._potential_types[self._potential_type]
         
     @property
-    def fate_bias_aware(self):
-        if isinstance(self._fate_bias_csv_path, NoneType):
-            return False
-        else:
-            if os.path.exists(self._fate_bias_csv_path):
-                return True
-            else:
+    def fate_bias_aware(self) -> bool:
+        """
+        First checks if the past is passed. If so, checks if it exists.
+        If passed but path does not exist, raises a ValueError.
+        """
+        if not self._fate_bias_csv_path is None:
+            if not os.path.exists(self._fate_bias_csv_path):
                 raise ValueError("Path to fate_bias.csv was passed though not found.")
-
+            else:
+                return True
+        else:
+            return False
+        
     @property
-    def _USE_CKPT(self):
-        return isinstance(self._ckpt_path, str)
+    def _USE_CKPT(self) -> bool:
+        return not self._ckpt_path is None
     
-    def __call__(self, kwargs, ckpt_path = None):
+    def __call__(self, kwargs: Dict, ckpt_path: Optional[str] = None):
         
         self._ckpt_path = ckpt_path
 
@@ -77,7 +87,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             _model.append("FateBiasAware")
 
         _model = "_".join(_model)
-
+        
         if _model in self.available_lightning_models:
             lit_model = getattr(lightning_models, _model)
             
