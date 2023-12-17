@@ -53,3 +53,5 @@ from ._annotate_gene_features import GeneCompatibility, annotate_gene_features
 # from ._smoothed_expression import SmoothedExpression, smoothed_expression
 from ._temporal_expression import temporal_expression
 
+from ._annotate_cell_state import annotate_cell_state
+from ._annotate_cell_fate import annotate_cell_fate

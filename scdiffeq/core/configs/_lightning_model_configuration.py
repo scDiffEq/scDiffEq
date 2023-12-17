@@ -96,6 +96,6 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             
             model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
             
-            return lit_model(data_dim = self._data_dim, **model_kwargs)
+            return lit_model(**model_kwargs) # data_dim = self._data_dim, 
         
         raise ValueError(f"Configuration tried: {_model} - this does not exist as an available model.")

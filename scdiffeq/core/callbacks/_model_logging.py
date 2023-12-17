@@ -34,14 +34,15 @@ class ModelLogging(lightning.Callback):
                     pl_module.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
 
     def log_sinkhorn_divergence(self, pl_module, t, stage: str):
-
-        sinkhorn_loss = pl_module.sinkhorn_loss
         
-        for i in range(len(t)):
-            _t = round(t[i].item(), 3)
-            pl_module.log(f"sinkhorn_{_t}_{stage}", sinkhorn_loss[i])
+        if hasattr(pl_module, "sinkhorn_loss"):
+            sinkhorn_loss = pl_module.sinkhorn_loss
 
-        return sinkhorn_loss.sum()
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"sinkhorn_{_t}_{stage}", sinkhorn_loss[i])
+
+            return sinkhorn_loss.sum()
 
     def _gather_current_epoch_loss(self, pl_module, sinkhorn_total, stage):
         

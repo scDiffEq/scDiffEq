@@ -44,10 +44,32 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
             # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
             # considering rm SWA pending better understanding
         ]
+    
+    @property
+    def BuiltInPreTrainCallbacks(self):
+
+        return [
+        ModelCheckpoint(
+            every_n_epochs=self._every_n_epochs,
+            save_on_train_epoch_end=True,
+            save_top_k=self._save_top_k,
+            save_last=self._save_last,
+            monitor=self._monitor,
+        ),
+            InterTrainerEpochCounter(),
+#             callbacks.ModelLogging(),
+#             callbacks.VisualizeTrackedLoss(
+#                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
+#             ),
+            # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
+            # considering rm SWA pending better understanding
+        ]
 
     @property
     def Callbacks(self):
-        return self.cbs + self.BuiltInCallbacks
+        if self._stage == "TRAIN":
+            return self.cbs + self.BuiltInCallbacks
+        return self.cbs + self.BuiltInPreTrainCallbacks
         
     @property
     def GradientRetainedCallbacks(self):
@@ -56,6 +78,7 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
     def __call__(
         self,
         version,
+        stage,
         viz_frequency = 1,
         model_name="scDiffEq_model",
         working_dir=os.getcwd(),

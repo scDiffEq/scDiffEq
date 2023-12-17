@@ -10,13 +10,15 @@ import ABCParse
 import anndata
 
 
+from typing import Optional
+
 class Simulation(ABCParse.ABCParse):
     """Sampled trajectories from an scDiffEq model"""
     def __init__(
         self,
         use_key: str = "X_pca",
-        N: int = 2000,
-        device = autodevice.AutoDevice(),
+        N: int = 1,
+        device: Optional[torch.device] = autodevice.AutoDevice(),
         *args,
         **kwargs,
     ):
@@ -37,24 +39,37 @@ class Simulation(ABCParse.ABCParse):
     @property
     def _adata_init(self):
         ...
+    
+    @property
+    def idx(self):
+        """ """
+        if not hasattr(self, "_idx"):
+            self._idx = self._adata.obs.index
+        return self._idx
 
     @property
     def Z0(self) -> torch.Tensor:
+        """ """
         if not hasattr(self, "_Z0"):
             self._Z0 = adata_query.fetch(
-                self._adata[self._idx],
+                self._adata[self.idx],
                 key=self._use_key,
                 torch=True,
                 device=self._device,
-            ).expand(self._N, -1)
+            )
+            if self._N > 1:
+                self._Z0 = self._Z0[None, :, :]
+                self._Z0 = self._Z0.expand(self._N, -1, -1).flatten(0, 1)
         return self._Z0
 
     @property
     def _T_MIN(self) -> float:
+        """ """
         return self._model.t_config.t_min
 
     @property
     def _T_MAX(self) -> float:
+        """ """
         return self._model.t_config.t_max
 
     @property
@@ -70,16 +85,28 @@ class Simulation(ABCParse.ABCParse):
                 self._N_STEPS,
             ).to(self._device)
         return self._t
-
+    
+    @property
+    def _N_CELLS(self):
+        return self._N * len(self.idx)
+    
     def forward(self, Z0, t) -> torch.Tensor:
         return self._model.DiffEq.forward(Z0, t).detach().cpu().flatten(0, 1).numpy()
 
-    def _to_adata_sim(self, Z_hat) -> None:
-        
+    def _to_adata_sim(self, Z_hat: np.ndarray) -> anndata.AnnData:
+        """
+        Args:
+            Z_hat (np.ndarray)
+            
+        Returns:
+            adata_sim (anndata.AnnData)
+        """
         adata_sim = anndata.AnnData(Z_hat)
-        adata_sim.obs["t"] = np.repeat(self.t.detach().cpu().numpy(), self._N)
-        adata_sim.obs["sim"] = np.tile(range(self._N), self._N_STEPS)
-        adata_sim.uns["sim_idx"] = self._idx
+        adata_sim.obs["t"] = np.repeat(self.t.detach().cpu().numpy(), self._N_CELLS)
+        adata_sim.obs['z0_idx'] = np.tile(np.tile(self.idx, self._N_STEPS), self._N)
+        adata_sim.obs["sim_i"] = np.tile(np.arange(self._N).repeat(len(self.idx)), self._N_STEPS)
+        adata_sim.obs["sim"] = adata_sim.obs['z0_idx'].astype(str) + adata_sim.obs["sim_i"].astype(str)
+        adata_sim.uns["sim_idx"] = self.idx
         adata_sim.uns["simulated"] = True
 
         return adata_sim
@@ -112,18 +139,18 @@ class Simulation(ABCParse.ABCParse):
 
 def simulate(
     adata: anndata.AnnData,
-    idx: pd.Index,
     model: "scdiffeq.scDiffEq",
+    idx: Optional[pd.Index] = None,
     use_key: str = "X_pca",
-    device: torch.device = autodevice.AutoDevice(),
-    N: int = 2000,
+    N: Optional[int] = 1,
+    device: Optional[torch.device] = autodevice.AutoDevice(),
     *args,
     **kwargs
 ) -> anndata.AnnData:
     """Simulate trajectories by sampling from an scDiffEq model.
 
     Args:
-        adata (anndata.AnnData): Input AnnDat object.
+        adata (anndata.AnnData): Input AnnData object.
 
         idx (pd.Index): cell indices (corresponding to `adata` from which the model should
             initiate sampled trajectories.

@@ -114,7 +114,7 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
         DiffEq_type: str = "SDE",
-        potential_type: Union[None, str] = "fixed-residual", # None,
+        potential_type: Union[None, str] = None,
         # other options: "fixed" or "prior"
         
         # -- Encoder params: ---------------------------------------------------
@@ -310,44 +310,64 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
             
         return trainer_kwargs
             
-    def _configure_pretrain_step(self, epochs, callbacks=[]):
+    def _configure_pretrain_step(self, epochs, kwargs):
         
         STAGE = "pretrain"
         self._INFO(f"Configuring fit step: {STAGE}")
         
         self.DiffEq._update_lit_diffeq_hparams(self._PARAMS)
+        
+        kwargs.update(self._PARAMS)
 
-        trainer_kwargs = utils.extract_func_kwargs(
-            func=self.TrainerGenerator,
-            kwargs=self._PARAMS,
-            ignore = ['version', 'working_dir'],
-        )
-        trainer_kwargs.update(
-            utils.extract_func_kwargs(
-                func=lightning.Trainer,
-                kwargs=self._PARAMS,
-                ignore = ['version', 'working_dir'],
+#         trainer_kwargs = utils.extract_func_kwargs(
+#             func=self.TrainerGenerator,
+#             kwargs=self._PARAMS,
+#             ignore = ['version', 'working_dir'],
+#         )
+#         trainer_kwargs.update(
+#             utils.extract_func_kwargs(
+#                 func=lightning.Trainer,
+#                 kwargs=self._PARAMS,
+#                 ignore = ['version', 'working_dir'],
+#             )
+#         )
+#         trainer_kwargs.update(
+#             utils.extract_func_kwargs(
+#                 func=lightning.Trainer,
+#                 kwargs=locals(),
+#                 ignore = ['version', 'working_dir'],
+#             )
+#         )
+        
+        ignore = ['version', 'working_dir', 'logger']
+        funcs = [self.TrainerGenerator, lightning.Trainer]
+        
+        pretrain_kwargs = {}
+        
+        for func in funcs:
+            pretrain_kwargs.update(
+                utils.extract_func_kwargs(
+                    func = func, kwargs = kwargs, ignore = ignore,
+                )
             )
-        )
-        trainer_kwargs.update(
-            utils.extract_func_kwargs(
-                func=lightning.Trainer,
-                kwargs=locals(),
-                ignore = ['version', 'working_dir'],
-            )
-        )
-        trainer_kwargs = self._check_disable_validation(trainer_kwargs)
+            
+        pretrain_kwargs = self._check_disable_validation(pretrain_kwargs)
         
         self.pre_trainer = self.TrainerGenerator(
+            logger = self.logger,
             max_epochs=self._pretrain_epochs,
             stage=STAGE,
-            working_dir = self.DiffEqLogger._WORKING_DIR,
-            version = self._VERSION,
+            working_dir = self._working_dir,
+            version = self.version,
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
-            **trainer_kwargs
+            **pretrain_kwargs,
         )
-        self._stage_log_path(STAGE)
+        
+        if hasattr(self, "_csv_logger"):
+            DIR = self._csv_logger.log_dir
+            self._INFO(f"Logging locally to: {DIR}")
+#         self._stage_log_path(STAGE)
 
     def pretrain(
         self,
@@ -359,7 +379,7 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
         arguments from __init__ and re-configure the DiffEq.
         """
 
-        self._configure_pretrain_step(epochs, pretrain_callbacks)
+        self._configure_pretrain_step(epochs, locals())
         self.pre_trainer.fit(self.DiffEq, self.LitDataModule)
 
     def _configure_train_step(self, epochs, kwargs):
@@ -469,7 +489,6 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
                 
         if pretrain_epochs > 0 and (not self._LitModelConfig.use_vae):
             pretrain_epochs = 0
-            
             
         self.__update__(locals())
 
