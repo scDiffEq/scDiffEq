@@ -16,7 +16,7 @@ import numpy as np
 # -- controlling class: -------------------------------------------------------
 class CellStateAnnotation(ABCParse.ABCParse):
     """Annotate cell states using a kNN graph."""
-    def __init__(self, kNN: "kNN", *args, **kwargs):
+    def __init__(self, kNN: "kNN", silent: bool = False, *args, **kwargs):
         """Initialize `CellStateAnnotation` class.
         
         Args:
@@ -66,7 +66,8 @@ class CellStateAnnotation(ABCParse.ABCParse):
     def forward(self) -> None:
         """Add mapped cell state values to adata_sim.obs"""
         self._adata_sim.obs[self._obs_key] = self.X_mapped.values
-        self._INFO(f"Added state annotation: adata_sim.obs['{self._obs_key}']")
+        if not self._silent:
+            self._INFO(f"Added state annotation: adata_sim.obs['{self._obs_key}']")
 
     def __call__(
         self,
@@ -96,7 +97,11 @@ class CellStateAnnotation(ABCParse.ABCParse):
 
 # -- API-facing function: -----------------------------------------------------
 def annotate_cell_state(
-    adata_sim: anndata.AnnData, kNN: "kNN", obs_key: str = "state", use_key: str = "X"
+    adata_sim: anndata.AnnData,
+    kNN: "kNN",
+    obs_key: str = "state",
+    use_key: str = "X",
+    silent: bool = False,
 ) -> None:
     """Use a kNN Graph to annotate simulated cell states.
     
@@ -111,10 +116,13 @@ def annotate_cell_state(
 
         use_key (str)
             **Default**: "X".
+            
+        silent (bool)
+            **Default**: False
 
     Returns:
         None
     """
 
-    state_annot = CellStateAnnotation(kNN=kNN)
+    state_annot = CellStateAnnotation(kNN=kNN, silent = silent)
     state_annot(adata_sim=adata_sim, obs_key=obs_key, use_key=use_key)

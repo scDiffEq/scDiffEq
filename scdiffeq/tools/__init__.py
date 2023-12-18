@@ -55,3 +55,6 @@ from ._temporal_expression import temporal_expression
 
 from ._annotate_cell_state import annotate_cell_state
 from ._annotate_cell_fate import annotate_cell_fate
+from ._invert_scaled_gex import invert_scaled_gex
+from ._fate_perturbation_experiment import FatePerturbationExperiment
+from ._fate_perturbation_screen import FatePerturbationScreen

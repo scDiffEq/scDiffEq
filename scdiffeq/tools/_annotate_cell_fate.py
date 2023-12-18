@@ -16,7 +16,7 @@ import pandas as pd
 # -- controlling class: -------------------------------------------------------
 class CellFateAnnotation(ABCParse.ABCParse):
     """ """
-    def __init__(self, time_key: str = "t", sim_key: str = "sim", *args, **kwargs):
+    def __init__(self, time_key: str = "t", sim_key: str = "sim", silent: bool = False, *args, **kwargs):
         self.__parse__(locals())
 
     @property
@@ -39,8 +39,18 @@ class CellFateAnnotation(ABCParse.ABCParse):
         self._adata_sim.obs[self._key_added] = self._adata_sim.obs[self._sim_key].map(
             mappable_fate_dict
         )
-        self._INFO(f"Added fate annotation: adata_sim.obs['{self._key_added}']")
+        if not self._silent:
+            self._INFO(f"Added fate annotation: adata_sim.obs['{self._key_added}']")
+        self._count_fates()
 
+    def _count_fates(self) -> None:
+        """ """
+        fate_obs = self._adata_sim.obs.loc[self._TIME == self._T_MAX]
+        self._adata_sim.uns['fate_counts'] = fate_obs[self._key_added].value_counts()
+        
+        if not self._silent:
+            self._INFO("Added fate counts: adata_sim.uns['fate_counts']")
+        
     def __call__(
         self,
         adata_sim: anndata.AnnData,
@@ -61,6 +71,7 @@ def annotate_cell_fate(
     key_added: str = "fate",
     time_key: str = "t",
     sim_key: str = "sim",
+    silent: bool = False, 
     *args,
     **kwargs,
 ) -> None:
@@ -83,10 +94,13 @@ def annotate_cell_fate(
 
         sim_key (str)
             Key in adata_sim.obs corresponding to each individual simulation.
+            
+        silent (bool)
+            Description.
 
     Returns:
         None
     """
 
-    fate_annot = CellFateAnnotation(time_key=time_key, sim_key=sim_key)
+    fate_annot = CellFateAnnotation(time_key=time_key, sim_key=sim_key, silent=silent)
     fate_annot(adata_sim=adata_sim, state_key=state_key, key_added=key_added)
