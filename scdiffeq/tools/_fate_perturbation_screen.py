@@ -9,7 +9,16 @@ import tqdm.notebook
 
 
 class FatePerturbationScreen(ABCParse.ABCParse):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        seed: int = 0,
+        use_key: str = "X_scaled",
+        replicates: int = 5,
+        N: int = 200,
+        time_key: str = "t",
+        *args,
+        **kwargs,
+    ):
         self.__parse__(locals())
 
         self.Results = {}
@@ -22,7 +31,13 @@ class FatePerturbationScreen(ABCParse.ABCParse):
 
     def forward(self, gene):
 
-        prtb_expt = FatePerturbationExperiment()
+        prtb_expt = FatePerturbationExperiment(
+            seed = self._seed,
+            use_key = self._use_key,
+            replicates = self._replicates,
+            N = self._N,
+            time_key = self._time_key,
+        )
         result = prtb_expt(
             adata=self._adata,
             model=self._model,
@@ -36,7 +51,7 @@ class FatePerturbationScreen(ABCParse.ABCParse):
 
     def __call__(
         self,
-        adata,
+        adata: anndata.AnnData,
         model,
         target_value: float = 10,
         genes: Optional[List] = None,

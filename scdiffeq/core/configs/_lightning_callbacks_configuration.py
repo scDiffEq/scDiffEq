@@ -67,9 +67,12 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
 
     @property
     def Callbacks(self):
-        if self._stage == "TRAIN":
-            return self.cbs + self.BuiltInCallbacks
-        return self.cbs + self.BuiltInPreTrainCallbacks
+        return self.cbs + self.BuiltInCallbacks
+#         if self._stage == "TRAIN":
+#             print("returning train cbs")
+#             return self.cbs + self.BuiltInCallbacks
+#         print("returning PRETRAIN cbs")
+#         return self.cbs + self.BuiltInPreTrainCallbacks
         
     @property
     def GradientRetainedCallbacks(self):

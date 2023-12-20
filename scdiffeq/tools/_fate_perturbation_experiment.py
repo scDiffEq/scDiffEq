@@ -68,7 +68,7 @@ class PerturbationExperimentResult(ABCParse.ABCParse):
         return result_t
 
     def _compute_lfc(self, ctrl_t, prtb_t, constant: float = 1e-9):
-        return (prtb_t + constant).div((ctrl_t + constant)).apply(np.log2).mean()
+        return (prtb_t + constant).div((ctrl_t + constant)).apply(np.log2)
 
     def _compute_pvals(self, ctrl_t, prtb_t):
         return pd.Series(
@@ -81,15 +81,17 @@ class PerturbationExperimentResult(ABCParse.ABCParse):
         )
 
     def _compute_summary_statistics(self):
+        
         ctrl_t = self._zerofill(self.ctrl)
         prtb_t = self._zerofill(self.prtb)
-        mean_lfc = self._compute_lfc(ctrl_t, prtb_t)
+        self._lfc = self._compute_lfc(ctrl_t, prtb_t)
         pvals = self._compute_pvals(ctrl_t, prtb_t)
-        lfc_pvals = pd.DataFrame([mean_lfc, pvals]).T
-        lfc_pvals.columns = ["lfc", "pval"]
+        
+        lfc_pvals = pd.DataFrame([self._lfc.mean(), self._lfc.std(), pvals]).T
+        lfc_pvals.columns = ["lfc", 'lfc_std', "pval"]
 
         return lfc_pvals
-
+    
     @property
     def stats(self):
         if not hasattr(self, "_stats"):

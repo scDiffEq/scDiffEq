@@ -65,7 +65,7 @@ class ModelLogging(lightning.Callback):
         batch: Any,
         batch_idx: int,
     ):
-        
+                
         batch = pl_module.process_batch(batch, batch_idx)
         
         self.log_total_epochs(pl_module)
