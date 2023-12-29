@@ -1,0 +1,4 @@
+html[data-theme=dark] .bd-content img:not(.only-dark):not(.dark-light) {
+    background: transparent;
+    border-radius: .25rem;
+    }

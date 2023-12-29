@@ -309,6 +309,9 @@ class scDiffEq(kNNMixIn, ABCParse.ABCParse):
             )
             
         return trainer_kwargs
+    
+    def __repr__(self):
+        return "scDiffEq"
             
     def _configure_pretrain_step(self, epochs, kwargs):
         

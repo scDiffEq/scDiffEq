@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import tqdm.notebook
 import ABCParse
 import anndata
+import lightning
 
 
 from typing import Optional
@@ -17,6 +18,7 @@ class Simulation(ABCParse.ABCParse):
     def __init__(
         self,
         use_key: str = "X_pca",
+        time_key: str = "Time point",
         N: int = 1,
         device: Optional[torch.device] = autodevice.AutoDevice(),
         *args,
@@ -61,20 +63,24 @@ class Simulation(ABCParse.ABCParse):
                 self._Z0 = self._Z0[None, :, :]
                 self._Z0 = self._Z0.expand(self._N, -1, -1).flatten(0, 1)
         return self._Z0
+    
+    @property
+    def _TIME(self) -> pd.Series:
+        return self._adata.obs[self._time_key]
 
     @property
     def _T_MIN(self) -> float:
         """ """
-        return self._model.t_config.t_min
+        return self._TIME.min()
 
     @property
     def _T_MAX(self) -> float:
         """ """
-        return self._model.t_config.t_max
+        return self._TIME.max()
 
     @property
     def _N_STEPS(self) -> float:
-        return self._model.t_config.n_steps
+        return int(((self._T_MAX - self._T_MIN) / self._dt) + 1)
 
     @property
     def t(self) -> torch.Tensor:
@@ -91,7 +97,7 @@ class Simulation(ABCParse.ABCParse):
         return self._N * len(self.idx)
     
     def forward(self, Z0, t) -> torch.Tensor:
-        return self._model.DiffEq.forward(Z0, t).detach().cpu().flatten(0, 1).numpy()
+        return self._diffeq.forward(Z0, t).detach().cpu().flatten(0, 1).numpy()
 
     def _to_adata_sim(self, Z_hat: np.ndarray) -> anndata.AnnData:
         """
@@ -112,13 +118,13 @@ class Simulation(ABCParse.ABCParse):
         return adata_sim
 
     def __call__(
-        self, model: "scdiffeq.scDiffEq", adata: anndata.AnnData, idx: pd.Index, *args, **kwargs,
+        self, diffeq, adata: anndata.AnnData, idx: pd.Index, dt: float = 0.1, *args, **kwargs,
     ) -> anndata.AnnData:
         
         """Simulate trajectories by sampling from an scDiffEq model.
 
         Args:
-            model (scdiffeq.scDiffEq): scDiffEq model. **Default**: ``True``.
+            diffeq (): lightning model.
             
             adata (anndata.AnnData): Input AnnDat object.
 
@@ -131,7 +137,7 @@ class Simulation(ABCParse.ABCParse):
         
         self.__update__(locals())
         
-        self._model.to(self._device)
+        self._diffeq.to(self._device)
 
         Z_hat = self.forward(self.Z0, self.t)
         return self._to_adata_sim(Z_hat)
@@ -139,9 +145,10 @@ class Simulation(ABCParse.ABCParse):
 
 def simulate(
     adata: anndata.AnnData,
-    model: "scdiffeq.scDiffEq",
+    diffeq: lightning.LightningModule,
     idx: Optional[pd.Index] = None,
     use_key: str = "X_pca",
+    time_key: str = "Time point",
     N: Optional[int] = 1,
     device: Optional[torch.device] = autodevice.AutoDevice(),
     *args,
@@ -155,7 +162,7 @@ def simulate(
         idx (pd.Index): cell indices (corresponding to `adata` from which the model should
             initiate sampled trajectories.
 
-        model (scdiffeq.scDiffEq): scDiffEq model. **Default**: ``True``.
+        diffeq (lightning.LightningModule)
 
         use_key (str): adata accession key for the input data. **Default**: "X_pca".
 
@@ -167,9 +174,13 @@ def simulate(
         adata_sim (anndata.AnnData): AnnData object encapsulating scDiffEq model simulation.
     """
     
+    if diffeq.__repr__() == "scDiffEq":
+        diffeq = diffeq.DiffEq
+    
     simulation = Simulation(
         use_key=use_key,
+        time_key=time_key,
         N=N,
         device=device,
     )
-    return simulation(model=model, adata=adata, idx=idx)
+    return simulation(diffeq=diffeq, adata=adata, idx=idx)
