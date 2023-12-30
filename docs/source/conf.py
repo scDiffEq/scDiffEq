@@ -18,10 +18,12 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
     'nbsphinx',
     'sphinx_copybutton',
     'sphinx_favicon',
     'sphinx_design',
+    'myst_parser',
 ]
 
 templates_path = ['_templates']
@@ -45,7 +47,7 @@ html_theme_options = {
 }
 autoclass_content = 'init'
 
-# favicons = {"rel": "icon", "href": "magnifying_glass.png"}
+favicons = [{"rel": "icon", "href": "scdiffeq.favicon.png"}]
 
 # -- notes: -------------------------------------------------------------------
 # For the full list of built-in configuration values, see the documentation:

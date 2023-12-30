@@ -3,7 +3,7 @@ import anndata
 import ABCParse
 from typing import Optional
 
-from .. import tools
+from ... import tools
 
 class kNNMixIn(ABCParse.ABCParse, object):
     def __init__(self, *args, **kwargs):

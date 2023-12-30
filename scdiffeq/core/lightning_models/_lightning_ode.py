@@ -17,6 +17,7 @@ class LightningODE(
     mix_ins.BaseForwardMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningODE"""
     def __init__(
         self,
         # -- ode params: -------------------------------------------------------
@@ -43,6 +44,16 @@ class LightningODE(
         *args,
         **kwargs,
     ):
+        """LightningODE
+        
+        Extended description.
+
+        Args:
+            latent_dim (int): Description. **Default**: 50.
+
+        Returns:
+            None
+        """
         super().__init__()
         
         name = self._configure_name(name)
@@ -53,5 +64,5 @@ class LightningODE(
         self._configure_torch_modules(func=NeuralODE, kwargs=locals())
         self._configure_lightning_model(kwargs = locals())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "LightningODE"

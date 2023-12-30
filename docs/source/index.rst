@@ -31,13 +31,14 @@
    quickstart
    install
    api
-   examples
+   tutorials
    analyses
    dependencies
 
 
 .. grid:: 4
-   :gutter: 1    
+   :gutter: 1
+   :class-container: only-light
 
    .. grid-item-card::
       :link: quickstart.rst
@@ -85,12 +86,12 @@
       :octicon:`code;3em;sd-text-dark`
 
    .. grid-item-card::
-      :link: examples.rst
+      :link: tutorials.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
        
-      Examples
+      Tutorials
       ^^^
        
       .. raw:: html
@@ -100,7 +101,8 @@
       :octicon:`sidebar-expand;3em;sd-text-dark`
 
 .. grid:: 4
-   :gutter: 1   
+   :gutter: 1
+   :class-container: only-light
 
    .. grid-item-card::
       :text-align: right
@@ -117,6 +119,7 @@
       :octicon:`book;3em;sd-text-dark`
       
    .. grid-item-card::
+      :link: analyses.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
@@ -146,6 +149,7 @@
       :octicon:`mark-github;3em;sd-text-dark`
 
    .. grid-item-card::
+      :link: dependencies.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
@@ -159,9 +163,9 @@
 
       :octicon:`repo;3em;sd-text-dark`
 
-
 .. grid:: 4
-   :gutter: 1    
+   :gutter: 1
+   :class-container: only-dark
 
    .. grid-item-card::
       :link: quickstart.rst
@@ -224,7 +228,8 @@
       :octicon:`sidebar-expand;3em;sd-text-light`
 
 .. grid:: 4
-   :gutter: 1   
+   :gutter: 1
+   :class-container: only-dark
 
    .. grid-item-card::
       :text-align: right
@@ -241,6 +246,7 @@
       :octicon:`book;4em;sd-text-light`
       
    .. grid-item-card::
+      :link: analyses.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-dark.png
       :class-card: only-dark
@@ -270,6 +276,7 @@
       :octicon:`mark-github;3em;sd-text-light`
 
    .. grid-item-card::
+      :link: dependencies.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-dark.png
       :class-card: only-dark

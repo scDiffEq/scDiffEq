@@ -17,9 +17,9 @@ from typing import Optional
 
 # -- DiffEq class: -------------------------------------------------------------
 class BaseLightningDiffEq(lightning.LightningModule):
+    """BaseLightningDiffEq"""
     def __init__(self, *args, **kwargs):
         super().__init__()
-        
         
     def _update_lit_diffeq_hparams(self, model_params):
         for key, val in self.hparams.items():
