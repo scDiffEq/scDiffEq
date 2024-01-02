@@ -28,9 +28,9 @@ def read_h5ad(h5ad_path: str, silent: bool = False, annotate_path: bool = True) 
 
     Returns:
     --------
-    adata
-        type: anndata._core.anndata.AnnData
-        
+    adata (anndata._core.anndata.AnnData). The (annotated) single-cell data matrix of shape
+        n_obs × n_vars. Rows correspond to cells and columns to genes. 
+        For more: https://anndata.readthedocs.io/en/latest/.
 
     Notes:
     ------
