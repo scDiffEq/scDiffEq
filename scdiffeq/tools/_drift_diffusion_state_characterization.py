@@ -20,7 +20,7 @@ from ..core.utils import InfoMessage
 class InstantaneousVelocity(ABCParse.ABCParse):
     """Quantify the instantaneous drift/diffusion given a state and model."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, silent = False, *args, **kwargs):
 
         """Inhereting class should pass the model and device here."""
 
@@ -79,8 +79,10 @@ class InstantaneousVelocity(ABCParse.ABCParse):
         return "Updated"
         
     def _issue_info_message(self, key: str, key_action: str) -> None:
+        
+        if not self._silent:
 
-        self._INFO(f"{key_action}: adata.obsm['{key}']")
+            self._INFO(f"{key_action}: adata.obsm['{key}']")
 
     def _add_to_adata(self, X_pred: np.ndarray):
 
@@ -124,10 +126,11 @@ class InstantaneousDrift(InstantaneousVelocity):
         obsm_key_added: str = "X_drift",
         obs_key_added: str = "drift",
         device=autodevice.AutoDevice(),
+        silent: bool = False,
         *args,
         **kwargs,
     ):
-        super().__init__()
+        super().__init__(silent = silent)
 
         self.__parse__(locals())
 
@@ -142,10 +145,11 @@ class InstantaneousDiffusion(InstantaneousVelocity):
         obsm_key_added: str = "X_diffusion",
         obs_key_added: str = "diffusion",
         device=autodevice.AutoDevice(),
+        silent: bool = False,
         *args,
         **kwargs,
     ):
-        super().__init__()
+        super().__init__(silent = silent)
 
         self.__parse__(locals())
 
@@ -162,6 +166,7 @@ def drift(
     obs_key_added: str = "drift",
     device = autodevice.AutoDevice(),
     inplace: bool = True,
+    silent: bool = False,
     *args,
     **kwargs,
 ):
@@ -172,6 +177,7 @@ def drift(
         obsm_key_added=obsm_key_added,
         obs_key_added=obs_key_added,
         device=device,
+        silent=silent,
     )
     return drift(adata, use_key=use_key, inplace=inplace)
 
@@ -184,6 +190,7 @@ def diffusion(
     obs_key_added: str = "diffusion",
     device=autodevice.AutoDevice(),
     inplace: bool = True,
+    silent: bool = False,
     *args,
     **kwargs,
 ):
@@ -194,5 +201,6 @@ def diffusion(
         obsm_key_added=obsm_key_added,
         obs_key_added=obs_key_added,
         device=device,
+        silent=silent,
     )
     return diffusion(adata, use_key=use_key, inplace=inplace)
