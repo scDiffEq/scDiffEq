@@ -106,11 +106,12 @@ def annotate_cell_state(
     """Use a kNN Graph to annotate simulated cell states.
     
     Args:
-        adata_sim (anndata.AnnData)
-        Simulated AnnData.
+        adata_sim (anndata.AnnData). Simulated data object in the format of 
+        ``anndata.AnnData``, the (annotated) single-cell data matrix of shape
+        n_obs × n_vars. Rows correspond to cells and columns to genes. 
+        For more: https://anndata.readthedocs.io/en/latest/.
 
-        kNN ('kNN')
-        k-nearest neighbor graph.
+        kNN ('kNN'). k-nearest neighbor graph.
 
         obs_key (str)
 
@@ -122,6 +123,9 @@ def annotate_cell_state(
 
     Returns:
         None
+        
+    References:
+        1. https://anndata.readthedocs.io/en/latest/.
     """
 
     state_annot = CellStateAnnotation(kNN=kNN, silent = silent)
