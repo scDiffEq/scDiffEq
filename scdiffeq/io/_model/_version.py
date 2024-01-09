@@ -20,6 +20,10 @@ class Version(ABCParse.ABCParse):
         if isinstance(self._path, str):
             self._path = pathlib.Path(self._path)
         return self._path
+    
+    @property
+    def _NAME(self) -> str:
+        return self._PATH.name
 
     @property
     def _CONTENTS(self):
@@ -63,3 +67,6 @@ class Version(ABCParse.ABCParse):
                 ckpt = Checkpoint(ckpt_path)
                 self._CHECKPOINTS[ckpt.epoch] = ckpt
         return self._CHECKPOINTS
+
+    def __repr__(self) -> str:
+        return self._NAME
