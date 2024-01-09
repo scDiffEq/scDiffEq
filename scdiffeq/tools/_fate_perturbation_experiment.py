@@ -5,6 +5,7 @@ import pandas as pd
 import cell_perturb
 import scipy.stats
 import numpy as np
+import lightning
 
 from ._simulation import simulate
 
@@ -103,6 +104,7 @@ class PerturbationExperimentResult(ABCParse.ABCParse):
 
 
 class FatePerturbationExperiment(ABCParse.ABCParse):
+    """Container class for an expression perturbation experiment"""
     def __init__(
         self,
         seed: int = 0,
@@ -116,19 +118,22 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         self.__parse__(locals())
 
     @property
-    def _PERTURBATION_INIT_KWARGS(self):
+    def _PERTURBATION_INIT_KWARGS(self) -> Dict:
+        """function kwargs for ``cell_perturb.Perturbation.__init__``."""
         return ABCParse.function_kwargs(
             func=cell_perturb.Perturbation.__init__, kwargs=self._PARAMS
         )
 
     @property
     def _PERTURBATION_CALL_KWARGS(self):
+        """function kwargs for ``cell_perturb.Perturbation.__call__``."""
         return ABCParse.function_kwargs(
             func=cell_perturb.Perturbation.__call__, kwargs=self._PARAMS
         )
 
     @property
-    def adata_prtb(self):
+    def adata_prtb(self) -> anndata.AnnData:
+        """adata_prtb (anndata.AnnData)"""
         if not hasattr(self, "_adata_prtb"):
             self._perturbation = cell_perturb.Perturbation(
                 **self._PERTURBATION_INIT_KWARGS
@@ -136,20 +141,32 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
             self._adata_prtb = self._perturbation(**self._PERTURBATION_CALL_KWARGS)
         return self._adata_prtb
 
-    def _subset_final_state(self, adata_sim):
+    def _subset_final_state(self, adata_sim) -> anndata.AnnData:
+        """adata at final state"""
         t = adata_sim.obs[self._time_key]
         return adata_sim[t == t.max()].copy()
+    
+    @property
+    def DiffEq(self) -> lightning.LightningModule:
+        """DiffEq (lightning.LightningModule)"""
+        if isinstance(self._model.DiffEq, lightning.LightningModule):
+            return self._model.DiffEq
+        elif isinstance(self._model, lightning.LightningModule):
+            return self._model    
 
     def forward(self):
+        """run simulation ctrl vs. prtb"""
         adata_sim_prtb = simulate(
             adata=self.adata_prtb,
-            model=self._model,
+            diffeq=self.DiffEq,
             use_key="X_pca_prtb",
+            time_key = self._time_key,
         )
         adata_sim_ctrl = simulate(
             adata=self.adata_prtb,
-            model=self._model,
+            diffeq=self.DiffEq,
             use_key="X_pca_ctrl",
+            time_key = self._time_key,
         )
         prtb = self._subset_final_state(adata_sim_prtb)
         ctrl = self._subset_final_state(adata_sim_ctrl)
@@ -179,6 +196,28 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         *args,
         **kwargs,
     ):
+        """
+        Run perturbation screen.
+        
+        Args:
+            adata (anndata.AnnData): adata obj.
+            
+            
+            model ("scdiffeq.scDiffEq"): scDiffEq model.
+            
+            genes (List[str]): Genes over which screen should be run.
+        
+            subset_key (str):
+            
+            subset_val (str):
+        
+            target_value (float): Z-score value at which perturbation should be set. **Default**: 10
+            
+            PCA (Optional[sklearn.decomposition.PCA]: PCA model for transforming expression to model input. **Default**: None.
+        
+        Returns:
+            PerturbationExperimentResult
+        """
         self.__update__(locals())
 
         self.ctrl_result, self.prtb_result = self.forward()
