@@ -18,6 +18,22 @@ Several of them are linked below.
 neural-diffeqs
 ^^^^^^^^^^^^^^
 
+.. button-link:: https://github.com/mvinyard/neural-diffeqs
+    :color: secondary
+    :shadow:
+    :outline:
+    :expand:
+    
+    :octicon:`mark-github;2em`
+    
+.. button-link:: https://neural-diffeqs.readthedocs.io/en/latest/
+    :color: primary
+    :shadow:
+    :outline:
+    
+    :octicon:`unfold;2em;sd-text-info`
+
+
 torch-adata
 ^^^^^^^^^^^
 
@@ -36,6 +52,10 @@ autodevice
 
 Other, external libraries on which ``scDiffEq`` depends:
 
-Lightning
-torch
-torchsde
+* Lightning
+* torch
+* torchsde
+
+* Lightning
+* torch
+* torchsde
