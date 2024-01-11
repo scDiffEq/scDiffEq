@@ -4,6 +4,10 @@ import ABCParse
 import pathlib
 
 
+# -- import local dependencies: -----------------------------------------------
+from ._version import Version
+
+
 # -- set typing: --------------------------------------------------------------
 from typing import Dict, Union
 
@@ -15,6 +19,7 @@ class Project(ABCParse.ABCParse):
     def __init__(
         self,
         path: Union[str, pathlib.Path] = pathlib.Path("./").absolute(),
+        metrics_groupby: str = "epoch",
         *args,
         **kwargs,
     ):
@@ -49,12 +54,13 @@ class Project(ABCParse.ABCParse):
     def _set_version_path_attributes(self) -> None:
         """sets the name of each version as a cls attribute, pointing to the
         path of the version."""
-        for k, v in self._VERSION_PATHS.items():
-            setattr(self, k, v)
-
+        for v_name, v_path in self._VERSION_PATHS.items():
+            version = Version(path = v_path, groupby = self._metrics_groupby)
+            setattr(self, v_name, version)
+            
     def __getitem__(self, version: int) -> pathlib.Path:
-        """format version key and return path"""
-        return self._VERSION_PATHS[f"version_{version}"]
+        """format version key and return version"""
+        return getattr(self, f"version_{version}")
 
     def __repr__(self) -> str:
         """return the name of the obj"""

@@ -109,10 +109,10 @@ class BaseLightningDiffEq(lightning.LightningModule):
     def __repr__(self):
         return "LightningDiffEq"
     
-    def _configure_name(self, name: Optional[str] = None):
+    def _configure_name(self, name: Optional[str] = None, delim: Optional[str] = "."):
         """ """
         if not name is None:
-            return f"{self.__repr__()}:{name}"
+            return f"{self.__repr__()}{delim}{name}"
         else:
             return self.__repr__()
 

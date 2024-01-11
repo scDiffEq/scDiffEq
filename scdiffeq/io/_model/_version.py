@@ -8,6 +8,7 @@ import pandas as pd
 # -- import local dependencies: -----------------------------------------------
 from ._hparams import HParams
 from ._checkpoint import Checkpoint
+from ._grouped_metrics import GroupedMetrics
 
 
 # -- set typing: --------------------------------------------------------------
@@ -18,7 +19,7 @@ from typing import Dict, List, Union
 class Version(ABCParse.ABCParse):
     """scDiffEq Version object container"""
 
-    def __init__(self, path: Union[pathlib.Path, str] = None, *args, **kwargs):
+    def __init__(self, path: Union[pathlib.Path, str] = None, groupby: str = "epoch", *args, **kwargs):
         """Instantiate Version by providing a path
 
         Args:
@@ -64,6 +65,11 @@ class Version(ABCParse.ABCParse):
         metrics_path = self._PATH.joinpath("metrics.csv")
         if metrics_path.exists():
             return pd.read_csv(metrics_path)
+        
+    @property
+    def per_epoch_metrics(self):
+        self._GROUPED_METRICS = GroupedMetrics(groupby = self._groupby)
+        return self._GROUPED_METRICS(self.metrics_df)
 
     @property
     def _CKPT_PATHS(self) -> List[pathlib.Path]:
