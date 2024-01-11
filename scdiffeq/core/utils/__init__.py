@@ -38,5 +38,4 @@ from ._flexible_component_loader import FlexibleComponentLoader
 
 
 # review for deletion:
-# from ._default_neural_sde import default_NeuralSDE
 # from ._fetch_format import fetch_format
