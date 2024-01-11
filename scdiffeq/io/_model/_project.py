@@ -57,4 +57,5 @@ class Project(ABCParse.ABCParse):
         return self._VERSION_PATHS[f"version_{version}"]
 
     def __repr__(self) -> str:
+        """return the name of the obj"""
         return """scDiffEq Project"""
