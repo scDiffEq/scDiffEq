@@ -21,7 +21,7 @@ from ._version import Version
 
 
 class ModelLoader(ABCParse.ABCParse):
-    def __init__(self, project_path = None, version = None, *args, **kwargs):
+    def __init__(self, project_path = None, version = None, name_delim: str = ".", *args, **kwargs):
         """ """
         self.__parse__(locals())
         self._INFO = utils.InfoMessage()
@@ -62,7 +62,7 @@ class ModelLoader(ABCParse.ABCParse):
 
     @property
     def _MODEL_TYPE(self):
-        return self.hparams["name"].split(":")[0].replace("-", "_")
+        return self.hparams["name"].split(self._name_delim)[0].replace("-", "_")
 
     @property
     def LightningModule(self):
@@ -162,17 +162,16 @@ def load_diffeq(
     """
     Load DiffEq from project_path, version [optional], and epoch [optional].
     
-    Parameters
-    ----------
-    project_path: Union[pathlib.Path, str]
+    Args:
+        project_path (Union[pathlib.Path, str])
 
-    version: Optional[int], default = None
+        version (Optional[int]): **Default** = None
 
-    epoch: Optional[Union[int, str]], default = None
+        epoch (Optional[Union[int, str]]): **Default** = None
 
-    Returns
-    -------
-    DiffEq: lightning.LightningModule
+    
+    Returns:
+        DiffEq (lightning.LightningModule): lightning differential equation model.
     """
     
     if not ckpt_path is None:
@@ -194,6 +193,23 @@ def load_model(
     version: Optional[int] = None,
     epoch: Optional[Union[int, str]] = None,
 ):
+    
+    """Load scDiffEq model.
+    
+    Args:
+        adata (anndata.AnnData): adata object.
+        
+        ckpt_path (Optional[Union[pathlib.Path, str]]): description. **Default** = None
+        
+        project_path (Optional[Union[pathlib.Path, str]]): description. **Default** = None
+        
+        version (Optional[int]): description. **Default** = None
+        
+        epoch (Optional[Union[int, str]]): description. **Default** = None
+    
+    Returns:
+        scdiffeq.scDiffEq
+    """
 
     diffeq = load_diffeq(
         ckpt_path=ckpt_path,
