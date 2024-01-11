@@ -18,7 +18,7 @@ import autodevice
 # -- import local dependencies: ------------------------------------------------
 from . import configs, lightning_models, utils, callbacks
 from . import _mix_ins as mix_ins
-from .. import tools, __version__
+from .. import __version__ # tools
 
 import warnings
 
