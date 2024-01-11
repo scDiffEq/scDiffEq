@@ -1,10 +1,14 @@
 
+# -- import packages: ---------------------------------------------------------
+import pathlib
 import pickle
 
-import pathlib
 
+# -- set typing: --------------------------------------------------------------
 from typing import Any, Dict, Optional, Union
 
+
+# -- operational class: -------------------------------------------------------
 class PickleIO:
     def __init__(self, *args, **kwargs):
         """ """
@@ -20,8 +24,9 @@ class PickleIO:
 
     def __path__(self, path, mode):
         return open(path, mode)
-    
-    
+
+
+# -- API-facing functions: ----------------------------------------------------
 def read_pickle(path: Union[str, pathlib.Path], mode: Optional[str] = "rb"):
     """Read the contents of a pickle file into memory.
     
