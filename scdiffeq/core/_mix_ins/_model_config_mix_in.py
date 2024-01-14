@@ -11,11 +11,13 @@ class ModelConfigMixIn(object):
 
     def _configure_trainer_generator(self):
         
+        """ """
+                
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             save_dir=self._name
         )
 
-    def configure_model(self, DiffEq: Optional[lightning.LightningModule] = None):
+    def configure_model(self, DiffEq: Optional[lightning.LightningModule] = None, configure_trainer: bool = True):
         if DiffEq is None:
             self._LitModelConfig = configs.LightningModelConfiguration(
                 data_dim=self._data_dim,
@@ -40,7 +42,9 @@ class ModelConfigMixIn(object):
         # was its own step before: now in-line here, since it
         # doesn't make sense to separate it, functionally
         self._LOGGING = utils.LoggerBridge(self.DiffEq)
-        self._configure_trainer_generator()
+        
+        if configure_trainer:
+            self._configure_trainer_generator()
         
     def configure_data(self, adata: anndata.AnnData):
         """ """
@@ -65,7 +69,7 @@ class ModelConfigMixIn(object):
                 self._PARAMS['kNN'] = self.kNN
 
             # -- Step 4: configure model -------------------------------------------
-            self.configure_model(DiffEq = None)
+            self.configure_model(DiffEq = None, configure_trainer = True)
             
             # -- Step 5: extras (was step 6): ---------------------------------------
 #             if kwargs["reduce_dimensions"]:

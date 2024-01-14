@@ -62,7 +62,10 @@ class ModelLoader(ABCParse.ABCParse):
 
     @property
     def _MODEL_TYPE(self):
-        return self.hparams["name"].split(self._name_delim)[0].replace("-", "_")
+        name = self.hparams["name"]
+        if ":" in name:
+            return name.split(":")[0].replace("-", "_")
+        return name.split(self._name_delim)[0].replace("-", "_")
 
     @property
     def LightningModule(self):
@@ -192,6 +195,7 @@ def load_model(
     project_path: Optional[Union[pathlib.Path, str]] = None,
     version: Optional[int] = None,
     epoch: Optional[Union[int, str]] = None,
+    configure_trainer: Optional[bool] = False,
 ):
     
     """Load scDiffEq model.
@@ -206,6 +210,8 @@ def load_model(
         version (Optional[int]): description. **Default** = None
         
         epoch (Optional[Union[int, str]]): description. **Default** = None
+        
+        configure_trainer (Optional[bool]): indicate if trainer should be configured. **Default** = False.
     
     Returns:
         scdiffeq.scDiffEq
@@ -220,6 +226,6 @@ def load_model(
     model = scDiffEq(**dict(diffeq.hparams))
     model.configure_data(adata)
     model.configure_kNN()
-    model.configure_model(diffeq)
+    model.configure_model(diffeq, configure_trainer = configure_trainer)
 
     return model
