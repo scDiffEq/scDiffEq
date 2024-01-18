@@ -37,6 +37,8 @@ class Simulation(ABCParse.ABCParse):
         """
         
         self.__parse__(locals())
+        
+        self._T_GIVEN = False
 
     @property
     def _adata_init(self):
@@ -66,7 +68,9 @@ class Simulation(ABCParse.ABCParse):
     
     @property
     def _TIME(self) -> pd.Series:
-        return self._adata.obs[self._time_key]
+        if not self._T_GIVEN:
+            return self._adata.obs[self._time_key]
+        return self.t
 
     @property
     def _T_MIN(self) -> float:
@@ -84,6 +88,7 @@ class Simulation(ABCParse.ABCParse):
 
     @property
     def t(self) -> torch.Tensor:
+        """ """
         if not hasattr(self, "_t"):
             self._t = torch.linspace(
                 self._T_MIN,
@@ -118,7 +123,14 @@ class Simulation(ABCParse.ABCParse):
         return adata_sim
 
     def __call__(
-        self, diffeq, adata: anndata.AnnData, idx: pd.Index, dt: float = 0.1, *args, **kwargs,
+        self,
+        diffeq,
+        adata: anndata.AnnData,
+        idx: pd.Index,
+        dt: float = 0.1,
+        t: Optional[torch.Tensor] = None,
+        *args,
+        **kwargs,
     ) -> anndata.AnnData:
         
         """Simulate trajectories by sampling from an scDiffEq model.
@@ -138,6 +150,9 @@ class Simulation(ABCParse.ABCParse):
         self.__update__(locals())
         
         self._diffeq.to(self._device)
+        
+        if not t is None:
+            self._T_GIVEN = True
 
         Z_hat = self.forward(self.Z0, self.t)
         return self._to_adata_sim(Z_hat)
@@ -150,6 +165,8 @@ def simulate(
     use_key: str = "X_pca",
     time_key: str = "Time point",
     N: Optional[int] = 1,
+    t: Optional[torch.Tensor] = None,
+    dt: Optional[float] = 0.1,
     device: Optional[torch.device] = autodevice.AutoDevice(),
     *args,
     **kwargs
@@ -183,4 +200,4 @@ def simulate(
         N=N,
         device=device,
     )
-    return simulation(diffeq=diffeq, adata=adata, idx=idx)
+    return simulation(diffeq=diffeq, adata=adata, idx=idx, t=t, dt = dt)

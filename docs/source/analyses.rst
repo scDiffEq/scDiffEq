@@ -2,6 +2,11 @@
 Reproducibility
 ===============
 
+.. toctree::
+   :hidden:
+   
+   human_hematopoiesis.preprocessing
+
 Here we feature a breakdown of analyses inclucded in the manuscript associated
 with ``scdiffeq``. While **Figure 1** contains an overview that does not host
 any analyses, **Figure 2** demonstrates the accuracy of *scDiffEq* compared to
@@ -16,6 +21,13 @@ Figure 2
 
 Figure 3
 ========
+.. grid-item-card:: ``human_hematopoiesis.preprocessing.ipynb``
+      :link: human_hematopoiesis.preprocessing.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
 
 Figure 4
 ========
