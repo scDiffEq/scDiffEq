@@ -46,7 +46,7 @@ class CellFateAnnotation(ABCParse.ABCParse):
     def _count_fates(self) -> None:
         """ """
         fate_obs = self._adata_sim.obs.loc[self._TIME == self._T_MAX]
-        self._adata_sim.uns['fate_counts'] = fate_obs[self._key_added].value_counts()
+        self._adata_sim.uns['fate_counts'] = fate_obs[self._key_added].value_counts().to_dict()
         
         if not self._silent:
             self._INFO("Added fate counts: adata_sim.uns['fate_counts']")

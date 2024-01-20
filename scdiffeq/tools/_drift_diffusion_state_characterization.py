@@ -10,8 +10,8 @@ import anndata
 import autodevice
 
 # -- import local dependencies: -----------------------------------------------
-from ._norm import L2Norm
-from ..core.utils import InfoMessage
+from .utils import L2Norm
+
 
 # -- set typing: --------------------------------------------------------------
 
@@ -26,7 +26,6 @@ class InstantaneousVelocity(ABCParse.ABCParse):
 
         self.__parse__(locals())
         self._L2Norm = L2Norm()
-        self._INFO = InfoMessage()
 
     @property
     def _t(self):

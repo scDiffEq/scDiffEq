@@ -1,365 +1,271 @@
-
-
-# -- import packages: ----------------------------------------------------------
-import os
-import abc
-import numpy as np
-import anndata
+# -- import packages: ---------------------------------------------------------
 import ABCParse
+import anndata
+import matplotlib.pyplot as plt
+import numpy as np
+import cellplots as cp
 
-# --
-# to avoid requirement of scvelo
-# import scvelo as scv
-import pip
+import matplotlib.cm
 
-def import_or_install(package: str):
-    try:
-        __import__(package)
-    except ImportError:
-        pip.main(['install', package])  
-        __import__(package)
-# --
-
-# -- import local dependencies: ------------------------------------------------
-from ..core import utils
+# -- import local dependencies: -----------------------------------------------
+from ..tools import VelocityEmbedding, GridVelocity
 
 
-# -- set typing: ---------------------------------------------------------------
-from typing import Union
-NoneType = type(None)
+# -- type setting: ------------------------------------------------------------
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 
-# -- Helper classes: -----------------------------------------------------------
-class AnnDataAttributeInspector(ABCParse.ABCParse):
-    def __init__(self):
-        ...
-
-    @property
-    @abc.abstractmethod
-    def _KEY_SET(self):
-        ...
-
-    def transfer(self, old_adata: anndata.AnnData, new_adata: anndata.AnnData):
-
-        for group, key_set in self._KEY_SET.items():
-            for key in key_set:
-                getattr(new_adata, group)[key] = getattr(old_adata, group)[key]
-
-
-class NearestNeighborAnnDataInspector(AnnDataAttributeInspector):
-    def __init__(
-        self,
-        obsp_neighbor_keys=["distances", "connectivities"],
-        uns_neighbor_keys=["neighbors"],
-    ):
-        super()
-        self.__parse__(locals(), public=[None])
-
-    @property
-    def _KEY_SET(self):
-        return {"obsp": self._obsp_neighbor_keys, "uns": self._uns_neighbor_keys}
-
-    @property
-    def has_obsp_neighbor_keys(self):
-        return np.all([key in self.adata.obsp for key in self._obsp_neighbor_keys])
-
-    @property
-    def has_uns_neighbor_keys(self):
-        return np.all([key in self.adata.uns_keys() for key in self._uns_neighbor_keys])
-
-    @property
-    def has_nn(self):
-        return np.all([self.has_obsp_neighbor_keys, self.has_uns_neighbor_keys])
-
-    def __call__(self, adata):
-        self.__update__(locals())
-        return self.has_nn
-
-
-class VelocityGraphInspector(AnnDataAttributeInspector):
-    def __init__(self, velo_key="Z_drift", basis="umap"):
-        super()
-        self.__parse__(locals(), public=[None])
-
-    @property
-    def _KEY_SET(self):
-        """_SCVELO_ADDED_GRAPH_KEYS"""
-        return {
-            "uns": [
-                f"{self._velo_key}_graph",
-                f"{self._velo_key}_graph_neg",
-                f"{self._velo_key}_params",
-            ],
-            #             "obsm": [f"{self._velo_key}_{self._basis}"],
-            "obs": [f"{self._velo_key}_self_transition"],
-        }
-
-    @property
-    def _VELO_GRAPH_COMPUTED(self):
-
-        _GROUPS = []
-        for group, key_set in self._KEY_SET.items():
-            _GROUPS.append(
-                np.all([key in getattr(self.adata, group) for key in key_set])
-            )
-        return np.all(_GROUPS)
-
-    def __call__(self, adata):
-        self.__update__(locals())
-        return self._VELO_GRAPH_COMPUTED
-    
-class VelocityAnnDataFormatter(ABCParse.ABCParse):
-    """Reformatted, minimal adata for velo plots"""
-
-    def __init__(
-        self,
-        state_key="X_pca",
-        drift_layer_key="Z_drift",
-        diffusion_layer_key="Z_diffusion",
-        drift_obs_key="drift",
-        diffusion_obs_key="diffusion",
-    ):
-        self.__parse__(locals(), public=[None])
-
-        self._NN_INSPECTOR = NearestNeighborAnnDataInspector()
-        self._VELO_GRAPH_INSPECTOR = VelocityGraphInspector()
-
-    @property
-    def Z_state(self):
-        return self.adata.obsm[self._state_key]
-
-    @property
-    def X_umap(self):
-        return self.adata.obsm["X_umap"]
-
-    @property
-    def Z_drift(self):
-        return self.adata.obsm[self._drift_layer_key]
-
-    @property
-    def Z_diffusion(self):
-        return self.adata.obsm[self._diffusion_layer_key]
-
-    @property
-    def obs_df(self):
-        obs_df = self.adata.obs[[self._drift_obs_key, self._diffusion_obs_key]].copy()
-        for col in obs_df.columns:
-            obs_df[col] = obs_df[col].astype(float).values
-        return obs_df
-
-    @property
-    def HAS_NN(self):
-        return self._NN_INSPECTOR(self.adata)
-
-    @property
-    def HAS_VELOCITY_GRAPH(self):
-        return self._VELO_GRAPH_INSPECTOR(self.adata)
-
-    @property
-    def adata_velo(self):
-        if not hasattr(self, "_adata_velo"):
-            self._adata_velo = anndata.AnnData(
-                X=self.Z_state,
-                dtype=self.Z_state.dtype,
-                layers={
-                    self._drift_layer_key: self.Z_drift,
-                    self._diffusion_layer_key: self.Z_diffusion,
-                    "spliced": self.Z_state,
-                },
-                obs=self.obs_df,
-                obsm={"X_umap": self.X_umap},
-            )
-            if self._NN_INSPECTOR(self.adata):
-                self._NN_INSPECTOR.transfer(self.adata, self._adata_velo)
-            else:
-                scv.pp.neighbors(self._adata_velo, use_rep="X")
-        return self._adata_velo
-
-    def __call__(self, adata: anndata.AnnData):
-
-        self.__update__(locals())
-        return self.adata_velo
-
-
-# -- Main operational class: ---------------------------------------------------
+# -- Operational class: -------------------------------------------------------
 class VelocityStreamPlot(ABCParse.ABCParse):
-    _GRAPH_COMPUTED = []
+    """Velocity stream plot for a single ax"""
 
     def __init__(
         self,
-        state_key="X_pca",
-        drift_layer_key="Z_drift",
-        diffusion_layer_key="Z_diffusion",
-        drift_obs_key="drift",
-        diffusion_obs_key="diffusion",
-    ):
-        self.__parse__(locals(), public=["adata"])
-
-        self.velocity_formatter = VelocityAnnDataFormatter(
-            **utils.function_kwargs(VelocityAnnDataFormatter, self._PARAMS)
-        )
-
-    @property
-    def adata_velo(self):
-        if not hasattr(self, "_adata_velo"):
-            self._adata_velo = self.velocity_formatter(self.adata)
-        return self._adata_velo
-
-    def _compute_velocity_graph(
-        self, velocity_key="Z_drift", n_jobs=int(os.cpu_count() / 2), *args, **kwargs
-    ):
-        self._velo_key = velocity_key
-        if self.velocity_formatter.HAS_VELOCITY_GRAPH:
-            self.velocity_formatter._VELO_GRAPH_INSPECTOR.transfer(
-                self.adata,
-                self.adata_velo,
-            )
-        else:
-            scv.tl.velocity_graph(
-                self.adata_velo, vkey=velocity_key, n_jobs=n_jobs, **kwargs
-            )
-            self.velocity_formatter._VELO_GRAPH_INSPECTOR.transfer(
-                self.adata_velo, self.adata
-            )
-
-        self._GRAPH_COMPUTED.append(velocity_key)
-
-    @property
-    def _VMIN(self):
-        return np.quantile(self.adata_velo.obs[self.color], self.color_quantile)
-
-    @property
-    def _VMAX(self):
-        return np.quantile(self.adata_velo.obs[self.color], (1 - self.color_quantile))
-
-    def __call__(
-        self,
-        adata,
-        velocity_key="Z_drift",
-        color="diffusion",
-        basis="umap",
-        color_quantile=0.05,
-        cmap="plasma",
-        save: Union[bool, str] = False,
+        density: float = 1,
+        smooth: float = 0.5,
+        n_neighbors: Optional[int] = None,
+        min_mass: float = 1,
+        autoscale: bool = True,
+        stream_adjust: bool = True,
+        cutoff_percentile: float = 0.05,
+        velocity_key: str = "velocity",
+        self_transitions: bool = True,
+        use_negative_cosines: bool = True,
+        T_scale: float = 10,
+        *args,
         **kwargs,
     ):
+        self.__parse__(locals())
 
-        self.__update__(locals())
-
-        self._adata_velo = self.velocity_formatter(self.adata)
-
-        if not velocity_key in self._GRAPH_COMPUTED:
-            self._compute_velocity_graph(velocity_key=self.velocity_key)
-
-        scv.pl.velocity_embedding_stream(
-            self.adata_velo,
-            vkey=self.velocity_key,
-            basis=self.basis,
-            color=self.color,
-            cmap=self.cmap,
-            vmin=self._VMIN,
-            vmax=self._VMAX,
-            save=self.save,
-            **kwargs,
+        self._velocity_emb = VelocityEmbedding(
+            velocity_key=velocity_key,
+            self_transitions=self_transitions,
+            use_negative_cosines=use_negative_cosines,
+            T_scale=T_scale,
         )
-        emb_key_added = f"{velocity_key}_{basis}"
-        adata.obsm[emb_key_added] = self.adata_velo.obsm[emb_key_added]
-        
+        self._grid_velocity = GridVelocity(
+            density=density,
+            smooth=smooth,
+            n_neighbors=n_neighbors,
+            min_mass=min_mass,
+            autoscale=autoscale,
+            stream_adjust=stream_adjust,
+            cutoff_percentile=cutoff_percentile,
+        )
 
-# -- API-facing function: ------------------------------------------------------
+
+    @property
+    def X_emb(self):
+        if not hasattr(self, "_X_emb"):
+            self._X_emb, self._V_emb = self._velocity_emb(self._adata)
+        return self._X_emb
+
+    @property
+    def V_emb(self):
+        if not hasattr(self, "_V_emb"):
+            self._X_emb, self._V_emb = self._velocity_emb(self._adata)
+        return self._V_emb
+
+    @property
+    def X_grid(self):
+        if not hasattr(self, "_X_grid"):
+            self._X_grid, self._V_grid = self._grid_velocity(self.X_emb, self.V_emb)
+        return self._X_grid
+
+    @property
+    def V_grid(self):
+        if not hasattr(self, "_V_grid"):
+            self._X_grid, self._V_grid = self._grid_velocity(self.X_emb, self.V_emb)
+        return self._V_grid
+
+    @property
+    def x(self):
+        return self.X_grid[0]
+
+    @property
+    def y(self):
+        return self.X_grid[1]
+
+    @property
+    def u(self):
+        return self.V_grid[0]
+
+    @property
+    def v(self):
+        return self.V_grid[1]
+
+    @property
+    def xmin(self):
+        return np.min(self.X_emb[:, 0])
+
+    @property
+    def xmax(self):
+        return np.max(self.X_emb[:, 0])
+
+    @property
+    def ymin(self):
+        return np.min(self.X_emb[:, 1])
+
+    @property
+    def ymax(self):
+        return np.max(self.X_emb[:, 1])
+
+    @property
+    def xmargin(self):
+        return (self.xmax - self.xmin) * self._add_margin
+
+    @property
+    def ymargin(self):
+        return (self.ymax - self.ymin) * self._add_margin
+
+    def _set_margin(self, ax):
+        """"""
+        ax.set_xlim(self.xmin - self.xmargin, self.xmax + self.xmargin)
+        ax.set_ylim(self.ymin - self.ymargin, self.ymax + self.ymargin)
+
+    @property
+    def _STREAMPLOT_KWARGS(self) -> Dict[str, Any]:
+        kwargs = {
+            "color": self._stream_color,
+            "density": self._stream_density,
+            "linewidth": self._linewidth,
+            "zorder": self._stream_zorder,
+            "arrowsize": self._arrowsize,
+            "arrowstyle": self._arrowstyle,
+            "maxlength": self._maxlength,
+            "integration_direction": self._integration_direction,
+        }
+        kwargs.update(self._stream_kwargs)
+        return kwargs
+
+    def streamplot(self, ax) -> None:
+        ax.streamplot(self.x, self.y, self.u, self.v, **self._STREAMPLOT_KWARGS)
+
+        self._set_margin(ax)
+        
+    @property
+    def _SCATTER_KWARGS(self) -> Dict[str, Any]:
+        kwargs = {
+            "c": self._c,
+            "ec": "None",
+            "zorder": self._scatter_zorder,
+            "alpha": 0.2,
+            "s": 50,
+        }
+        kwargs.update(self._scatter_kwargs)
+        return kwargs
+    
+    def _SCATTER_CMAP(self, groups) -> Dict:
+        if not hasattr(self, "_cmap"):
+            self._cmap = matplotlib.cm.tab20.colors
+        if not isinstance(self._cmap, Dict):
+            self._cmap = {group: self._cmap[en] for en, group in enumerate(groups)}
+        return self._cmap
+
+    def scatter(self, ax) -> None:
+        """ """
+        obs_df = self._adata.obs.copy().reset_index()
+        cols = obs_df.columns.tolist()
+        
+        kwargs = self._SCATTER_KWARGS
+        
+        if self._c in cols:
+            kwargs.pop("c")
+            groups = obs_df.groupby(self._c).groups # dict
+            cmap = self._SCATTER_CMAP(groups)
+            for group, group_ix in groups.items():
+                ax.scatter(
+                    self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
+                )
+        else:
+            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **self._SCATTER_KWARGS)
+            
+    def __call__(
+        self,
+        adata: anndata.AnnData,
+        ax: Optional[Union[plt.Axes, List[plt.Axes]]] = None,
+        stream_color: str = "k",
+        c: str = "dodgerblue",
+        cmap: Optional[Union[Dict,List,Tuple]] = matplotlib.cm.tab20.colors,
+        linewidth: float = 0.5,
+        stream_density: float = 2.5,
+        add_margin: float = 0.1,
+        arrowsize: float = 1,
+        density: float = 1,
+        arrowstyle: str = "-|>",
+        maxlength: float = 4,
+        integration_direction: str = "both",
+        scatter_zorder: int = 0,
+        stream_zorder: int = 10,
+        mpl_kwargs: Optional[Dict] = {},
+        scatter_kwargs: Optional[Dict] = {},
+        stream_kwargs: Optional[Dict] = {},
+        disable_scatter: bool = False,
+        *args,
+        **kwargs,
+    ):
+        """
+        Args:
+
+        Returns
+            None
+        """
+        self.__update__(locals())
+        
+        if ax is None:
+            _mpl_kwargs = {
+                "nplots": 1,
+                "ncols": 1,
+                "height": 1.,
+                "width": 1.,
+                "delete": "all",
+                "del_xy_ticks": [True],
+            }
+            _mpl_kwargs.update(mpl_kwargs)
+            fig, axes = cp.plot(**_mpl_kwargs)
+
+        else:
+            axes = ABCParse.as_list(ax)
+        
+        for ax in axes:
+            self.streamplot(ax)
+            if not self._disable_scatter:
+                self.scatter(ax)
+
+# -- API-facing function: -----------------------------------------------------
 def velocity_stream(
     adata: anndata.AnnData,
-    velocity_key: str = "Z_drift",
-    color: str = "diffusion",
-    state_key: str = "X_pca",
-    drift_layer_key: str = "Z_drift",
-    diffusion_layer_key: str = "Z_diffusion",
-    drift_obs_key: str = "drift",
-    diffusion_obs_key: str = "diffusion",
-    basis: str = "umap",
-    color_quantile: float = 0.05,
-    cmap: str ="plasma",
-    save: bool = False,
+    ax: Optional[Union[plt.Axes, List[plt.Axes]]] = None,
+    c: str = "dodgerblue",
+    linewidth: float = 0.5,
+    stream_density: float = 2.5,
+    add_margin: float = 0.1,
+    arrowsize: float = 1,
+    arrowstyle: str = "-|>",
+    maxlength: float = 4,
+    integration_direction: str = "both",
+    scatter_zorder: int = 0,
+    stream_zorder: int = 10,
+    density: float = 1,
+    smooth: float = 0.5,
+    n_neighbors: Optional[int] = None,
+    min_mass: float = 1,
+    autoscale=True,
+    stream_adjust=True,
+    cutoff_percentile: float = 0.05,
+    velocity_key: str = "velocity",
+    self_transitions: bool = True,
+    use_negative_cosines: bool = True,
+    T_scale: float = 10,
+    stream_kwargs: Optional[Dict[str, Any]] = {},
+    scatter_kwargs: Optional[Dict[str, Any]] = {},
+    mpl_kwargs: Optional[Dict[str, Any]] = {},
+    *args,
     **kwargs,
 ):
-    """
-    Parameters:
-    -----------
-    adata
-        type: anndata.AnnData
-        default: [ REQUIRED ]
-        
-    velocity_key
-        type: str
-        default: "Z_drift"
-        
-    color
-        type: str
-        default: "diffusion"
-        
-    state_key
-        type: str
-        default: "X_pca"
-        
-    drift_layer_key
-        type: str
-        default: "Z_drift"
-        
-    diffusion_layer_key
-        type: str
-        default: "Z_diffusion"
-        
-    drift_obs_key
-        type: str
-        default: "drift"
-        
-    diffusion_obs_key
-        type: str
-        default: "diffusion"
-        
-    basis
-        type: str
-        default: "umap"
-        
-    color_quantile
-        type: float
-        default: 0.05
-        
-    cmap
-        type: str
-        default: "plasma"
-        
-    save
-        type: bool
-        default: False
-    
-    Returns:
-    --------
-    None, plots velocity stream plot.
-    
-    Notes:
-    ------
-    1.  Increased flexibility with passed parameters is a TODO, will
-        be mostly through **kwargs.
-    """
-    
-    
-    import_or_install("scvelo")
-    
-    velo_stream_plot = VelocityStreamPlot(
-        state_key=state_key,
-        drift_layer_key=drift_layer_key,
-        diffusion_layer_key=diffusion_layer_key,
-        drift_obs_key=drift_obs_key,
-        diffusion_obs_key=diffusion_obs_key,
-    )
-    velo_stream_plot(
-        adata=adata,
-        velocity_key=velocity_key,
-        color=color,
-        basis=basis,
-        color_quantile=color_quantile,
-        cmap=cmap,
-        save=save,
-    )
-    
+    """"""
+
+    init_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__init__, locals())
+    call_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__call__, locals())
+    velo_stream_plot = VelocityStreamPlot(**init_kwargs)
+    velo_stream_plot(**call_kwargs)

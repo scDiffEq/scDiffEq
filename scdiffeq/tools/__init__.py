@@ -5,6 +5,12 @@ __author__ = ", ".join(["Michael E. Vinyard",])
 __email__ = ", ".join(["mvinyard.ai@gmail.org",])
 
 
+from . import utils
+
+from ._grid_velocity import GridVelocity
+from ._velocity_embedding import VelocityEmbedding
+from ._velocity_graph import velocity_graph
+
 # import functions accessed as sdq.tl.<func>: --------------------------------------------
 from ._annotate_cells import annotate_cells
 from ._time_free_sampling import time_free_sampling
@@ -38,7 +44,6 @@ from ._feature_correlation import (
 )
 
 from ._cell_potential import cell_potential, normalize_cell_potential
-from ._norm import L2Norm
 
 from ._final_state_per_simulation import FinalStatePerSimulation
 
