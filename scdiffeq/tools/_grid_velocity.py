@@ -12,6 +12,42 @@ import sklearn.neighbors
 # -- set typing: -------------------------------------------------------
 from typing import Optional
 
+import ABCParse
+import numpy as np
+
+# -----------------------------------------------------------------------------
+# class Quiver(ABCParse.ABCParse):
+#     """With autoscaling"""
+
+#     def __init__(self, *args, **kwargs):
+#         self.__parse__(locals())
+
+#     @property
+#     def _scale_factor(self):
+#         """enables handling large values"""
+#         return np.abs(self._X_emb).max()
+
+#     def quiver(self, ax):
+#         ax.quiver(
+#             self._X_emb[:, 0] / self._scale_factor,
+#             self._X_emb[:, 1] / self._scale_factor,
+#             self._V_emb[:, 0],
+#             self._V_emb[:, 1],
+#             angles="xy",
+#             scale_units="xy",
+#             scale=None,
+#         )
+
+#     def __call__(self, ax, X_emb: np.ndarray, V_emb: np.ndarray):
+#         """
+#         X_emb (np.ndarray): state embedding.
+#         V_emb (np.ndarray): velocity embedding.
+#         """
+
+#         self.__update__(locals())
+
+#         self.quiver(ax)
+   
 
 # -- supporting function: --------------------------------------------------
 def quiver_autoscale(X_emb: np.ndarray, V_emb: np.ndarray):

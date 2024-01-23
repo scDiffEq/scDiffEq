@@ -43,6 +43,9 @@ class StateCharacterizationMixIn(object):
         use_key: Optional[str] = None,
         device=autodevice.AutoDevice(),
         inplace: bool = True,
+        silent: bool = False,
+        *args,
+        **kwargs,
     ):
         """"""
         adata, use_key = self.__check_vital_inputs(adata, use_key)
@@ -55,6 +58,9 @@ class StateCharacterizationMixIn(object):
             obs_key_added=obs_key_added,
             device=device,
             inplace=inplace,
+            silent=silent,
+            *args,
+            **kwargs,
         )
 
     def drift(
@@ -65,6 +71,9 @@ class StateCharacterizationMixIn(object):
         obs_key_added: str = "drift",
         device=autodevice.AutoDevice(),
         inplace: bool = True,
+        silent: bool = False,
+        *args,
+        **kwargs,
     ):
         """Drift method."""
         self._drift_diffusion_fwd(
@@ -75,7 +84,11 @@ class StateCharacterizationMixIn(object):
             use_key=use_key,
             device=device,
             inplace=inplace,
+            silent=silent,
+            *args,
+            **kwargs,
         )
+    
 
     def diffusion(
         self,
@@ -85,6 +98,9 @@ class StateCharacterizationMixIn(object):
         obs_key_added: str = "diffusion",
         device=autodevice.AutoDevice(),
         inplace: bool = True,
+        silent: bool = False,
+        *args,
+        **kwargs,
     ):
         """Diffusion method."""
 
@@ -96,6 +112,9 @@ class StateCharacterizationMixIn(object):
             use_key=use_key,
             device=device,
             inplace=inplace,
+            silent=silent,
+            *args,
+            **kwargs,
         )
 
     def potential(
