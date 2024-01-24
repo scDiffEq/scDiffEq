@@ -50,6 +50,9 @@ class scDiffEq(
         seed: int = 0,
         backend: str = "auto",
         gradient_clip_val: float = 0.5,
+        # -- velocity ratio keys: -----------------------------------------------
+        velocity_ratio_target: float = 0,  # off by default
+        velocity_ratio_enforce: float = 0, # off by default
         # -- kNN keys: [optional]: ----------------------------------------------
         build_kNN: Optional[bool] = False,
         kNN_key: Optional[str] = "X_pca",

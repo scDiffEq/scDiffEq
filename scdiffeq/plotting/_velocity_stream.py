@@ -157,8 +157,10 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     
     def _SCATTER_CMAP(self, groups) -> Dict:
         if not hasattr(self, "_cmap"):
+            print("no cmap found...")
             self._cmap = matplotlib.cm.tab20.colors
         if not isinstance(self._cmap, Dict):
+            print("cmap found...not a dictionary")
             self._cmap = {group: self._cmap[en] for en, group in enumerate(groups)}
         return self._cmap
 
@@ -171,12 +173,15 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         
         if self._c in cols:
             kwargs.pop("c")
-            groups = obs_df.groupby(self._c).groups # dict
-            cmap = self._SCATTER_CMAP(groups)
-            for group, group_ix in groups.items():
-                ax.scatter(
-                    self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
-                )
+            if str(obs_df[self._c].dtype) == "categorical":
+                groups = obs_df.groupby(self._c).groups # dict
+                cmap = self._SCATTER_CMAP(groups)                
+                for group, group_ix in groups.items():
+                    if hasattr(self, "_group_zorder") and group in self._group_zorder:
+                        kwargs.update({'zorder': self._group_zorder[group]})
+                    ax.scatter(
+                        self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
+                    )
         else:
             ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **self._SCATTER_KWARGS)
             
@@ -186,7 +191,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         ax: Optional[Union[plt.Axes, List[plt.Axes]]] = None,
         stream_color: str = "k",
         c: str = "dodgerblue",
-        cmap: Optional[Union[Dict,List,Tuple]] = matplotlib.cm.tab20.colors,
+        group_zorder: Optional[Dict] = None,
+        cmap: Optional[Union[Dict,List,Tuple]] = 'matplotlib.cm.tab20.colors',
         linewidth: float = 0.5,
         stream_density: float = 2.5,
         add_margin: float = 0.1,
@@ -237,6 +243,8 @@ def velocity_stream(
     adata: anndata.AnnData,
     ax: Optional[Union[plt.Axes, List[plt.Axes]]] = None,
     c: str = "dodgerblue",
+    cmap: Optional[Union[Dict,List,Tuple]] = matplotlib.cm.tab20.colors,
+    group_zorder: Optional[Dict] = None,
     linewidth: float = 0.5,
     stream_density: float = 2.5,
     add_margin: float = 0.1,

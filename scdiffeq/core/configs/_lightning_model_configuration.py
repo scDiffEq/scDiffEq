@@ -27,6 +27,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
         DiffEq_type: str = "SDE",
         potential_type: str = "fixed",
         fate_bias_csv_path = None,
+        velocity_ratio_target: float = 0,
     ):
         """ """
 
@@ -85,6 +86,10 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             
         if self.fate_bias_aware:
             _model.append("FateBiasAware")
+            
+            
+        if self._velocity_ratio_target:
+            _model.append("RegularizedVelocityRatio")
 
         _model = "_".join(_model)
         
