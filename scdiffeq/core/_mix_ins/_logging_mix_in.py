@@ -3,11 +3,20 @@ import pathlib
 import pandas as pd
 
 class LoggingMixIn(object):
+    
     def _configure_CSVLogger(self):
+        
+        """ """
+        
+#         if hasattr(self, "_load_version"):
+#             version = self._load_version
+#         else:
+#             version = None
+                
         return lightning.pytorch.loggers.CSVLogger(
                 save_dir=self._working_dir,
                 name=self._name,
-                version=None,
+                version=None, # version,
                 prefix="",
                 flush_logs_every_n_steps=1,
             )

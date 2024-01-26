@@ -149,7 +149,6 @@ class scDiffEq(
         Returns:
             None
         """
-        
         self.__config__(locals())
         
     def fit(

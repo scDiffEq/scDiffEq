@@ -72,7 +72,9 @@ class LightningModelConfiguration(ABCParse.ABCParse):
     def _USE_CKPT(self) -> bool:
         return not self._ckpt_path is None
     
-    def __call__(self, kwargs: Dict, ckpt_path: Optional[str] = None):
+    def __call__(
+        self, kwargs: Dict, ckpt_path: Optional[str] = None, loading_existing: bool = False,
+                ):
         
         self._ckpt_path = ckpt_path
 
@@ -100,6 +102,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
                 return lit_model.load_from_checkpoint(self._ckpt_path)
             
             model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
+            model_kwargs['loading_existing'] = loading_existing
             
             return lit_model(**model_kwargs) # data_dim = self._data_dim, 
         

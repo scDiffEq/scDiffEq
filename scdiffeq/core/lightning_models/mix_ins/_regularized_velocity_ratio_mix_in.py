@@ -28,10 +28,10 @@ class RegularizedVelocityRatioMixIn(object):
         TARGET_RATIO = self.hparams['velocity_ratio_target']
         VELO_RATIO_ENFORCE = self.hparams['velocity_ratio_enforce']
         
-        self.reg_f_loss = self._compute_magnitude_f(Z_hat)
-        self.reg_g_loss = self._compute_magnitude_g(Z_hat)
+        self.reg_f = self._compute_magnitude_f(Z_hat)
+        self.reg_g = self._compute_magnitude_g(Z_hat)
         
-        VELO_RATIO_LOSS = VELO_RATIO_ENFORCE * (TARGET_RATIO - self.reg_f_loss.div(self.reg_g_loss))
+        VELO_RATIO_LOSS = VELO_RATIO_ENFORCE * (TARGET_RATIO - self.reg_f.div(self.reg_g))
         return torch.abs(VELO_RATIO_LOSS)
     
     def step(self, batch, batch_idx, stage=None):
@@ -43,6 +43,10 @@ class RegularizedVelocityRatioMixIn(object):
         )
         
         self.velocity_ratio_loss = self._velocity_ratio_loss(X_hat)
-        self.total_loss = self.sinkhorn_loss + self.velocity_ratio_loss
         
+        if self.hparams['disable_velocity_ratio_backprop']:
+            self.total_loss = self.sinkhorn_loss
+        else:
+            self.total_loss = self.sinkhorn_loss + self.velocity_ratio_loss
+
         return self.total_loss.sum()

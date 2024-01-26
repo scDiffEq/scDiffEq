@@ -72,6 +72,7 @@ class LightningSDE_VAE(
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
         
+        loading_existing: bool = False,
         version = __version__,
         
         *args,
@@ -79,7 +80,7 @@ class LightningSDE_VAE(
     ):
         super().__init__()
 
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing=loading_existing)
 
         self.save_hyperparameters()
         

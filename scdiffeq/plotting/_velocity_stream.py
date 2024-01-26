@@ -140,15 +140,15 @@ class VelocityStreamPlot(ABCParse.ABCParse):
 
     def streamplot(self, ax) -> None:
         ax.streamplot(self.x, self.y, self.u, self.v, **self._STREAMPLOT_KWARGS)
-
         self._set_margin(ax)
         
     @property
     def _SCATTER_KWARGS(self) -> Dict[str, Any]:
+        """ """
         kwargs = {
             "c": self._c,
-            "ec": "None",
             "zorder": self._scatter_zorder,
+            "ec": "None",
             "alpha": 0.2,
             "s": 50,
         }
@@ -156,6 +156,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return kwargs
     
     def _SCATTER_CMAP(self, groups) -> Dict:
+        """ """
         if not hasattr(self, "_cmap"):
             print("no cmap found...")
             self._cmap = matplotlib.cm.tab20.colors
@@ -168,23 +169,27 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         """ """
         obs_df = self._adata.obs.copy().reset_index()
         cols = obs_df.columns.tolist()
-        
+
         kwargs = self._SCATTER_KWARGS
+
+        COLOR_FROM_OBS = self._c in cols
+        COLOR_BY_GROUP = str(obs_df[self._c].dtype) == "categorical"
         
-        if self._c in cols:
-            kwargs.pop("c")
-            if str(obs_df[self._c].dtype) == "categorical":
+        if COLOR_FROM_OBS:
+            if not COLOR_BY_GROUP: # implies float not grouped object.
+                kwargs.update({"c":obs_df[self._c]})
+                ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
+            else:
+                kwargs.pop("c")
                 groups = obs_df.groupby(self._c).groups # dict
-                cmap = self._SCATTER_CMAP(groups)                
+                cmap = self._SCATTER_CMAP(groups)
                 for group, group_ix in groups.items():
                     if hasattr(self, "_group_zorder") and group in self._group_zorder:
                         kwargs.update({'zorder': self._group_zorder[group]})
                     ax.scatter(
                         self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
                     )
-        else:
-            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **self._SCATTER_KWARGS)
-            
+
     def __call__(
         self,
         adata: anndata.AnnData,

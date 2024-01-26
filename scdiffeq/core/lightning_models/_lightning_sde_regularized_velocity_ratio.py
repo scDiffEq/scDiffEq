@@ -23,6 +23,7 @@ class LightningSDE_RegularizedVelocityRatio(
         latent_dim: int = 50,
         velocity_ratio_target: float = 1,
         velocity_ratio_enforce: float = 100,
+        disable_velocity_ratio_backprop: bool = False,
         name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [512, 512],
         sigma_hidden: Union[List[int], int] = [32, 32],
@@ -49,6 +50,7 @@ class LightningSDE_RegularizedVelocityRatio(
         adjoint=False,
         backend = "auto",
         version = __version__,
+        loading_existing: bool = False,
         *args,
         **kwargs,
     ):
@@ -64,9 +66,9 @@ class LightningSDE_RegularizedVelocityRatio(
             None
         """
         super().__init__()
+                
+        name = self._configure_name(name, loading_existing = loading_existing)
         
-        name = self._configure_name(name)
-
         self.save_hyperparameters()
         
         # -- torch modules: ----------------------------------------------------

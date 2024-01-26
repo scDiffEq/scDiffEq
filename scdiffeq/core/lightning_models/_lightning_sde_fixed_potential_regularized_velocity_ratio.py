@@ -21,6 +21,7 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
         latent_dim: int = 50,
         velocity_ratio_target: float = 1,
         velocity_ratio_enforce: float = 100,
+        disable_velocity_ratio_backprop: bool = False,
         name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [2000, 2000],
         sigma_hidden: Union[List[int], int] = [800, 800],
@@ -47,6 +48,7 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
         dt: float = 0.1,
         adjoint = False,
         backend = "auto",
+        loading_existing: bool = False,
         
         version = __version__,
         
@@ -55,8 +57,8 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
     ):
         super().__init__()
         
-        name = self._configure_name(name)
-
+        name = self._configure_name(name, loading_existing = loading_existing)
+        
         self.save_hyperparameters()
         
         # -- torch modules: ----------------------------------------------------

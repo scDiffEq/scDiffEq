@@ -44,7 +44,18 @@ class ModelLogging(lightning.Callback):
 
             return sinkhorn_loss.sum()
         
-        
+    def log_f(self, pl_module, t, stage: str):
+        if hasattr(pl_module, "reg_f"):
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"velo_f_{_t}_{stage}", pl_module.reg_f[i])
+
+    def log_g(self, pl_module, t, stage: str):
+        if hasattr(pl_module, "reg_g"):
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"velo_g_{_t}_{stage}", pl_module.reg_g[i])
+
     def log_velocity_ratio_loss(self, pl_module, t, stage: str):
         
         if hasattr(pl_module, "velocity_ratio_loss"):
@@ -89,10 +100,11 @@ class ModelLogging(lightning.Callback):
             pl_module = pl_module, t = batch.t, stage = "training",
         )
         # right now, we do nothing with the VRL total
-        
         self._gather_current_epoch_loss(
             pl_module = pl_module, sinkhorn_total = sinkhorn_total, stage = "training",
         )
+        self.log_f(pl_module = pl_module, t = batch.t, stage = "training")
+        self.log_g(pl_module = pl_module, t = batch.t, stage = "training")
 
     def on_validation_batch_end(
         self, 
@@ -117,3 +129,5 @@ class ModelLogging(lightning.Callback):
         self._gather_current_epoch_loss(
             pl_module = pl_module, sinkhorn_total = sinkhorn_total, stage = "validation",
         )
+        self.log_f(pl_module = pl_module, t = batch.t, stage = "validation")
+        self.log_g(pl_module = pl_module, t = batch.t, stage = "validation")

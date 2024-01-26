@@ -24,7 +24,6 @@ class ModelLoader(ABCParse.ABCParse):
     def __init__(self, project_path = None, version = None, name_delim: str = ".", *args, **kwargs):
         """ """
         self.__parse__(locals())
-        self._INFO = utils.InfoMessage()
         self._validate_version()
 
     @property
@@ -63,7 +62,7 @@ class ModelLoader(ABCParse.ABCParse):
     @property
     def _MODEL_TYPE(self):
         name = self.hparams["name"]
-        if ":" in name:
+        if ":" in name: # for backwards-compatibility
             return name.split(":")[0].replace("-", "_")
         return name.split(self._name_delim)[0].replace("-", "_")
 
@@ -101,13 +100,14 @@ class ModelLoader(ABCParse.ABCParse):
         msg = f"{version_key} not found in project. Available versions: {available_versions}"
         assert version_key in self.project._VERSION_PATHS, msg
 
-    def from_ckpt(self, ckpt_path: str):
-        return self.LightningModule.load_from_checkpoint(ckpt_path)
+    def from_ckpt(self, ckpt_path: str, load_kwargs = {"loading_existing": True}):
+        return self.LightningModule.load_from_checkpoint(ckpt_path, **load_kwargs)
     
     def __call__(
         self,
         epoch: Optional[Union[str, int]] = None,
         plot_state_change: Optional[bool] = False,
+        load_kwargs = {"loading_existing": True},
         *args,
         **kwargs,
     ) -> lightning.LightningModule:
@@ -128,8 +128,7 @@ class ModelLoader(ABCParse.ABCParse):
 
         self._validate_epoch()
         ckpt_path = self.ckpt.path
-        model = self.LightningModule.load_from_checkpoint(ckpt_path)
-        # self.model
+        return self.LightningModule.load_from_checkpoint(ckpt_path, **load_kwargs)
 
 #         if plot_state_change:
 #             torch_nets.pl.weights_and_biases(model.state_dict())
@@ -140,8 +139,6 @@ class ModelLoader(ABCParse.ABCParse):
         
 #         if plot_state_change:
 #             torch_nets.pl.weights_and_biases(model.state_dict())
-
-        return model
 
 def _inputs_from_ckpt_path(ckpt_path):
     """If you give the whole ckpt_path, you can derive the other inputs."""
@@ -223,9 +220,18 @@ def load_model(
         version=version,
         epoch=epoch,
     )
+    
     model = scDiffEq(**dict(diffeq.hparams))
+    model._load_version = version
     model.configure_data(adata)
     model.configure_kNN()
-    model.configure_model(diffeq, configure_trainer = configure_trainer)
+    model.configure_model(
+        diffeq, configure_trainer = configure_trainer, loading_existing = True,
+    )
+    
+    PREVIOUS_METRICS_PATH = pathlib.Path(project_path).joinpath(f"version_{version}/metrics.csv")
+    PREVIOUS_METRICS = pd.read_csv(PREVIOUS_METRICS_PATH)
+    
+    model.DiffEq.COMPLETED_EPOCHS = int(PREVIOUS_METRICS["total_epochs"].max())
 
     return model

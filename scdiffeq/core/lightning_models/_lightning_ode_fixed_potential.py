@@ -37,8 +37,10 @@ class LightningODE_FixedPotential(
         backend: str = "auto",
         
         adjoint=False,
+        
+        # -- other: ----
+        loading_existing: bool = False,
         version = __version__,
-
         *args,
         **kwargs,
     )->None:
@@ -59,7 +61,7 @@ class LightningODE_FixedPotential(
         """
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing = loading_existing)
 
         self.save_hyperparameters()
 

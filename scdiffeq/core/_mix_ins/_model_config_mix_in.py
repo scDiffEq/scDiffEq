@@ -17,7 +17,12 @@ class ModelConfigMixIn(object):
             save_dir=self._name
         )
 
-    def configure_model(self, DiffEq: Optional[lightning.LightningModule] = None, configure_trainer: bool = True):
+    def configure_model(
+        self,
+        DiffEq: Optional[lightning.LightningModule] = None,
+        configure_trainer: bool = True,
+        loading_existing: bool = False,
+    ):
         if DiffEq is None:
             self._LitModelConfig = configs.LightningModelConfiguration(
                 data_dim=self._data_dim,
@@ -27,13 +32,14 @@ class ModelConfigMixIn(object):
                 fate_bias_csv_path=self._fate_bias_csv_path,
                 velocity_ratio_target = self._velocity_ratio_target,
             )
+
             if hasattr(self, "reducer"):
                 self._PARAMS["PCA"] = self.reducer.PCA
-            DiffEq = self._LitModelConfig(self._PARAMS, self._ckpt_path)
+            DiffEq = self._LitModelConfig(self._PARAMS, self._ckpt_path, loading_existing = loading_existing)
 
         self.DiffEq = DiffEq
-
         self._name = self.DiffEq.hparams.name
+
         self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
 
@@ -43,10 +49,10 @@ class ModelConfigMixIn(object):
         # was its own step before: now in-line here, since it
         # doesn't make sense to separate it, functionally
         self._LOGGING = utils.LoggerBridge(self.DiffEq)
-        
+
         if configure_trainer:
             self._configure_trainer_generator()
-        
+
     def configure_data(self, adata: anndata.AnnData):
         """ """
         self.adata = adata.copy()
@@ -59,19 +65,19 @@ class ModelConfigMixIn(object):
         """ """
         # -- Step 1: parse kwargs, set up info msg -----------------------------
         self.__parse__(kwargs, public = [None], ignore=["adata"])
-        
+
         # -- Step 2: configure data ----------------------------------------------
         if not kwargs['adata'] is None:
             # if adata is given, triggers 2 through 4
             self.configure_data(adata = kwargs['adata'])
-            
+
             # -- Step 3: configure kNN --------------------------------------------
             if self._PARAMS["build_kNN"]:
                 self._PARAMS['kNN'] = self.kNN
 
             # -- Step 4: configure model -------------------------------------------
             self.configure_model(DiffEq = None, configure_trainer = True)
-            
+
             # -- Step 5: extras (was step 6): ---------------------------------------
 #             if kwargs["reduce_dimensions"]:
 #                 self._configure_dimension_reduction()

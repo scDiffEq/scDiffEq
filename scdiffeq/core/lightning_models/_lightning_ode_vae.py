@@ -64,13 +64,14 @@ class LightningODE_VAE(
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
+        loading_existing: bool = False,
         version = __version__,
         *args,
         **kwargs,
     ):
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing=loading_existing)
 
         self.save_hyperparameters()
         
