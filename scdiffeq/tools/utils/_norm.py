@@ -1,13 +1,17 @@
 
+# -- import packages: ---------------------------------------------------------
 import abc
 import numpy as np
 import torch
+
+
+# -- set typing: --------------------------------------------------------------
 from typing import Union
 
 
+# -- Base class: --------------------------------------------------------------
 class FlexibleCall(abc.ABC):
     def __init__(self, *args, **kwargs):
-
         """"""
 
     @property
@@ -36,6 +40,7 @@ class FlexibleCall(abc.ABC):
         return self.flexible_forward(self.input, *args, **kwargs)
 
 
+# -- API-facing callables: ----------------------------------------------------
 class L1Norm(FlexibleCall):
     """Manhattan Distance"""
 
@@ -48,7 +53,7 @@ class L1Norm(FlexibleCall):
     def _torch(self, input: torch.Tensor, dim=-1, **kwargs):
         return input.norm(p=1, dim=dim, **kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "L1 Norm: Manhattan Distance"
 
 
@@ -64,5 +69,5 @@ class L2Norm(FlexibleCall):
     def _torch(self, input: torch.Tensor, dim=-1):
         return input.norm(p=2, dim=dim)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "L2 Norm: Euclidean Distance"

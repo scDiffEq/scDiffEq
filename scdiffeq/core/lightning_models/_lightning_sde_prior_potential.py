@@ -44,13 +44,14 @@ class LightningSDE_PriorPotential(
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
         backend = "auto",
+        loading_existing: bool = False,
         version = __version__,
         *args,
         **kwargs,
     ):
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing = loading_existing)
 
         self.save_hyperparameters()
         

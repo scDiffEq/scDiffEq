@@ -13,3 +13,5 @@ from ._fate_bias_mix_in import FateBiasMixIn
 from ._fate_bias_vae_mix_in import FateBiasVAEMixIn
 from ._fate_bias_drift_prior_mix_in import FateBiasDriftPriorMixIn
 from ._fate_bias_drift_prior_vae_mix_in import FateBiasDriftPriorVAEMixIn
+
+from ._regularized_velocity_ratio_mix_in import RegularizedVelocityRatioMixIn

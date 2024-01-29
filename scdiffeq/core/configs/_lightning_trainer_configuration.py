@@ -50,6 +50,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         
         return callback_config(
             version = self._version,
+            stage = self._stage,
             viz_frequency = self._viz_frequency,
             model_name=self._model_name,
             working_dir=self._working_dir,
@@ -210,7 +211,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         self._retain_test_gradients = False
         if stage is None:
             stage = ""
-            
+        self._stage = stage
 #         if isinstance(swa_lrs, NoneType):
 #             swa_lrs = lr
             

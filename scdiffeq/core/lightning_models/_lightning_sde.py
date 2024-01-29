@@ -21,8 +21,8 @@ class LightningSDE(
         self,
         latent_dim: int = 50,
         name: Optional[str] = None,
-        mu_hidden: Union[List[int], int] = [2000, 2000],
-        sigma_hidden: Union[List[int], int] = [800, 800],
+        mu_hidden: Union[List[int], int] = [512, 512],
+        sigma_hidden: Union[List[int], int] = [32, 32],
         mu_activation: Union[str, List[str]] = 'LeakyReLU',
         sigma_activation: Union[str, List[str]] = 'LeakyReLU',
         mu_dropout: Union[float, List[float]] = 0.1,
@@ -46,12 +46,24 @@ class LightningSDE(
         adjoint=False,
         backend = "auto",
         version = __version__,
+        loading_existing: bool = False,
         *args,
         **kwargs,
     ):
+        """LightningSDE model accessed as model.DiffEq
+        
+        Args:
+            latent_dim (int): number of latent dimensions over which SDE should be
+            parameterized. **Default** = 50
+            
+            name (Optional[str]): model name used during project saving. **Default** = None
+        
+        Returns:
+            None
+        """
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing = loading_existing)
 
         self.save_hyperparameters()
         

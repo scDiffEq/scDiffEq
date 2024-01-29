@@ -1,10 +1,4 @@
-.field-list.simple p em {
-    color: #424874;
-}
-
-.field-list.simple p strong {
-    color: #654199;
-}
-.sd-card-header .sd-card-text {
-    font-size: 20px;
-}
+html[data-theme=dark] .bd-content img:not(.only-dark):not(.dark-light) {
+    background: transparent;
+    border-radius: .25rem;
+    }

@@ -81,14 +81,15 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         
         PCA = None,
         
+        # -- other: ----
+        loading_existing: bool = False,
         version = __version__,
-        
         *args,
         **kwargs,
     ):
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing = loading_existing)
         
         self.save_hyperparameters()
         

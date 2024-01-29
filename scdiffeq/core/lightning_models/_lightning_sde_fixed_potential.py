@@ -44,7 +44,7 @@ class LightningSDE_FixedPotential(
         dt: float = 0.1,
         adjoint = False,
         backend = "auto",
-        
+        loading_existing: bool = False,
         version = __version__,
         
         *args,
@@ -52,7 +52,7 @@ class LightningSDE_FixedPotential(
     ):
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing = loading_existing)
 
         self.save_hyperparameters()
         
