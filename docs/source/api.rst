@@ -4,6 +4,7 @@ API Reference
 
 .. title:: API
 
+Here you will find documentation of the scDiffEq API. This covers both the model as well as the supporting function modules.
 
 Model
 =====
@@ -153,3 +154,4 @@ Data I/O
             :expand:
 
             sdq.tl.write_pickle
+

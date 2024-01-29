@@ -29,7 +29,6 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = []
 
-
 # -- html output options: -----------------------------------------------------
 
 html_theme = 'pydata_sphinx_theme'

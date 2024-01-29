@@ -290,10 +290,6 @@
 
       :octicon:`repo;3em;sd-text-light`
 
-
-
-
-
 .. raw:: html
 
    <embed>

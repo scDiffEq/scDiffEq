@@ -1,0 +1,8 @@
+sphinx
+pydata_sphinx_theme
+autodoc
+sphinxcontrib-napoleon
+nbsphinx
+sphinx-copybutton
+sphinx-favicon
+sphinx-design
