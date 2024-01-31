@@ -3,8 +3,6 @@ from pathlib import Path
 import os, glob
 import ABCParse
 
-from ._info_message import InfoMessage
-
 class scDiffEqLogger(ABCParse.ABCParse):
     """
     While Lightning uses automatic logging, we need something one step removed from this to take full
@@ -19,7 +17,6 @@ class scDiffEqLogger(ABCParse.ABCParse):
     ):
 
         self.__parse__(locals(), public=[None])
-        self._INFO = InfoMessage()
         self.creation_count = 0
 
     @property

@@ -3,7 +3,11 @@
 import torch_nets
 import lightning
 import torch
+import ABCParse
 
+# -- import local dependencies: ------------------------------------------------
+from ..base._batch_processor import BatchProcessor
+from ..base._sinkhorn_divergence import SinkhornDivergence
 
 from ... import utils
 
@@ -51,8 +55,9 @@ class VAEMixIn(object):
         self._configure_encoder()
         self.DiffEq = func(**utils.function_kwargs(func, kwargs))
         self._configure_decoder()
+#         self._configure_optimizers_schedulers()
         
-    def _configure_optimizers_schedulers(self):
+    def _configure_lightning_model(self, kwargs): # _configure_optimizers_schedulers(self):
         
         """Assumes use of a pre-train step with an independent optimizer, scheduler (i.e., two total, each)"""
         
@@ -75,6 +80,11 @@ class VAEMixIn(object):
                     optimizer=self._optimizers[1], step_size=self.hparams['train_step_size']
                 ),
         ]
+        sinkhorn_kwargs = ABCParse.function_kwargs(func = SinkhornDivergence, kwargs = kwargs)
+        self.sinkhorn_divergence = SinkhornDivergence(**sinkhorn_kwargs)
+        self.process_batch = BatchProcessor
+        self.COMPLETED_EPOCHS = 0
+        
         
     def encode(self, X: torch.Tensor) -> torch.Tensor:
         return self.Encoder(X)
@@ -103,7 +113,7 @@ class VAEMixIn(object):
         recon_loss = self.reconstruction_loss(X0_hat, batch.X0).sum()
         self.log("pretrain_rl_mse", recon_loss.item())
         
-        self.log_lr()
+#         self.log_lr()
         
         self.manual_backward(recon_loss)
         pretrain_optim.step()
@@ -118,15 +128,15 @@ class VAEMixIn(object):
 
         batch = self.process_batch(batch, batch_idx)
         X_hat = self.forward(batch.X0, batch.t)
-        sinkhorn_loss = self.compute_sinkhorn_divergence(
+        self.sinkhorn_loss = self.compute_sinkhorn_divergence(
             batch.X, X_hat, batch.W, batch.W_hat
         )
-        loss = self.log_sinkhorn_divergence(sinkhorn_loss, t=batch.t, stage=stage)
+#         loss = self.log_sinkhorn_divergence(sinkhorn_loss, t=batch.t, stage=stage)
                 
-        self.log_lr()
+#         self.log_lr()
         
         if stage == "training":
-            self.manual_backward(loss)
+            self.manual_backward(self.sinkhorn_loss) # loss)
             train_optim.step()
             train_scheduler = self.lr_schedulers()[1]
             train_scheduler.step()

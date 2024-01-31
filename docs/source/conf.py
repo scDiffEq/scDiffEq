@@ -1,42 +1,53 @@
 __doc__ = """Configuration file for the Sphinx documentation builder."""
 
-# -- Project information: -----------------------------------------------------
-project = 'scDiffEq'
+# -- project info: ------------------------------------------------------------
+
+project = 'scdiffeq'
 copyright = '2023, Michael E. Vinyard'
 author = 'Michael E. Vinyard'
-release = '0.0.53'
+release = '0.1.0'
 
+# -- config: ------------------------------------------------------------------
+import os
+import sys
 
-# -- General configuration: ---------------------------------------------------
+sys.path.insert(0, os.path.abspath('../../'))
+
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
     'nbsphinx',
     'sphinx_copybutton',
     'sphinx_favicon',
     'sphinx_design',
+    'myst_parser',
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-# -- Options for HTML output: ------------------------------------------------
-html_theme = 'pydata_sphinx_theme'
+# -- html output options: -----------------------------------------------------
 
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
+
 
 html_theme_options = {
     "github_url": "https://github.com/scDiffEq/scDiffEq",
     "twitter_url": "https://twitter.com/vinyard_m",
     "logo": {
-      "image_light": "_static/imgs/scdiffeq_logo.png",
-      "image_dark": "_static/imgs/scdiffeq_logo.png",
+      "image_light": "scdiffeq_logo.png",
+      "image_dark": "scdiffeq_logo.dark_mode.png",
    },
 }
 autoclass_content = 'init'
 
-favicons = [
-    "imgs/scdiffeq.favicon.png",
-]
+favicons = [{"rel": "icon", "href": "scdiffeq.favicon.png"}]
+
+# -- notes: -------------------------------------------------------------------
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html

@@ -7,148 +7,23 @@ import lightning
 import torch
 import torch_nets
 import yaml
+import pandas as pd
 
-
-from ..core import lightning_models, utils, scDiffEq
+from ...core import lightning_models, utils, scDiffEq
 
 
 from typing import Optional, Union
 
-
-class Project(ABCParse.ABCParse):
-    def __init__(self, path=pathlib.Path("./").absolute(), *args, **kwargs):
-
-        self.__parse__(locals())
-
-        for k, v in self._VERSION_PATHS.items():
-            setattr(self, k, v)
-
-    @property
-    def _PROJECT_PATH(self):
-        if isinstance(self._path, pathlib.Path):
-            return self._path
-        elif isinstance(self._path, str):
-            return pathlib.Path(self._path)
-        else:
-            raise TypeError("arg: `path` must be of type: [pathlib.Path, str]")
-
-    @property
-    def _VERSION_PATHS(self):
-        version_paths = sorted(list(self._PROJECT_PATH.glob("version_*")))
-        return {path.name: path for path in version_paths}
-
-
-class HyperParams(ABCParse.ABCParse):
-    def __init__(self, yaml_path):
-
-        self.__configure__(locals())
-
-    def _read(self):
-        if not hasattr(self, "_file"):
-            self._yaml_file = yaml.load(open(self._yaml_path), Loader=yaml.Loader)
-
-    def __configure__(self, kwargs, private=["yaml_path"]):
-
-        self.__parse__(kwargs, private=private)
-        self._read()
-        for key, val in self._yaml_file.items():
-            setattr(self, key, val)
-
-    @property
-    def _ATTRS(self):
-        self._attrs = {
-            attr: getattr(self, attr)
-            for attr in self.__dir__()
-            if not attr[0] in ["_", "a"]
-        }
-        return self._attrs
-
-    def __repr__(self):
-
-        """Return a readable representation of the discovered hyperparameters"""
-
-        string = "HyperParameters\n"
-        for attr, val in self._ATTRS.items():
-            string += "\n  {:<34}: {}".format(attr, val)
-
-        return string
-
-    def __call__(self):
-        return self._ATTRS
-
-
-class Checkpoint(ABCParse.ABCParse):
-    def __init__(self, path: pathlib.Path, *args, **kwargs):
-        self.__parse__(locals(), public=["path"])
-
-    @property
-    def _fname(self):
-        return self.path.name.split(".")[0]
-
-    @property
-    def epoch(self):
-        if self._fname != "last":
-            return int(self._fname.split("=")[1].split("-")[0])
-        return self._fname
-
-    @property
-    def state_dict(self):
-        if not hasattr(self, "_ckpt"):
-            self._state_dict = torch.load(self.path)  # ["state_dict"]
-        return self._state_dict
-
-    def __repr__(self):
-        return f"ckpt epoch: {self.epoch}"
-
-
-class Version(ABCParse.ABCParse):
-    def __init__(self, path = None, *args, **kwargs):
-
-        self.__parse__(locals())
-
-    @property
-    def _CONTENTS(self):
-        return list(version_path.glob("*"))
-
-    @property
-    def hparams(self):
-        hparams_path = self._path.joinpath("hparams.yaml")
-        if hparams_path.exists():
-            return HyperParams(hparams_path)
-
-    @property
-    def metrics_df(self):
-        metrics_path = self._path.joinpath("metrics.csv")
-        if metrics_path.exists():
-            return pd.read_csv(metrics_path)
-
-    @property
-    def _CKPT_PATHS(self):
-        _ckpt_paths = list(self._path.joinpath("checkpoints").glob("*"))
-        return [pathlib.Path(path) for path in _ckpt_paths]
-
-    @property
-    def _SORTED_CKPT_KEYS(self):
-        epochs = list(self.ckpts.keys())
-        _epochs = sorted([epoch for epoch in epochs if epoch != "last"])
-        if "last" in epochs:
-            _epochs.append("last")
-        return _epochs
-
-    @property
-    def ckpts(self):
-        if not hasattr(self, "_CHECKPOINTS"):
-            self._CHECKPOINTS = {}
-            for ckpt_path in self._CKPT_PATHS:
-                ckpt = Checkpoint(ckpt_path)
-                self._CHECKPOINTS[ckpt.epoch] = ckpt
-        return self._CHECKPOINTS
+from ._hparams import HParams
+from ._project import Project
+from ._checkpoint import Checkpoint
+from ._version import Version
 
 
 class ModelLoader(ABCParse.ABCParse):
-    def __init__(self, project_path = None, version = None, *args, **kwargs):
+    def __init__(self, project_path = None, version = None, name_delim: str = ".", *args, **kwargs):
+        """ """
         self.__parse__(locals())
-        self._INFO = utils.InfoMessage()
         self._validate_version()
 
     @property
@@ -186,7 +61,10 @@ class ModelLoader(ABCParse.ABCParse):
 
     @property
     def _MODEL_TYPE(self):
-        return self.hparams["name"].split(":")[0].replace("-", "_")
+        name = self.hparams["name"]
+        if ":" in name: # for backwards-compatibility
+            return name.split(":")[0].replace("-", "_")
+        return name.split(self._name_delim)[0].replace("-", "_")
 
     @property
     def LightningModule(self):
@@ -222,13 +100,14 @@ class ModelLoader(ABCParse.ABCParse):
         msg = f"{version_key} not found in project. Available versions: {available_versions}"
         assert version_key in self.project._VERSION_PATHS, msg
 
-    def from_ckpt(self, ckpt_path: str):
-        return self.LightningModule.load_from_checkpoint(ckpt_path)
+    def from_ckpt(self, ckpt_path: str, load_kwargs = {"loading_existing": True}):
+        return self.LightningModule.load_from_checkpoint(ckpt_path, **load_kwargs)
     
     def __call__(
         self,
         epoch: Optional[Union[str, int]] = None,
         plot_state_change: Optional[bool] = False,
+        load_kwargs = {"loading_existing": True},
         *args,
         **kwargs,
     ) -> lightning.LightningModule:
@@ -249,8 +128,7 @@ class ModelLoader(ABCParse.ABCParse):
 
         self._validate_epoch()
         ckpt_path = self.ckpt.path
-        model = self.LightningModule.load_from_checkpoint(ckpt_path)
-        # self.model
+        return self.LightningModule.load_from_checkpoint(ckpt_path, **load_kwargs)
 
 #         if plot_state_change:
 #             torch_nets.pl.weights_and_biases(model.state_dict())
@@ -261,8 +139,6 @@ class ModelLoader(ABCParse.ABCParse):
         
 #         if plot_state_change:
 #             torch_nets.pl.weights_and_biases(model.state_dict())
-
-        return model
 
 def _inputs_from_ckpt_path(ckpt_path):
     """If you give the whole ckpt_path, you can derive the other inputs."""
@@ -286,17 +162,16 @@ def load_diffeq(
     """
     Load DiffEq from project_path, version [optional], and epoch [optional].
     
-    Parameters
-    ----------
-    project_path: Union[pathlib.Path, str]
+    Args:
+        project_path (Union[pathlib.Path, str])
 
-    version: Optional[int], default = None
+        version (Optional[int]): **Default** = None
 
-    epoch: Optional[Union[int, str]], default = None
+        epoch (Optional[Union[int, str]]): **Default** = None
 
-    Returns
-    -------
-    DiffEq: lightning.LightningModule
+    
+    Returns:
+        DiffEq (lightning.LightningModule): lightning differential equation model.
     """
     
     if not ckpt_path is None:
@@ -317,7 +192,27 @@ def load_model(
     project_path: Optional[Union[pathlib.Path, str]] = None,
     version: Optional[int] = None,
     epoch: Optional[Union[int, str]] = None,
+    configure_trainer: Optional[bool] = False,
 ):
+    
+    """Load scDiffEq model.
+    
+    Args:
+        adata (anndata.AnnData): adata object.
+        
+        ckpt_path (Optional[Union[pathlib.Path, str]]): description. **Default** = None
+        
+        project_path (Optional[Union[pathlib.Path, str]]): description. **Default** = None
+        
+        version (Optional[int]): description. **Default** = None
+        
+        epoch (Optional[Union[int, str]]): description. **Default** = None
+        
+        configure_trainer (Optional[bool]): indicate if trainer should be configured. **Default** = False.
+    
+    Returns:
+        scdiffeq.scDiffEq
+    """
 
     diffeq = load_diffeq(
         ckpt_path=ckpt_path,
@@ -325,9 +220,18 @@ def load_model(
         version=version,
         epoch=epoch,
     )
+    
     model = scDiffEq(**dict(diffeq.hparams))
+    model._load_version = version
     model.configure_data(adata)
     model.configure_kNN()
-    model.configure_model(diffeq)
+    model.configure_model(
+        diffeq, configure_trainer = configure_trainer, loading_existing = True,
+    )
+    
+    PREVIOUS_METRICS_PATH = pathlib.Path(project_path).joinpath(f"version_{version}/metrics.csv")
+    PREVIOUS_METRICS = pd.read_csv(PREVIOUS_METRICS_PATH)
+    
+    model.DiffEq.COMPLETED_EPOCHS = int(PREVIOUS_METRICS["total_epochs"].max())
 
     return model

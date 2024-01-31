@@ -17,9 +17,9 @@ from typing import Optional
 
 # -- DiffEq class: -------------------------------------------------------------
 class BaseLightningDiffEq(lightning.LightningModule):
+    """BaseLightningDiffEq"""
     def __init__(self, *args, **kwargs):
         super().__init__()
-        
         
     def _update_lit_diffeq_hparams(self, model_params):
         for key, val in self.hparams.items():
@@ -109,13 +109,13 @@ class BaseLightningDiffEq(lightning.LightningModule):
     def __repr__(self):
         return "LightningDiffEq"
     
-    def _configure_name(self, name: Optional[str] = None):
+    def _configure_name(self, name: Optional[str] = None, delim: Optional[str] = ".", loading_existing: bool = False):
         """ """
-        if not name is None:
-            return f"{self.__repr__()}:{name}"
-        else:
+                
+        if loading_existing or name is None:
             return self.__repr__()
-
+        else:
+            return f"{self.__repr__()}{delim}{name}"
     
     
 # -- moved to log callback: ---

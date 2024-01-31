@@ -50,7 +50,7 @@ class LightningSDE_FateBiasAware(
         fate_bias_csv_path=None,
         fate_bias_multiplier = 1,
         backend = "auto",
-        
+        loading_existing: bool = False,
         version = __version__,
         
         *args,
@@ -58,7 +58,7 @@ class LightningSDE_FateBiasAware(
     ):
         super().__init__()
         
-        name = self._configure_name(name)
+        name = self._configure_name(name, loading_existing = loading_existing)
 
         self.save_hyperparameters(ignore=['kNN_Graph'])
                         

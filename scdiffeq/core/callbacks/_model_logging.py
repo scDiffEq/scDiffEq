@@ -34,14 +34,38 @@ class ModelLogging(lightning.Callback):
                     pl_module.log(f"opt_{i}_param_group_{j}_lr", pg["lr"])
 
     def log_sinkhorn_divergence(self, pl_module, t, stage: str):
-
-        sinkhorn_loss = pl_module.sinkhorn_loss
         
-        for i in range(len(t)):
-            _t = round(t[i].item(), 3)
-            pl_module.log(f"sinkhorn_{_t}_{stage}", sinkhorn_loss[i])
+        if hasattr(pl_module, "sinkhorn_loss"):
+            sinkhorn_loss = pl_module.sinkhorn_loss
 
-        return sinkhorn_loss.sum()
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"sinkhorn_{_t}_{stage}", sinkhorn_loss[i])
+
+            return sinkhorn_loss.sum()
+        
+    def log_f(self, pl_module, t, stage: str):
+        if hasattr(pl_module, "reg_f"):
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"velo_f_{_t}_{stage}", pl_module.reg_f[i])
+
+    def log_g(self, pl_module, t, stage: str):
+        if hasattr(pl_module, "reg_g"):
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"velo_g_{_t}_{stage}", pl_module.reg_g[i])
+
+    def log_velocity_ratio_loss(self, pl_module, t, stage: str):
+        
+        if hasattr(pl_module, "velocity_ratio_loss"):
+            velocity_ratio_loss = pl_module.velocity_ratio_loss
+
+            for i in range(len(t)):
+                _t = round(t[i].item(), 3)
+                pl_module.log(f"velo_ratio_{_t}_{stage}", velocity_ratio_loss[i])
+
+            return velocity_ratio_loss.sum()
 
     def _gather_current_epoch_loss(self, pl_module, sinkhorn_total, stage):
         
@@ -64,7 +88,7 @@ class ModelLogging(lightning.Callback):
         batch: Any,
         batch_idx: int,
     ):
-        
+                
         batch = pl_module.process_batch(batch, batch_idx)
         
         self.log_total_epochs(pl_module)
@@ -72,9 +96,15 @@ class ModelLogging(lightning.Callback):
         sinkhorn_total = self.log_sinkhorn_divergence(
             pl_module = pl_module, t = batch.t, stage = "training",
         )
+        velocity_ratio_loss_total = self.log_velocity_ratio_loss(
+            pl_module = pl_module, t = batch.t, stage = "training",
+        )
+        # right now, we do nothing with the VRL total
         self._gather_current_epoch_loss(
             pl_module = pl_module, sinkhorn_total = sinkhorn_total, stage = "training",
         )
+        self.log_f(pl_module = pl_module, t = batch.t, stage = "training")
+        self.log_g(pl_module = pl_module, t = batch.t, stage = "training")
 
     def on_validation_batch_end(
         self, 
@@ -92,6 +122,12 @@ class ModelLogging(lightning.Callback):
         sinkhorn_total = self.log_sinkhorn_divergence(
             pl_module = pl_module, t = batch.t, stage = "validation",
         )
+        velocity_ratio_loss_total = self.log_velocity_ratio_loss(
+            pl_module = pl_module, t = batch.t, stage = "validation",
+        )
+        # right now, we do nothing with the VRL total
         self._gather_current_epoch_loss(
             pl_module = pl_module, sinkhorn_total = sinkhorn_total, stage = "validation",
         )
+        self.log_f(pl_module = pl_module, t = batch.t, stage = "validation")
+        self.log_g(pl_module = pl_module, t = batch.t, stage = "validation")

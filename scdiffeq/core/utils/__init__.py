@@ -35,8 +35,3 @@ from ._display_tracked_loss import display_tracked_loss
 
 from ._knn_graph_query import kNNGraphQuery
 from ._flexible_component_loader import FlexibleComponentLoader
-
-
-# review for deletion:
-# from ._default_neural_sde import default_NeuralSDE
-# from ._fetch_format import fetch_format
