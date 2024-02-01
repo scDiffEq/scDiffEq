@@ -3,6 +3,9 @@
 Lightning models (``sdq.core.lightning_models``)
 ================================================
 
+This sub-package contains all of the lightning models (present and future) that may be
+called by ``scDiffEq`` and set as ``scDiffEq.LightningModule``.
+
 .. title:: Lightning
 
 .. toctree::
