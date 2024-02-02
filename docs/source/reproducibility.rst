@@ -1,7 +1,0 @@
-
-===============
-Reproducibility
-===============
-
-.. toctree::
-   :hidden:

@@ -8,7 +8,7 @@ import torch
 from . import base, mix_ins
 
 
-from typing import Optional, Union, List
+from typing import Dict, List, Optional, Union
 from ... import __version__
 
 
@@ -21,9 +21,11 @@ class LightningSDE_RegularizedVelocityRatio(
     def __init__(
         self,
         latent_dim: int = 50,
-        velocity_ratio_target: float = 1,
-        velocity_ratio_enforce: float = 100,
-        disable_velocity_ratio_backprop: bool = False,
+        velocity_ratio_params: Dict[str,Union[float,bool]] = {
+            "target": 1,
+            "enforce": 0, # zero to disable
+            "method": "square", # abs -> calls torch.abs or torch.square
+        },
         name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [512, 512],
         sigma_hidden: Union[List[int], int] = [32, 32],

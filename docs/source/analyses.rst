@@ -5,7 +5,7 @@ Reproducibility
 .. toctree::
    :hidden:
    
-   human_hematopoiesis.preprocessing
+   _notebooks/human_hematopoiesis.preprocessing
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
 with ``scdiffeq``. While **Figure 1** contains an overview that does not host
@@ -19,8 +19,10 @@ they relate to the observed data.
 Figure 2
 ========
 
+
 Figure 3
 ========
+
 .. grid-item-card:: ``human_hematopoiesis.preprocessing.ipynb``
       :link: human_hematopoiesis.preprocessing.ipynb
       :text-align: right

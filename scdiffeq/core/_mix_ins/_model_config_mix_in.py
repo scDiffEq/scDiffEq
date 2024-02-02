@@ -30,7 +30,7 @@ class ModelConfigMixIn(object):
                 DiffEq_type=self._DiffEq_type,
                 potential_type=self._potential_type,
                 fate_bias_csv_path=self._fate_bias_csv_path,
-                velocity_ratio_target = self._velocity_ratio_target,
+                velocity_ratio_params = self._velocity_ratio_params,
             )
 
             if hasattr(self, "reducer"):
