@@ -1,6 +1,6 @@
 
 # -- type setting: -------------------------------------------------------------
-from typing import Union, List, Optional, Dict
+from typing import Dict, List, Optional, Union
 
 
 # -- import packages: ----------------------------------------------------------
@@ -51,8 +51,11 @@ class scDiffEq(
         backend: str = "auto",
         gradient_clip_val: float = 0.5,
         # -- velocity ratio keys: -----------------------------------------------
-        velocity_ratio_target: float = 0,  # off by default
-        velocity_ratio_enforce: float = 0, # off by default
+        velocity_ratio_params: Dict[str,Union[float,bool]] = {
+            "target": 1,
+            "enforce": 0, # zero to disable
+            "method": "square", # abs -> calls torch.abs or torch.square
+        },
         # -- kNN keys: [optional]: ----------------------------------------------
         build_kNN: Optional[bool] = False,
         kNN_key: Optional[str] = "X_pca",

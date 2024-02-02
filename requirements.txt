@@ -13,8 +13,4 @@ torch-nets>=0.1.0
 torch-adata>=0.0.24
 autodevice>=0.0.2
 cellplots>=0.0.1rc0
-<<<<<<< HEAD
-cell-perturb>=0.0.1rc0
-=======
 cell-perturb>=0.0.1rc1
->>>>>>> c9415bfacdfa1c86698efd8c7a46e851dbfb7423
