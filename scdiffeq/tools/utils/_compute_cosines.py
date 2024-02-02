@@ -14,6 +14,8 @@ from ._get_neighbor_indices import get_neighbor_indices
 from ._get_iterative_indices import get_iterative_indices
 
 
+from typing import Optional
+
 # -- supporting operational class: -------------------------------------------------------
 class CosineCorrelation(ABCParse.ABCParse):
     def __init__(self, *args, **kwargs) -> None:
@@ -51,6 +53,7 @@ class ComputeCosines(ABCParse.ABCParse):
         self,
         state_key="X",
         velocity_key: str = "X_drift",
+        n_pcs: Optional[int] = None,
         split_negative: bool = True,
         silent: bool = False,
         *args,
@@ -71,6 +74,8 @@ class ComputeCosines(ABCParse.ABCParse):
     def X(self):
         if not hasattr(self, "_X"):
             self._x = adata_query.fetch(self._adata, key=self._state_key, torch=False)
+            if not self._n_pcs is None:
+                self._x = self._x[:, :self._n_pcs]
         return self._x
 
     @property
@@ -79,6 +84,8 @@ class ComputeCosines(ABCParse.ABCParse):
             self._v = adata_query.fetch(
                 self._adata, key=self._velocity_key, torch=False
             )
+            if not self._n_pcs is None:
+                self._v = self._v[:, :self._n_pcs]
         return self._v
 
     @property

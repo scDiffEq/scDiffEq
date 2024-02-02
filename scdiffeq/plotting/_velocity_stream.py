@@ -173,9 +173,9 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         kwargs = self._SCATTER_KWARGS
 
         COLOR_FROM_OBS = self._c in cols
-        COLOR_BY_GROUP = str(obs_df[self._c].dtype) == "categorical"
-        
+
         if COLOR_FROM_OBS:
+            COLOR_BY_GROUP = str(obs_df[self._c].dtype) == "categorical"
             if not COLOR_BY_GROUP: # implies float not grouped object.
                 kwargs.update({"c":obs_df[self._c]})
                 ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
@@ -189,6 +189,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
                     ax.scatter(
                         self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
                     )
+        else:
+            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
 
     def __call__(
         self,
