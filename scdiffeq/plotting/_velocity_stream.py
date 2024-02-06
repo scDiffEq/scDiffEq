@@ -228,7 +228,6 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def save_img(self):
         """"""
         self._mk_fig_dir()
-        self.save_img()
         plt.savefig(self.SVG_path, dpi = self._dpi)
         plt.savefig(self.PNG_path, dpi = self._dpi)
         
