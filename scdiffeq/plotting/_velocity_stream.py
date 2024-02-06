@@ -218,11 +218,11 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     
     @property
     def SVG_path(self):
-        return ".".join([self.fname_basis, "svg"])
+        return pathlib.Path(".".join([str(self.fname_basis), "svg"]))
     
     @property
     def PNG_path(self):
-        return ".".join([self.fname_basis, "png"])
+        return pathlib.Path(".".join([str(self.fname_basis), "png"]))
     
     def save_img(self):
         """"""
@@ -296,7 +296,7 @@ def velocity_stream(
     adata: anndata.AnnData,
     ax: Optional[Union[plt.Axes, List[plt.Axes]]] = None,
     c: str = "dodgerblue",
-    cmap: Optional[Union[Dict,List,Tuple]] = matplotlib.cm.tab20.colors,
+    cmap: Optional[Union[Dict,List,Tuple]] = 'plasma_r',
     group_zorder: Optional[Dict] = None,
     linewidth: float = 0.5,
     stream_density: float = 2.5,
