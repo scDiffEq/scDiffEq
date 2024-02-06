@@ -153,6 +153,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
             "ec": "None",
             "alpha": 0.2,
             "s": 50,
+            "cmap": self._cmap,
         }
         kwargs.update(self._scatter_kwargs)
         return kwargs
@@ -160,10 +161,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def _SCATTER_CMAP(self, groups) -> Dict:
         """ """
         if not hasattr(self, "_cmap"):
-            print("no cmap found...")
             self._cmap = matplotlib.cm.tab20.colors
         if not isinstance(self._cmap, Dict):
-            print("cmap found...not a dictionary")
             self._cmap = {group: self._cmap[en] for en, group in enumerate(groups)}
         return self._cmap
 
@@ -192,9 +191,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
                         self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
                     )
         else:
-            if isinstance(self._cmap, tuple):
-                self._cmap = "plasma_r"
-            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], cmap=self._cmap, **kwargs)
+            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
 
     @property
     def scdiffeq_figure_dir(self):
@@ -216,8 +213,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     @property
     def fname_basis(self):
         if "sdq_info" in self._adata.uns:
-            return scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.data_model_info_tag}")
-        return scdiffeq_figure_dir.joinpath("velocity_stream")
+            return self.scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.data_model_info_tag}")
+        return self.scdiffeq_figure_dir.joinpath("velocity_stream")
     
     @property
     def SVG_path(self):
@@ -241,7 +238,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         stream_color: str = "k",
         c: str = "dodgerblue",
         group_zorder: Optional[Dict] = None,
-        cmap: Optional[Union[Dict,List,Tuple]] = 'matplotlib.cm.tab20.colors',
+        cmap: Optional[Union[Dict,List,Tuple, str]] = 'plasma_r',
         linewidth: float = 0.5,
         stream_density: float = 2.5,
         add_margin: float = 0.1,
