@@ -214,8 +214,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     @property
     def fname_basis(self):
         if "sdq_info" in self._adata.uns:
-            return f"velocity_stream.{self.data_model_info_tag}"
-        return "velocity_stream"
+            return scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.data_model_info_tag}")
+        return scdiffeq_figure_dir.joinpath("velocity_stream")
     
     @property
     def SVG_path(self):
@@ -228,8 +228,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def save_img(self):
         """"""
         self._mk_fig_dir()
-        plt.savefig(self.SVG_path, dpi = self._dpi)
-        plt.savefig(self.PNG_path, dpi = self._dpi)
+        plt.savefig(self.SVG_path, dpi = self._svg_dpi)
+        plt.savefig(self.PNG_path, dpi = self._png_dpi)
         
     def __call__(
         self,
@@ -254,7 +254,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         stream_kwargs: Optional[Dict] = {},
         disable_scatter: bool = False,
         save: bool = False,
-        dpi: float = 500,
+        png_dpi: Optional[float] = 500,
+        svg_dpi: Optional[float] = 250,
         *args,
         **kwargs,
     ):
@@ -321,7 +322,8 @@ def velocity_stream(
     scatter_kwargs: Optional[Dict[str, Any]] = {},
     mpl_kwargs: Optional[Dict[str, Any]] = {},
     save: Optional[bool] = False,
-    dpi: Optional[float] = 500,
+    png_dpi: Optional[float] = 500,
+    svg_dpi: Optional[float] = 250,
     *args,
     **kwargs,
 ):
