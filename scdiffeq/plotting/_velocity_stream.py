@@ -4,8 +4,10 @@ import anndata
 import matplotlib.pyplot as plt
 import numpy as np
 import cellplots as cp
-
 import matplotlib.cm
+import os
+import pathlib
+
 
 # -- import local dependencies: -----------------------------------------------
 from ..tools import VelocityEmbedding, GridVelocity
@@ -192,6 +194,44 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         else:
             ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
 
+    @property
+    def scdiffeq_figure_dir(self):
+        return pathlib.Path("scdiffeq_figures")
+
+    def _mk_fig_dir(self):
+        if not self.scdiffeq_figure_dir.exists():
+            os.mkdir(self.scdiffeq_figure_dir)
+            self._INFO(f"mkdir: {self.scdiffeq_figure_dir}")
+
+    @property
+    def sdq_info(self):
+        return self._adata.uns["sdq_info"]
+
+    @property
+    def data_model_info_tag(self) -> str:
+        return f"{self.sdq_info['project']}.version_{self.sdq_info['version']}.ckpt_{self.sdq_info['ckpt']}"
+
+    @property
+    def fname_basis(self):
+        if "sdq_info" in self._adata.uns:
+            return f"velocity_stream.{self.data_model_info_tag}"
+        return "velocity_stream"
+    
+    @property
+    def SVG_path(self):
+        return ".".join([self.fname_basis, "svg"])
+    
+    @property
+    def PNG_path(self):
+        return ".".join([self.fname_basis, "png"])
+    
+    def save_img(self):
+        """"""
+        self._mk_fig_dir()
+        self.save_img()
+        plt.savefig(self.SVG_path, dpi = self._dpi)
+        plt.savefig(self.PNG_path, dpi = self._dpi)
+        
     def __call__(
         self,
         adata: anndata.AnnData,
@@ -214,6 +254,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         scatter_kwargs: Optional[Dict] = {},
         stream_kwargs: Optional[Dict] = {},
         disable_scatter: bool = False,
+        save: bool = False,
+        dpi: float = 500,
         *args,
         **kwargs,
     ):
@@ -244,6 +286,10 @@ class VelocityStreamPlot(ABCParse.ABCParse):
             self.streamplot(ax)
             if not self._disable_scatter:
                 self.scatter(ax)
+                
+        if self._save:
+            self.save_img()
+
 
 # -- API-facing function: -----------------------------------------------------
 def velocity_stream(
@@ -275,6 +321,8 @@ def velocity_stream(
     stream_kwargs: Optional[Dict[str, Any]] = {},
     scatter_kwargs: Optional[Dict[str, Any]] = {},
     mpl_kwargs: Optional[Dict[str, Any]] = {},
+    save: Optional[bool] = False,
+    dpi: Optional[float] = 500,
     *args,
     **kwargs,
 ):

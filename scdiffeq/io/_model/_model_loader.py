@@ -200,7 +200,7 @@ def load_model(
     Args:
         adata (anndata.AnnData): adata object.
         
-        ckpt_path (Optional[Union[pathlib.Path, str]]): description. **Default** = None
+        ckpt_path (Optional[Union[pathlib.Path, str]]): Checkpoint or ckpt_path are accepted. **Default** = None
         
         project_path (Optional[Union[pathlib.Path, str]]): description. **Default** = None
         
@@ -213,6 +213,10 @@ def load_model(
     Returns:
         scdiffeq.scDiffEq
     """
+    
+    if isinstance(ckpt_path, Checkpoint):
+        ckpt_path = ckpt_path.path
+    
 
     diffeq = load_diffeq(
         ckpt_path=ckpt_path,
@@ -221,6 +225,25 @@ def load_model(
         epoch=epoch,
     )
     
+    # -- note: if ckpt_path is passed, get: project_path|version|epoch
+    if not ckpt_path is None:
+        project_path = ckpt_path.parent.parent.parent
+        version = int(ckpt_path.parent.parent.name.split("version_")[-1])
+        if ckpt_path.name == 'last.ckpt':
+            epoch = "last"
+        else:
+            epoch = int(ckpt_path.name.split("epoch=")[-1].split("-")[0])
+            
+            
+    # ----------------------------------------------------------------
+    
+    sdq_info = {
+        "ckpt": ckpt_path.name.split(".ckpt")[0],
+        "version": version,
+        "project": project_path.name
+    }
+    
+    # ----------------------------------------------------------------
     model = scDiffEq(**dict(diffeq.hparams))
     model._load_version = version
     model.configure_data(adata)
@@ -233,5 +256,7 @@ def load_model(
     PREVIOUS_METRICS = pd.read_csv(PREVIOUS_METRICS_PATH)
     
     model.DiffEq.COMPLETED_EPOCHS = int(PREVIOUS_METRICS["total_epochs"].max())
+    
+    model.adata.uns['sdq_info'] = sdq_info
 
     return model
