@@ -192,7 +192,9 @@ class VelocityStreamPlot(ABCParse.ABCParse):
                         self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
                     )
         else:
-            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
+            if isinstance(self._cmap, tuple):
+                self._cmap = "plasma_r"
+            ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], cmap=self._cmap, **kwargs)
 
     @property
     def scdiffeq_figure_dir(self):
@@ -230,6 +232,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         self._mk_fig_dir()
         plt.savefig(self.SVG_path, dpi = self._svg_dpi)
         plt.savefig(self.PNG_path, dpi = self._png_dpi)
+        self._INFO(f"Saved to: \n  {self.SVG_path}\n  {self.PNG_path}")
         
     def __call__(
         self,
