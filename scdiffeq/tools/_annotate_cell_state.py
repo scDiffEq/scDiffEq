@@ -65,7 +65,7 @@ class CellStateAnnotation(ABCParse.ABCParse):
 
     def forward(self) -> None:
         """Add mapped cell state values to adata_sim.obs"""
-        self._adata_sim.obs[self._obs_key] = self.X_mapped.values
+        self._adata_sim.obs[self._obs_key] = self.X_mapped.values.flatten()
         if not self._silent:
             self._INFO(f"Added state annotation: adata_sim.obs['{self._obs_key}']")
 
