@@ -52,8 +52,8 @@ class scDiffEq(
         gradient_clip_val: float = 0.5,
         # -- velocity ratio keys: -----------------------------------------------
         velocity_ratio_params: Dict[str,Union[float,bool]] = {
-            "target": 1,
-            "enforce": 0, # zero to disable
+            "target": 2,
+            "enforce": 100, # zero to disable
             "method": "square", # abs -> calls torch.abs or torch.square
         },
         # -- kNN keys: [optional]: ----------------------------------------------
