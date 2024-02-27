@@ -70,7 +70,7 @@ class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
         
         self.__update__(locals(), private = [None])
 
-        adata = read(self._fpath, backup_url=self.url, sparse=True, cache=True)
+        adata = read("data/Pancreas/endocrinogenesis_day15.h5ad", backup_url=self.url, sparse=True, cache=True)
         adata.var_names_make_unique()
         if self._WRITE:
             adata.write_h5ad(self._fpath)
@@ -79,7 +79,7 @@ class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
 
 # -- API-facing function: ------------------------------------------------------
 def pancreas(
-    fpath: Union[pathlib.Path, str] = "data/Pancreas/endocrinogenesis_day15.h5ad",
+    fpath: Union[pathlib.Path, str] = "pancreas.h5ad",
     write_h5ad: bool = True,
     *args,
     **kwargs,
