@@ -13,6 +13,7 @@ class RegularizedVelocityRatioMixIn(object):
 
     def forward(self, Z0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""
+        print(f"Z0 shape: {Z0.shape}, t: {t}")
         return self.integrate(Z0=Z0, t=t, dt=self.hparams["dt"], logqp=False, **kwargs)
     
     @property
