@@ -5,4 +5,4 @@
 
 .. title:: velocity_stream
 
-.. autofunction:: scdiffeq._plotting._velocity_stream.velocity_stream
+.. autofunction:: scdiffeq.plotting._velocity_stream.velocity_stream

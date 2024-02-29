@@ -405,7 +405,7 @@ def velocity_stream(
     svg_dpi: Optional[float] = 250,
     *args,
     **kwargs,
-):
+) -> Optional[Union[List[plt.Axes], None]]:
     """Generates velocity stream plots for single-cell data using the
     VelocityStreamPlot class.
 
@@ -414,45 +414,77 @@ def velocity_stream(
     plots without manually instantiating the class.
 
     Args:
-        adata (anndata.AnnData): The AnnData object containing the data
-        to plot.
+        adata (anndata.AnnData): The AnnData object containing the data to plot.
         
-        ax (Optional[Union[plt.Axes, List[plt.Axes]]]): Matplotlib axes object
-        or list of axes objects on which to draw the plots. If None, a new
-        figure and axes are created. Defaults to None.
+        ax (Optional[Union[plt.Axes, List[plt.Axes]]]): Matplotlib axes object or list of axes objects on which to draw the plots. If None, a new figure and axes are created. **Default** ``None``.
         
-        c (str): Color for the scatter plot points. Can be a column name from
-        `adata.obs` if coloring by a categorical variable. Defaults to
-        "dodgerblue".
+        c (str): Color for the scatter plot points. Can be a column name from `adata.obs` if coloring by a categorical variable. **Default**: ``"dodgerblue"``.
         
-        cmap (Optional[Union[Dict, List, Tuple, str]]): Colormap for the
-        scatter plot points if `c` is a categorical variable. Defaults to
-        'plasma_r'.
-        group_zorder (Optional[Dict]): Z-order for groups in the scatter plot,
+        cmap (Optional[Union[Dict, List, Tuple, str]]): Colormap for the scatter plot points if `c` is a categorical variable. **Default**: ``"plasma_r"``.
         
-        allowing certain groups to be plotted on top of others. Defaults to
-        None.
+        group_zorder (Optional[Dict]): Z-order for groups in the scatter plot, allowing certain groups to be plotted on top of others. **Default** ``None``.
         
-        linewidth (float): Line width for the streamlines. Defaults to 0.5.
-        stream_density (float): Density of the streamlines. Higher values create more densely packed streamlines. Defaults to 2.5.
-        add_margin (float): Additional margin added around the plotted data, specified as a fraction of the data range. Defaults to 0.1.
-        arrowsize (float): Size of the arrows in the stream plot. Defaults to 1.
-        arrowstyle (str): Style of the arrows in the stream plot. Defaults to "-|>".
-        maxlength (float): Maximum length of the arrows in the stream plot. Defaults to 4.
-        integration_direction (str): Direction of integration for the streamlines, can be "forward", "backward", or "both". Defaults to "both".
-        scatter_zorder (int): Z-order for scatter plot points, determining their layering. Defaults to 0.
-        stream_zorder (int): Z-order for the streamlines, determining their layering. Defaults to 10.
-        density (float), smooth (float), n_neighbors (Optional[int]), min_mass (float), autoscale (bool), stream_adjust (bool), cutoff_percentile (float), velocity_key (str), self_transitions (bool), use_negative_cosines (bool), T_scale (float): Parameters passed to `VelocityStreamPlot` class for plot customization.
+        linewidth (float): Line width for the streamlines. **Default**: ``0.5``.
+        
+        stream_density (float): Density of the streamlines. Higher values create more densely packed streamlines. **Default**: ``2.5``.
+        
+        add_margin (float): Additional margin added around the plotted data, specified as a fraction of the data range. **Default**: ``0.1``.
+        
+        arrowsize (float): Size of the arrows in the stream plot. **Default**: ``1``.
+        
+        arrowstyle (str): Style of the arrows in the stream plot. **Default**: ``"-|>"``.
+        
+        maxlength (float): Maximum length of the arrows in the stream plot. **Default**: ``4``.
+        
+        integration_direction (str): Direction of integration for the streamlines, can be "forward", "backward", or "both". **Default**: "both".
+        
+        scatter_zorder (int): Z-order for scatter plot points, determining their layering. **Default**: ``0``.
+        
+        stream_zorder (int): Z-order for the streamlines, determining their layering. **Default**: ``10``.
+        
+        density (float) **Default**: ``1``.
+        
+        smooth (float) **Default**: ``0.5``.
+        
+        n_neighbors (Optional[int]) **Default**: ``None``.
+        
+        min_mass (float)  **Default**: ``1``.
+        
+        autoscale (bool) **Default**: ``True``.
+        
+        stream_adjust (bool) **Default**: ``True``.
+        
+        cutoff_percentile (float)
+        
+        velocity_key (str)
+        
+        self_transitions (bool)
+        
+        use_negative_cosines (bool)
+        
+        T_scale (float): 
+        
         disable_scatter (bool): If True, disables the scatter plot overlay on the stream plot. Defaults to False.
+        
         disable_cbar (bool): If True, disables the color bar for the scatter plot. Useful when `c` is numeric. Defaults to False.
-        stream_kwargs (Dict[str, Any]), scatter_kwargs (Dict[str, Any]), cbar_kwargs (Dict), mpl_kwargs (Dict[str, Any]): Additional keyword arguments for customizing the stream plot, scatter plot, color bar, and matplotlib figure, respectively.
+        stream_kwargs (Dict[str, Any])
+        
+        scatter_kwargs (Dict[str, Any])
+        
+        cbar_kwargs (Dict)
+        
+        mpl_kwargs (Dict[str, Any]): Additional keyword arguments for customizing the stream plot, scatter plot, color bar, and matplotlib figure, respectively.
+        
         return_axes (bool): If True, returns the matplotlib axes with the generated plots. Defaults to False.
+        
         save (bool): If True, saves the generated plot to SVG and PNG formats. Defaults to False.
-        png_dpi (Optional[float]), svg_dpi (Optional[float]): DPI settings for saving PNG and SVG images. Defaults to 500 for PNG and 250 for SVG.
-        args, kwargs: Additional positional and keyword arguments.
+        
+        png_dpi (Optional[float]): DPI settings for saving PNG images. **Default**: ``500``.
+        
+        svg_dpi (Optional[float]): DPI settings for saving SVG images. **Default**: ``250``.
 
     Returns:
-        Optional[List[plt.Axes]]: A list of matplotlib axes with the generated plots, if `return_axes` is True. Otherwise, returns None.
+        axes (Optional[List[plt.Axes], None]): A list of matplotlib axes with the generated plots, if ``return_axes == True``. Otherwise, returns ``None``.
     """
 
     init_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__init__, locals())

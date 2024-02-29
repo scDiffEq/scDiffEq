@@ -72,26 +72,26 @@ Data I/O
 
             _api/io
 
-         .. button-link:: _api/_tools/read_h5ad.rst
+         .. button-link:: _api/_io/read_h5ad.rst
             :color: primary
             :outline:
             :expand:
 
-            sdq.tl.read_h5ad
+            sdq.io.read_h5ad
 
-         .. button-link:: _api/_tools/read_pickle.rst
+         .. button-link:: _api/_io/read_pickle.rst
             :color: primary
             :outline:
             :expand:
 
-            sdq.tl.read_pickle
+            sdq.io.read_pickle
 
-         .. button-link:: _api/_tools/write_pickle.rst
+         .. button-link:: _api/_io/write_pickle.rst
             :color: primary
             :outline:
             :expand:
 
-            sdq.tl.write_pickle
+            sdq.io.write_pickle
 
 
 Datasets
@@ -111,7 +111,7 @@ Datasets
    .. grid-item::
       :columns: 11
 
-      .. dropdown:: Tools (``sdq.datasets``) modules
+      .. dropdown:: Datasets (``sdq.datasets``) modules
 
          .. toctree::
             :maxdepth: 2
@@ -150,7 +150,7 @@ Plotting
    .. grid-item::
       :columns: 11
 
-      .. dropdown:: Tools (``sdq.pl``) modules
+      .. dropdown:: Plotting (``sdq.pl``) modules
 
          .. toctree::
             :maxdepth: 2
