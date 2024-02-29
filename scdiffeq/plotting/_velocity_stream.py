@@ -19,7 +19,32 @@ from typing import Any, Dict, List, Optional, Union, Tuple
 
 # -- Operational class: -------------------------------------------------------
 class VelocityStreamPlot(ABCParse.ABCParse):
-    """Velocity stream plot for a single ax"""
+    """A class to generate and plot velocity stream plots on a given plt.Axes object.
+
+    This class is designed to visualize the flow of cells (or particles) in a
+    velocity field, commonly used in single-cell data analysis to represent cell
+    trajectories over a reduced dimensionality space. It extends the ABCParse class
+    to leverage its parsing capabilities for initializing and configuring the plot
+    parameters.
+
+    Attributes:
+        density (float): The density of the grid for velocity vectors. Defaults to 1.
+        smooth (float): Smoothing factor applied to the velocity field. Defaults to 0.5.
+        n_neighbors (Optional[int]): Number of neighbors to consider for local averaging. Defaults to None.
+        min_mass (float): Minimum mass (weight) threshold for considering a point in the velocity field. Defaults to 1.
+        autoscale (bool): Flag to automatically scale the vectors. Defaults to True.
+        stream_adjust (bool): Adjust the streamplot parameters for optimal visualization. Defaults to True.
+        cutoff_percentile (float): Percentile for cutoff to ignore outlier velocities. Defaults to 0.05.
+        velocity_key (str): Key in `adata` to access velocity vectors. Defaults to "velocity".
+        self_transitions (bool): Whether to consider self-transitions in the velocity calculations. Defaults to True.
+        use_negative_cosines (bool): Flag to use negative cosines to adjust directionality. Defaults to True.
+        T_scale (float): Scaling factor for the transition matrix. Defaults to 10.
+        args: Variable length argument list.
+        kwargs: Arbitrary keyword arguments.
+
+    Note:
+        This class requires an AnnData object `adata` to be passed at call time, not at initialization.
+    """
 
     def __init__(
         self,
@@ -37,6 +62,29 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         *args,
         **kwargs,
     ):
+        """Initializes the VelocityStreamPlot object with parameters to configure the velocity stream plot.
+
+        This method sets up the necessary parameters for generating a velocity stream plot, including the setup for velocity embedding and grid velocity calculation. It parses the arguments and initializes internal states needed for plotting.
+
+        Args:
+            density (float): Density of the grid for velocity vectors. Higher values create a denser grid. Defaults to 1.
+            smooth (float): Smoothing factor applied to the velocity vectors, influencing the smoothness of the stream plot. Defaults to 0.5.
+            n_neighbors (Optional[int]): Number of nearest neighbors to use for local averaging of velocities. If None, a default heuristic is used. Defaults to None.
+            min_mass (float): Minimum mass (weight) threshold for considering a point in the velocity field. Helps in filtering out noise. Defaults to 1.
+            autoscale (bool): If True, scales the magnitude of velocity vectors automatically based on the density and size of the plot. Defaults to True.
+            stream_adjust (bool): If True, adjusts stream plot parameters for optimal visualization. Defaults to True.
+            cutoff_percentile (float): Percentile for cutoff to filter out outlier velocities, specified as a fraction between 0 and 1. Defaults to 0.05.
+            velocity_key (str): Key in the AnnData object `adata` to access velocity vectors. Defaults to "velocity".
+            self_transitions (bool): If True, considers self-transitions in velocity calculations, affecting the direction and magnitude of vectors. Defaults to True.
+            use_negative_cosines (bool): If True, uses negative cosines to adjust the directionality of vectors, potentially improving visualization clarity. Defaults to True.
+            T_scale (float): Scaling factor for the transition matrix T, affecting the overall magnitude of velocity vectors. Defaults to 10.
+            args: Additional positional arguments not specifically defined.
+            kwargs: Additional keyword arguments not specifically defined.
+
+        Note:
+            The `__init__` method does not require the AnnData object `adata`. Instead, `adata` should be passed to the `__call__` method when generating the plots.
+        """
+
         self.__parse__(locals())
 
         self._velocity_emb = VelocityEmbedding(
@@ -167,7 +215,14 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return self._cmap
 
     def scatter(self, ax) -> None:
-        """ """
+        """Generates a scatter plot on the given matplotlib axis, overlaying the stream plot.
+
+        This method visualizes individual points (cells) on the velocity stream plot,
+        with optional coloring and grouping.
+
+        Args:
+            ax (matplotlib.axes.Axes): The matplotlib axis on which to plot the scatter plot.
+        """
         obs_df = self._adata.obs.copy().reset_index()
         cols = obs_df.columns.tolist()
 
@@ -229,6 +284,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     
     @property
     def SVG_path(self):
+        """ """
         return pathlib.Path(".".join([str(self.fname_basis), "svg"]))
     
     @property
@@ -236,7 +292,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return pathlib.Path(".".join([str(self.fname_basis), "png"]))
     
     def save_img(self):
-        """"""
+        """Saves the generated plot to both SVG and PNG formats in a specified directory."""
         self._mk_fig_dir()
         plt.savefig(self.SVG_path, dpi = self._svg_dpi)
         plt.savefig(self.PNG_path, dpi = self._png_dpi)
@@ -272,11 +328,15 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         *args,
         **kwargs,
     ):
-        """
-        Args:
+        """Generates velocity stream plots for the provided AnnData object.
 
-        Returns
-            None
+        Args:
+            adata (anndata.AnnData): The AnnData object containing the data for plotting.
+            ax (Optional[Union[plt.Axes, List[plt.Axes]]]): A matplotlib axis or list of axes where plots will be drawn.
+            **kwargs: Additional keyword arguments to customize the plot appearance.
+
+        Returns:
+            List[plt.Axes]: A list of matplotlib axes with the generated plots.
         """
         self.__update__(locals())
         
@@ -346,7 +406,54 @@ def velocity_stream(
     *args,
     **kwargs,
 ):
-    """"""
+    """Generates velocity stream plots for single-cell data using the
+    VelocityStreamPlot class.
+
+    This function is a convenient wrapper around the VelocityStreamPlot
+    class, allowing users to quickly generate and customize velocity stream
+    plots without manually instantiating the class.
+
+    Args:
+        adata (anndata.AnnData): The AnnData object containing the data
+        to plot.
+        
+        ax (Optional[Union[plt.Axes, List[plt.Axes]]]): Matplotlib axes object
+        or list of axes objects on which to draw the plots. If None, a new
+        figure and axes are created. Defaults to None.
+        
+        c (str): Color for the scatter plot points. Can be a column name from
+        `adata.obs` if coloring by a categorical variable. Defaults to
+        "dodgerblue".
+        
+        cmap (Optional[Union[Dict, List, Tuple, str]]): Colormap for the
+        scatter plot points if `c` is a categorical variable. Defaults to
+        'plasma_r'.
+        group_zorder (Optional[Dict]): Z-order for groups in the scatter plot,
+        
+        allowing certain groups to be plotted on top of others. Defaults to
+        None.
+        
+        linewidth (float): Line width for the streamlines. Defaults to 0.5.
+        stream_density (float): Density of the streamlines. Higher values create more densely packed streamlines. Defaults to 2.5.
+        add_margin (float): Additional margin added around the plotted data, specified as a fraction of the data range. Defaults to 0.1.
+        arrowsize (float): Size of the arrows in the stream plot. Defaults to 1.
+        arrowstyle (str): Style of the arrows in the stream plot. Defaults to "-|>".
+        maxlength (float): Maximum length of the arrows in the stream plot. Defaults to 4.
+        integration_direction (str): Direction of integration for the streamlines, can be "forward", "backward", or "both". Defaults to "both".
+        scatter_zorder (int): Z-order for scatter plot points, determining their layering. Defaults to 0.
+        stream_zorder (int): Z-order for the streamlines, determining their layering. Defaults to 10.
+        density (float), smooth (float), n_neighbors (Optional[int]), min_mass (float), autoscale (bool), stream_adjust (bool), cutoff_percentile (float), velocity_key (str), self_transitions (bool), use_negative_cosines (bool), T_scale (float): Parameters passed to `VelocityStreamPlot` class for plot customization.
+        disable_scatter (bool): If True, disables the scatter plot overlay on the stream plot. Defaults to False.
+        disable_cbar (bool): If True, disables the color bar for the scatter plot. Useful when `c` is numeric. Defaults to False.
+        stream_kwargs (Dict[str, Any]), scatter_kwargs (Dict[str, Any]), cbar_kwargs (Dict), mpl_kwargs (Dict[str, Any]): Additional keyword arguments for customizing the stream plot, scatter plot, color bar, and matplotlib figure, respectively.
+        return_axes (bool): If True, returns the matplotlib axes with the generated plots. Defaults to False.
+        save (bool): If True, saves the generated plot to SVG and PNG formats. Defaults to False.
+        png_dpi (Optional[float]), svg_dpi (Optional[float]): DPI settings for saving PNG and SVG images. Defaults to 500 for PNG and 250 for SVG.
+        args, kwargs: Additional positional and keyword arguments.
+
+    Returns:
+        Optional[List[plt.Axes]]: A list of matplotlib axes with the generated plots, if `return_axes` is True. Otherwise, returns None.
+    """
 
     init_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__init__, locals())
     call_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__call__, locals())
