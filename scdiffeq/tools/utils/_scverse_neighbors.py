@@ -24,6 +24,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         self.__parse__(locals())
 
         self._neighbor_computation_performed = False
+        self._INFO._SILENT = silent
 
     @property
     def _SCANPY_NEIGHBORS_KWARGS(self):
@@ -93,8 +94,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         self._intake(adata)
 
         if self.neighbors_precomputed and self._force:
-            if not self._silent:
-                self._INFO("Force recomputing neighbors")
+            self._INFO("Force recomputing neighbors")
 
         if not self.neighbors_precomputed or self._force:
             kw = self._SCANPY_NEIGHBORS_KWARGS.copy()
@@ -103,8 +103,8 @@ class SCVerseNeighbors(ABCParse.ABCParse):
             sc.pp.neighbors(**kw)
 
             self._neighbor_computation_performed = True
-        if not self._silent:
-            self._message(adata)
+        self._message(adata)
+            
 
 
     def __call__(
