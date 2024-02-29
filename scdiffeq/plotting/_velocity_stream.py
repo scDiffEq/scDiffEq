@@ -178,8 +178,14 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         if COLOR_FROM_OBS:
             COLOR_BY_GROUP = str(obs_df[self._c].dtype) == "categorical"
             if not COLOR_BY_GROUP: # implies float not grouped object.
-                kwargs.update({"c":obs_df[self._c]})
-                ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
+                c_idx = np.argsort(obs_df[self._c])
+                kwargs.update({"c":obs_df[self._c][c_idx]})
+                self._img = ax.scatter(self.X_emb[c_idx, 0], self.X_emb[c_idx, 1], **kwargs)
+                if not self._disable_cbar:
+                    cbar = plt.colorbar(mappable = self._img, **self._cbar_kwargs)
+                    cbar.solids.set(alpha=1)
+#                     cbar.set_alpha(1)
+                
             else:
                 kwargs.pop("c")
                 groups = obs_df.groupby(self._c).groups # dict
@@ -213,7 +219,12 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     @property
     def fname_basis(self):
         if "sdq_info" in self._adata.uns:
-            return self.scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.data_model_info_tag}")
+            try:
+                return self.scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.data_model_info_tag}")
+            except:
+                return self.scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.sdq_info}")
+            finally:
+                pass
         return self.scdiffeq_figure_dir.joinpath("velocity_stream")
     
     @property
@@ -252,7 +263,9 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         mpl_kwargs: Optional[Dict] = {},
         scatter_kwargs: Optional[Dict] = {},
         stream_kwargs: Optional[Dict] = {},
+        cbar_kwargs: Optional[Dict] = {},
         disable_scatter: bool = False,
+        disable_cbar: bool = False,
         save: bool = False,
         png_dpi: Optional[float] = 500,
         svg_dpi: Optional[float] = 250,
@@ -289,6 +302,8 @@ class VelocityStreamPlot(ABCParse.ABCParse):
                 
         if self._save:
             self.save_img()
+            
+        return axes
 
 
 # -- API-facing function: -----------------------------------------------------
@@ -318,9 +333,13 @@ def velocity_stream(
     self_transitions: bool = True,
     use_negative_cosines: bool = True,
     T_scale: float = 10,
+    disable_scatter: bool = False,
+    disable_cbar: bool = False,
     stream_kwargs: Optional[Dict[str, Any]] = {},
     scatter_kwargs: Optional[Dict[str, Any]] = {},
+    cbar_kwargs: Optional[Dict] = {},
     mpl_kwargs: Optional[Dict[str, Any]] = {},
+    return_axes: bool = False,
     save: Optional[bool] = False,
     png_dpi: Optional[float] = 500,
     svg_dpi: Optional[float] = 250,
@@ -332,4 +351,7 @@ def velocity_stream(
     init_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__init__, locals())
     call_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__call__, locals())
     velo_stream_plot = VelocityStreamPlot(**init_kwargs)
-    velo_stream_plot(**call_kwargs)
+    axes = velo_stream_plot(**call_kwargs)
+    
+    if return_axes:
+        return axes

@@ -23,7 +23,8 @@ from typing import Union
 # -- Controller class: ---------------------------------------------------------
 class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
     HTTPS = "https://github.com/theislab/scvelo_notebooks/raw/master/data/Pancreas/endocrinogenesis_day15.h5ad"
-    FNAME = "pancreas.h5ad"
+    RAW_FNAME = "_downloaded.pancreas.h5ad"
+    PROCESSED_FNAME = "pancreas.pp.h5ad"
     def __init__(self, data_dir = os.getcwd(), *args, **kwargs):
         self.__parse__(locals())
         
@@ -31,40 +32,65 @@ class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
             self.data_dir.mkdir()
         
     @property
-    def data_dir(self):
-        return pathlib.Path(self._data_dir).joinpath("scdiffeq_data")
+    def _scdiffeq_parent_data_dir(self):
+        path = pathlib.Path(self._data_dir).joinpath("scdiffeq_data")
+        if not path.exists():
+            path.mkdir()
+        return path
         
     @property
-    def h5ad_path(self) -> pathlib.Path:
-        return self.data_dir.joinpath(self.FNAME)
+    def data_dir(self):
+        path = self._scdiffeq_parent_data_dir.joinpath("pancreas")
+        if not path.exists():
+            path.mkdir()
+        return path
+        
+    @property
+    def raw_h5ad_path(self) -> pathlib.Path:
+        return self.data_dir.joinpath(self.RAW_FNAME)
     
-    def download(self):
-        if not self.h5ad_path.exists():
-            web_file = web_files.WebFile(http_address=self.HTTPS, local_path=str(self.h5ad_path))
+    @property
+    def processed_h5ad_path(self) -> pathlib.Path:
+        return self.data_dir.joinpath(self.PROCESSED_FNAME)
+    
+    
+    def download_raw(self):
+            web_file = web_files.WebFile(http_address=self.HTTPS, local_path=str(self.raw_h5ad_path))
             web_file.download()            
             
     @property
     def raw_adata(self):
-        if not hasattr(self, "_adata"):
-            self.download()
-            raw_adata = anndata.read_h5ad(self.h5ad_path)
+        if not hasattr(self, "_raw_adata"):
+            if not self.raw_h5ad_path.exists():
+                self.download_raw()                                
+
+            raw_adata = anndata.read_h5ad(self.raw_h5ad_path)
             self._raw_idx = raw_adata.obs.index
-            
+
             del raw_adata.uns["pca"]
             del raw_adata.uns["neighbors"]
             del raw_adata.obsm["X_pca"]
             del raw_adata.obsm["X_umap"]
             del raw_adata.obsp["distances"]
             del raw_adata.obsp["connectivities"]
-            
+
             raw_adata.layers["X_counts"] = raw_adata.X
-            
+
             raw_adata.obs = raw_adata.obs.reset_index()
             raw_adata.obs.index = raw_adata.obs.index.astype(str)
-            
+
             self._raw_adata = raw_adata
-            
-        return self._raw_adata    
+                
+        return self._raw_adata
+    
+    @property
+    def pp_adata(self):
+        if not hasattr(self, "_pp_adata"):
+            if not self.processed_h5ad_path.exists():
+                self._pp_adata = self.get()
+            else:
+                self._pp_adata = anndata.read_h5ad(self.processed_h5ad_path)
+        return self._pp_adata  
 
     def pp(self, adata, min_genes=200, min_cells = 3):
         
@@ -112,14 +138,16 @@ class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
     def get(self):
         
         adata_pp = self.pp(self.raw_adata)
-        adata = self.dimension_reduction(adata_pp)
-        return self.annotate_time(adata)
+        adata_pp = self.dimension_reduction(adata_pp)
+        adata = self.annotate_time(adata_pp)
+        adata.write_h5ad(self.processed_h5ad_path)
+        return adata
     
-def pancreas():
+def pancreas(data_dir: str = os.getcwd()):
     """
     Pancreas dataset
     
     For more, see:
     """
-    data_handler = PancreaticEndocrinogenesisDataset()
-    return data_handler.get()
+    data_handler = PancreaticEndocrinogenesisDataset(data_dir=data_dir)
+    return data_handler.pp_adata
