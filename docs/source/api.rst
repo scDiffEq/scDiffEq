@@ -45,6 +45,13 @@ Model
             :expand:
 
             sdq.core.lightning_models
+            
+         .. button-link:: _api/_model/core_supporting_constructs.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.core
 
 
 Data I/O
