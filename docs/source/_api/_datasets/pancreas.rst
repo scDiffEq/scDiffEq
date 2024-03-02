@@ -5,4 +5,4 @@
 
 .. title:: pancreas
 
-.. autofunction:: scdiffeq._datasets._pancreas.pancreas
+.. autofunction:: scdiffeq.datasets._pancreas.pancreas

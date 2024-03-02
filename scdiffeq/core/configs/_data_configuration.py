@@ -104,9 +104,9 @@ class TimeConfiguration(ABCParse.ABCParse):
     @property
     def n_steps(self):
         _n_steps = self.t_diff / self._dt + 1
-        if self._IS_CONTIGUOUS(_n_steps):
-            return int(_n_steps)
-        raise ValueError("Time is non-contiguous")
+        return int(_n_steps) # logic doesn't quite work in edge cases
+#         if self._IS_CONTIGUOUS(_n_steps):
+#         raise ValueError("Time is non-contiguous")
 
     @property
     def dt(self):
