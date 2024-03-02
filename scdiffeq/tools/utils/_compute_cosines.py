@@ -58,7 +58,7 @@ class ComputeCosines(ABCParse.ABCParse):
         silent: bool = False,
         *args,
         **kwargs
-    ):
+    ) -> None:
         self.__parse__(locals())
 
         self._L2Norm = L2Norm()
