@@ -6,3 +6,4 @@ nbsphinx
 sphinx-copybutton
 sphinx-favicon
 sphinx-design
+myst_parser
