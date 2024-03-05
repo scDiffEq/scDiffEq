@@ -10,7 +10,7 @@ Install via pip (recommended)
 """""""""""""""""""""""""""""
 .. code-block:: python
 
-    pip install adata_query
+    pip install scdiffeq
 
 
 GitHub (Developer version)
@@ -24,7 +24,7 @@ editable version.
 
     # Install the developer version via GitHub
     
-    git clone https://github.com/mvinyard/AnnDataQuery.git; cd ./AnnDataQuery;
+    git clone https://github.com/scDiffEq/scDiffEq.git; cd ./scDiffEq;
     pip install -e .
 
 
