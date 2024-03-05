@@ -1,6 +1,6 @@
 
 # -- import packages: ---------------------------------------------------------
-import sklearn
+import sklearn.decomposition
 import anndata
 import ABCParse
 import pandas as pd
