@@ -14,3 +14,4 @@ torch-adata>=0.0.24
 autodevice>=0.0.2
 cellplots>=0.0.1rc0
 cell-perturb>=0.0.1rc1
+tqdm
