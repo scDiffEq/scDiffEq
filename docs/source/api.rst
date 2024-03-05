@@ -45,6 +45,132 @@ Model
             :expand:
 
             sdq.core.lightning_models
+            
+         .. button-link:: _api/_model/core_supporting_constructs.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.core
+
+
+Data I/O
+========
+
+.. grid:: 2
+   :gutter: 1
+
+   .. grid-item::
+      :columns: 1
+
+      .. button-link:: _api/io.rst
+         :color: primary
+   
+         Go
+
+   .. grid-item::
+      :columns: 11
+
+      .. dropdown:: Data I/O (``sdq.io``) modules
+
+         .. toctree::
+            :maxdepth: 2
+            :hidden:
+
+            _api/io
+
+         .. button-link:: _api/_io/read_h5ad.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.read_h5ad
+
+         .. button-link:: _api/_io/read_pickle.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.read_pickle
+
+         .. button-link:: _api/_io/write_pickle.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.write_pickle
+
+
+Datasets
+========
+
+.. grid:: 2
+   :gutter: 1
+
+   .. grid-item::
+      :columns: 1
+
+      .. button-link:: _api/datasets.rst
+         :color: primary
+   
+         Go
+
+   .. grid-item::
+      :columns: 11
+
+      .. dropdown:: Datasets (``sdq.datasets``) modules
+
+         .. toctree::
+            :maxdepth: 2
+            :hidden:
+
+            _api/datasets
+
+         .. button-link:: _api/_datasets/pancreas.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.datasets.pancreas
+            
+         .. button-link:: _api/_datasets/human_hematopoiesis.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.datasets.human_hematopoiesis
+            
+Plotting
+========
+
+.. grid:: 2
+   :gutter: 1
+
+   .. grid-item::
+      :columns: 1
+
+      .. button-link:: _api/plotting.rst
+         :color: primary
+   
+         Go
+
+   .. grid-item::
+      :columns: 11
+
+      .. dropdown:: Plotting (``sdq.pl``) modules
+
+         .. toctree::
+            :maxdepth: 2
+            :hidden:
+
+            _api/datasets
+
+         .. button-link:: _api/_plotting/velocity_stream.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.pl.velocity_stream
 
 
 Tools
@@ -106,52 +232,4 @@ Tools
             :expand:
 
             sdq.tl.perturb
-
-
-
-Data I/O
-========
-
-.. grid:: 2
-   :gutter: 1
-
-   .. grid-item::
-      :columns: 1
-
-      .. button-link:: _api/io.rst
-         :color: primary
-   
-         Go
-
-   .. grid-item::
-      :columns: 11
-
-      .. dropdown:: Data I/O (``sdq.io``) modules
-
-         .. toctree::
-            :maxdepth: 2
-            :hidden:
-
-            _api/io
-
-         .. button-link:: _api/_tools/read_h5ad.rst
-            :color: primary
-            :outline:
-            :expand:
-
-            sdq.tl.read_h5ad
-
-         .. button-link:: _api/_tools/read_pickle.rst
-            :color: primary
-            :outline:
-            :expand:
-
-            sdq.tl.read_pickle
-
-         .. button-link:: _api/_tools/write_pickle.rst
-            :color: primary
-            :outline:
-            :expand:
-
-            sdq.tl.write_pickle
 

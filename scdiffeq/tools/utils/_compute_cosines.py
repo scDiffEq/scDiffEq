@@ -58,11 +58,12 @@ class ComputeCosines(ABCParse.ABCParse):
         silent: bool = False,
         *args,
         **kwargs
-    ):
+    ) -> None:
         self.__parse__(locals())
 
         self._L2Norm = L2Norm()
         self._cosine_correlation = CosineCorrelation()
+        self._INFO._SILENT = silent
 
     def _initialize_results(self):
         self._VALS, self._ROWS, self._COLS = [], [], []
@@ -145,13 +146,12 @@ class ComputeCosines(ABCParse.ABCParse):
         neg_key = f"{self._velocity_key_added}_graph_neg"
         
         for key, obj in zip([pos_key, neg_key], [graph, graph_neg]):
-            if not self._silent:
-                if key in self._adata.obsp:
-                    self._adata.obsp[key] = obj
-                    self._INFO(f"Updated: adata.obsp['{key}']")
-                else:
-                    self._adata.obsp[key] = obj
-                    self._INFO(f"Added: adata.obsp['{key}']")
+            if key in self._adata.obsp:
+                self._adata.obsp[key] = obj
+                self._INFO(f"Updated: adata.obsp['{key}']")
+            else:
+                self._adata.obsp[key] = obj
+                self._INFO(f"Added: adata.obsp['{key}']")
 
     def __call__(self, adata: anndata.AnnData, velocity_key_added: str = "velocity", *args, **kargs) -> None:
         """ """

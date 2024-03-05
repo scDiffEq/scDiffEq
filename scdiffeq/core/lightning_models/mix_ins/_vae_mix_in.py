@@ -11,20 +11,55 @@ from ..base._sinkhorn_divergence import SinkhornDivergence
 
 from ... import utils
 
+
 # -- set typing: ---------------------------------------------------------------
 from typing import Union, List
-NoneType = type(None)
 
 
 # -- MixIn class: --------------------------------------------------------------        
 class VAEMixIn(object):
-    def __init__(self, *args, **kwargs):
+    """Mixin class for Variational Autoencoder (VAE) operations.
+
+    This class provides methods for configuring encoder and decoder modules,
+    performing forward pass, and optimization steps including pre-training.
+
+    Attributes:
+        reconstruction_loss (torch.nn.Module): Reconstruction loss function.
+
+    Methods:
+        __init__: Initialize the VAEMixIn object.
+        _configure_encoder: Configure the encoder module.
+        _configure_decoder: Configure the decoder module.
+        _configure_torch_modules: Configure torch modules including encoder, decoder, and differential equation.
+        _configure_lightning_model: Configure lightning model with optimizers and schedulers.
+        encode: Encode input data into latent space.
+        decode: Decode latent space into output data.
+        forward: Perform forward pass integrating in latent space.
+        pretrain_step: Perform a single pre-training step.
+        step: Perform a single optimization step.
+        __repr__: Return the representation of the class.
+
+    """
+    def __init__(self, *args, **kwargs) -> None:
+        
+        """
+        Initialize the VAEMixIn object.
+
+        Args:
+            *args: Variable length arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            None
+
+        """
+        
         super().__init__()
 
         # -- loss functions: ---------------------------------------------------
         self.reconstruction_loss = torch.nn.MSELoss(reduction="sum", **kwargs)
         
-    def _configure_encoder(self):
+    def _configure_encoder(self) -> None:
         self.Encoder = torch_nets.Encoder(
             data_dim = self.hparams['data_dim'],
             latent_dim = self.hparams['latent_dim'],
@@ -36,7 +71,7 @@ class VAEMixIn(object):
             output_bias=self.hparams["encoder_output_bias"],
         )
 
-    def _configure_decoder(self):
+    def _configure_decoder(self) -> None:
         self.Decoder = torch_nets.Decoder(
             data_dim = self.hparams['data_dim'],
             latent_dim = self.hparams['latent_dim'],
@@ -48,7 +83,7 @@ class VAEMixIn(object):
             output_bias=self.hparams["decoder_output_bias"],
         )
         
-    def _configure_torch_modules(self, func, kwargs):
+    def _configure_torch_modules(self, func, kwargs) -> None:
         
         kwargs['state_size'] = self.hparams['latent_dim']
         
@@ -141,5 +176,5 @@ class VAEMixIn(object):
             train_scheduler = self.lr_schedulers()[1]
             train_scheduler.step()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "scDiffEq MixIn: VAEMixIn"

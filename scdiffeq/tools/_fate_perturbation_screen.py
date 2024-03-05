@@ -1,10 +1,14 @@
 
 import anndata
 import ABCParse
+import torch
+
+
 from ._fate_perturbation_experiment import FatePerturbationExperiment
 
 from typing import Optional, List
 
+import tqdm as tqdm_sh
 import tqdm.notebook
 
 
@@ -16,6 +20,7 @@ class FatePerturbationScreen(ABCParse.ABCParse):
         replicates: int = 5,
         N: int = 200,
         time_key: str = "t",
+        nb: bool = True,
         *args,
         **kwargs,
     ):
@@ -42,17 +47,27 @@ class FatePerturbationScreen(ABCParse.ABCParse):
             adata=self._adata,
             model=self._model,
             genes=ABCParse.as_list(gene),
+            t_sim=self._t_sim,
             subset_key=self._subset_key,
             subset_val=self._subset_val,
             target_value=self._target_value,
+            obs_key=self._obs_key,
             PCA=self._PCA,
         )
         self.Results.update({gene: result})
 
+    @property
+    def _progress_bar(self):
+        if self._nb:
+            return tqdm.notebook.tqdm(self.genes)
+        return tqdm_sh.tqdm(self.genes)
+    
     def __call__(
         self,
         adata: anndata.AnnData,
         model,
+        obs_key: str,
+        t_sim: torch.Tensor,
         target_value: float = 10,
         genes: Optional[List] = None,
         subset_key="Time point",
@@ -63,7 +78,7 @@ class FatePerturbationScreen(ABCParse.ABCParse):
     ):
         self.__update__(locals())
 
-        for gene in tqdm.notebook.tqdm(self.genes):
+        for gene in self._progress_bar: # tqdm.notebook.tqdm(self.genes):
             self.forward(gene)
 
         return self.Results

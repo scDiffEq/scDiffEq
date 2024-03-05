@@ -7,17 +7,21 @@ class ModelLogging(lightning.Callback):
     def __init__(self, *args, **kwargs):
         
         self._CURRENT_EPOCH = None
+        self._EPOCH_TRAIN_LOSS = []
+        self._EPOCH_VALIDATION_LOSS = []
             
     def on_train_epoch_end(self, trainer, pl_module):
         
         epoch_train_loss = torch.hstack(self._EPOCH_TRAIN_LOSS).mean().to(torch.float32)
         
         pl_module.log("epoch_train_loss", epoch_train_loss)
+        self._EPOCH_TRAIN_LOSS = []
         
     def on_validation_epoch_end(self, trainer, pl_module):
         
         epoch_validation_loss = torch.hstack(self._EPOCH_VALIDATION_LOSS).mean().to(torch.float32)
         pl_module.log("epoch_validation_loss", epoch_validation_loss)
+        self._EPOCH_VALIDATION_LOSS = []
         
     def log_total_epochs(self, pl_module):
         """Train model N times --> N"""
@@ -67,19 +71,6 @@ class ModelLogging(lightning.Callback):
 
             return velocity_ratio_loss.sum()
 
-    def _gather_current_epoch_loss(self, pl_module, sinkhorn_total, stage):
-        
-        if pl_module.COMPLETED_EPOCHS != self._CURRENT_EPOCH:
-            self._EPOCH_TRAIN_LOSS = []
-            self._EPOCH_VALIDATION_LOSS = []
-            self._CURRENT_EPOCH = pl_module.COMPLETED_EPOCHS
-            
-        else:
-            if stage == "training":
-                self._EPOCH_TRAIN_LOSS.append(sinkhorn_total.detach().cpu())
-            elif stage == "validation":
-                self._EPOCH_VALIDATION_LOSS.append(sinkhorn_total.detach().cpu())
-
     def on_train_batch_end(
         self, 
         trainer: 'pl.Trainer',
@@ -96,13 +87,11 @@ class ModelLogging(lightning.Callback):
         sinkhorn_total = self.log_sinkhorn_divergence(
             pl_module = pl_module, t = batch.t, stage = "training",
         )
+        self._EPOCH_TRAIN_LOSS.append(sinkhorn_total.detach().cpu())
         velocity_ratio_loss_total = self.log_velocity_ratio_loss(
             pl_module = pl_module, t = batch.t, stage = "training",
         )
         # right now, we do nothing with the VRL total
-        self._gather_current_epoch_loss(
-            pl_module = pl_module, sinkhorn_total = sinkhorn_total, stage = "training",
-        )
         self.log_f(pl_module = pl_module, t = batch.t, stage = "training")
         self.log_g(pl_module = pl_module, t = batch.t, stage = "training")
 
@@ -122,12 +111,10 @@ class ModelLogging(lightning.Callback):
         sinkhorn_total = self.log_sinkhorn_divergence(
             pl_module = pl_module, t = batch.t, stage = "validation",
         )
+        self._EPOCH_VALIDATION_LOSS.append(sinkhorn_total.detach().cpu())
         velocity_ratio_loss_total = self.log_velocity_ratio_loss(
             pl_module = pl_module, t = batch.t, stage = "validation",
         )
         # right now, we do nothing with the VRL total
-        self._gather_current_epoch_loss(
-            pl_module = pl_module, sinkhorn_total = sinkhorn_total, stage = "validation",
-        )
         self.log_f(pl_module = pl_module, t = batch.t, stage = "validation")
         self.log_g(pl_module = pl_module, t = batch.t, stage = "validation")

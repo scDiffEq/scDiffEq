@@ -42,7 +42,7 @@ def velocity_graph(
         (None)
     """
     
-    scverse_neighbors(adata, **neighbor_kwargs)
+    scverse_neighbors(adata, silent=silent, **neighbor_kwargs)
     
     init_kw = ABCParse.function_kwargs(ComputeCosines.__init__, locals())
     call_kw = ABCParse.function_kwargs(ComputeCosines.__call__, locals())

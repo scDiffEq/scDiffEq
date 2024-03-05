@@ -1,11 +1,19 @@
 
 
 # -- import packages: ----------------------------------------------------------
-import pathlib
-import os
-from scanpy import read
-import anndata
 import ABCParse
+import pathlib
+import anndata
+import scanpy as sc
+import os
+import sklearn
+import umap
+import numpy as np
+import web_files
+
+
+# -- import local dependencies: ------------------------------------------------
+from .. import io
 
 
 # -- set typing: ---------------------------------------------------------------
@@ -14,90 +22,132 @@ from typing import Union
 
 # -- Controller class: ---------------------------------------------------------
 class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
-    """
-    Pancreatic endocrinogenesis:
-
-    *   Downloading / io taken from scvelo
-    *   Data from `Bastidas-Ponce et al. (2019) <https://doi.org/10.1242/dev.173849>`__.
-    *   Pancreatic epithelial and Ngn3-Venus fusion (NVF) cells during secondary transition
-        with transcriptome profiles sampled from embryonic day 15.5.
-    *   Endocrine cells are derived from endocrine progenitors located in the pancreatic
-        epithelium. Endocrine commitment terminates in four major fates: glucagon- producing
-        α-cells, insulin-producing β-cells, somatostatin-producing δ-cells and
-        ghrelin-producing ε-cells.
-    """
-
-    _URL_DATADIR = "https://github.com/theislab/scvelo_notebooks/raw/master/"
-
-    def __init__(
-        self, fpath: Union[str, pathlib.Path] = "data/Pancreas/endocrinogenesis_day15.h5ad"
-    ) -> None:
-        """
-        Parameters:
-        -----------
-        fpath
-            Path where to save dataset and read it from.
-
-        Returns:
-        --------
-        None
-        """
-
-        self.__parse__(locals(), public=[None])
-
-    @property
-    def url(self):
-        return os.path.join(self._URL_DATADIR, self._fpath)
-
-    @property
-    def _PATH_EXISTS(self):
-        return os.path.exists(self._fpath) 
-
-    @property
-    def _WRITE(self):
-        return (not self._PATH_EXISTS) and (self._write_h5ad)
-
-    def __call__(self, write_h5ad: bool = True) -> anndata.AnnData:
-        """
-        Parameters
-        ----------
-        write_h5ad: bool, default = True
+    HTTPS = "https://github.com/theislab/scvelo_notebooks/raw/master/data/Pancreas/endocrinogenesis_day15.h5ad"
+    RAW_FNAME = "_downloaded.pancreas.h5ad"
+    PROCESSED_FNAME = "pancreas.pp.h5ad"
+    def __init__(self, data_dir = os.getcwd(), *args, **kwargs):
+        self.__parse__(locals())
         
-        Returns
-        -------
-        adata: anndata.AnnData
-        """
+        if not self.data_dir.exists():
+            self.data_dir.mkdir()
         
-        self.__update__(locals(), private = [None])
-
-        adata = read(self._fpath, backup_url=self.url, sparse=True, cache=True)
-        adata.var_names_make_unique()
-        if self._WRITE:
-            adata.write_h5ad(self._fpath)
-
-        return adata
-
-# -- API-facing function: ------------------------------------------------------
-def pancreas(
-    fpath: Union[pathlib.Path, str] = "data/Pancreas/endocrinogenesis_day15.h5ad",
-    write_h5ad: bool = True,
-    *args,
-    **kwargs,
-) -> anndata.AnnData:
-
-    """
-    Parameters
-    ----------
-    fpath: Union[pathlib.Path, str], default = "data/Pancreas/endocrinogenesis_day15.h5ad"
-            Path where to save dataset and/or subsequently read it from.
+    @property
+    def _scdiffeq_parent_data_dir(self):
+        path = pathlib.Path(self._data_dir).joinpath("scdiffeq_data")
+        if not path.exists():
+            path.mkdir()
+        return path
+        
+    @property
+    def data_dir(self):
+        path = self._scdiffeq_parent_data_dir.joinpath("pancreas")
+        if not path.exists():
+            path.mkdir()
+        return path
+        
+    @property
+    def raw_h5ad_path(self) -> pathlib.Path:
+        return self.data_dir.joinpath(self.RAW_FNAME)
+    
+    @property
+    def processed_h5ad_path(self) -> pathlib.Path:
+        return self.data_dir.joinpath(self.PROCESSED_FNAME)
+    
+    
+    def download_raw(self):
+            web_file = web_files.WebFile(http_address=self.HTTPS, local_path=str(self.raw_h5ad_path))
+            web_file.download()            
             
-    write_h5ad: bool, default = True
-        If True and the path does not exists, the file will be written to disk.
+    @property
+    def raw_adata(self):
+        if not hasattr(self, "_raw_adata"):
+            if not self.raw_h5ad_path.exists():
+                self.download_raw()                                
 
-    Returns
-    -------
-    adata: anndata.AnnData
+            raw_adata = anndata.read_h5ad(self.raw_h5ad_path)
+            self._raw_idx = raw_adata.obs.index
+
+            del raw_adata.uns["pca"]
+            del raw_adata.uns["neighbors"]
+            del raw_adata.obsm["X_pca"]
+            del raw_adata.obsm["X_umap"]
+            del raw_adata.obsp["distances"]
+            del raw_adata.obsp["connectivities"]
+
+            raw_adata.layers["X_counts"] = raw_adata.X
+
+            raw_adata.obs = raw_adata.obs.reset_index()
+            raw_adata.obs.index = raw_adata.obs.index.astype(str)
+
+            self._raw_adata = raw_adata
+                
+        return self._raw_adata
+    
+    @property
+    def pp_adata(self):
+        if not hasattr(self, "_pp_adata"):
+            if not self.processed_h5ad_path.exists():
+                self._pp_adata = self.get()
+            else:
+                self._pp_adata = anndata.read_h5ad(self.processed_h5ad_path)
+        return self._pp_adata  
+
+    def pp(self, adata, min_genes=200, min_cells = 3):
+        
+        adata = adata.copy()
+        
+        sc.pp.filter_cells(adata, min_genes=min_genes)
+        sc.pp.filter_genes(adata, min_cells=min_cells)
+        sc.pp.log1p(adata)
+        sc.pp.highly_variable_genes(adata)
+        adata = adata[:, adata.var["highly_variable"]].copy()
+        
+        return adata
+    
+    def dimension_reduction(self, adata: anndata.AnnData):
+    
+        adata = adata.copy()
+        
+        self.SCALER_MODEL = sklearn.preprocessing.StandardScaler()
+        self.PCA_MODEL = sklearn.decomposition.PCA(n_components=50)
+        self.UMAP_MODEL = umap.UMAP(n_components=2, n_neighbors=30, random_state=0, min_dist=0.5)
+        
+        adata.obsm["X_scaled"] = self.SCALER_MODEL.fit_transform(adata.X.A)
+        adata.obsm["X_pca"] = self.PCA_MODEL.fit_transform(adata.obsm["X_scaled"])
+        adata.obsm["X_umap"] = self.UMAP_MODEL.fit_transform(adata.obsm["X_pca"])
+
+        io.write_pickle(self.SCALER_MODEL, self.data_dir.joinpath("pancreas.scaler_model.pkl"))        
+        io.write_pickle(self.PCA_MODEL, self.data_dir.joinpath("pancreas.pca_model.pkl"))
+        io.write_pickle(self.UMAP_MODEL, self.data_dir.joinpath("pancreas.umap_model.pkl"))
+        
+        return adata
+    
+    
+    def annotate_time(self, adata):
+
+        idx = adata.obs.index
+        t0_str_idx = adata.obs[adata.obs["clusters"] == "Ductal"].index
+        t0_idx = idx.isin(t0_str_idx)
+        t1_idx = ~idx.isin(t0_str_idx)
+        t = np.zeros(len(idx))
+        t[t1_idx] = 1
+        adata.obs["t"] = t
+        
+        return adata
+    
+    def get(self):
+        
+        adata_pp = self.pp(self.raw_adata)
+        adata_pp = self.dimension_reduction(adata_pp)
+        adata = self.annotate_time(adata_pp)
+        adata.write_h5ad(self.processed_h5ad_path)
+        return adata
+    
+def pancreas(data_dir: str = os.getcwd()):
     """
-
-    data = PancreaticEndocrinogenesisDataset(fpath = fpath)
-    return data(write_h5ad = write_h5ad)
+    Pancreas dataset
+    
+    For more, see:
+    """
+    data_handler = PancreaticEndocrinogenesisDataset(data_dir=data_dir)
+    return data_handler.pp_adata
