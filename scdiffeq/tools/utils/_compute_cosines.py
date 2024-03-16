@@ -55,6 +55,7 @@ class ComputeCosines(ABCParse.ABCParse):
         velocity_key: str = "X_drift",
         n_pcs: Optional[int] = None,
         split_negative: bool = True,
+        distances_key: str = "distances", # NEW
         silent: bool = False,
         *args,
         **kwargs
@@ -92,11 +93,25 @@ class ComputeCosines(ABCParse.ABCParse):
     @property
     def obs_idx(self):
         return range(len(self._adata))
+    
+    @property
+    def n_neighbors(self) -> int: # NEW
+        if not hasattr(self, "_n_neighbors"):
+            n_neighbor_param = self._adata.uns["neighbors"]["params"]["n_neighbors"]
+            if isinstance(n_neighbor_param, int):
+                self._n_neighbors = n_neighbor_param
+            else:
+                self._n_neighbors = n_neighbor_param[0]
+        return self._n_neighbors
 
     @property
     def nn_idx(self):
         if not hasattr(self, "_nn_idx"):
-            self._nn_idx = get_neighbor_indices(self._adata)
+            self._nn_idx = get_neighbor_indices(
+                adata = self._adata,
+                n_neighbors = self.n_neighbors,
+                distances_key = self._distances_key,
+            ) # HERE
         return self._nn_idx
 
     def _contains_non_zero(self, obs_id: int):
