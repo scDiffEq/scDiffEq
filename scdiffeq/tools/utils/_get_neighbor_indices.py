@@ -1,10 +1,13 @@
 
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
 import numpy as np
 import scipy.sparse
-from typing import Optional
 
+
+# -- Set typing: --------------------------------------------------------------
+from typing import Optional
 
 
 # -- Controller class: --------------------------------------------------------
@@ -21,7 +24,7 @@ class DistancesHandler(ABCParse.ABCParse):
     def distances(self) -> scipy.sparse.csr_matrix:
         if not hasattr(self, "_distances"):
             D = self._adata.obsp[self._distances_key].copy()
-#             D.data += 1e-6
+            D.data += 1e-6
             self._distances = D
         return self._distances
 
@@ -55,7 +58,6 @@ class DistancesHandler(ABCParse.ABCParse):
         """clean up indices of a row if criteria are met before
         passing to this function"""
         n0, n1 = self.cumsum_neighbors[row], self.cumsum_neighbors[row + 1]
-#         idx_to_rm + self._data[n0:n1].argsort()[self.n_neighbors :]
         rm_idx = self._data[n0:n1].argsort()[self.n_neighbors :]
         self._data[rm_idx] = 0
 
@@ -83,7 +85,7 @@ class DistancesHandler(ABCParse.ABCParse):
 
         _ = [self._idx_filter(row) for row in self.rows]
         self.distances.eliminate_zeros()
-#         self.distances.data -= 1e-6
+        self.distances.data -= 1e-6
 
         return self._return_mode_distances()
 
@@ -92,14 +94,17 @@ class DistancesHandler(ABCParse.ABCParse):
 def get_neighbor_indices(
     adata: anndata.AnnData,
     n_neighbors: Optional[int] = None,
-    distances_key: str = "distances",
+    distances_key: Optional[str] = "distances",
 ):
     """Return distance matrix indices
 
     Args:
-        adata (anndata.AnnData)
+        adata (anndata.AnnData): anndata.
 
-        n_neighbors (Optional[int])
+        n_neighbors (Optional[int]): 
+        
+        distances_key (Optional[str]): Key accessor to cell neighbor distances
+        in ``adata.obsp``. **Default**: "distances".
 
     Returns:
         (np.ndarray)
