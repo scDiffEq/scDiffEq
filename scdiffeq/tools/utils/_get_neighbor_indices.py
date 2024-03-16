@@ -21,19 +21,21 @@ class DistancesHandler(ABCParse.ABCParse):
     def distances(self) -> scipy.sparse.csr_matrix:
         if not hasattr(self, "_distances"):
             D = self._adata.obsp[self._distances_key].copy()
-            D.data += 1e-6
+#             D.data += 1e-6
             self._distances = D
         return self._distances
 
     @property
     def n_counts(self):
-        return (self.distances > 0).sum(axis=1)
+        return (self.distances > 0).sum(axis=1).A.flatten()
 
     @property
     def n_neighbors(self):
         if not hasattr(self, "_n_neighbors") or self._n_neighbors is None:
             return self.n_counts.min()
-        return min(n_counts.min(), self._n_neighbors)
+        if self.n_counts.min() == 0:
+            return self._n_neighbors
+        return min(self.n_counts.min(), self._n_neighbors)
 
     @property
     def rows(self):
@@ -53,13 +55,19 @@ class DistancesHandler(ABCParse.ABCParse):
         """clean up indices of a row if criteria are met before
         passing to this function"""
         n0, n1 = self.cumsum_neighbors[row], self.cumsum_neighbors[row + 1]
-        idx_to_rm + self._data[n0:n1].argsort()[self.n_neighbors :]
+#         idx_to_rm + self._data[n0:n1].argsort()[self.n_neighbors :]
+        rm_idx = self._data[n0:n1].argsort()[self.n_neighbors :]
         self._data[rm_idx] = 0
 
     def _return_mode_distances(self):
         """scvelo also enables return mode on connectivities. we'll
         forego that for now."""
-        return self.distances.indices.reshape((-1, self.n_neighbors))
+        print("returning mode distances")
+        print(self.distances.indices.shape)
+        print(self.n_neighbors)
+        x= self.distances.indices.reshape((-1, self.n_neighbors))
+        print(x.shape)
+        return x
 
     def __call__(
         self, adata: anndata.AnnData, n_neighbors: Optional[int] = None, *args, **kwargs
@@ -75,7 +83,7 @@ class DistancesHandler(ABCParse.ABCParse):
 
         _ = [self._idx_filter(row) for row in self.rows]
         self.distances.eliminate_zeros()
-        self.distances.data -= 1e-6
+#         self.distances.data -= 1e-6
 
         return self._return_mode_distances()
 
