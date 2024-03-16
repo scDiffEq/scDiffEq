@@ -1,10 +1,13 @@
 
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
 import numpy as np
 import scipy.sparse
-from typing import Optional
 
+
+# -- Set typing: --------------------------------------------------------------
+from typing import Optional
 
 
 # -- Controller class: --------------------------------------------------------
@@ -27,13 +30,15 @@ class DistancesHandler(ABCParse.ABCParse):
 
     @property
     def n_counts(self):
-        return (self.distances > 0).sum(axis=1)
+        return (self.distances > 0).sum(axis=1).A.flatten()
 
     @property
     def n_neighbors(self):
         if not hasattr(self, "_n_neighbors") or self._n_neighbors is None:
             return self.n_counts.min()
-        return min(n_counts.min(), self._n_neighbors)
+        if self.n_counts.min() == 0:
+            return self._n_neighbors
+        return min(self.n_counts.min(), self._n_neighbors)
 
     @property
     def rows(self):
@@ -53,13 +58,18 @@ class DistancesHandler(ABCParse.ABCParse):
         """clean up indices of a row if criteria are met before
         passing to this function"""
         n0, n1 = self.cumsum_neighbors[row], self.cumsum_neighbors[row + 1]
-        idx_to_rm + self._data[n0:n1].argsort()[self.n_neighbors :]
+        rm_idx = self._data[n0:n1].argsort()[self.n_neighbors :]
         self._data[rm_idx] = 0
 
     def _return_mode_distances(self):
         """scvelo also enables return mode on connectivities. we'll
         forego that for now."""
-        return self.distances.indices.reshape((-1, self.n_neighbors))
+        print("returning mode distances")
+        print(self.distances.indices.shape)
+        print(self.n_neighbors)
+        x= self.distances.indices.reshape((-1, self.n_neighbors))
+        print(x.shape)
+        return x
 
     def __call__(
         self, adata: anndata.AnnData, n_neighbors: Optional[int] = None, *args, **kwargs
@@ -84,14 +94,17 @@ class DistancesHandler(ABCParse.ABCParse):
 def get_neighbor_indices(
     adata: anndata.AnnData,
     n_neighbors: Optional[int] = None,
-    distances_key: str = "distances",
+    distances_key: Optional[str] = "distances",
 ):
     """Return distance matrix indices
 
     Args:
-        adata (anndata.AnnData)
+        adata (anndata.AnnData): anndata.
 
-        n_neighbors (Optional[int])
+        n_neighbors (Optional[int]): 
+        
+        distances_key (Optional[str]): Key accessor to cell neighbor distances
+        in ``adata.obsp``. **Default**: "distances".
 
     Returns:
         (np.ndarray)
