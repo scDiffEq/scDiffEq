@@ -64,12 +64,7 @@ class DistancesHandler(ABCParse.ABCParse):
     def _return_mode_distances(self):
         """scvelo also enables return mode on connectivities. we'll
         forego that for now."""
-        print("returning mode distances")
-        print(self.distances.indices.shape)
-        print(self.n_neighbors)
-        x= self.distances.indices.reshape((-1, self.n_neighbors))
-        print(x.shape)
-        return x
+        return self.distances.indices.reshape((-1, self.n_neighbors))
 
     def __call__(
         self, adata: anndata.AnnData, n_neighbors: Optional[int] = None, *args, **kwargs

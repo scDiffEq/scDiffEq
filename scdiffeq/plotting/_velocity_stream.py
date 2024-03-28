@@ -202,6 +202,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
             "alpha": 0.2,
             "s": 50,
             "cmap": self._cmap,
+            "rasterized": self._rasterized,
         }
         kwargs.update(self._scatter_kwargs)
         return kwargs
@@ -316,6 +317,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         integration_direction: str = "both",
         scatter_zorder: int = 0,
         stream_zorder: int = 10,
+        rasterized: bool = True,
         mpl_kwargs: Optional[Dict] = {},
         scatter_kwargs: Optional[Dict] = {},
         stream_kwargs: Optional[Dict] = {},
@@ -380,8 +382,8 @@ def velocity_stream(
     arrowstyle: str = "-|>",
     maxlength: float = 4,
     integration_direction: str = "both",
-    scatter_zorder: int = 0,
-    stream_zorder: int = 10,
+    scatter_zorder: int = 101,
+    stream_zorder: int = 201,
     density: float = 1,
     smooth: float = 0.5,
     n_neighbors: Optional[int] = None,
@@ -401,6 +403,7 @@ def velocity_stream(
     mpl_kwargs: Optional[Dict[str, Any]] = {},
     return_axes: bool = False,
     save: Optional[bool] = False,
+    rasterized: bool = True,
     png_dpi: Optional[float] = 500,
     svg_dpi: Optional[float] = 250,
     *args,
