@@ -10,7 +10,7 @@ Install via pip (recommended)
 """""""""""""""""""""""""""""
 .. code-block:: python
 
-    pip install adata_query
+    pip install scdiffeq
 
 
 GitHub (Developer version)
