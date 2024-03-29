@@ -1,15 +1,15 @@
 
-# -- import packages: ----------------------------------------------------------
+# -- import packages: ---------------------------------------------------------
 import neural_diffeqs
 import lightning
 import torchsde
 
 
-# -- set typing: ---------------------------------------------------------------
+# -- set typing: --------------------------------------------------------------
 from typing import Union, List
 
 
-# -- MixIn class: --------------------------------------------------------------
+# -- MixIn class: -------------------------------------------------------------
 class SDEMixIn(lightning.LightningModule):
     """"""
     def __init__(self, *args, **kwargs):

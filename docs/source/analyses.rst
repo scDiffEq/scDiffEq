@@ -6,6 +6,9 @@ Reproducibility
    :hidden:
    
    _notebooks/human_hematopoiesis.preprocessing
+   _notebooks/neural_diffeqs.potential_ode.reference.ipynb
+   _notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb
+
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
 with ``scdiffeq``. While **Figure 1** contains an overview that does not host
@@ -19,12 +22,28 @@ they relate to the observed data.
 Figure 2
 ========
 
+.. grid-item-card:: ``neural_diffeqs.potential_ode.reference.ipynb``
+      :link: _notebooks/neural_diffeqs.potential_ode.reference.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+
+.. grid-item-card:: ``neural_diffeqs.latent_potential_ode.reference.ipynb``
+      :link: _notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
 
 Figure 3
 ========
 
 .. grid-item-card:: ``human_hematopoiesis.preprocessing.ipynb``
-      :link: human_hematopoiesis.preprocessing.ipynb
+      :link: _notebooks/human_hematopoiesis.preprocessing.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0

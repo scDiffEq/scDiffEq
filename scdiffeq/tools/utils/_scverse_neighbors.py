@@ -14,16 +14,32 @@ from typing import Optional, Union
 class SCVerseNeighbors(ABCParse.ABCParse):
     def __init__(
         self,
-        distance_key: str = "distances",
+        distances_key: str = "distances",
         connectivities_key: str = "connectivities",
         params_key: str = "neighbors",
         silent: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
+        """
+        Args:
+            distances_key (Optional[str]): Key accessor to cell neighbor
+            distances in ``adata.obsp``. **Default**: "distances".
+            
+            connectivities_key (Optional[str]): Key accessor to cell neighbor
+            connectivities in ``adata.obsp``. **Default**: "connectivities".
+            
+            params_key (str): **Default**: "neighbors".
+            
+            silent (bool): **Default**: False.
+            
+        Returns:
+            None
+        """
         self.__parse__(locals())
 
         self._neighbor_computation_performed = False
+        self._INFO._SILENT = silent
 
     @property
     def _SCANPY_NEIGHBORS_KWARGS(self):
@@ -31,7 +47,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
 
     @property
     def _HAS_DISTANCES(self):
-        return self._distance_key in self._adata.obsp
+        return self._distances_key in self._adata.obsp
 
     @property
     def _HAS_CONNECTIVITIES(self):
@@ -47,7 +63,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
     @property
     def distances(self):
         if self._HAS_DISTANCES:
-            return self._probable_fetch(self._distance_key)
+            return self._probable_fetch(self._distances_key)
 
     @property
     def connectivities(self):
@@ -93,8 +109,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         self._intake(adata)
 
         if self.neighbors_precomputed and self._force:
-            if not self._silent:
-                self._INFO("Force recomputing neighbors")
+            self._INFO("Force recomputing neighbors")
 
         if not self.neighbors_precomputed or self._force:
             kw = self._SCANPY_NEIGHBORS_KWARGS.copy()
@@ -103,8 +118,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
             sc.pp.neighbors(**kw)
 
             self._neighbor_computation_performed = True
-        if not self._silent:
-            self._message(adata)
+        self._message(adata)
 
 
     def __call__(
@@ -116,7 +130,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         random_state: Optional[Union[int, None]] = 0,
         method: Optional = 'umap',
         metric: Optional = 'euclidean',
-        distance_key: Optional[str] = "distances",
+        distances_key: Optional[str] = "distances",
         connectivities_key: Optional[str] = "connectivities",
         params_key: Optional[str] = "neighbors",
         force: bool = False,
@@ -139,7 +153,7 @@ def scverse_neighbors(
     random_state: Optional[Union[int, None]] = 0,
     method: Optional = 'umap',
     metric: Optional = 'euclidean',
-    distance_key: Optional[str] = "distances",
+    distances_key: Optional[str] = "distances",
     connectivities_key: Optional[str] = "connectivities",
     params_key: Optional[str] = "neighbors",
     force: Optional[bool] = False,
@@ -155,7 +169,7 @@ def scverse_neighbors(
         
         n_neighbors (int): decsription. **Default** = 15
         
-        distance_key (str): decsription. **Default** = "distances"
+        distances_key (str): decsription. **Default** = "distances"
         
         connectivities_key (str): decsription. **Default** = "connectivities"
         
@@ -170,7 +184,7 @@ def scverse_neighbors(
     """
         
     scv_neighbors = SCVerseNeighbors(
-        distance_key=distance_key,
+        distances_key=distances_key,
         connectivities_key=connectivities_key,
         params_key=params_key,
         silent=silent,

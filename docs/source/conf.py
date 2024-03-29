@@ -10,6 +10,21 @@ release = '0.1.0'
 # -- config: ------------------------------------------------------------------
 import os
 import sys
+import requests
+
+
+def download_notebooks():
+    notebook_urls = [
+        "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb",
+        "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.potential_ode.reference.ipynb",
+    ]
+    os.makedirs('./_notebooks', exist_ok=True)  # Ensure the target directory exists
+    for url in notebook_urls:
+        r = requests.get(url)
+        with open(os.path.join('./_notebooks', os.path.basename(url)), 'wb') as f:
+            f.write(r.content)
+
+download_notebooks()
 
 sys.path.insert(0, os.path.abspath('../../'))
 

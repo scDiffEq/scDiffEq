@@ -1,33 +1,56 @@
 
-import anndata
+# -- import packages: ---------------------------------------------------------
 import ABCParse
-import pandas as pd
+import anndata
 import cell_perturb
-import scipy.stats
-import numpy as np
 import lightning
+import numpy as np
+import pandas as pd
+import scipy.stats
+import torch
 
-from ._simulation import simulate
 
+# -- import local dependencies: -----------------------------------------------
 from ._annotate_cell_state import annotate_cell_state
 from ._annotate_cell_fate import annotate_cell_fate
+from ._simulation import simulate
 
-from typing import Optional, List, Dict, Union
+
+# -- set typing: --------------------------------------------------------------
+from typing import Dict, List, Optional, Tuple, Union
 
 
+# -- Operational class: -------------------------------------------------------
 class PerturbationExperimentResult(ABCParse.ABCParse):
+    """Container for the results of a perturbation of experiment. Both the control
+    and perturbed arms of the experiment are given as input.
+    
+    Generally the user interacts with this class, but does not instantiate it. Instead,
+    it is instantiated through the output of ``FatePerturbationExperiment``.
+
+    Attributes:
+        ctrl
+        
+        prtb
+        
+        stats
+    """
     def __init__(
         self,
         ctrl_result: anndata.AnnData,
         prtb_result: anndata.AnnData,
         *args,
         **kwargs,
-    ):
-        """
+    ) -> None:
+        """ Initialize the ``PerturbationExperimentResult`` class.
+        
         Args:
-            ctrl_result (anndata.AnnData)
+            ctrl_result (anndata.AnnData) The resulting AnnData object containing the final state of the simulated control, over each replicate.
 
-            prtb_result (anndata.AnnData)
+            prtb_result (anndata.AnnData). The resulting AnnData object containing the final state of the simulated perturbation, over each replicate.
+            
+        Returns:
+            None
         """
 
         self.__parse__(locals())
@@ -103,8 +126,16 @@ class PerturbationExperimentResult(ABCParse.ABCParse):
         return "PerturbationExperimentResult"
 
 
+# -- API-facing operational class: --------------------------------------------
 class FatePerturbationExperiment(ABCParse.ABCParse):
-    """Container class for an expression perturbation experiment"""
+    """Container class for an expression perturbation experiment, designed to facilitate
+    the analysis of gene expression perturbations and their effects on cell fate and state.
+    
+    Inherits from ABCParse for abstract base class parsing functionality.
+    
+    Attributes:
+        
+    """
     def __init__(
         self,
         seed: int = 0,
@@ -112,28 +143,59 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         replicates: int = 5,
         N: int = 200,
         time_key: str = "t",
+        save_simulation: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
+        """
+        Initializes the FatePerturbationExperiment object.
+        
+        Args:
+            seed (int): Seed for random number generation to ensure reproducibility.
+
+            use_key (str): Key to use for the expression data within the AnnData object.
+
+            replicates (int): Number of replicates to consider in the perturbation experiment.
+
+            N (int): The number of cells to simulate.
+
+            time_key (str): Key to access time-related data within the AnnData object.
+
+            *args, **kwargs: Additional arguments and keyword arguments for flexibility and future extensions.
+        """
         self.__parse__(locals())
 
     @property
     def _PERTURBATION_INIT_KWARGS(self) -> Dict:
-        """function kwargs for ``cell_perturb.Perturbation.__init__``."""
+        """Retrieves the function keyword arguments for initializing the Perturbation object.
+        (i.e., ``cell_perturb.Perturbation.__init__``).
+        
+        Returns:
+            Dict: A dictionary of keyword arguments used for Perturbation object initialization.
+        """
         return ABCParse.function_kwargs(
             func=cell_perturb.Perturbation.__init__, kwargs=self._PARAMS
         )
 
     @property
-    def _PERTURBATION_CALL_KWARGS(self):
-        """function kwargs for ``cell_perturb.Perturbation.__call__``."""
+    def _PERTURBATION_CALL_KWARGS(self) -> Dict:
+        """Retrieves the function keyword arguments for calling the Perturbation object
+        (i.e., ``cell_perturb.Perturbation.__call__``).
+        
+        Returns:
+            Dict: A dictionary of keyword arguments used for calling the Perturbation object.
+        """
         return ABCParse.function_kwargs(
             func=cell_perturb.Perturbation.__call__, kwargs=self._PARAMS
         )
 
     @property
     def adata_prtb(self) -> anndata.AnnData:
-        """adata_prtb (anndata.AnnData)"""
+        """Lazily loads or generates the AnnData object resulting from perturbation.
+        
+        Returns:
+            adata_prtb (anndata.AnnData): The AnnData object after applying perturbation.
+        """
         if not hasattr(self, "_adata_prtb"):
             self._perturbation = cell_perturb.Perturbation(
                 **self._PERTURBATION_INIT_KWARGS
@@ -142,32 +204,64 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         return self._adata_prtb
 
     def _subset_final_state(self, adata_sim) -> anndata.AnnData:
-        """adata at final state"""
+        """Extracts the subset of the AnnData object corresponding to the final state of simulation.
+        
+        Args:
+            adata_sim (anndata.AnnData): The simulated AnnData object.
+        
+        Returns:
+            adata_final (anndata.AnnData): A subset of the AnnData object at its final state.
+        """
+
         t = adata_sim.obs[self._time_key]
         return adata_sim[t == t.max()].copy()
     
     @property
     def DiffEq(self) -> lightning.LightningModule:
-        """DiffEq (lightning.LightningModule)"""
+        """Accessor for the differential equation model used in the simulation.
+
+        Returns:
+            DiffEq (lightning.LightningModule)
+        """
         if isinstance(self._model.DiffEq, lightning.LightningModule):
             return self._model.DiffEq
         elif isinstance(self._model, lightning.LightningModule):
             return self._model    
 
-    def forward(self):
-        """run simulation ctrl vs. prtb"""
+    def forward(self) -> Tuple[anndata.AnnData, anndata.AnnData]:
+        
+        
+        """
+        Executes the perturbation experiment, comparing control and perturbed conditions.
+        
+        Simulates, subsets the final simulated state, annotates respective replicates, then annotates
+        cell states/fates using the given kNN.
+        
+        Returns:
+            [adata_ctrl, adata_prtb] (Tuple[anndata.AnnData, anndata.AnnData]): A tuple containing AnnData objects for control and perturbation experiments, respectively.
+        """
+        
         adata_sim_prtb = simulate(
             adata=self.adata_prtb,
             diffeq=self.DiffEq,
             use_key="X_pca_prtb",
-            time_key = self._time_key,
+            t = self._t_sim,
+#             time_key = self._time_key,
         )
         adata_sim_ctrl = simulate(
             adata=self.adata_prtb,
             diffeq=self.DiffEq,
             use_key="X_pca_ctrl",
-            time_key = self._time_key,
+            t = self._t_sim,
+#             time_key = self._time_key,
         )
+        
+        
+        if self._save_simulation:
+            self.adata_sim_prtb = adata_sim_prtb
+            self.adata_sim_ctrl = adata_sim_ctrl
+            
+        
         prtb = self._subset_final_state(adata_sim_prtb)
         ctrl = self._subset_final_state(adata_sim_ctrl)
         
@@ -175,12 +269,12 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         
         prtb.obs["replicate"] = rep
         ctrl.obs["replicate"] = rep
+        
+        annotate_cell_state(prtb, kNN = self._model.kNN, obs_key = self._obs_key, silent=True)
+        annotate_cell_fate(prtb, state_key = self._obs_key, silent=True)
 
-        annotate_cell_state(prtb, self._model.kNN, silent=True)
-        annotate_cell_fate(prtb, silent=True)
-
-        annotate_cell_state(ctrl, self._model.kNN, silent=True)
-        annotate_cell_fate(ctrl, silent=True)
+        annotate_cell_state(ctrl, kNN = self._model.kNN, obs_key = self._obs_key, silent=True)
+        annotate_cell_fate(ctrl, state_key = self._obs_key, silent=True)
         
         return ctrl, prtb
 
@@ -188,6 +282,8 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         self,
         adata: anndata.AnnData,
         model: "scdiffeq.scDiffEq",
+        t_sim: torch.Tensor,
+        obs_key: str,
         genes: List[str],
         subset_key: str,
         subset_val: str,

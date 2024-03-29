@@ -193,6 +193,7 @@ def load_model(
     version: Optional[int] = None,
     epoch: Optional[Union[int, str]] = None,
     configure_trainer: Optional[bool] = False,
+#     silent: bool = False,
 ):
     
     """Load scDiffEq model.

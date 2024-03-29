@@ -55,14 +55,16 @@ class ComputeCosines(ABCParse.ABCParse):
         velocity_key: str = "X_drift",
         n_pcs: Optional[int] = None,
         split_negative: bool = True,
+        distances_key: str = "distances", # NEW
         silent: bool = False,
         *args,
         **kwargs
-    ):
+    ) -> None:
         self.__parse__(locals())
 
         self._L2Norm = L2Norm()
         self._cosine_correlation = CosineCorrelation()
+        self._INFO._SILENT = silent
 
     def _initialize_results(self):
         self._VALS, self._ROWS, self._COLS = [], [], []
@@ -91,11 +93,25 @@ class ComputeCosines(ABCParse.ABCParse):
     @property
     def obs_idx(self):
         return range(len(self._adata))
+    
+    @property
+    def n_neighbors(self) -> int: # NEW
+        if not hasattr(self, "_n_neighbors"):
+            n_neighbor_param = self._adata.uns["neighbors"]["params"]["n_neighbors"]
+            if isinstance(n_neighbor_param, int):
+                self._n_neighbors = n_neighbor_param
+            else:
+                self._n_neighbors = n_neighbor_param[0]
+        return self._n_neighbors
 
     @property
     def nn_idx(self):
         if not hasattr(self, "_nn_idx"):
-            self._nn_idx = get_neighbor_indices(self._adata)
+            self._nn_idx = get_neighbor_indices(
+                adata = self._adata,
+                n_neighbors = self.n_neighbors,
+                distances_key = self._distances_key,
+            ) # HERE
         return self._nn_idx
 
     def _contains_non_zero(self, obs_id: int):
@@ -145,13 +161,12 @@ class ComputeCosines(ABCParse.ABCParse):
         neg_key = f"{self._velocity_key_added}_graph_neg"
         
         for key, obj in zip([pos_key, neg_key], [graph, graph_neg]):
-            if not self._silent:
-                if key in self._adata.obsp:
-                    self._adata.obsp[key] = obj
-                    self._INFO(f"Updated: adata.obsp['{key}']")
-                else:
-                    self._adata.obsp[key] = obj
-                    self._INFO(f"Added: adata.obsp['{key}']")
+            if key in self._adata.obsp:
+                self._adata.obsp[key] = obj
+                self._INFO(f"Updated: adata.obsp['{key}']")
+            else:
+                self._adata.obsp[key] = obj
+                self._INFO(f"Added: adata.obsp['{key}']")
 
     def __call__(self, adata: anndata.AnnData, velocity_key_added: str = "velocity", *args, **kargs) -> None:
         """ """
