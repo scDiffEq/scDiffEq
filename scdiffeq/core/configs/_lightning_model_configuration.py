@@ -1,6 +1,7 @@
 
 # -- import packages: ---------------------------------------------------------
 import ABCParse
+import logging
 import os
 
 
@@ -10,6 +11,10 @@ from .. import lightning_models, utils
 
 # -- set typing: --------------------------------------------------------------
 from typing import Dict, Optional
+
+
+# -- setup logging: -----------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
 # -- operational class: -------------------------------------------------------
@@ -103,7 +108,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             
             model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
             model_kwargs['loading_existing'] = loading_existing
-            
+            logger.warning(model_kwargs)
             return lit_model(**model_kwargs) # data_dim = self._data_dim, 
         
         raise ValueError(f"Configuration tried: {_model} - this does not exist as an available model.")
