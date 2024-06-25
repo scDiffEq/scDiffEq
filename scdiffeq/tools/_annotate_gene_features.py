@@ -28,6 +28,7 @@ class GeneCompatibility(ABCParse.ABCParse):
         gene_id_key="gene_ids",
         PCA: Optional[sklearn.decomposition.PCA] = None,
         key_added: str = "X_gene",
+        silent: bool = False,
     ):
 
         self.__parse__(locals(), public=[None])
@@ -40,7 +41,8 @@ class GeneCompatibility(ABCParse.ABCParse):
 
     def _format_var_names(self):
         self.adata_sim.uns[self._gene_id_key] = self.var_names
-        self._INFO(f"Gene names added to: `adata_sim.uns['{self._gene_id_key}']`")
+        if not self._silent:
+            self._INFO(f"Gene names added to: `adata_sim.uns['{self._gene_id_key}']`")
 
     def _format_inverted_expression(self):
 
@@ -53,9 +55,9 @@ class GeneCompatibility(ABCParse.ABCParse):
             columns = self.var_names,
         )
         self.adata_sim.obsm[self._key_added] = X_gene
-        
-        msg = f"Inverted expression added to: `adata_sim.obsm['{self._key_added}']`"
-        self._INFO(msg)
+        if not self._silent:
+            msg = f"Inverted expression added to: `adata_sim.obsm['{self._key_added}']`"
+            self._INFO(msg)
 
     def __call__(
         self, adata: anndata.AnnData, adata_sim: anndata.AnnData, *args, **kwargs
@@ -74,6 +76,9 @@ def annotate_gene_features(
     PCA: Optional[sklearn.decomposition.PCA] = None,
     gene_id_key="gene_ids",
     key_added: str = "X_gene",
+    silent: bool = False,
+    *args,
+    **kwargs,
 ):
     """
     Annotate simulation with gene-level features
@@ -100,6 +105,6 @@ def annotate_gene_features(
     None, modifies adata_sim in-place.
     """
     gene_compatibility = GeneCompatibility(
-        gene_id_key=gene_id_key, PCA=PCA, key_added=key_added
+        gene_id_key=gene_id_key, PCA=PCA, key_added=key_added, silent=silent,
     )
     return gene_compatibility(adata_sim=adata_sim, adata=adata)

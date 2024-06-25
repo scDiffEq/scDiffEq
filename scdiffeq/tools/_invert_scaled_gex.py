@@ -81,6 +81,7 @@ class InvertScalingExpression(ABCParse.ABCParse):
         suffix_added: str = "inv",
         return_df: bool = False,
         gene_ids: Optional[Union[pd.Series, pd.Index, List]] = None,
+        silent: bool = False,
         *args,
         **kwargs,
     ) -> pd.DataFrame:
