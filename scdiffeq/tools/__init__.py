@@ -26,10 +26,11 @@ from ._annotate_cell_fate import annotate_cell_fate
 from ._invert_scaled_gex import invert_scaled_gex
 
 
-
-# -- perturbation screening classes: ------------------------------------------
+# -- perturbation: ------------------------------------------------------------
 from ._fate_perturbation_experiment import FatePerturbationExperiment
 from ._fate_perturbation_screen import FatePerturbationScreen
+from ._perturb import perturb
+from ._perturb_scan_z_range import perturb_scan_z_range
 
 
 # -- velocity plotting tools: -------------------------------------------------
