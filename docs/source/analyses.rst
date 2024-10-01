@@ -5,9 +5,16 @@ Reproducibility
 .. toctree::
    :hidden:
    
+   _notebooks/Figure2A.ipynb
+   _notebooks/Figure2B.ipynb
+   _notebooks/Figure2D.ipynb
+   _notebooks/Figure2E.ipynb
+   _notebooks/Figure2F.ipynb
+   _notebooks/Figure3AB.ipynb
+   _notebooks/Figure3CD.ipynb
+   _notebooks/Figure3EFG.ipynb
+   _notebooks/Figure3J.ipynb
    _notebooks/human_hematopoiesis.preprocessing
-   _notebooks/neural_diffeqs.potential_ode.reference.ipynb
-   _notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb
 
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
@@ -22,8 +29,8 @@ they relate to the observed data.
 Figure 2
 ========
 
-.. grid-item-card:: ``neural_diffeqs.potential_ode.reference.ipynb``
-      :link: _notebooks/neural_diffeqs.potential_ode.reference.ipynb
+.. grid-item-card:: ``Figure2A.ipynb``
+      :link: _notebooks/Figure2A.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
@@ -31,8 +38,32 @@ Figure 2
       :octicon:`book;2em;sd-text-dark`
 
 
-.. grid-item-card:: ``neural_diffeqs.latent_potential_ode.reference.ipynb``
-      :link: _notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb
+.. grid-item-card:: ``Figure2B.ipynb``
+      :link: _notebooks/Figure2B.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure2D.ipynb``
+      :link: _notebooks/Figure2D.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure2E.ipynb``
+      :link: _notebooks/Figure2E.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure2F.ipynb``
+      :link: _notebooks/Figure2F.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
@@ -41,6 +72,47 @@ Figure 2
 
 Figure 3
 ========
+
+.. grid-item-card:: ``Figure3AB.ipynb``
+      :link: _notebooks/Figure3AB.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure3CD.ipynb``
+      :link: _notebooks/Figure3CD.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure3EFG.ipynb``
+      :link: _notebooks/Figure3EFG.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure3J.ipynb``
+      :link: _notebooks/Figure3J.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+
+.. grid-item-card:: ``Figure3J.make_supplementary_tables.ipynb``
+      :link: _notebooks/Figure3J.make_supplementary_tables.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
 
 .. grid-item-card:: ``human_hematopoiesis.preprocessing.ipynb``
       :link: _notebooks/human_hematopoiesis.preprocessing.ipynb
