@@ -2,9 +2,5 @@
 
 from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
 from ._lightning_trainer_configuration import LightningTrainerConfiguration
-
-
-
 from ._lightning_model_configuration import LightningModelConfiguration
-
 from ._data_configuration import DataConfiguration, LightningData, TimeConfiguration, configure_time

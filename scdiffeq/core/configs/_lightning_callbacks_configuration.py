@@ -1,14 +1,26 @@
 
+__module_name__ = "_lightning_callbacks_configuration.py"
+__doc__ = """where built-in callbacks are configured"""
+__author__ = ", ".join(["Michael E. Vinyard"])
+__email__ = ", ".join(["mvinyard.ai@gmail.com"])
+
+
+# -- import packages: ---------------------------------------------------------
+
 import os
 import ABCParse
 from lightning import Callback
-from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
+from lightning.pytorch.callbacks import (
+    ModelCheckpoint, StochasticWeightAveraging
+)
 
-"""where built-in callbacks are configured"""
 
+
+# -- import local dependencies: -----------------------------------------------
 from .. import utils, callbacks
 
 
+# -- supporting class: --------------------------------------------------------
 class InterTrainerEpochCounter(Callback):
     def __init__(self):
         ...
@@ -19,6 +31,8 @@ class InterTrainerEpochCounter(Callback):
         pl_module.COMPLETED_EPOCHS += 1
         ce = pl_module.COMPLETED_EPOCHS
 
+        
+# -- operational class: -------------------------------------------------------
 class LightningCallbacksConfiguration(ABCParse.ABCParse):
     def __init__(self):
         super().__init__()

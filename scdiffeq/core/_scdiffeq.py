@@ -1,31 +1,41 @@
 
-# -- type setting: -------------------------------------------------------------
+# -- type setting: ------------------------------------------------------------
 from typing import Dict, List, Optional, Union
 
 
-# -- import packages: ----------------------------------------------------------
-from tqdm.notebook import tqdm
-import lightning
-import anndata
-import pandas as pd
-import torch
-import glob
-import os
+# -- import packages: ---------------------------------------------------------
 import ABCParse
-import pathlib
+import anndata
 import autodevice
+import glob
+import lightning
+import logging
+import os
+import pandas as pd
+import pathlib
+import py_pkg_logging
+import torch
+from tqdm.notebook import tqdm
+import warnings
 
-# -- import local dependencies: ------------------------------------------------
+
+# -- import local dependencies: -----------------------------------------------
 from . import configs, lightning_models, utils, callbacks
 from . import _mix_ins as mix_ins
 from .. import __version__ # tools
 
-import warnings
 
-warnings.filterwarnings("ignore", ".*Consider increasing the value of the `num_workers` argument*")
+# -- setup logging: -----------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
-# -- model class, faces API: ---------------------------------------------------
+# -- remove specific unnecessary warnings from dependency: --------------------
+warnings.filterwarnings(
+    "ignore", ".*Consider increasing the value of the `num_workers` argument*",
+)
+
+
+# -- model class, faces API: --------------------------------------------------
 class scDiffEq(
     mix_ins.ModelConfigMixIn,
     mix_ins.kNNMixIn,
@@ -38,9 +48,10 @@ class scDiffEq(
 ):
         
     """scDiffeq model class"""
+    @py_pkg_logging.log_function_call(logger)
     def __init__(
         self,
-        # -- data params: -------------------------------------------------------
+        # -- data params: ------------------------------------------------------
         adata: Optional[anndata.AnnData] = None,
         latent_dim: int = 50,
         name: Optional[str] = None,
@@ -50,7 +61,7 @@ class scDiffEq(
         seed: int = 0,
         backend: str = "auto",
         gradient_clip_val: float = 0.5,
-        # -- velocity ratio keys: -----------------------------------------------
+        # -- velocity ratio keys: ----------------------------------------------
         velocity_ratio_params: Dict[str,Union[float,bool]] = {
             "target": 2,
             "enforce": 100, # zero to disable
@@ -60,13 +71,13 @@ class scDiffEq(
         build_kNN: Optional[bool] = False,
         kNN_key: Optional[str] = "X_pca",
         kNN_fit_subset: Optional[str] = "train",
-        # -- pretrain params: ---------------------------------------------------
+        # -- pretrain params: --------------------------------------------------
         pretrain_epochs: int = 500,
         pretrain_lr: float = 1e-3,
         pretrain_optimizer = torch.optim.Adam,
         pretrain_step_size: int = 100,
         pretrain_scheduler = torch.optim.lr_scheduler.StepLR,
-        # -- train params: ------------------------------------------------------
+        # -- train params: -----------------------------------------------------
         train_epochs: int = 1500,
         train_lr: float = 1e-5,
         train_optimizer = torch.optim.RMSprop,
@@ -78,7 +89,7 @@ class scDiffEq(
         val_key: str = "val",
         test_key: str = "test",
         predict_key: str = "predict",
-        # -- general params: ----------------------------------------------------
+        # -- general params: ---------------------------------------------------
         logger: Optional["lightning.logger"] = None,
         num_workers: int = os.cpu_count(),
         silent: bool = True,
@@ -97,7 +108,7 @@ class scDiffEq(
         time_cluster_key: Optional[str] = None,
         t0_cluster: Optional[str] = None,
         shuffle_time_labels: bool = False,
-        # -- DiffEq params: ----------------------------------------------------
+        # -- DiffEq params: ---------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400],
         mu_activation: Union[str, List[str]] = "LeakyReLU",
         mu_dropout: Union[float, List[float]] = 0.1,
@@ -127,7 +138,7 @@ class scDiffEq(
         encoder_dropout: Union[float, List[float]] = 0.2,
         encoder_bias: bool = True,
         encoder_output_bias: bool = True,
-        # -- Decoder params: ---------------------------------------------------
+        # -- Decoder params: --------------------------------------------------
         decoder_n_hidden: int = 4,
         decoder_power: float = 2,
         decoder_activation: Union[str, List[str]] = "LeakyReLU",
@@ -154,6 +165,7 @@ class scDiffEq(
         """
         self.__config__(locals())
         
+    @py_pkg_logging.log_function_call(logger)    
     def fit(
         self,
         train_epochs=200,
@@ -186,7 +198,7 @@ class scDiffEq(
         
         self.train(**ABCParse.function_kwargs(self.train, locals()))
 
-
+    @py_pkg_logging.log_function_call(logger)
     def simulate(self) -> anndata.AnnData:
         ...
         
