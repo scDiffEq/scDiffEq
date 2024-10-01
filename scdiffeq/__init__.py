@@ -5,6 +5,12 @@ __author__ = ", ".join(["Michael E. Vinyard"])
 __email__ = ", ".join(["mvinyard.ai@gmail.com"])
 
 
+# -- setup logging: ----------------------------------------------------------
+import py_pkg_logging as _ppl
+
+_LOGGING = _ppl.PackageLogging(name=__name__, file=__file__)
+
+
 from .__version__ import __version__
 
 import os as _os

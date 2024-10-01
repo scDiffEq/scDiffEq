@@ -52,6 +52,7 @@ def perturb_scan_z_range(
             subset_val=subset_val,
             gene_id_key=gene_id_key,
             genes=genes,
+            replicates=replicates,
             PCA=PCA,
             *args,
             **kwargs,
