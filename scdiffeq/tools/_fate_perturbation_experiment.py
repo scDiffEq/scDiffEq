@@ -4,10 +4,17 @@ import ABCParse
 import anndata
 import cell_perturb
 import lightning
+import logging
 import numpy as np
+import os
 import pandas as pd
+import pathlib
 import scipy.stats
 import torch
+
+
+# -- initialize logger: -------------------------------------------------------
+logger = logging.getLogger(name=__name__)
 
 
 # -- import local dependencies: -----------------------------------------------
@@ -144,6 +151,7 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         N: int = 200,
         time_key: str = "t",
         save_simulation: bool = False,
+        save_path: Optional[pathlib.Path] = pathlib.Path("./scdiffeq_simulations"),
         *args,
         **kwargs,
     ) -> None:
@@ -258,8 +266,20 @@ class FatePerturbationExperiment(ABCParse.ABCParse):
         
         
         if self._save_simulation:
+            
+            if not self._save_path.exists():
+                os.mkdir(self._save_path)
+            
             self.adata_sim_prtb = adata_sim_prtb
             self.adata_sim_ctrl = adata_sim_ctrl
+            _genes_ = "_".join(self._genes)
+            
+            del self.adata_sim_prtb.uns['sim_idx']
+            del self.adata_sim_ctrl.uns['sim_idx']
+            
+            self.adata_sim_prtb.write_h5ad(self._save_path.joinpath(f"adata.{_genes_}.prtb.h5ad"))
+            self.adata_sim_ctrl.write_h5ad(self._save_path.joinpath(f"adata.{_genes_}.ctrl.h5ad"))
+            logger.info(f"Perturbed simulations saved to: {self._save_path}")
             
         
         prtb = self._subset_final_state(adata_sim_prtb)
