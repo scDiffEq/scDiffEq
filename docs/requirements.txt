@@ -1,4 +1,4 @@
-sklearn>=1.5
+scikit-learn>=1.5
 sphinx
 pydata_sphinx_theme
 autodoc
