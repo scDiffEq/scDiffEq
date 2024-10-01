@@ -1,11 +1,11 @@
 __doc__ = """Configuration file for the Sphinx documentation builder."""
 
 # -- project info: ------------------------------------------------------------
-
 project = 'scdiffeq'
 copyright = '2023, Michael E. Vinyard'
 author = 'Michael E. Vinyard'
 release = '0.1.0'
+
 
 # -- config: ------------------------------------------------------------------
 import os
@@ -13,11 +13,58 @@ import sys
 import requests
 
 
+# -- new nb fetch: ------------------------------------------------------------
+class NotebookURLs:
+    def __init__(self):
+        ...
+
+    def _URL_factory(self, path: str):
+        """example: manuscript/Figure2"""
+        return f"https://api.github.com/repos/scDiffEq/scdiffeq-analyses/contents/{path}/notebooks?ref=main"
+
+    def _fetch(self, url: str):
+        response = requests.get(url)
+    
+        if response.status_code == 200:
+            files = response.json()
+            
+            # Filter for .ipynb files and print their download URLs
+            ipynb_files = [file['download_url'] for file in files if file['name'].endswith('.ipynb')]
+            return ipynb_files            
+            # for file_url in ipynb_files:
+            #     print(file_url)
+        else:
+            print(f"Error: {response.status_code}")
+            print(response.text)
+
+    @property
+    def Figure2(self):
+        return self._fetch(self._URL_factory("manuscript/Figure2"))
+
+    @property
+    def Figure3(self):
+        return self._fetch(self._URL_factory("manuscript/Figure3"))
+
+    @property
+    def Figure4(self):
+        return self._fetch(self._URL_factory("manuscript/Figure4"))
+
+    def __call__(self):
+
+        paths = self.Figure2 + self.Figure3
+        
+        return paths
+
+# ------------------------------------------------
+
+
 def download_notebooks():
-    notebook_urls = [
-        "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb",
-        "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.potential_ode.reference.ipynb",
-    ]
+    url_fetcher = NotebookURLs()
+    notebook_urls = url_fetcher()
+#     notebook_urls = [
+#         "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb",
+#         "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.potential_ode.reference.ipynb",
+#     ]
     os.makedirs('./_notebooks', exist_ok=True)  # Ensure the target directory exists
     for url in notebook_urls:
         r = requests.get(url)
