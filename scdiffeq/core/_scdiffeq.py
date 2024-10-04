@@ -1,4 +1,3 @@
-
 # -- type setting: ------------------------------------------------------------
 from typing import Dict, List, Optional, Union
 
@@ -13,7 +12,8 @@ import logging
 import os
 import pandas as pd
 import pathlib
-import py_pkg_logging
+
+# import py_pkg_logging
 import torch
 from tqdm.notebook import tqdm
 import warnings
@@ -22,7 +22,7 @@ import warnings
 # -- import local dependencies: -----------------------------------------------
 from . import configs, lightning_models, utils, callbacks
 from . import _mix_ins as mix_ins
-from .. import __version__ # tools
+from .. import __version__  # tools
 
 
 # -- setup logging: -----------------------------------------------------------
@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 
 # -- remove specific unnecessary warnings from dependency: --------------------
 warnings.filterwarnings(
-    "ignore", ".*Consider increasing the value of the `num_workers` argument*",
+    "ignore",
+    ".*Consider increasing the value of the `num_workers` argument*",
 )
 
 
@@ -46,9 +47,9 @@ class scDiffEq(
     mix_ins.TrainMixIn,
     ABCParse.ABCParse,
 ):
-        
     """scDiffeq model class"""
-    @py_pkg_logging.log_function_call(logger)
+
+    # @py_pkg_logging.log_function_call(logger)
     def __init__(
         self,
         # -- data params: ------------------------------------------------------
@@ -56,16 +57,16 @@ class scDiffEq(
         latent_dim: int = 50,
         name: Optional[str] = None,
         use_key: str = "X_pca",
-        weight_key: str = 'W',
+        weight_key: str = "W",
         obs_keys: List[str] = [],
         seed: int = 0,
         backend: str = "auto",
         gradient_clip_val: float = 0.5,
         # -- velocity ratio keys: ----------------------------------------------
-        velocity_ratio_params: Dict[str,Union[float,bool]] = {
+        velocity_ratio_params: Dict[str, Union[float, bool]] = {
             "target": 2,
-            "enforce": 100, # zero to disable
-            "method": "square", # abs -> calls torch.abs or torch.square
+            "enforce": 100,  # zero to disable
+            "method": "square",  # abs -> calls torch.abs or torch.square
         },
         # -- kNN keys: [optional]: ----------------------------------------------
         build_kNN: Optional[bool] = False,
@@ -74,14 +75,14 @@ class scDiffEq(
         # -- pretrain params: --------------------------------------------------
         pretrain_epochs: int = 500,
         pretrain_lr: float = 1e-3,
-        pretrain_optimizer = torch.optim.Adam,
+        pretrain_optimizer=torch.optim.Adam,
         pretrain_step_size: int = 100,
-        pretrain_scheduler = torch.optim.lr_scheduler.StepLR,
+        pretrain_scheduler=torch.optim.lr_scheduler.StepLR,
         # -- train params: -----------------------------------------------------
         train_epochs: int = 1500,
         train_lr: float = 1e-5,
-        train_optimizer = torch.optim.RMSprop,
-        train_scheduler = torch.optim.lr_scheduler.StepLR,
+        train_optimizer=torch.optim.RMSprop,
+        train_scheduler=torch.optim.lr_scheduler.StepLR,
         train_step_size: int = 10,
         train_val_split: List[float] = [0.9, 0.1],
         batch_size: int = 2000,
@@ -150,27 +151,26 @@ class scDiffEq(
         *args,
         **kwargs,
     ) -> None:
-
         """Initialize the scDiffEq model.
 
         This class is responsible for bringing together three critical
         components: the lightning model, the lightning trainer, and the
-        lightning data. All else is superfluous to model operation. 
+        lightning data. All else is superfluous to model operation.
 
         Args:
             arg1 (arg1_type): description of arg1. **Default**: None
-        
+
         Returns:
             None
         """
         self.__config__(locals())
-        
-    @py_pkg_logging.log_function_call(logger)    
+
+    # @py_pkg_logging.log_function_call(logger)
     def fit(
         self,
         train_epochs=200,
         pretrain_epochs=500,
-        train_lr = None,
+        train_lr=None,
         pretrain_callbacks: List = [],
         train_callbacks: List = [],
         ckpt_frequency: int = 25,
@@ -184,23 +184,21 @@ class scDiffEq(
         deterministic=False,
         **kwargs,
     ) -> None:
-
         """Fit the scDiffEq model to some data.
 
         Extended description.
 
         Args:
             arg1 (arg1_type): description of arg1. **Default**: None
-        
+
         Returns:
             None
         """
-        
+
         self.train(**ABCParse.function_kwargs(self.train, locals()))
 
-    @py_pkg_logging.log_function_call(logger)
-    def simulate(self) -> anndata.AnnData:
-        ...
-        
+    # @py_pkg_logging.log_function_call(logger)
+    def simulate(self) -> anndata.AnnData: ...
+
     def __repr__(self) -> str:
         return "scDiffEq"
