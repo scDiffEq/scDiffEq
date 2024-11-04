@@ -54,7 +54,7 @@ class NotebookURLs:
 
     def __call__(self):
 
-        paths = self.Figure2 + self.Figure3 + +self.Figure4
+        paths = self.Figure2 + self.Figure3 + self.Figure4
 
         return paths
 
