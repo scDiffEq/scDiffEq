@@ -163,7 +163,7 @@ Plotting
             :maxdepth: 2
             :hidden:
 
-            _api/datasets
+            _api/_plotting
 
          .. button-link:: _api/_plotting/velocity_stream.rst
             :color: primary
