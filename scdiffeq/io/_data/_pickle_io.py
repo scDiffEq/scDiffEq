@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import pathlib
 import pickle
@@ -29,12 +28,12 @@ class PickleIO:
 # -- API-facing functions: ----------------------------------------------------
 def read_pickle(path: Union[str, pathlib.Path], mode: Optional[str] = "rb"):
     """Read the contents of a pickle file into memory.
-    
-    Args:        
-        path (Union[str, pathlib.Path]): pickle file path. 
-        
+
+    Args:
+        path (Union[str, pathlib.Path]): pickle file path.
+
         mode (Optional[str]): read mode. **Default** = "rb"
-                
+
     Returns:
         obj (Dict[Any,Any]): Object, usually a dictionary contained in pickle file.
     """
@@ -44,24 +43,27 @@ def read_pickle(path: Union[str, pathlib.Path], mode: Optional[str] = "rb"):
 
 
 def write_pickle(
-    obj: Dict[Any,Any],
+    obj: Dict[Any, Any],
     path: Union[str, pathlib.Path],
     mode: Optional[str] = "wb",
     protocol: Optional = pickle.HIGHEST_PROTOCOL,
-):
+) -> None:
     """Save an object to a pickle file.
-    
-    Args:
-        obj (Dict[Any,Any]): Object, usually a dictionary to write to pickle file.
-        
-        path (Union[str, pathlib.Path]): path to which pickle file should be written. 
-        
-        mode (Optional[str]): write mode. **Default** = "wb"
-        
-        protocol (Optional) pickling protocol. **Default** = ``pickle.HIGHEST_PROTOCOL``
-        
-    Returns:
-        None
+
+    Parameters
+    ----------
+    obj : Dict[Any, Any]
+        Object, usually a dictionary to write to pickle file.
+    path : Union[str, pathlib.Path]
+        Path to which pickle file should be written.
+    mode : Optional[str], default="wb"
+        Write mode.
+    protocol : Optional, default=pickle.HIGHEST_PROTOCOL
+        Pickling protocol.
+
+    Returns
+    -------
+    None
     """
 
     pickle_io = PickleIO()

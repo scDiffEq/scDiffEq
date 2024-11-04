@@ -109,8 +109,8 @@ def annotate_cell_state(
     ----------
     adata_sim : anndata.AnnData
         Simulated data object in the format of ``anndata.AnnData``, the (annotated)
-        single-cell data matrix of shape n_obs × n_vars. Rows correspond to cells
-        and columns to genes. For more: https://anndata.readthedocs.io/en/latest/.
+        single-cell data matrix of shape ``n_obs × n_vars``. Rows correspond to cells
+        and columns to genes. For more: [1](https://anndata.readthedocs.io/en/latest/).
 
     kNN : kNN
         k-nearest neighbor graph.

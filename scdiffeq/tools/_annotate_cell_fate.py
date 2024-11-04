@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import anndata
 import ABCParse
@@ -12,11 +11,18 @@ import pandas as pd
 # -- set typing: --------------------------------------------------------------
 
 
-
 # -- controlling class: -------------------------------------------------------
 class CellFateAnnotation(ABCParse.ABCParse):
     """ """
-    def __init__(self, time_key: str = "t", sim_key: str = "sim", silent: bool = False, *args, **kwargs):
+
+    def __init__(
+        self,
+        time_key: str = "t",
+        sim_key: str = "sim",
+        silent: bool = False,
+        *args,
+        **kwargs,
+    ):
         self.__parse__(locals())
 
     @property
@@ -46,11 +52,13 @@ class CellFateAnnotation(ABCParse.ABCParse):
     def _count_fates(self) -> None:
         """ """
         fate_obs = self._adata_sim.obs.loc[self._TIME == self._T_MAX]
-        self._adata_sim.uns['fate_counts'] = fate_obs[self._key_added].value_counts().to_dict()
-        
+        self._adata_sim.uns["fate_counts"] = (
+            fate_obs[self._key_added].value_counts().to_dict()
+        )
+
         if not self._silent:
             self._INFO("Added fate counts: adata_sim.uns['fate_counts']")
-        
+
     def __call__(
         self,
         adata_sim: anndata.AnnData,
@@ -71,35 +79,36 @@ def annotate_cell_fate(
     key_added: str = "fate",
     time_key: str = "t",
     sim_key: str = "sim",
-    silent: bool = False, 
+    silent: bool = False,
     *args,
     **kwargs,
 ) -> None:
-
     """Annotate the fate of a simulated cell trajectory, given annotated states.
 
-    Args:
-        adata_sim (anndata.AnnData)
-            Simulated AnnData object.
+    Parameters
+    ----------
+    adata_sim : anndata.AnnData
+        Simulated AnnData object.
 
         state_key (str)
-            Key in adata_sim.obs corresponding to annotated states.
+            Key in ``adata_sim.obs`` corresponding to annotated states.
 
         key_added (str)
-            Key added to adata.obs to indicate the fate of each trajectory.
+            Key added to ``adata_sim.obs`` to indicate the fate of each trajectory.
             **Default**: "fate"
 
         time_key (str)
-            Key in adata_sim.obs corresponding to time.
+            Key in ``adata_sim.obs`` corresponding to time.
 
         sim_key (str)
-            Key in adata_sim.obs corresponding to each individual simulation.
-            
-        silent (bool)
-            Description.
+            Key in ``adata_sim.obs`` corresponding to each individual simulation.
 
-    Returns:
-        None
+        silent (bool)
+            If ``True``, suppresses informational messages.
+
+    Returns
+    -------
+    None
     """
 
     fate_annot = CellFateAnnotation(time_key=time_key, sim_key=sim_key, silent=silent)
