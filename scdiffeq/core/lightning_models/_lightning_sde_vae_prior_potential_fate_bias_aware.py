@@ -1,4 +1,3 @@
-
 # -- import packages: ----------------------------------------------------------
 from neural_diffeqs import LatentPotentialSDE
 import torch_nets
@@ -40,14 +39,12 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
-        backend = "auto",
-        
+        backend="auto",
         # -- sde params: -----
-        
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
-        mu_activation: Union[str, List[str]] = 'LeakyReLU',
-        sigma_activation: Union[str, List[str]] = 'LeakyReLU',
+        mu_activation: Union[str, List[str]] = "LeakyReLU",
+        sigma_activation: Union[str, List[str]] = "LeakyReLU",
         mu_dropout: Union[float, List[float]] = 0.1,
         sigma_dropout: Union[float, List[float]] = 0.1,
         mu_bias: bool = True,
@@ -56,53 +53,129 @@ class LightningSDE_VAE_PriorPotential_FateBiasAware(
         sigma_output_bias: bool = True,
         mu_n_augment: int = 0,
         sigma_n_augment: int = 0,
-        sde_type='ito',
-        noise_type='general',
+        sde_type="ito",
+        noise_type="general",
         brownian_dim=1,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
-        
         # -- encoder parameters: -------
         encoder_n_hidden: int = 4,
         encoder_power: float = 2,
-        encoder_activation: Union[str, List[str]] = 'LeakyReLU',
+        encoder_activation: Union[str, List[str]] = "LeakyReLU",
         encoder_dropout: Union[float, List[float]] = 0.2,
         encoder_bias: bool = True,
         encoder_output_bias: bool = True,
-        
         # -- decoder parameters: -------
         decoder_n_hidden: int = 4,
         decoder_power: float = 2,
-        decoder_activation: Union[str, List[str]] = 'LeakyReLU',
+        decoder_activation: Union[str, List[str]] = "LeakyReLU",
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
-        
-        PCA = None,
-        
+        PCA=None,
         # -- other: ----
         loading_existing: bool = False,
-        version = __version__,
+        version=__version__,
         *args,
         **kwargs,
-    ):
+    ) -> None:
+        """
+        LightningSDE-VAE-PriorPotential-FateBiasAware model accessed as model.DiffEq
+
+        Parameters
+        ----------
+        latent_dim : int, optional
+            Number of latent dimensions over which SDE should be parameterized. Default is 50.
+        name : Optional[str], optional
+            Model name used during project saving. Default is None.
+        mu_hidden : Union[List[int], int], optional
+            Hidden layer sizes for the drift function. Default is [400, 400, 400].
+        sigma_hidden : Union[List[int], int], optional
+            Hidden layer sizes for the diffusion function. Default is [400, 400, 400].
+        mu_activation : Union[str, List[str]], optional
+            Activation function for the drift function. Default is "LeakyReLU".
+        sigma_activation : Union[str, List[str]], optional
+            Activation function for the diffusion function. Default is "LeakyReLU".
+        mu_dropout : Union[float, List[float]], optional
+            Dropout rate for the drift function. Default is 0.1.
+        sigma_dropout : Union[float, List[float]], optional
+            Dropout rate for the diffusion function. Default is 0.1.
+        mu_bias : bool, optional
+            Whether to use bias in the drift function. Default is True.
+        sigma_bias : List[bool], optional
+            Whether to use bias in the diffusion function. Default is True.
+        mu_output_bias : bool, optional
+            Whether to use bias in the output layer of the drift function. Default is True.
+        sigma_output_bias : bool, optional
+            Whether to use bias in the output layer of the diffusion function. Default is True.
+        mu_n_augment : int, optional
+            Number of augmented dimensions for the drift function. Default is 0.
+        sigma_n_augment : int, optional
+            Number of augmented dimensions for the diffusion function. Default is 0.
+        sde_type : str, optional
+            Type of SDE (e.g., "ito" or "stratonovich"). Default is "ito".
+        noise_type : str, optional
+            Type of noise (e.g., "general" or "diagonal"). Default is "general".
+        brownian_dim : int, optional
+            Dimension of the Brownian motion. Default is 1.
+        coef_drift : float, optional
+            Coefficient for the drift term. Default is 1.0.
+        coef_diffusion : float, optional
+            Coefficient for the diffusion term. Default is 1.0.
+        coef_prior_drift : float, optional
+            Coefficient for the prior drift term. Default is 1.0.
+        encoder_n_hidden : int, optional
+            Number of hidden layers for the encoder. Default is 4.
+        encoder_power : float, optional
+            Power for the encoder. Default is 2.
+        encoder_activation : Union[str, List[str]], optional
+            Activation function for the encoder. Default is "LeakyReLU".
+        encoder_dropout : Union[float, List[float]], optional
+            Dropout rate for the encoder. Default is 0.2.
+        encoder_bias : bool, optional
+            Whether to use bias in the encoder. Default is True.
+        encoder_output_bias : bool, optional
+            Whether to use bias in the output layer of the encoder. Default is True.
+        decoder_n_hidden : int, optional
+            Number of hidden layers for the decoder. Default is 4.
+        decoder_power : float, optional
+            Power for the decoder. Default is 2.
+        decoder_activation : Union[str, List[str]], optional
+            Activation function for the decoder. Default is "LeakyReLU".
+        decoder_dropout : Union[float, List[float]], optional
+            Dropout rate for the decoder. Default is 0.2.
+        decoder_bias : bool, optional
+            Whether to use bias in the decoder. Default is True.
+        decoder_output_bias : bool, optional
+            Whether to use bias in the output layer of the decoder. Default is True.
+        PCA : optional
+            Principal Component Analysis. Default is None.
+        loading_existing : bool, optional
+            Whether to load an existing model. Default is False.
+        version : str, optional
+            Version of the model. Default is __version__.
+
+        Returns
+        -------
+        None
+        """
         super().__init__()
-        
-        name = self._configure_name(name, loading_existing = loading_existing)
-        
+
+        name = self._configure_name(name, loading_existing=loading_existing)
+
         self.save_hyperparameters()
-        
+
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func = LatentPotentialSDE, kwargs=locals())
-        self._configure_lightning_model(kwargs = locals())
-        
+        self._configure_torch_modules(func=LatentPotentialSDE, kwargs=locals())
+        self._configure_lightning_model(kwargs=locals())
+
         self._configure_fate(
             graph=kNN_Graph,
-            csv_path = fate_bias_csv_path,
-            t0_idx = t0_idx,
-            fate_bias_multiplier = fate_bias_multiplier,
-            PCA = PCA,
+            csv_path=fate_bias_csv_path,
+            t0_idx=t0_idx,
+            fate_bias_multiplier=fate_bias_multiplier,
+            PCA=PCA,
         )
 
     def __repr__(self):
