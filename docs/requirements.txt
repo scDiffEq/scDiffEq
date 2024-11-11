@@ -27,3 +27,4 @@ sphinx-copybutton
 sphinx-design
 sphinx-favicon
 myst-parser
+scdiffeq -e .
