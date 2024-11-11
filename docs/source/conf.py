@@ -42,19 +42,23 @@ class NotebookURLs:
 
     @property
     def Figure2(self):
-        return self._fetch(self._URL_factory("manuscript/Figure2"))
+        return self._fetch(self._URL_factory("manuscript/figure_2"))
 
     @property
     def Figure3(self):
-        return self._fetch(self._URL_factory("manuscript/Figure3"))
+        return self._fetch(self._URL_factory("manuscript/figure_3"))
 
     @property
     def Figure4(self):
-        return self._fetch(self._URL_factory("manuscript/Figure4"))
+        return self._fetch(self._URL_factory("manuscript/figure_4"))
+    
+    @property
+    def FigureS1(self):
+        return self._fetch(self._URL_factory("manuscript/figure_s1"))
 
     def __call__(self):
 
-        paths = self.Figure2 + self.Figure3 + self.Figure4
+        paths = self.Figure2 + self.Figure3 + self.Figure4 + self.FigureS1
 
         return paths
 
@@ -65,10 +69,6 @@ class NotebookURLs:
 def download_notebooks():
     url_fetcher = NotebookURLs()
     notebook_urls = url_fetcher()
-    #     notebook_urls = [
-    #         "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.latent_potential_ode.reference.ipynb",
-    #         "https://raw.githubusercontent.com/mvinyard/neural-diffeqs/main/docs/source/_notebooks/neural_diffeqs.potential_ode.reference.ipynb",
-    #     ]
     os.makedirs("./_notebooks", exist_ok=True)  # Ensure the target directory exists
     for url in notebook_urls:
         r = requests.get(url)
