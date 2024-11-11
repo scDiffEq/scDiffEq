@@ -1,4 +1,3 @@
-
 from . import mix_ins, base
 
 
@@ -23,7 +22,7 @@ class LightningODE_VAE_FixedPotential(
         latent_dim: int = 50,
         name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [2000, 2000],
-        mu_activation: Union[str, List[str]] = 'LeakyReLU',
+        mu_activation: Union[str, List[str]] = "LeakyReLU",
         mu_dropout: Union[float, List[float]] = 0.2,
         mu_bias: bool = True,
         mu_output_bias: bool = True,
@@ -39,21 +38,86 @@ class LightningODE_VAE_FixedPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
-        backend = "auto",
+        backend="auto",
         loading_existing: bool = False,
-        version = __version__,
+        version=__version__,
         *args,
         **kwargs,
-    ):
+    ) -> None:
+        """
+        LightningODE_VAE_FixedPotential
+
+        Parameters
+        ----------
+        data_dim : int
+            Dimensionality of the input data.
+        latent_dim : int, optional
+            Dimensionality of the latent space, by default 50.
+        name : str, optional
+            Name of the model, by default None.
+        mu_hidden : Union[List[int], int], optional
+            Hidden layer sizes for the neural network, by default [2000, 2000].
+        mu_activation : Union[str, List[str]], optional
+            Activation function(s) for the neural network, by default 'LeakyReLU'.
+        mu_dropout : Union[float, List[float]], optional
+            Dropout rate(s) for the neural network, by default 0.2.
+        mu_bias : bool, optional
+            Whether to use bias in the neural network, by default True.
+        mu_output_bias : bool, optional
+            Whether to use bias in the output layer of the neural network, by default True.
+        mu_n_augment : int, optional
+            Number of augmentations for the neural network, by default 0.
+        train_lr : float, optional
+            Learning rate for training, by default 1e-5.
+        pretrain_lr : float, optional
+            Learning rate for pretraining, by default 1e-3.
+        pretrain_epochs : int, optional
+            Number of epochs for pretraining, by default 100.
+        pretrain_optimizer : torch.optim.Optimizer, optional
+            Optimizer for pretraining, by default torch.optim.Adam.
+        train_optimizer : torch.optim.Optimizer, optional
+            Optimizer for training, by default torch.optim.RMSprop.
+        pretrain_scheduler : torch.optim.lr_scheduler._LRScheduler, optional
+            Learning rate scheduler for pretraining, by default None.
+        train_scheduler : torch.optim.lr_scheduler._LRScheduler, optional
+            Learning rate scheduler for training, by default torch.optim.lr_scheduler.StepLR.
+        pretrain_step_size : int, optional
+            Step size for the pretraining learning rate scheduler, by default None.
+        train_step_size : int, optional
+            Step size for the training learning rate scheduler, by default 10.
+        dt : float, optional
+            Time step for the ODE solver, by default 0.1.
+        adjoint : bool, optional
+            Whether to use the adjoint method for the ODE solver, by default False.
+        backend : str, optional
+            Backend for the ODE solver, by default "auto".
+        loading_existing : bool, optional
+            Whether to load an existing model, by default False.
+        version : str, optional
+            Version of the model, by default __version__.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This class implements a VAE with fixed potential ODE using PyTorch Lightning.
+
+        Examples
+        --------
+        >>> model = LightningODE_VAE_FixedPotential(data_dim=100, latent_dim=20, dt=0.05)
+        >>> model.fit(data)
+        """
         super().__init__()
-        
+
         name = self._configure_name(name, loading_existing=loading_existing)
 
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=PotentialODE, kwargs=locals())
-        self._configure_lightning_model(kwargs = locals())
+        self._configure_lightning_model(kwargs=locals())
 
     def forward(self, X0, t, **kwargs):
         """Forward step: (0) integrate in latent space"""

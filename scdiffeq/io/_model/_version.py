@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import pathlib
@@ -17,24 +16,52 @@ from typing import Dict, List, Union
 
 # -- operational class: -------------------------------------------------------
 class Version(ABCParse.ABCParse):
-    """scDiffEq Version object container"""
+    """scDiffEq Version object container
 
-    def __init__(self, path: Union[pathlib.Path, str] = None, groupby: str = "epoch", *args, **kwargs):
+    Attributes
+    ----------
+    _path : Union[pathlib.Path, str]
+        Path to the version within an scDiffEq project.
+    _groupby : str
+        Grouping method for metrics, default is "epoch".
+    """
+
+    def __init__(
+        self,
+        path: Union[pathlib.Path, str] = None,
+        groupby: str = "epoch",
+        *args,
+        **kwargs
+    ):
         """Instantiate Version by providing a path
 
-        Args:
-            path (Union[pathlib.Path]): path to the version within an
-            scDiffEq project. **Default** = None.
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str], optional
+            Path to the version within an scDiffEq project, by default None.
+        groupby : str, optional
+            Grouping method for metrics, by default "epoch"
 
-
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         self.__parse__(locals())
 
     @property
     def _PATH(self) -> pathlib.Path:
-        """check and format the provided path"""
+        """Check and format the provided path
+
+        Returns
+        -------
+        pathlib.Path
+            Formatted path
+
+        Raises
+        ------
+        TypeError
+            If the path is not of type pathlib.Path or str
+        """
         if isinstance(self._path, pathlib.Path):
             return self._path
         if isinstance(self._path, str):
@@ -43,43 +70,85 @@ class Version(ABCParse.ABCParse):
 
     @property
     def _NAME(self) -> str:
-        """version name from provided path"""
+        """Version name from provided path
+
+        Returns
+        -------
+        str
+            Name of the version
+        """
         return self._PATH.name
 
     @property
     def _CONTENTS(self) -> List[pathlib.Path]:
-        """return one-level glob of the provided path"""
+        """Return one-level glob of the provided path
+
+        Returns
+        -------
+        List[pathlib.Path]
+            List of contents in the provided path
+        """
         return list(self._PATH.glob("*"))
 
     @property
     def hparams(self):
-        """check if the .yaml exists and instantiate the HParams cls each time"""
+        """Check if the .yaml exists and instantiate the HParams class each time
+
+        Returns
+        -------
+        HParams
+            Instance of HParams class if hparams.yaml exists
+        """
         hparams_path = self._PATH.joinpath("hparams.yaml")
         if hparams_path.exists():
             return HParams(hparams_path)
 
     @property
     def metrics_df(self) -> pd.DataFrame:
-        """check if metrics.csv path exists as given and read. reads new
-        each time"""
+        """Check if metrics.csv path exists and read it
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the metrics if metrics.csv exists
+        """
         metrics_path = self._PATH.joinpath("metrics.csv")
         if metrics_path.exists():
             return pd.read_csv(metrics_path)
-        
+
     @property
     def per_epoch_metrics(self):
-        self._GROUPED_METRICS = GroupedMetrics(groupby = self._groupby)
+        """Group metrics by the specified groupby attribute
+
+        Returns
+        -------
+        GroupedMetrics
+            Instance of GroupedMetrics class
+        """
+        self._GROUPED_METRICS = GroupedMetrics(groupby=self._groupby)
         return self._GROUPED_METRICS(self.metrics_df)
 
     @property
     def _CKPT_PATHS(self) -> List[pathlib.Path]:
-        """formatted ckpt paths"""
+        """Formatted checkpoint paths
+
+        Returns
+        -------
+        List[pathlib.Path]
+            List of checkpoint paths
+        """
         _ckpt_paths = list(self._PATH.joinpath("checkpoints").glob("*"))
         return [pathlib.Path(path) for path in _ckpt_paths]
 
     @property
     def _SORTED_CKPT_KEYS(self) -> List:
-        """sorting for organization's sake"""
+        """Sorting for organization's sake
+
+        Returns
+        -------
+        List
+            Sorted list of checkpoint keys
+        """
         epochs = list(self.ckpts.keys())
         _epochs = sorted([epoch for epoch in epochs if epoch != "last"])
         if "last" in epochs:
@@ -88,7 +157,13 @@ class Version(ABCParse.ABCParse):
 
     @property
     def ckpts(self) -> Dict:
-        """format and update available checkpoints for the version"""
+        """Format and update available checkpoints for the version
+
+        Returns
+        -------
+        Dict
+            Dictionary of checkpoints
+        """
         if not hasattr(self, "_CHECKPOINTS"):
             self._CHECKPOINTS = {}
             for ckpt_path in self._CKPT_PATHS:
@@ -97,5 +172,11 @@ class Version(ABCParse.ABCParse):
         return self._CHECKPOINTS
 
     def __repr__(self) -> str:
-        """return the name of the obj"""
+        """Return the name of the object
+
+        Returns
+        -------
+        str
+            Name of the object
+        """
         return self._NAME

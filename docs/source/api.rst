@@ -100,6 +100,34 @@ Data I/O
 
             sdq.io.write_pickle
 
+         .. button-link:: _api/_io/project.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.Project
+
+         .. button-link:: _api/_io/version.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.Version
+
+         .. button-link:: _api/_io/checkpoint.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.Checkpoint
+
+         .. button-link:: _api/_io/hparams.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.io.HParams
+
 
 Datasets
 ========
@@ -163,7 +191,7 @@ Plotting
             :maxdepth: 2
             :hidden:
 
-            _api/datasets
+            _api/_plotting
 
          .. button-link:: _api/_plotting/velocity_stream.rst
             :color: primary

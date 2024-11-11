@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import sklearn.decomposition
 import anndata
@@ -33,8 +32,7 @@ class GeneCompatibility(ABCParse.ABCParse):
 
         self.__parse__(locals(), public=[None])
         self._INFO = utils.InfoMessage()
-        
-        
+
     @property
     def var_names(self):
         return self.adata.var[self._gene_id_key]
@@ -47,12 +45,12 @@ class GeneCompatibility(ABCParse.ABCParse):
     def _format_inverted_expression(self):
 
         assert not self._PCA is None, "Must supply PCA model!"
-        
+
         X_gene = self._PCA.inverse_transform(self.adata_sim.X)
         X_gene = pd.DataFrame(
             X_gene,
-            index = self.adata_sim.obs.index,
-            columns = self.var_names,
+            index=self.adata_sim.obs.index,
+            columns=self.var_names,
         )
         self.adata_sim.obsm[self._key_added] = X_gene
         if not self._silent:
@@ -63,11 +61,12 @@ class GeneCompatibility(ABCParse.ABCParse):
         self, adata: anndata.AnnData, adata_sim: anndata.AnnData, *args, **kwargs
     ):
 
-        self.__update__(locals(), public = ["adata", "adata_sim"])
+        self.__update__(locals(), public=["adata", "adata_sim"])
 
         self._format_var_names()
         if not self._PCA is None:
             self._format_inverted_expression()
+
 
 # -- API-facing function: ------------------------------------------------------
 def annotate_gene_features(
@@ -79,7 +78,7 @@ def annotate_gene_features(
     silent: bool = False,
     *args,
     **kwargs,
-):
+) -> None:
     """
     Annotate simulation with gene-level features
 
@@ -105,6 +104,9 @@ def annotate_gene_features(
     None, modifies adata_sim in-place.
     """
     gene_compatibility = GeneCompatibility(
-        gene_id_key=gene_id_key, PCA=PCA, key_added=key_added, silent=silent,
+        gene_id_key=gene_id_key,
+        PCA=PCA,
+        key_added=key_added,
+        silent=silent,
     )
     return gene_compatibility(adata_sim=adata_sim, adata=adata)

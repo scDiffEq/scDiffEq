@@ -1,4 +1,3 @@
-
 # -- import packages: ----------------------------------------------------------
 from neural_diffeqs import LatentPotentialODE
 import torch_nets
@@ -38,41 +37,115 @@ class LightningODE_VAE_PriorPotential(
         train_step_size=10,
         dt=0.1,
         adjoint=False,
-        backend = "auto",
-        
+        backend="auto",
         # -- encoder parameters: -------
         encoder_n_hidden: int = 4,
         encoder_power: float = 2,
-        encoder_activation: Union[str, List[str]] = 'LeakyReLU',
+        encoder_activation: Union[str, List[str]] = "LeakyReLU",
         encoder_dropout: Union[float, List[float]] = 0.2,
         encoder_bias: bool = True,
         encoder_output_bias: bool = True,
-
         # -- decoder parameters: -------
         decoder_n_hidden: int = 4,
         decoder_power: float = 2,
-        decoder_activation: Union[str, List[str]] = 'LeakyReLU',
+        decoder_activation: Union[str, List[str]] = "LeakyReLU",
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
         loading_existing: bool = False,
-        version = __version__,
-        
+        version=__version__,
         *args,
         **kwargs,
     ):
+        """
+        LightningODE_VAE_PriorPotential
+
+        Parameters:
+        -----------
+        data_dim : int
+            Dimensionality of the input data
+        latent_dim : int, optional
+            Dimensionality of the latent space, by default 50
+        name : str, optional
+            Name of the model, by default None
+        train_lr : float, optional
+            Learning rate for training, by default 1e-5
+        pretrain_lr : float, optional
+            Learning rate for pretraining, by default 1e-3
+        pretrain_epochs : int, optional
+            Number of epochs for pretraining, by default 100
+        pretrain_optimizer : torch.optim.Optimizer, optional
+            Optimizer for pretraining, by default torch.optim.Adam
+        train_optimizer : torch.optim.Optimizer, optional
+            Optimizer for training, by default torch.optim.RMSprop
+        pretrain_scheduler : torch.optim.lr_scheduler._LRScheduler, optional
+            Learning rate scheduler for pretraining, by default torch.optim.lr_scheduler.StepLR
+        train_scheduler : torch.optim.lr_scheduler._LRScheduler, optional
+            Learning rate scheduler for training, by default torch.optim.lr_scheduler.StepLR
+        pretrain_step_size : int, optional
+            Step size for the pretraining learning rate scheduler, by default 200
+        train_step_size : int, optional
+            Step size for the training learning rate scheduler, by default 10
+        dt : float, optional
+            Time step for the ODE solver, by default 0.1
+        adjoint : bool, optional
+            Whether to use the adjoint method for the ODE solver, by default False
+        backend : str, optional
+            Backend for the ODE solver, by default "auto"
+        encoder_n_hidden : int, optional
+            Number of hidden layers in the encoder, by default 4
+        encoder_power : float, optional
+            Power of the encoder, by default 2
+        encoder_activation : Union[str, List[str]], optional
+            Activation function(s) for the encoder, by default 'LeakyReLU'
+        encoder_dropout : Union[float, List[float]], optional
+            Dropout rate(s) for the encoder, by default 0.2
+        encoder_bias : bool, optional
+            Whether to use bias in the encoder, by default True
+        encoder_output_bias : bool, optional
+            Whether to use bias in the output layer of the encoder, by default True
+        decoder_n_hidden : int, optional
+            Number of hidden layers in the decoder, by default 4
+        decoder_power : float, optional
+            Power of the decoder, by default 2
+        decoder_activation : Union[str, List[str]], optional
+            Activation function(s) for the decoder, by default 'LeakyReLU'
+        decoder_dropout : Union[float, List[float]], optional
+            Dropout rate(s) for the decoder, by default 0.2
+        decoder_bias : bool, optional
+            Whether to use bias in the decoder, by default True
+        decoder_output_bias : bool, optional
+            Whether to use bias in the output layer of the decoder, by default True
+        loading_existing : bool, optional
+            Whether to load an existing model, by default False
+        version : str, optional
+            Version of the model, by default __version__
+
+        Returns:
+        --------
+        None
+
+        Notes:
+        ------
+        This class implements a VAE with prior potential ODE using PyTorch Lightning.
+
+        Examples:
+        ---------
+        >>> model = LightningODE_VAE_PriorPotential(data_dim=100, latent_dim=20, dt=0.05)
+        >>> model.fit(data)
+        """
         super().__init__()
-        
+
         name = self._configure_name(name, loading_existing=loading_existing)
 
         self.save_hyperparameters()
-        
+
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func = LatentPotentialODE, kwargs=locals())
-        self._configure_lightning_model(kwargs = locals())
+        self._configure_torch_modules(func=LatentPotentialODE, kwargs=locals())
+        self._configure_lightning_model(kwargs=locals())
 
     def log_computed_loss(self, sinkhorn_loss, t, kl_div_loss, stage):
-        
+
         sinkhorn_loss = self.log_sinkhorn_divergence(sinkhorn_loss).sum()
         self.log(f"kl_div_{stage}", kl_div_loss.sum())
 

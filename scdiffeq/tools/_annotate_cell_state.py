@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
@@ -12,13 +11,13 @@ import numpy as np
 # -- set typing: --------------------------------------------------------------
 
 
-
 # -- controlling class: -------------------------------------------------------
 class CellStateAnnotation(ABCParse.ABCParse):
     """Annotate cell states using a kNN graph."""
+
     def __init__(self, kNN: "kNN", silent: bool = False, *args, **kwargs):
         """Initialize `CellStateAnnotation` class.
-        
+
         Args:
             kNN ('kNN')
                 k-nearest neighbor graph.
@@ -80,15 +79,15 @@ class CellStateAnnotation(ABCParse.ABCParse):
         """
         Args:
             adata_sim (anndata.AnnData)
-            
+
             obs_key (str)
-            
+
             use_key (str)
-            
+
         Returns:
             None
         """
-        
+
         self.__update__(locals())
 
         self._assert_dimension_check()
@@ -103,30 +102,36 @@ def annotate_cell_state(
     use_key: str = "X",
     silent: bool = False,
 ) -> None:
-    """Use a kNN Graph to annotate simulated cell states.
-    
-    Args:
-        adata_sim (anndata.AnnData). Simulated data object in the format of 
-        ``anndata.AnnData``, the (annotated) single-cell data matrix of shape
-        n_obs × n_vars. Rows correspond to cells and columns to genes. 
-        For more: https://anndata.readthedocs.io/en/latest/.
+    """
+    Use a kNN Graph to annotate simulated cell states.
 
-        kNN ('kNN'). k-nearest neighbor graph.
+    Parameters
+    ----------
+    adata_sim : anndata.AnnData
+        Simulated data object in the format of ``anndata.AnnData``, the (annotated)
+        single-cell data matrix of shape ``n_obs × n_vars``. Rows correspond to cells
+        and columns to genes. For more: [1](https://anndata.readthedocs.io/en/latest/).
 
-        obs_key (str)
+    kNN : kNN
+        k-nearest neighbor graph.
 
-        use_key (str)
-            **Default**: "X".
-            
-        silent (bool)
-            **Default**: False
+    obs_key : str, optional
+        Observation key. Default is "state".
 
-    Returns:
-        None
-        
-    References:
-        1. https://anndata.readthedocs.io/en/latest/.
+    use_key : str, optional
+        Key to use for the basis. Default is "X".
+
+    silent : bool, optional
+        If True, suppresses informational messages. Default is False.
+
+    Returns
+    -------
+    None
+
+    References
+    ----------
+    .. [1] https://anndata.readthedocs.io/en/latest/
     """
 
-    state_annot = CellStateAnnotation(kNN=kNN, silent = silent)
+    state_annot = CellStateAnnotation(kNN=kNN, silent=silent)
     state_annot(adata_sim=adata_sim, obs_key=obs_key, use_key=use_key)

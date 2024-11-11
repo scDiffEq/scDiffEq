@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import anndata
 import ABCParse
@@ -114,7 +113,8 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
         x, y = self._X, self._MEAN[group]
         self.ax.plot(x, y, lw=2, color=color, zorder=en + 2, label=group)
         self.ax.set_xlim(x.min(), x.max())
-#         self.ax.set_ylim(0, round(self._global_max))
+
+    #         self.ax.set_ylim(0, round(self._global_max))
 
     def __call__(
         self,
@@ -136,27 +136,28 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
         show_legend: bool = True,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.__update__(locals(), public=[None])
 
         for en, group in enumerate(self._PLOT_GROUPS):
             self.forward(en, group)
 
         self.ax.set_xlabel(self._x_label, fontsize=8)
-        
+
         if y_label is None:
             y_label = self._gene
         if title is None:
             title = f"sim idx: {self._sim_idx}"
-        self.ax.set_ylabel(y_label, fontsize=8)    
+        self.ax.set_ylabel(y_label, fontsize=8)
         self.ax.set_title(title, fontsize=title_fontsize)
-            
+
         if grid:
             self.ax.grid(zorder=0, alpha=0.1)
-        
+
         if show_legend:
-            self.ax.legend(edgecolor="None", facecolor="None", loc=(1.05, 0.25), fontsize=6)
-        
+            self.ax.legend(
+                edgecolor="None", facecolor="None", loc=(1.05, 0.25), fontsize=6
+            )
 
         if save:
             if savename is None:
@@ -164,7 +165,7 @@ class TemporalExpressionPlot(ABCParse.ABCParse):
             plt.savefig(savename, dpi=dpi)
 
 
-# -- API-facing function: ----------------------------------------------------- 
+# -- API-facing function: -----------------------------------------------------
 def temporal_expression(
     adata_sim: anndata.AnnData,
     gene: str,
@@ -189,38 +190,38 @@ def temporal_expression(
 ):
     """
     Plot smoothed expression over time.
-    
+
     Parameters
     ----------
     adata_sim: anndata.AnnData
-    
+
     gene: str
-    
+
     plot_groups: Optional[List[str]] = None
-    
+
     show_std: bool = False
-    
+
     ax: Optional[plt.Axes] = None
-    
+
     cmap: Optional[Dict] = None
-    
+
     height: float, default = 0.4
-    
+
     width: float, default = 0.4
-    
+
     delete: List[List[str]], default = [["top", "right"]]
-    
+
     save: bool, default = False
-        
+
     savename: str, default = None
-    
+
     save_format: str, default = "svg"
         ["svg", "png"]
-    
+
     dpi: int, default = 250
-    
+
     plot_kwargs: Optional[Dict], default = {}
-    
+
     Returns
     -------
     None
@@ -240,10 +241,10 @@ def temporal_expression(
         savename=savename,
         save_format=save_format,
         dpi=dpi,
-        x_label = x_label,
-        y_label = y_label,
-        title = title,
-        grid = grid,
-        show_legend = show_legend,
-        title_fontsize = title_fontsize,
+        x_label=x_label,
+        y_label=y_label,
+        title=title,
+        grid=grid,
+        show_legend=show_legend,
+        title_fontsize=title_fontsize,
     )

@@ -103,7 +103,6 @@ class VelocityStreamPlot(ABCParse.ABCParse):
             cutoff_percentile=cutoff_percentile,
         )
 
-
     @property
     def X_emb(self):
         if not hasattr(self, "_X_emb"):
@@ -191,7 +190,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def streamplot(self, ax) -> None:
         ax.streamplot(self.x, self.y, self.u, self.v, **self._STREAMPLOT_KWARGS)
         self._set_margin(ax)
-        
+
     @property
     def _SCATTER_KWARGS(self) -> Dict[str, Any]:
         """ """
@@ -206,7 +205,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         }
         kwargs.update(self._scatter_kwargs)
         return kwargs
-    
+
     def _SCATTER_CMAP(self, groups) -> Dict:
         """ """
         if not hasattr(self, "_cmap"):
@@ -233,24 +232,29 @@ class VelocityStreamPlot(ABCParse.ABCParse):
 
         if COLOR_FROM_OBS:
             COLOR_BY_GROUP = str(obs_df[self._c].dtype) == "categorical"
-            if not COLOR_BY_GROUP: # implies float not grouped object.
+            if not COLOR_BY_GROUP:  # implies float not grouped object.
                 c_idx = np.argsort(obs_df[self._c])
-                kwargs.update({"c":obs_df[self._c][c_idx]})
-                self._img = ax.scatter(self.X_emb[c_idx, 0], self.X_emb[c_idx, 1], **kwargs)
+                kwargs.update({"c": obs_df[self._c][c_idx]})
+                self._img = ax.scatter(
+                    self.X_emb[c_idx, 0], self.X_emb[c_idx, 1], **kwargs
+                )
                 if not self._disable_cbar:
-                    cbar = plt.colorbar(mappable = self._img, **self._cbar_kwargs)
+                    cbar = plt.colorbar(mappable=self._img, **self._cbar_kwargs)
                     cbar.solids.set(alpha=1)
-#                     cbar.set_alpha(1)
-                
+            #                     cbar.set_alpha(1)
+
             else:
                 kwargs.pop("c")
-                groups = obs_df.groupby(self._c).groups # dict
+                groups = obs_df.groupby(self._c).groups  # dict
                 cmap = self._SCATTER_CMAP(groups)
                 for group, group_ix in groups.items():
                     if hasattr(self, "_group_zorder") and group in self._group_zorder:
-                        kwargs.update({'zorder': self._group_zorder[group]})
+                        kwargs.update({"zorder": self._group_zorder[group]})
                     ax.scatter(
-                        self.X_emb[group_ix, 0], self.X_emb[group_ix, 1], color = cmap[group], **kwargs,
+                        self.X_emb[group_ix, 0],
+                        self.X_emb[group_ix, 1],
+                        color=cmap[group],
+                        **kwargs,
                     )
         else:
             ax.scatter(self.X_emb[:, 0], self.X_emb[:, 1], **kwargs)
@@ -276,29 +280,33 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def fname_basis(self):
         if "sdq_info" in self._adata.uns:
             try:
-                return self.scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.data_model_info_tag}")
+                return self.scdiffeq_figure_dir.joinpath(
+                    f"velocity_stream.{self.data_model_info_tag}"
+                )
             except:
-                return self.scdiffeq_figure_dir.joinpath(f"velocity_stream.{self.sdq_info}")
+                return self.scdiffeq_figure_dir.joinpath(
+                    f"velocity_stream.{self.sdq_info}"
+                )
             finally:
                 pass
         return self.scdiffeq_figure_dir.joinpath("velocity_stream")
-    
+
     @property
     def SVG_path(self):
         """ """
         return pathlib.Path(".".join([str(self.fname_basis), "svg"]))
-    
+
     @property
     def PNG_path(self):
         return pathlib.Path(".".join([str(self.fname_basis), "png"]))
-    
+
     def save_img(self):
         """Saves the generated plot to both SVG and PNG formats in a specified directory."""
         self._mk_fig_dir()
-        plt.savefig(self.SVG_path, dpi = self._svg_dpi)
-        plt.savefig(self.PNG_path, dpi = self._png_dpi)
+        plt.savefig(self.SVG_path, dpi=self._svg_dpi)
+        plt.savefig(self.PNG_path, dpi=self._png_dpi)
         self._INFO(f"Saved to: \n  {self.SVG_path}\n  {self.PNG_path}")
-        
+
     def __call__(
         self,
         adata: anndata.AnnData,
@@ -306,7 +314,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         stream_color: str = "k",
         c: str = "dodgerblue",
         group_zorder: Optional[Dict] = None,
-        cmap: Optional[Union[Dict,List,Tuple, str]] = 'plasma_r',
+        cmap: Optional[Union[Dict, List, Tuple, str]] = "plasma_r",
         linewidth: float = 0.5,
         stream_density: float = 2.5,
         add_margin: float = 0.1,
@@ -341,13 +349,13 @@ class VelocityStreamPlot(ABCParse.ABCParse):
             List[plt.Axes]: A list of matplotlib axes with the generated plots.
         """
         self.__update__(locals())
-        
+
         if ax is None:
             _mpl_kwargs = {
                 "nplots": 1,
                 "ncols": 1,
-                "height": 1.,
-                "width": 1.,
+                "height": 1.0,
+                "width": 1.0,
                 "delete": "all",
                 "del_xy_ticks": [True],
             }
@@ -356,15 +364,15 @@ class VelocityStreamPlot(ABCParse.ABCParse):
 
         else:
             axes = ABCParse.as_list(ax)
-        
+
         for ax in axes:
             self.streamplot(ax)
             if not self._disable_scatter:
                 self.scatter(ax)
-                
+
         if self._save:
             self.save_img()
-            
+
         return axes
 
 
@@ -373,7 +381,7 @@ def velocity_stream(
     adata: anndata.AnnData,
     ax: Optional[Union[plt.Axes, List[plt.Axes]]] = None,
     c: str = "dodgerblue",
-    cmap: Optional[Union[Dict,List,Tuple]] = 'plasma_r',
+    cmap: Optional[Union[Dict, List, Tuple]] = "plasma_r",
     group_zorder: Optional[Dict] = None,
     linewidth: float = 0.5,
     stream_density: float = 2.5,
@@ -409,91 +417,89 @@ def velocity_stream(
     *args,
     **kwargs,
 ) -> Optional[Union[List[plt.Axes], None]]:
-    """Generates velocity stream plots for single-cell data using the
+    """
+    Generates velocity stream plots for single-cell data using the
     VelocityStreamPlot class.
 
     This function is a convenient wrapper around the VelocityStreamPlot
     class, allowing users to quickly generate and customize velocity stream
     plots without manually instantiating the class.
 
-    Args:
-        adata (anndata.AnnData): The AnnData object containing the data to plot.
-        
-        ax (Optional[Union[plt.Axes, List[plt.Axes]]]): Matplotlib axes object or list of axes objects on which to draw the plots. If None, a new figure and axes are created. **Default** ``None``.
-        
-        c (str): Color for the scatter plot points. Can be a column name from `adata.obs` if coloring by a categorical variable. **Default**: ``"dodgerblue"``.
-        
-        cmap (Optional[Union[Dict, List, Tuple, str]]): Colormap for the scatter plot points if `c` is a categorical variable. **Default**: ``"plasma_r"``.
-        
-        group_zorder (Optional[Dict]): Z-order for groups in the scatter plot, allowing certain groups to be plotted on top of others. **Default** ``None``.
-        
-        linewidth (float): Line width for the streamlines. **Default**: ``0.5``.
-        
-        stream_density (float): Density of the streamlines. Higher values create more densely packed streamlines. **Default**: ``2.5``.
-        
-        add_margin (float): Additional margin added around the plotted data, specified as a fraction of the data range. **Default**: ``0.1``.
-        
-        arrowsize (float): Size of the arrows in the stream plot. **Default**: ``1``.
-        
-        arrowstyle (str): Style of the arrows in the stream plot. **Default**: ``"-|>"``.
-        
-        maxlength (float): Maximum length of the arrows in the stream plot. **Default**: ``4``.
-        
-        integration_direction (str): Direction of integration for the streamlines, can be "forward", "backward", or "both". **Default**: "both".
-        
-        scatter_zorder (int): Z-order for scatter plot points, determining their layering. **Default**: ``0``.
-        
-        stream_zorder (int): Z-order for the streamlines, determining their layering. **Default**: ``10``.
-        
-        density (float) **Default**: ``1``.
-        
-        smooth (float) **Default**: ``0.5``.
-        
-        n_neighbors (Optional[int]) **Default**: ``None``.
-        
-        min_mass (float)  **Default**: ``1``.
-        
-        autoscale (bool) **Default**: ``True``.
-        
-        stream_adjust (bool) **Default**: ``True``.
-        
-        cutoff_percentile (float)
-        
-        velocity_key (str)
-        
-        self_transitions (bool)
-        
-        use_negative_cosines (bool)
-        
-        T_scale (float): 
-        
-        disable_scatter (bool): If True, disables the scatter plot overlay on the stream plot. Defaults to False.
-        
-        disable_cbar (bool): If True, disables the color bar for the scatter plot. Useful when `c` is numeric. Defaults to False.
-        stream_kwargs (Dict[str, Any])
-        
-        scatter_kwargs (Dict[str, Any])
-        
-        cbar_kwargs (Dict)
-        
-        mpl_kwargs (Dict[str, Any]): Additional keyword arguments for customizing the stream plot, scatter plot, color bar, and matplotlib figure, respectively.
-        
-        return_axes (bool): If True, returns the matplotlib axes with the generated plots. Defaults to False.
-        
-        save (bool): If True, saves the generated plot to SVG and PNG formats. Defaults to False.
-        
-        png_dpi (Optional[float]): DPI settings for saving PNG images. **Default**: ``500``.
-        
-        svg_dpi (Optional[float]): DPI settings for saving SVG images. **Default**: ``250``.
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the data to plot.
+    ax : Optional[Union[plt.Axes, List[plt.Axes]]], optional
+        Matplotlib axes object or list of axes objects on which to draw the plots. If None, a new figure and axes are created. **Default**: ``None``.
+    c : str, optional
+        Color for the scatter plot points. Can be a column name from `adata.obs` if coloring by a categorical variable. **Default**: ``"dodgerblue"``.
+    cmap : Optional[Union[Dict, List, Tuple, str]], optional
+        Colormap for the scatter plot points if `c` is a categorical variable. **Default**: ``"plasma_r"``.
+    group_zorder : Optional[Dict], optional
+        Z-order for groups in the scatter plot, allowing certain groups to be plotted on top of others. **Default**: ``None``.
+    linewidth : float, optional
+        Line width for the streamlines. **Default**: ``0.5``.
+    stream_density : float, optional
+        Density of the streamlines. Higher values create more densely packed streamlines. **Default**: ``2.5``.
+    add_margin : float, optional
+        Additional margin added around the plotted data, specified as a fraction of the data range. **Default**: ``0.1``.
+    arrowsize : float, optional
+        Size of the arrows in the stream plot. **Default**: ``1``.
+    arrowstyle : str, optional
+        Style of the arrows in the stream plot. **Default**: ``"-|>"``.
+    maxlength : float, optional
+        Maximum length of the arrows in the stream plot. **Default**: ``4``.
+    integration_direction : str, optional
+        Direction of integration for the streamlines, can be "forward", "backward", or "both". **Default**: ``"both"``.
+    scatter_zorder : int, optional
+        Z-order for scatter plot points, determining their layering. **Default**: ``101``.
+    stream_zorder : int, optional
+        Z-order for the streamlines, determining their layering. **Default**: ``201``.
+    density : float, optional
+        **Default**: ``1``.
+    smooth : float, optional
+        **Default**: ``0.5``.
+    n_neighbors : Optional[int], optional
+        **Default**: ``None``.
+    min_mass : float, optional
+        **Default**: ``1``.
+    autoscale : bool, optional
+        **Default**: ``True``.
+    stream_adjust : bool, optional
+        **Default**: ``True``.
+    cutoff_percentile : float, optional
+    velocity_key : str, optional
+    self_transitions : bool, optional
+    use_negative_cosines : bool, optional
+    T_scale : float, optional
+    disable_scatter : bool, optional
+        If True, disables the scatter plot overlay on the stream plot. **Default**: ``False``.
+    disable_cbar : bool, optional
+        If True, disables the color bar for the scatter plot. Useful when `c` is numeric. **Default**: ``False``.
+    stream_kwargs : Optional[Dict[str, Any]], optional
+    scatter_kwargs : Optional[Dict[str, Any]], optional
+    cbar_kwargs : Optional[Dict], optional
+    mpl_kwargs : Optional[Dict[str, Any]], optional
+        Additional keyword arguments for customizing the stream plot, scatter plot, color bar, and matplotlib figure, respectively.
+    return_axes : bool, optional
+        If True, returns the matplotlib axes with the generated plots. **Default**: ``False``.
+    save : bool, optional
+        If True, saves the generated plot to SVG and PNG formats. **Default**: ``False``.
+    png_dpi : Optional[float], optional
+        DPI settings for saving PNG images. **Default**: ``500``.
+    svg_dpi : Optional[float], optional
+        DPI settings for saving SVG images. **Default**: ``250``.
 
-    Returns:
-        axes (Optional[List[plt.Axes], None]): A list of matplotlib axes with the generated plots, if ``return_axes == True``. Otherwise, returns ``None``.
+    Returns
+    -------
+    Optional[Union[List[plt.Axes], None]]
+        A list of matplotlib axes with the generated plots, if ``return_axes == True``. Otherwise, returns ``None``.
     """
 
     init_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__init__, locals())
     call_kwargs = ABCParse.function_kwargs(VelocityStreamPlot.__call__, locals())
     velo_stream_plot = VelocityStreamPlot(**init_kwargs)
     axes = velo_stream_plot(**call_kwargs)
-    
+
     if return_axes:
         return axes

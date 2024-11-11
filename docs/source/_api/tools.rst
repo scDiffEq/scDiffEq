@@ -15,26 +15,53 @@ Tools (``sdq.tl``)
     _tools/perturb
 
 
-.. card:: ``sdq.tl.annotate_cell_state``
-    :link: _tools/annotate_cell_state.rst
-    :text-align: right
+.. dropdown:: ``sdq.tl.annotate_cell_state``
 
-    :octicon:`code;2em;sd-text-dark`
+    .. autofunction:: scdiffeq.tools._annotate_cell_state.annotate_cell_state
+        :no-index:
+    
+    .. grid:: 1
+        :gutter: 0
 
-.. card:: ``sdq.tl.annotate_cell_fate``
-    :link: _tools/annotate_cell_fate.rst
-    :text-align: right
+        .. grid-item-card:: For more
+            :link: _tools/annotate_cell_state.rst
+            :text-align: right
+            :columns: 10
 
-    :octicon:`code;2em;sd-text-dark`
+            :octicon:`code;2em;sd-text-dark`
 
-``kNN``
-^^^^^^^
-.. card:: ``sdq.tl.kNN``
-    :link: _tools/knn.rst
-    :text-align: right
 
-    :octicon:`code;2em;sd-text-dark`
+.. dropdown:: ``sdq.tl.annotate_cell_fate``
 
+    .. autofunction:: scdiffeq.tools._annotate_cell_fate.annotate_cell_fate
+        :no-index:
+    
+    .. grid:: 1
+        :gutter: 0
+
+        .. grid-item-card:: For more
+            :link: _tools/annotate_cell_fate.rst
+            :text-align: right
+            :columns: 10
+
+            :octicon:`code;2em;sd-text-dark`
+
+    
+.. dropdown:: ``sdq.tl.kNN``
+
+    .. autofunction:: scdiffeq.tools._knn.kNN
+        :no-index:
+    
+    .. grid:: 1
+        :gutter: 0
+
+        .. grid-item-card:: For more
+            :link: _tools/knn.rst
+            :text-align: right
+            :columns: 10
+
+            :octicon:`code;2em;sd-text-dark`
+    
 
 .. dropdown:: ``sdq.tl.simulate``
 
