@@ -1,8 +1,5 @@
-================
-``LightningSDE``
-================
-
-.. title:: LightningSDE
+LightningSDE
+===============
 
 .. automodule:: scdiffeq.core.lightning_models._lightning_sde
     :members:
