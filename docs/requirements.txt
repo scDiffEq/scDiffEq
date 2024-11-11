@@ -1,13 +1,8 @@
 scikit-learn>=1.5
 sphinx
-pydata_sphinx_theme
 autodoc
 sphinxcontrib-napoleon
 nbsphinx
-sphinx-copybutton
-sphinx-favicon
-sphinx-design
-myst_parser
 tqdm
 lightning>=2.1
 anndata>=0.10.3
@@ -26,3 +21,9 @@ autodevice>=0.0.2
 cellplots>=0.0.1rc0
 cell-perturb>=0.0.1rc1
 ipython
+sphinx-autodoc-typehints
+pydata-sphinx-theme
+sphinx-copybutton
+sphinx-design
+sphinx-favicon
+myst-parser

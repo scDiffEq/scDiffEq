@@ -91,12 +91,45 @@ download_notebooks()
 
 sys.path.insert(0, os.path.abspath("../../"))
 
+# Add these imports for better type handling
+import typing
+from typing import get_type_hints
+
+# -- Your existing path setup --
+sys.path.insert(0, os.path.abspath("../../"))
+
+# -- Add autodoc settings --
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': True,
+    'exclude-members': '__weakref__'
+}
+
+# This helps with showing the correct parameter types
+autodoc_type_aliases = {
+    'ArrayLike': 'numpy.typing.ArrayLike',
+    # Add any other type aliases your project uses
+}
+
+# Ensures that your docstrings are properly parsed
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_include_private_with_doc = True
+napoleon_include_special_with_doc = True
+napoleon_use_param = True
+napoleon_use_rtype = True
+
+# -- Your existing extensions list --
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.intersphinx",  # Add this for external references
     "nbsphinx",
     "sphinx_copybutton",
     "sphinx_favicon",
@@ -122,7 +155,19 @@ html_theme_options = {
         "image_dark": "scdiffeq_logo.dark_mode.png",
     },
 }
-autoclass_content = "init"
+# Add intersphinx mapping for external package references
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'torch': ('https://pytorch.org/docs/stable', None),
+    # Add other relevant packages your project depends on
+}
+
+# Add settings for better type hints display
+python_use_unqualified_type_names = True
+
+# Keep your autodoc class content setting
+autoclass_content = "both"  # Changed from "init" to "both" to show both class and __init__ docstrings
+
 
 favicons = [{"rel": "icon", "href": "scdiffeq.favicon.png"}]
 
