@@ -15,6 +15,13 @@ Reproducibility
    _notebooks/Figure3EFG.ipynb
    _notebooks/Figure3J.ipynb
    _notebooks/human_hematopoiesis.preprocessing
+   _notebooks/Figure4ABC.ipynb
+   _notebooks/FigureS1.ipynb
+   _notebooks/FigureS2A.ipynb
+   _notebooks/FigureS2B.ipynb
+   _notebooks/FigureS2C.ipynb
+   _notebooks/FigureS3.ipynb
+   _notebooks/FigureS4.ipynb
 
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
@@ -124,3 +131,72 @@ Figure 3
 
 Figure 4
 ========
+
+.. grid-item-card:: ``Figure4ABC.ipynb``
+      :link: _notebooks/Figure4ABC.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+      
+Supplementary Figure 1
+======================
+
+.. grid-item-card:: ``FigureS1.ipynb``
+      :link: _notebooks/FigureS1.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+Supplementary Figure 2
+======================
+
+.. grid-item-card:: ``FigureS2A.ipynb``
+      :link: _notebooks/FigureS2A.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+.. grid-item-card:: ``FigureS2B.ipynb``
+      :link: _notebooks/FigureS2B.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+.. grid-item-card:: ``FigureS2C.ipynb``
+      :link: _notebooks/FigureS2C.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+Supplementary Figure 3
+======================
+
+.. grid-item-card:: ``FigureS3.ipynb``
+      :link: _notebooks/FigureS3.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+Supplementary Figure 4
+======================
+
+.. grid-item-card:: ``FigureS4.ipynb``
+      :link: _notebooks/FigureS4.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`

@@ -59,10 +59,18 @@ class NotebookURLs:
     @property
     def FigureS2(self):
         return self._fetch(self._URL_factory("manuscript/figure_s2"))
+    
+    @property
+    def FigureS3(self):
+        return self._fetch(self._URL_factory("manuscript/figure_s1"))
+    
+    @property
+    def FigureS4(self):
+        return self._fetch(self._URL_factory("manuscript/figure_s2"))
 
     def __call__(self):
 
-        paths = self.Figure2 + self.Figure3 + self.Figure4 + self.FigureS1 + self.FigureS2
+        paths = self.Figure2 + self.Figure3 + self.Figure4 + self.FigureS1 + self.FigureS2 + self.FigureS3 + self.FigureS4
         return paths
 
 
