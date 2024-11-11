@@ -122,19 +122,11 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
         None
         """
         super().__init__()
-<<<<<<< HEAD
         
         name = self._configure_name(name, loading_existing = loading_existing)
         
         self.save_hyperparameters(ignore=['version'])
-        
-=======
 
-        name = self._configure_name(name, loading_existing=loading_existing)
-
-        self.save_hyperparameters()
-
->>>>>>> 841dd6fd3fa8ed4e6e8781fe26ce6895bc7c5c0c
         # -- torch modules: ----------------------------------------------------
         self._configure_torch_modules(func=PotentialSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
