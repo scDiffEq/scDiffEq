@@ -19,4 +19,4 @@ from ._model._hparams import HParams
 
 from ._model._model_loader import load_diffeq, load_model, ModelLoader
 
-from ._logs import logs
+# from ._logs import logs

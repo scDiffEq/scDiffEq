@@ -1,5 +1,5 @@
 
-from .. import _LOGGING
+# from .. import _LOGGING
 
 def _read_logs(logging = _LOGGING):
     with open(logging.log_config.log_fpath, "r") as f:
@@ -7,5 +7,5 @@ def _read_logs(logging = _LOGGING):
         f.close()
     return _logs
 
-logs = _read_logs()        
+# logs = _read_logs()        
     
