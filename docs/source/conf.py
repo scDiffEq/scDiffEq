@@ -46,7 +46,7 @@ class NotebookURLs:
         
         fig_nums = ["2", "3", "4", "s1", "s2", "s3", "s4", "s5", "s6", "s7"]
         for fn in fig_nums:
-            paths += self._fetch(self._URL_factory(f"manuscript/figure_{fn}")):
+            paths += self._fetch(self._URL_factory(f"manuscript/figure_{fn}"))
         return paths
 
 # -----------------------------------------------------------------------------
