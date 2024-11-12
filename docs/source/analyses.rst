@@ -22,6 +22,9 @@ Reproducibility
    _notebooks/FigureS2C.ipynb
    _notebooks/FigureS3.ipynb
    _notebooks/FigureS4.ipynb
+   _notebooks/FigureS5.ipynb
+   _notebooks/FigureS6.ipynb
+   _notebooks/FigureS7.ipynb
 
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
@@ -195,6 +198,39 @@ Supplementary Figure 4
 
 .. grid-item-card:: ``FigureS4.ipynb``
       :link: _notebooks/FigureS4.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 5
+======================
+
+.. grid-item-card:: ``FigureS5.ipynb``
+      :link: _notebooks/FigureS5.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 6
+======================
+
+.. grid-item-card:: ``FigureS6.ipynb``
+      :link: _notebooks/FigureS6.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 7
+======================
+
+.. grid-item-card:: ``FigureS7.ipynb``
+      :link: _notebooks/FigureS7.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
