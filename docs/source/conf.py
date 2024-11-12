@@ -12,6 +12,9 @@ import os
 import sys
 import requests
 
+# -- set typing: --------------------------------------------------------------
+import typing
+from typing import get_type_hints
 
 # -- new nb fetch: ------------------------------------------------------------
 class NotebookURLs:
@@ -27,55 +30,26 @@ class NotebookURLs:
         if response.status_code == 200:
             files = response.json()
 
-            # Filter for .ipynb files and print their download URLs
             ipynb_files = [
                 file["download_url"]
                 for file in files
                 if file["name"].endswith(".ipynb")
             ]
             return ipynb_files
-            # for file_url in ipynb_files:
-            #     print(file_url)
         else:
             print(f"Error: {response.status_code}")
             print(response.text)
 
-    @property
-    def Figure2(self):
-        return self._fetch(self._URL_factory("manuscript/figure_2"))
-
-    @property
-    def Figure3(self):
-        return self._fetch(self._URL_factory("manuscript/figure_3"))
-
-    @property
-    def Figure4(self):
-        return self._fetch(self._URL_factory("manuscript/figure_4"))
-    
-    @property
-    def FigureS1(self):
-        return self._fetch(self._URL_factory("manuscript/figure_s1"))
-    
-    @property
-    def FigureS2(self):
-        return self._fetch(self._URL_factory("manuscript/figure_s2"))
-    
-    @property
-    def FigureS3(self):
-        return self._fetch(self._URL_factory("manuscript/figure_s1"))
-    
-    @property
-    def FigureS4(self):
-        return self._fetch(self._URL_factory("manuscript/figure_s2"))
-
     def __call__(self):
-
-        paths = self.Figure2 + self.Figure3 + self.Figure4 + self.FigureS1 + self.FigureS2 + self.FigureS3 + self.FigureS4
+        
+        paths = []
+        
+        fig_nums = ["2", "3", "4", "s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+        for fn in fig_nums:
+            paths += self._fetch(self._URL_factory(f"manuscript/figure_{fn}")):
         return paths
 
-
-# ------------------------------------------------
-
+# -----------------------------------------------------------------------------
 
 def download_notebooks():
     url_fetcher = NotebookURLs()
@@ -89,16 +63,10 @@ def download_notebooks():
 
 download_notebooks()
 
+# -- Your existing path setup -------------------------------------------------
 sys.path.insert(0, os.path.abspath("../../"))
 
-# Add these imports for better type handling
-import typing
-from typing import get_type_hints
-
-# -- Your existing path setup --
-sys.path.insert(0, os.path.abspath("../../"))
-
-# -- Add autodoc settings --
+# -- Add autodoc settings -----------------------------------------------------
 autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
@@ -170,7 +138,3 @@ autoclass_content = "both"  # Changed from "init" to "both" to show both class a
 
 
 favicons = [{"rel": "icon", "href": "scdiffeq.favicon.png"}]
-
-# -- notes: -------------------------------------------------------------------
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
