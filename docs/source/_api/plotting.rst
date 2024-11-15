@@ -16,12 +16,8 @@ Plotting (``sdq.pl``)
     .. autofunction:: scdiffeq.plotting._velocity_stream.velocity_stream
         :no-index:
     
-    .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/velocity_stream.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _plotting/velocity_stream.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.velocity_stream``

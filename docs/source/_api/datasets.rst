@@ -10,7 +10,6 @@ Datasets (``sdq.datasets``)
 
     _datasets/human_hematopoiesis
     _datasets/pancreas
-    
 
 
 .. dropdown:: ``sdq.datasets.human_hematopoiesis``
@@ -18,27 +17,19 @@ Datasets (``sdq.datasets``)
     .. autofunction:: scdiffeq.datasets._human_hematopoiesis.human_hematopoiesis
         :no-index:
     
-    .. grid:: 1
-        :gutter: 0
+    .. button-link:: _datasets/human_hematopoiesis.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _datasets/human_hematopoiesis.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.datasets.human_hematopoiesis``
 
 .. dropdown:: ``sdq.datasets.pancreas``
 
     .. autofunction:: scdiffeq.datasets._pancreas.pancreas
         :no-index:
     
-    .. grid:: 1
-        :gutter: 0
+    .. button-link:: _datasets/pancreas.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _datasets/pancreas.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.datasets.pancreas``

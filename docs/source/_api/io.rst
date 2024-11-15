@@ -29,15 +29,11 @@ Data I/O (``sdq.io``)
     .. autofunction:: scdiffeq.io._data._pickle_io.read_pickle
         :no-index:
     
-    .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/read_pickle.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _io/read_pickle.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.read_pickle``
     
 
 .. dropdown:: ``sdq.io.write_pickle``
@@ -45,72 +41,52 @@ Data I/O (``sdq.io``)
     .. autofunction:: scdiffeq.io._data._pickle_io.write_pickle
         :no-index:
     
-    .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/write_pickle.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _io/write_pickle.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.write_pickle``
     
 .. dropdown:: ``sdq.io.Project``
 
     .. autoclass:: scdiffeq.io.Project
         :no-index:
 
-        .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/project.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _io/project.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.Project``
 
 .. dropdown:: ``sdq.io.Version``
 
     .. autoclass:: scdiffeq.io.Version
         :no-index:
 
-        .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/version.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _io/version.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.Version``
 
 .. dropdown:: ``sdq.io.Checkpoint``
 
     .. autoclass:: scdiffeq.io.Checkpoint
         :no-index:
 
-        .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/checkpoint.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _io/checkpoint.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.Checkpoint``
 
 .. dropdown:: ``sdq.io.HParams``
 
     .. autoclass:: scdiffeq.io.HParams
         :no-index:
 
-        .. grid:: 1
-        :gutter: 0
+    .. button-link:: _io/hparams.rst
+        :color: dark
+        :outline:
 
-        .. grid-item-card:: For more
-            :link: _io/hparams.rst
-            :text-align: right
-            :columns: 10
-
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.io.HParams``

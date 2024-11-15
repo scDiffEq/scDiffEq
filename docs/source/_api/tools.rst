@@ -14,53 +14,40 @@ Tools (``sdq.tl``)
     _tools/simulate
     _tools/perturb
 
-
 .. dropdown:: ``sdq.tl.annotate_cell_state``
 
     .. autofunction:: scdiffeq.tools._annotate_cell_state.annotate_cell_state
         :no-index:
-    
-    .. grid:: 1
-        :gutter: 0
 
-        .. grid-item-card:: For more
-            :link: _tools/annotate_cell_state.rst
-            :text-align: right
-            :columns: 10
+    .. button-link:: _tools/annotate_cell_state.rst
+        :color: dark
+        :outline:
 
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.tl.annotate_cell_state``
 
 
 .. dropdown:: ``sdq.tl.annotate_cell_fate``
 
     .. autofunction:: scdiffeq.tools._annotate_cell_fate.annotate_cell_fate
         :no-index:
-    
-    .. grid:: 1
-        :gutter: 0
 
-        .. grid-item-card:: For more
-            :link: _tools/annotate_cell_fate.rst
-            :text-align: right
-            :columns: 10
+    .. button-link:: _tools/annotate_cell_fate.rst
+        :color: dark
+        :outline:
 
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.tl.annotate_cell_fate``
 
     
 .. dropdown:: ``sdq.tl.kNN``
 
     .. autofunction:: scdiffeq.tools._knn.kNN
         :no-index:
-    
-    .. grid:: 1
-        :gutter: 0
 
-        .. grid-item-card:: For more
-            :link: _tools/knn.rst
-            :text-align: right
-            :columns: 10
+    .. button-link:: _tools/knn.rst
+        :color: dark
+        :outline:
 
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.tl.kNN``
     
 
 .. dropdown:: ``sdq.tl.simulate``
@@ -79,14 +66,10 @@ Tools (``sdq.tl``)
 
     .. autofunction:: scdiffeq.tools._perturbation.perturb
         :no-index:
-    
-    .. grid:: 1
-        :gutter: 0
 
-        .. grid-item-card:: For more
-            :link: _tools/perturb.rst
-            :text-align: right
-            :columns: 10
+    .. button-link:: _tools/perturb.rst
+        :color: dark
+        :outline:
 
-            :octicon:`code;2em;sd-text-dark`
+        More: ``sdq.tl.perturb``
     
