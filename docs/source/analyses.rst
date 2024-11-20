@@ -5,26 +5,30 @@ Reproducibility
 .. toctree::
    :hidden:
    
-   _notebooks/Figure2A.ipynb
-   _notebooks/Figure2B.ipynb
-   _notebooks/Figure2D.ipynb
-   _notebooks/Figure2E.ipynb
-   _notebooks/Figure2F.ipynb
-   _notebooks/Figure3AB.ipynb
-   _notebooks/Figure3CD.ipynb
-   _notebooks/Figure3EFG.ipynb
-   _notebooks/Figure3J.ipynb
+   _notebooks/Figure2A
+   _notebooks/Figure2B
+   _notebooks/Figure2D
+   _notebooks/Figure2E
+   _notebooks/Figure2F
+   _notebooks/Figure3AB
+   _notebooks/Figure3CD
+   _notebooks/Figure3EFG
+   _notebooks/Figure3J
    _notebooks/human_hematopoiesis.preprocessing
-   _notebooks/Figure4ABC.ipynb
-   _notebooks/FigureS1.ipynb
-   _notebooks/FigureS2A.ipynb
-   _notebooks/FigureS2B.ipynb
-   _notebooks/FigureS2C.ipynb
-   _notebooks/FigureS3.ipynb
-   _notebooks/FigureS4.ipynb
-   _notebooks/FigureS5.ipynb
-   _notebooks/FigureS6.ipynb
-   _notebooks/FigureS7.ipynb
+   _notebooks/Figure4ABC
+   _notebooks/Figure4EF
+   _notebooks/Figure4G
+   _notebooks/Figure4HI
+   _notebooks/Figure4JKLM
+   _notebooks/FigureS1
+   _notebooks/FigureS2A
+   _notebooks/FigureS2B
+   _notebooks/FigureS2C
+   _notebooks/FigureS3
+   _notebooks/FigureS4
+   _notebooks/FigureS5
+   _notebooks/FigureS6
+   _notebooks/FigureS7
 
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
@@ -137,6 +141,38 @@ Figure 4
 
 .. grid-item-card:: ``Figure4ABC.ipynb``
       :link: _notebooks/Figure4ABC.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4EF.ipynb``
+      :link: _notebooks/Figure4EF.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4G.ipynb``
+      :link: _notebooks/Figure4G.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``FigureHI.ipynb``
+      :link: _notebooks/FigureHI.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``FigureJKLM.ipynb``
+      :link: _notebooks/FigureJKLM.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
