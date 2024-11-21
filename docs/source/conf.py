@@ -127,22 +127,32 @@ def download_notebooks():
             
         os.makedirs("./_notebooks", exist_ok=True)
         
-        # Create headers for raw.githubusercontent.com
-        headers = {}
-        if github_token:
-            headers['Authorization'] = f'token {github_token}'
-            # Add required headers for raw content
-            headers['Accept'] = 'application/vnd.github.raw'
+        # Create headers specifically for raw.githubusercontent.com
+        headers = {
+            'Accept': 'application/vnd.github.v3.raw',
+            'Authorization': f'Bearer {github_token}' if github_token else None,
+            'User-Agent': 'scdiffeq-docs'
+        }
+        headers = {k: v for k, v in headers.items() if v is not None}
         
         print(f"\nDownloading {len(notebook_urls)} notebooks...")
         for i, url in enumerate(notebook_urls, 1):
             try:
                 print(f"Downloading {os.path.basename(url)} ({i}/{len(notebook_urls)})...")
-                r = requests.get(url, headers=headers, timeout=30)
-                r.raise_for_status()
+                # Convert raw URL to API URL format
+                api_url = url.replace('raw.githubusercontent.com', 'api.github.com/repos').replace('/main/', '/contents/')
+                r = requests.get(api_url, headers=headers, timeout=30)
                 
-                with open(os.path.join("./_notebooks", os.path.basename(url)), "wb") as f:
-                    f.write(r.content)
+                if r.status_code == 200:
+                    content = r.content
+                    if r.headers.get('content-type') == 'application/json':
+                        # If we got JSON instead of raw content, extract the content
+                        content = requests.get(r.json()['download_url'], headers=headers, timeout=30).content
+                    
+                    with open(os.path.join("./_notebooks", os.path.basename(url)), "wb") as f:
+                        f.write(content)
+                else:
+                    print(f"Error status {r.status_code} for {url}: {r.text}")
                     
             except Exception as e:
                 print(f"Error downloading {url}: {str(e)}")
