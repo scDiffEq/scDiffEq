@@ -117,7 +117,8 @@ class NotebookURLs:
 def download_notebooks():
     """Download notebooks with authentication and error handling."""
     try:
-        url_fetcher = NotebookURLs()
+        github_token = os.environ.get('GITHUB_TOKEN')
+        url_fetcher = NotebookURLs(github_token)
         notebook_urls = url_fetcher()
         
         if not notebook_urls:
@@ -126,11 +127,18 @@ def download_notebooks():
             
         os.makedirs("./_notebooks", exist_ok=True)
         
+        # Create headers for raw.githubusercontent.com
+        headers = {}
+        if github_token:
+            headers['Authorization'] = f'token {github_token}'
+            # Add required headers for raw content
+            headers['Accept'] = 'application/vnd.github.raw'
+        
         print(f"\nDownloading {len(notebook_urls)} notebooks...")
         for i, url in enumerate(notebook_urls, 1):
             try:
                 print(f"Downloading {os.path.basename(url)} ({i}/{len(notebook_urls)})...")
-                r = requests.get(url, timeout=30)
+                r = requests.get(url, headers=headers, timeout=30)
                 r.raise_for_status()
                 
                 with open(os.path.join("./_notebooks", os.path.basename(url)), "wb") as f:
