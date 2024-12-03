@@ -16,6 +16,7 @@ Reproducibility
    _notebooks/Figure3J
    _notebooks/human_hematopoiesis.preprocessing
    _notebooks/Figure4ABC
+   _notebooks/Figure4D
    _notebooks/Figure4EF
    _notebooks/Figure4G
    _notebooks/Figure4HI
@@ -141,6 +142,14 @@ Figure 4
 
 .. grid-item-card:: ``Figure4ABC.ipynb``
       :link: _notebooks/Figure4ABC.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4D.ipynb``
+      :link: _notebooks/Figure4D.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
