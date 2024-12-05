@@ -27,9 +27,13 @@ Reproducibility
    _notebooks/FigureS2C
    _notebooks/FigureS3
    _notebooks/FigureS4
-   _notebooks/FigureS5
-   _notebooks/FigureS6
+   _notebooks/FigureS5AB
+   _notebooks/FigureS5C
    _notebooks/FigureS7
+   _notebooks/FigureS9
+   _notebooks/FigureS10
+   _notebooks/FigureS11
+   _notebooks/FigureS12
 
 
 Here we feature a breakdown of analyses inclucded in the manuscript associated
@@ -260,22 +264,55 @@ Supplementary Figure 5
 
       :octicon:`book;2em;sd-text-dark`
 
-Supplementary Figure 6
+Supplementary Figure 7
 ======================
 
-.. grid-item-card:: ``FigureS6.ipynb``
-      :link: _notebooks/FigureS6.ipynb
+.. grid-item-card:: ``FigureS7.ipynb``
+      :link: _notebooks/FigureS7.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
 
       :octicon:`book;2em;sd-text-dark`
 
-Supplementary Figure 7
+Supplementary Figure 9
 ======================
 
-.. grid-item-card:: ``FigureS7.ipynb``
-      :link: _notebooks/FigureS7.ipynb
+.. grid-item-card:: ``FigureS9.ipynb``
+      :link: _notebooks/FigureS9.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 10
+=======================
+
+.. grid-item-card:: ``FigureS10.ipynb``
+      :link: _notebooks/FigureS10.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 11
+=======================
+
+.. grid-item-card:: ``FigureS11.ipynb``
+      :link: _notebooks/FigureS11.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 12
+=======================
+
+.. grid-item-card:: ``FigureS12.ipynb``
+      :link: _notebooks/FigureS12.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
