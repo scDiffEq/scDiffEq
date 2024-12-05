@@ -105,7 +105,7 @@ class NotebookURLs:
     def __call__(self) -> List[str]:
         """Fetch all notebook URLs with progress tracking."""
         paths = []
-        fig_nums = ["2", "3", "4", "s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+        fig_nums = ["2", "3", "4", "s1", "s2", "s3", "s4", "s5", "s7", "s9", "s10", "s11", "s12"]
         
         for i, fn in enumerate(fig_nums, 1):
             print(f"Fetching figure {fn} ({i}/{len(fig_nums)})...")
