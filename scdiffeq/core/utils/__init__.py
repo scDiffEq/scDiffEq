@@ -1,4 +1,3 @@
-
 __module_name__ = "__init__.py"
 __doc__ = """TODO"""
 __author__ = ", ".join(["Michael E. Vinyard"])
@@ -21,7 +20,6 @@ from ._not_none_type import not_none
 
 
 from ._anndata_inspector import AnnDataInspector
-from ._info_message import InfoMessage
 from ._fast_graph import FastGraph
 
 

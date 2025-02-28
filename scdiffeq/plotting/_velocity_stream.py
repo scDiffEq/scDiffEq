@@ -1,13 +1,17 @@
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
-import matplotlib.pyplot as plt
-import numpy as np
-import cellplots as cp
 import matplotlib.cm
+import matplotlib.pyplot as plt
+import logging
+import numpy as np
 import os
 import pathlib
+import cellplots as cp
 
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- import local dependencies: -----------------------------------------------
 from ..tools import VelocityEmbedding, GridVelocity
@@ -61,7 +65,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         T_scale: float = 10,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """Initializes the VelocityStreamPlot object with parameters to configure the velocity stream plot.
 
         This method sets up the necessary parameters for generating a velocity stream plot, including the setup for velocity embedding and grid velocity calculation. It parses the arguments and initializes internal states needed for plotting.
@@ -266,7 +270,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def _mk_fig_dir(self):
         if not self.scdiffeq_figure_dir.exists():
             os.mkdir(self.scdiffeq_figure_dir)
-            self._INFO(f"mkdir: {self.scdiffeq_figure_dir}")
+            logger.info(f"mkdir: {self.scdiffeq_figure_dir}")
 
     @property
     def sdq_info(self):
@@ -277,7 +281,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return f"{self.sdq_info['project']}.version_{self.sdq_info['version']}.ckpt_{self.sdq_info['ckpt']}"
 
     @property
-    def fname_basis(self):
+    def fname_basis(self) -> pathlib.Path:
         if "sdq_info" in self._adata.uns:
             try:
                 return self.scdiffeq_figure_dir.joinpath(
@@ -292,20 +296,20 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return self.scdiffeq_figure_dir.joinpath("velocity_stream")
 
     @property
-    def SVG_path(self):
+    def SVG_path(self) -> pathlib.Path:
         """ """
         return pathlib.Path(".".join([str(self.fname_basis), "svg"]))
 
     @property
-    def PNG_path(self):
+    def PNG_path(self) -> pathlib.Path:
         return pathlib.Path(".".join([str(self.fname_basis), "png"]))
 
-    def save_img(self):
+    def save_img(self) -> None:
         """Saves the generated plot to both SVG and PNG formats in a specified directory."""
         self._mk_fig_dir()
         plt.savefig(self.SVG_path, dpi=self._svg_dpi)
         plt.savefig(self.PNG_path, dpi=self._png_dpi)
-        self._INFO(f"Saved to: \n  {self.SVG_path}\n  {self.PNG_path}")
+        logger.info(f"Saved to: \n  {self.SVG_path}\n  {self.PNG_path}")
 
     def __call__(
         self,

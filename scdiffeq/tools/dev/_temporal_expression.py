@@ -1,10 +1,15 @@
-
 import ABCParse
 import anndata
+import logging
 import numpy as np
 import pandas as pd
 
 from typing import Optional, Union, Dict, List, Tuple
+
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 class TemporalExpression(ABCParse.ABCParse):
     def __init__(
@@ -15,7 +20,7 @@ class TemporalExpression(ABCParse.ABCParse):
         use_key: str = "X_gene_inv",
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.__parse__(locals(), public=[None])
 
     @property
@@ -53,9 +58,9 @@ class TemporalExpression(ABCParse.ABCParse):
     def _add_to_adata(self, mean, std):
         """"""
         self._adata_sim.uns["gex_mean"] = mean
-        self._INFO("Mean temporal expression added to: `adata_sim.uns['gex_mean']`")
+        logger.info("Mean temporal expression added to: `adata_sim.uns['gex_mean']`")
         self._adata_sim.uns["gex_std"] = std
-        self._INFO(
+        logger.info(
             "Standard deviation of temporal expression added to: `adata_sim.uns['gex_std']`"
         )
 
@@ -67,7 +72,6 @@ class TemporalExpression(ABCParse.ABCParse):
         *args,
         **kwargs,
     ) -> Union[None, Tuple[pd.DataFrame]]:
-
         """
         Parameters
         ----------

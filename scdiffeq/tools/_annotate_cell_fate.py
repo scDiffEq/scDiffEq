@@ -3,7 +3,11 @@ import anndata
 import ABCParse
 import numpy as np
 import pandas as pd
+import logging
 
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- import local dependencies: -----------------------------------------------
 
@@ -22,7 +26,7 @@ class CellFateAnnotation(ABCParse.ABCParse):
         silent: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.__parse__(locals())
 
     @property
@@ -46,7 +50,7 @@ class CellFateAnnotation(ABCParse.ABCParse):
             mappable_fate_dict
         )
         if not self._silent:
-            self._INFO(f"Added fate annotation: adata_sim.obs['{self._key_added}']")
+            logger.info(f"Added fate annotation: adata_sim.obs['{self._key_added}']")
         self._count_fates()
 
     def _count_fates(self) -> None:
@@ -57,7 +61,7 @@ class CellFateAnnotation(ABCParse.ABCParse):
         )
 
         if not self._silent:
-            self._INFO("Added fate counts: adata_sim.uns['fate_counts']")
+            logger.info("Added fate counts: adata_sim.uns['fate_counts']")
 
     def __call__(
         self,

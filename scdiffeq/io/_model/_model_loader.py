@@ -5,7 +5,12 @@ import lightning
 import torch
 import torch_nets
 import yaml
+import logging
 import pandas as pd
+
+# -- configure logging: ----
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 from ...core import lightning_models, utils, scDiffEq
 
@@ -38,7 +43,7 @@ class ModelLoader(ABCParse.ABCParse):
         if not hasattr(self, "_VERSION_KEY_PRIVATE"):
             if self._version is None:
                 version_key = max(self.project._VERSION_PATHS)
-                self._INFO(f"Version not provided. Defaulting to: '{version_key}'")
+                logger.info(f"Version not provided. Defaulting to: '{version_key}'")
                 self._VERSION_KEY_PRIVATE = version_key
             else:
                 self._VERSION_KEY_PRIVATE = f"version_{self._version}"
@@ -46,7 +51,7 @@ class ModelLoader(ABCParse.ABCParse):
         return self._VERSION_KEY_PRIVATE
 
     @property
-    def _VERSION_PATH(self):
+    def _VERSION_PATH(self) -> pathlib.Path:
         return self.project._VERSION_PATHS[self._VERSION_KEY]
 
     @property
@@ -83,15 +88,15 @@ class ModelLoader(ABCParse.ABCParse):
     def epoch(self):
         if not hasattr(self, "_epoch"):
             self._epoch = "last"
-            self._INFO(f"Epoch not provided. Defaulting to: '{self._epoch}'")
+            logger.info(f"Epoch not provided. Defaulting to: '{self._epoch}'")
         return self._epoch
 
-    def _validate_epoch(self):
+    def _validate_epoch(self) -> None:
 
         msg = f"ckpt at epoch: {self.epoch} does not exist. Choose from: {self.version._SORTED_CKPT_KEYS}"
         assert self.epoch in self.version.ckpts, msg
 
-    def _validate_version(self):
+    def _validate_version(self) -> None:
 
         version_key = self._VERSION_KEY
         available_versions = [
@@ -135,7 +140,6 @@ class ModelLoader(ABCParse.ABCParse):
 #             torch_nets.pl.weights_and_biases(model.state_dict())
 
 #         ckpt_path = self.ckpt.path
-#         self._INFO(f"Loading model from ckpt: \n\t'{ckpt_path}'")
 #         model = model.load_from_checkpoint(ckpt_path)
 
 #         if plot_state_change:

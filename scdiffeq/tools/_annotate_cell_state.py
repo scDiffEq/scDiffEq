@@ -2,8 +2,13 @@
 import ABCParse
 import anndata
 import adata_query
+import logging
 import numpy as np
 
+
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- import local dependencies: -----------------------------------------------
 
@@ -15,7 +20,7 @@ import numpy as np
 class CellStateAnnotation(ABCParse.ABCParse):
     """Annotate cell states using a kNN graph."""
 
-    def __init__(self, kNN: "kNN", silent: bool = False, *args, **kwargs):
+    def __init__(self, kNN: "kNN", silent: bool = False, *args, **kwargs) -> None:
         """Initialize `CellStateAnnotation` class.
 
         Args:
@@ -66,7 +71,7 @@ class CellStateAnnotation(ABCParse.ABCParse):
         """Add mapped cell state values to adata_sim.obs"""
         self._adata_sim.obs[self._obs_key] = self.X_mapped.values.flatten()
         if not self._silent:
-            self._INFO(f"Added state annotation: adata_sim.obs['{self._obs_key}']")
+            logger.info(f"Added state annotation: adata_sim.obs['{self._obs_key}']")
 
     def __call__(
         self,

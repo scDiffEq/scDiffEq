@@ -1,18 +1,23 @@
-
 import lightning
 import anndata
+import logging
+
 
 from .. import configs, utils
 
 from typing import Dict, Optional
 
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 class ModelConfigMixIn(object):
     """configure_model and configure_data can/should be accessed from the public handle"""
 
-    def _configure_trainer_generator(self):
-        
+    def _configure_trainer_generator(self) -> None:
         """ """
-                
+
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             save_dir=self._name
         )
@@ -22,7 +27,7 @@ class ModelConfigMixIn(object):
         DiffEq: Optional[lightning.LightningModule] = None,
         configure_trainer: bool = True,
         loading_existing: bool = False,
-    ):
+    ) -> None:
         if DiffEq is None:
             self._LitModelConfig = configs.LightningModelConfiguration(
                 data_dim=self._data_dim,
@@ -30,17 +35,19 @@ class ModelConfigMixIn(object):
                 DiffEq_type=self._DiffEq_type,
                 potential_type=self._potential_type,
                 fate_bias_csv_path=self._fate_bias_csv_path,
-                velocity_ratio_params = self._velocity_ratio_params,
+                velocity_ratio_params=self._velocity_ratio_params,
             )
 
             if hasattr(self, "reducer"):
                 self._PARAMS["PCA"] = self.reducer.PCA
-            DiffEq = self._LitModelConfig(self._PARAMS, self._ckpt_path, loading_existing = loading_existing)
+            DiffEq = self._LitModelConfig(
+                self._PARAMS, self._ckpt_path, loading_existing=loading_existing
+            )
 
         self.DiffEq = DiffEq
         self._name = self.DiffEq.hparams.name
 
-        self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
+        logger.info(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
 
         lightning.seed_everything(self._seed)
@@ -56,28 +63,30 @@ class ModelConfigMixIn(object):
     def configure_data(self, adata: anndata.AnnData):
         """ """
         self.adata = adata.copy()
-        
+
         self._DATA_CONFIG = configs.DataConfiguration()
-        self._DATA_CONFIG(scDiffEq = self)
-        self._INFO(f"Input data configured.")
-        
+        self._DATA_CONFIG(scDiffEq=self)
+        logger.info(f"Input data configured.")
+
     def __config__(self, kwargs: Dict):
         """ """
         # -- Step 1: parse kwargs, set up info msg -----------------------------
-        self.__parse__(kwargs, public = [None], ignore=["adata"])
+        self.__parse__(kwargs, public=[None], ignore=["adata"])
 
         # -- Step 2: configure data ----------------------------------------------
-        if not kwargs['adata'] is None:
+        if not kwargs["adata"] is None:
             # if adata is given, triggers 2 through 4
-            self.configure_data(adata = kwargs['adata'])
+            self.configure_data(adata=kwargs["adata"])
 
             # -- Step 3: configure kNN --------------------------------------------
             if self._PARAMS["build_kNN"]:
-                self._PARAMS['kNN'] = self.kNN
+                self._PARAMS["kNN"] = self.kNN
 
             # -- Step 4: configure model -------------------------------------------
-            self.configure_model(DiffEq = None, configure_trainer = True)
+            self.configure_model(DiffEq=None, configure_trainer=True)
 
             # -- Step 5: extras (was step 6): ---------------------------------------
+
+
 #             if kwargs["reduce_dimensions"]:
 #                 self._configure_dimension_reduction()
