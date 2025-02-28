@@ -1,5 +1,5 @@
+import logging
 
-from ._info_message import InfoMessage
 from ._anndata_inspector import AnnDataInspector
 
 import annoyance
@@ -7,12 +7,15 @@ import pandas as pd
 import torch
 import numpy as np
 
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 NoneType = type(None)
 
-class FastGraph:
-    def __init__(self, adata, use_key, annot_key="Cell type annotation"):
 
-        self._INFO = InfoMessage()
+class FastGraph:
+    def __init__(self, adata, use_key, annot_key="Cell type annotation") -> None:
 
         self.adata = adata
         self._inspector = AnnDataInspector(adata)
@@ -34,21 +37,22 @@ class FastGraph:
     def _query(self, X_fin):
         return self._fast_count(self.Graph.query(X_fin))
 
-    def _fate_df(self, x_lab):
+    def _fate_df(self, x_lab) -> pd.DataFrame:
         return pd.DataFrame([x_lab[0].value_counts() for i in range(len(x_lab))])
-    
-    def _DETACH(self, X_hat: torch.Tensor)->np.ndarray:
+
+    def _DETACH(self, X_hat: torch.Tensor) -> np.ndarray:
         return X_hat.detach().cpu().numpy()
-    
-    def _DETACH_FINAL(self, X_hat: torch.Tensor)->np.ndarray:
+
+    def _DETACH_FINAL(self, X_hat: torch.Tensor) -> np.ndarray:
         return X_hat[-1].detach().cpu().numpy()
-    
+
     def _TRANSFORM(self, dimension_reduction_model, X_fin):
         return dimension_reduction_model.transform(X_fin)
-        
 
-    def __call__(self, X_hat, dimension_reduction_model = None, final_timepoint_only=True):
-        
+    def __call__(
+        self, X_hat, dimension_reduction_model=None, final_timepoint_only=True
+    ) -> pd.DataFrame:
+
         if X_hat.device != "cpu" and (final_timepoint_only):
             X_hat_ = self._DETACH_FINAL(X_hat)
         elif X_hat.device != "cpu":
@@ -57,7 +61,7 @@ class FastGraph:
             X_hat_ = X_hat[-1].numpy()
         else:
             X_hat_ = X_hat.numpy()
-            
+
         if not isinstance(dimension_reduction_model, NoneType):
-            X_hat_ = self._TRANSFORM(dimension_reduction_model, X_hat_)
-        return self._fate_df(self._query(X_fin))
+            X_hat_ = self._TRANSFORM(dimension_reduction_model, X_fin=X_hat_)
+        return self._fate_df(self._query(X_fin=X_hat_))

@@ -2,8 +2,12 @@
 import sklearn.decomposition
 import anndata
 import ABCParse
+import logging
 import pandas as pd
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- import local dependencies: -----------------------------------------------
 from ..core import utils
@@ -28,10 +32,9 @@ class GeneCompatibility(ABCParse.ABCParse):
         PCA: Optional[sklearn.decomposition.PCA] = None,
         key_added: str = "X_gene",
         silent: bool = False,
-    ):
+    ) -> None:
 
         self.__parse__(locals(), public=[None])
-        self._INFO = utils.InfoMessage()
 
     @property
     def var_names(self):
@@ -40,9 +43,9 @@ class GeneCompatibility(ABCParse.ABCParse):
     def _format_var_names(self):
         self.adata_sim.uns[self._gene_id_key] = self.var_names
         if not self._silent:
-            self._INFO(f"Gene names added to: `adata_sim.uns['{self._gene_id_key}']`")
+            logger.info(f"Gene names added to: `adata_sim.uns['{self._gene_id_key}']`")
 
-    def _format_inverted_expression(self):
+    def _format_inverted_expression(self) -> None:
 
         assert not self._PCA is None, "Must supply PCA model!"
 
@@ -55,11 +58,11 @@ class GeneCompatibility(ABCParse.ABCParse):
         self.adata_sim.obsm[self._key_added] = X_gene
         if not self._silent:
             msg = f"Inverted expression added to: `adata_sim.obsm['{self._key_added}']`"
-            self._INFO(msg)
+            logger.info(msg)
 
     def __call__(
         self, adata: anndata.AnnData, adata_sim: anndata.AnnData, *args, **kwargs
-    ):
+    ) -> None:
 
         self.__update__(locals(), public=["adata", "adata_sim"])
 

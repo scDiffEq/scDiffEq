@@ -1,4 +1,3 @@
-
 __author__ = "Michael E. Vinyard"
 __email__ = "mvinyard.ai@gmai.com"
 
@@ -11,4 +10,4 @@ from . import utils
 from . import configs
 from . import callbacks
 
-from . import _dummy
+__all__ = ["scDiffEq", "lightning_models", "utils", "configs", "callbacks"]

@@ -1,4 +1,3 @@
-
 """
 Three main classes that are going to be used here:
 
@@ -6,9 +5,18 @@ Three main classes that are going to be used here:
 2. [ called in callback ] LossTrackingVisualization 
 3. [ lightning.Callback ] VisualizeTrackedLoss
 """
+
 import lightning
 import glob
 import os
+import logging
+
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# -- import local dependencies: -----------------------------------------------
+
 
 from .. import utils
 
@@ -40,7 +48,6 @@ class ModelTracker(ABCParse.ABCParse):
         for fpath in glob.glob(os.path.join(self._PATH, "*/version_*/metrics.csv")):
             if stage_key in fpath:
                 return True
-            
 
     @property
     def _HAS_PRETRAIN(self):
@@ -181,26 +188,26 @@ class LossTrackingVisualization(ABCParse.ABCParse):
     @property
     def _HAS_TRAIN(self):
         return self._tracker._HAS_TRAIN
-    
+
     @property
     def _HAS_PRETRAIN(self):
         return self._tracker._HAS_PRETRAIN
 
     @property
     def _PLOT_KEYS(self):
-        
+
         keys = []
         if self._HAS_PRETRAIN:
-            keys+= list(self._PLOT_INPUTS["pretrain"].keys())
-            
+            keys += list(self._PLOT_INPUTS["pretrain"].keys())
+
         if self._HAS_TRAIN:
-            keys+= self._PLOT_INPUTS["train"].keys()
-            
+            keys += self._PLOT_INPUTS["train"].keys()
+
         return keys
 
     @property
     def _NPLOTS(self):
-        nplots = 0        
+        nplots = 0
         if self._HAS_TRAIN:
             nplots += len(self._PLOT_INPUTS["train"].keys())
         if self._HAS_PRETRAIN:
@@ -209,7 +216,7 @@ class LossTrackingVisualization(ABCParse.ABCParse):
         return nplots
 
     def __layout__(self):
-        
+
         self.fig, self.axes = sdq_pl.plot(
             nplots=self._NPLOTS,
             **self._PLOT_KWARGS,
@@ -248,42 +255,41 @@ class VisualizeTrackedLoss(lightning.Callback):
     def __init__(
         self,
         version,
-        viz_frequency = 1,
+        viz_frequency=1,
         model_name="scDiffEq_model",
         working_dir=os.getcwd(),
         train_version=0,
         pretrain_version=0,
-        fname = "scDiffEq_fit_loss_tracking.png",
+        fname="scDiffEq_fit_loss_tracking.png",
         *args,
         **kwargs,
     ):
         self.model_tracker = ModelTracker(
             **utils.extract_func_kwargs(func=ModelTracker, kwargs=locals())
         )
-        self._INFO = utils.InfoMessage()
         self.fname = fname
         self.viz_frequency = viz_frequency
-        
+
     @property
     def _VIZ_DISABLE(self):
         return not self.vis_frequency is None
-        
+
     @property
     def save_path(self):
         return os.path.join(self.model_tracker._PATH, self.fname)
-        
+
     def _save_plot(self):
         if not os.path.exists(self.save_path):
-            self._INFO(f"Loss visualization saved to: {self.save_path}")
+            logger.info(f"Loss visualization saved to: {self.save_path}")
         plt.savefig(self.save_path)
         plt.close()
-        
-    def on_train_epoch_end(self, trianer, pl_module, *args, **kwargs):
-        
+
+    def on_train_epoch_end(self, trainer, pl_module, *args, **kwargs) -> None:
+
         epoch = pl_module.current_epoch
-        
+
         if not self._VIZ_DISABLED and (epoch % self.viz_frequency == 0):
-            
+
             loss_track_viz = LossTrackingVisualization(self.model_tracker)
             loss_track_viz.__plot__()
             self._save_plot()

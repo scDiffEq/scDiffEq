@@ -54,7 +54,6 @@
 #     # -- could cordon off into a kNNMixIn: ----
 #     def _configure_kNN_graph(self):      
 #         train_adata = self.adata[self.adata.obs[self._train_key]].copy()
-#         self._INFO(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_key}']")        
 #         self._kNN_graph = tools.kNN(adata = train_adata, use_key = self._kNN_key)
         
 #     @proprety
@@ -66,7 +65,6 @@
 
 # #     def _stage_log_path(self, stage):
 # #         log_path = glob.glob(self.DiffEqLogger.VERSIONED_MODEL_OUTDIR + f"/{stage}*")[0]
-# #         self._INFO(f"Access logs at: {log_path}")
         
 # #     @property
 # #     def _VERSION(self):
@@ -77,7 +75,6 @@
         self.reducer = tools.DimensionReduction(self.adata, save_path = "TESTING_SCDIFFEQ_MODEL")
 
         if self._scale_input_counts:
-            self._INFO("Scaling input counts (for dimension reduction).")
             self.reducer.fit_scaler()
             self.adata.obsm["X_scaled_scDiffEq"] = self.reducer.X_scaled
         else:

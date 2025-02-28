@@ -1,4 +1,3 @@
-
 from typing import Dict, List, Union, Optional
 import anndata
 import matplotlib.pyplot as plt
@@ -7,18 +6,19 @@ import numpy as np
 import pathlib
 import ABCParse
 import os
-# import cellplots
+import logging
+
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 from ..core import utils
 
 
 class FillBetweenPlot:
-    
     """KNOWN BUG: CELLPLOTS REQUIRED / NOT YET RELEASED"""
-    
-    def __init__(self, *args, **kwargs):
 
-        ...
+    def __init__(self, *args, **kwargs): ...
 
     @property
     def _MEAN(self):
@@ -47,7 +47,7 @@ class FillBetweenPlot:
     def _configure_plot(self, ax):
         if ax is None:
             # KNOWN BUG
-            self.fig, axes = cellplots.plot(1, 1, delete = [["top", "right"]])
+            self.fig, axes = cellplots.plot(1, 1, delete=[["top", "right"]])
             ax = axes[0]
         return ax
 
@@ -66,6 +66,7 @@ class FillBetweenPlot:
         self._df = df
         self.ax = self._configure_plot(ax)
         self._plot(label, **kwargs)
+
 
 class SmoothedGEXPlot(ABCParse.ABCParse):
     def __init__(
@@ -86,7 +87,6 @@ class SmoothedGEXPlot(ABCParse.ABCParse):
         **kwargs,
     ):
         self.__parse__(locals(), public=[None])
-        self._INFO = utils.InfoMessage()
 
     @property
     def _PLOT_KWARGS(self):
@@ -162,9 +162,9 @@ class SmoothedGEXPlot(ABCParse.ABCParse):
         if self._save:
             if not self._SAVE_PATH.parent.exists():
                 self._SAVE_PATH.parent.mkdir()
-                self._INFO(f"Directory created: {self._SAVE_PATH.parent}")
+                logger.info(f"Directory created: {self._SAVE_PATH.parent}")
             plt.savefig(self._SAVE_PATH)
-            self._INFO(f"Saved to: {self._SAVE_PATH}")
+            logger.info(f"Saved to: {self._SAVE_PATH}")
 
 
 def plot_smoothed_expression(
