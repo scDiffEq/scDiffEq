@@ -5,12 +5,12 @@ import logging
 # -- import local dependencies: -----------------------------------------------
 from .. import utils
 
-# -- configure logger: --------------------------------------------------------
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 # -- set type hints: ----------------------------------------------------------
 from typing import List, Optional
+
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- base mix-in cls: ---------------------------------------------------------
 class BaseRoutineMixIn(object):
@@ -21,7 +21,7 @@ class BaseRoutineMixIn(object):
         """"""
         return [self.TrainerGenerator, lightning.Trainer]
 
-    def _check_disable_validation(self, trainer_kwargs):
+    def _check_disable_validation(self, trainer_kwargs) -> None:
         """"""
         if self._train_val_split[1] == 0:
             trainer_kwargs.update(
@@ -35,7 +35,7 @@ class BaseRoutineMixIn(object):
 
     def _update_trainer_kwargs(
         self, kwargs, ignore=["version", "working_dir", "logger"]
-    ):
+    ) -> None:
         # -- update kwargs with params already passed (this is problematic)
         kwargs.update(self._PARAMS)
 
@@ -64,17 +64,17 @@ class BaseRoutineMixIn(object):
 
 # -- pre-training mix-in: -----------------------------------------------------
 class PreTrainMixIn(BaseRoutineMixIn):
-
-    """Container hosting the pre-training config/execution methods"""   
+    """Container hosting the pre-training config/execution methods"""
 
     def _configure_pretrain_step(self, kwargs) -> None:
         """"""
+
         logger.info("Configuring pretraining step")
 
         self._update_trainer_kwargs(kwargs)
-        
+
         STAGE = "pretrain"
-        
+
         self._initialize__attrs()
 
         # -- generate a new trainer
@@ -111,38 +111,35 @@ class PreTrainMixIn(BaseRoutineMixIn):
         **kwargs,
     ) -> None:
         """Pretrain method.
-        
+
         Extended description of the pretrain method.
-        
+
         Args:
             pretrain_epochs (int): Description. **Default**: 500
-            
+
             pretrain_callbacks (Optional[List]): Description. **Default**: []
-            
+
             ckpt_frequency (int): Description. **Default**: 25
         """
-        
+
         self.__update__(locals())
-        
+
         if self._pretrain_epochs > 0:
             self._configure_pretrain_step(locals())
             self.pretrainer.fit(self.DiffEq, self.LitDataModule)
 
 # -- training mix-in: ---------------------------------------------------------
 class TrainMixIn(BaseRoutineMixIn):
-    
     """Container hosting the training config/execution methods"""
-    
-    
-    def _configure_train_step(self, kwargs) -> None:
-        """"""
 
-        logger.info("Configuring training step")
-        
+    def _configure_train_step(self, kwargs):
+        """"""
+        logger.info(f"Configuring training step")
+
         self._update_trainer_kwargs(kwargs)
-        
+
         STAGE = "train"
-        
+
         self._initialize__attrs()
 
         # -- generate a new trainer
@@ -178,9 +175,9 @@ class TrainMixIn(BaseRoutineMixIn):
         **kwargs,
     ) -> None:
         """ """
-        
+
         self.__update__(locals())
-        
+
         if self._train_epochs > 0:
             self._configure_train_step(locals())
             self.trainer.fit(self.DiffEq, self.LitDataModule)

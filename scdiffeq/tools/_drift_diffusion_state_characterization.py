@@ -1,14 +1,13 @@
-
 # -- import packages: ---------------------------------------------------------
 import abc
-import torch
-import adata_query
-from lightning import LightningModule
-import numpy as np
 import ABCParse
+import adata_query
 import anndata
 import autodevice
+import lightning
 import logging
+import numpy as np
+import torch
 
 # -- import local dependencies: -----------------------------------------------
 from .utils import L2Norm
@@ -17,12 +16,14 @@ from .utils import L2Norm
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# -- set type hints: ----------------------------------------------------------
+from typing import Any, Dict, Optional, Union
+
 # -- base class: --------------------------------------------------------------
 class InstantaneousVelocity(ABCParse.ABCParse):
     """Quantify the instantaneous drift/diffusion given a state and model."""
 
-    def __init__(self, silent = False, *args, **kwargs):
-
+    def __init__(self, silent: bool = False, *args, **kwargs) -> None:
         """Inhereting class should pass the model and device here."""
 
         self.__parse__(locals())
@@ -37,11 +38,11 @@ class InstantaneousVelocity(ABCParse.ABCParse):
         if isinstance(self._device, str):
             self._device = autodevice.AutoDevice(self._device)
         return self._device
-    
+
     @property
     def _INPUT_IS_SIMULATED(self) -> bool:
         return "simulated" in self._adata.uns
-    
+
     @property
     def _USE_KEY(self) -> str:
         """Some added flexibility for adata_sim, which places the target in adata.X"""
@@ -70,32 +71,35 @@ class InstantaneousVelocity(ABCParse.ABCParse):
         return X_pred.detach().cpu().numpy()
 
     @abc.abstractmethod
-    def forward(self, X):
-        ...
+    def forward(self, X): ...
 
     def _key_action_indicator(self, key, keyset) -> str:
         if not key in keyset:
             return "Added"
         return "Updated"
-        
-    def _issue_info_message(self, key: str, key_action: str) -> None:
-        
-        if not self._silent:
 
+    def _issue_info_message(self, key: str, key_action: str) -> None:
+        logger.info(f"{key_action}: adata.obsm['{key}']")            
+
+    def _add_to_adata(self, X_pred: np.ndarray) -> None:
+        if not self._silent:
             logger.info(f"{key_action}: adata.obsm['{key}']")
 
     def _add_to_adata(self, X_pred: np.ndarray) -> None:
-
         """
         Add the predicted X_{term} to adata.obsm and compute the L2Norm(X_{term}),
         which is added to adata.obs[key].
         """
-        
-        key_action = self._key_action_indicator(key=self._obsm_key_added, keyset=self._adata.obsm_keys())
+
+        key_action = self._key_action_indicator(
+            key=self._obsm_key_added, keyset=self._adata.obsm_keys()
+        )
         self._adata.obsm[self._obsm_key_added] = X_pred
         self._issue_info_message(key=self._obsm_key_added, key_action=key_action)
-        
-        key_action = self._key_action_indicator(key=self._obs_key_added, keyset=self._adata.obs_keys())        
+
+        key_action = self._key_action_indicator(
+            key=self._obs_key_added, keyset=self._adata.obs_keys()
+        )
         self._adata.obs[self._obs_key_added] = self._L2Norm(X_pred)
         self._issue_info_message(key=self._obs_key_added, key_action=key_action)
 
@@ -130,7 +134,8 @@ class InstantaneousDrift(InstantaneousVelocity):
         *args,
         **kwargs,
     ) -> None:
-        super().__init__(silent = silent)
+        """ """
+        super().__init__(silent=silent)
 
         self.__parse__(locals())
 
@@ -149,7 +154,10 @@ class InstantaneousDiffusion(InstantaneousVelocity):
         *args,
         **kwargs,
     ) -> None:
-        super().__init__(silent = silent)
+        
+        """ """
+        
+        super().__init__(silent=silent)
 
         self.__parse__(locals())
 
@@ -164,7 +172,7 @@ def drift(
     use_key: str = "X_pca",
     obsm_key_added: str = "X_drift",
     obs_key_added: str = "drift",
-    device = autodevice.AutoDevice(),
+    device=autodevice.AutoDevice(),
     inplace: bool = True,
     silent: bool = False,
     *args,

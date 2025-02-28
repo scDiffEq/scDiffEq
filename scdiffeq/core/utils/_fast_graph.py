@@ -1,15 +1,30 @@
-from ._info_message import InfoMessage
+
+# -- import packages: ----------------------------------------------------------
+import annoyance
+import logging
+import numpy as np
+import pandas as pd
+import sklearn.decomposition
+import torch
+
+# -- import local dependencies: ------------------------------------------------
 from ._anndata_inspector import AnnDataInspector
 
-import annoyance
-import pandas as pd
-import torch
-import numpy as np
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-NoneType = type(None)
-
+# -- operational cls: ----------------------------------------------------------
 class FastGraph:
-    def __init__(self, adata, use_key, annot_key="Cell type annotation"):
+    """ """
+    def __init__(
+        self,
+        adata: anndata.AnnData,
+        use_key: str,
+        annot_key: str = "Cell type annotation",
+    ) -> None:
+        
+        """ """
 
         self.adata = adata
         self._inspector = AnnDataInspector(adata)
@@ -31,19 +46,24 @@ class FastGraph:
     def _query(self, X_fin):
         return self._fast_count(self.Graph.query(X_fin))
 
-    def _fate_df(self, x_lab):
+    def _fate_df(self, x_lab) -> pd.DataFrame:
         return pd.DataFrame([x_lab[0].value_counts() for i in range(len(x_lab))])
 
-    def _DETACH(self, X_hat: torch.Tensor)->np.ndarray:
+    def _DETACH(self, X_hat: torch.Tensor) -> np.ndarray:
         return X_hat.detach().cpu().numpy()
 
-    def _DETACH_FINAL(self, X_hat: torch.Tensor)->np.ndarray:
+    def _DETACH_FINAL(self, X_hat: torch.Tensor) -> np.ndarray:
         return X_hat[-1].detach().cpu().numpy()
 
     def _TRANSFORM(self, dimension_reduction_model, X_fin):
         return dimension_reduction_model.transform(X_fin)
 
-    def __call__(self, X_hat, dimension_reduction_model = None, final_timepoint_only=True):
+    def __call__(
+        self,
+        X_hat: torch.Tensor,
+        dimension_reduction_model: Optional[sklearn.decomposition.PCA] = None,
+        final_timepoint_only: bool = True,
+    ) -> pd.DataFrame:
 
         if X_hat.device != "cpu" and (final_timepoint_only):
             X_hat_ = self._DETACH_FINAL(X_hat)
@@ -54,6 +74,7 @@ class FastGraph:
         else:
             X_hat_ = X_hat.numpy()
 
-        if not isinstance(dimension_reduction_model, NoneType):
-            X_hat_ = self._TRANSFORM(dimension_reduction_model, X_hat_)
-        return self._fate_df(self._query(X_hat_))
+        if not dimension_reduction_model is None:
+            X_hat_ = self._TRANSFORM(dimension_reduction_model, X_fin=X_hat_)
+            
+        return self._fate_df(self._query(X_fin=X_hat_))

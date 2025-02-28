@@ -1,14 +1,18 @@
-
 from ._anndata_inspector import AnnDataInspector
 from ._function_kwargs import extract_func_kwargs
-from ._info_message import InfoMessage
 
 import annoyance
 import pandas as pd
 import torch
 import ABCParse
+import logging
+
+# -- configure logging: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 NoneType = type(None)
+
 
 class kNNGraphQuery(ABCParse.ABCParse):
     def __init__(self, adata, use_key, *args, **kwargs):
