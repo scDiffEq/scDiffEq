@@ -115,7 +115,7 @@ class ComputeCosines(ABCParse.ABCParse):
             ) # HERE
         return self._nn_idx
 
-    def _contains_non_zero(self, obs_id: int) -> np.bool:
+    def _contains_non_zero(self, obs_id: int) -> bool:
         return np.any(np.array([self.V[obs_id].min(), self.V[obs_id].max()]) != 0)
 
     def forward(self, obs_id) -> None:
