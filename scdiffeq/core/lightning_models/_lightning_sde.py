@@ -1,21 +1,20 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import NeuralSDE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
 
+# -- set type hints: ----------------------------------------------------------
+from typing import Literal, List, Optional, Union
 
-from typing import Optional, Union, List
-from ... import __version__
-
-
-# -- lightning model: ----------------------------------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE(
     mix_ins.BaseForwardMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningSDE"""
+
     def __init__(
         self,
         latent_dim: int = 50,
@@ -32,19 +31,18 @@ class LightningSDE(
         sigma_output_bias: bool = True,
         mu_n_augment: int = 0,
         sigma_n_augment: int = 0,
-        sde_type="ito",
-        noise_type="general",
-        brownian_dim=1,
+        sde_type: str = "ito",
+        noise_type: str = "general",
+        brownian_dim: int = 1,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
-        train_lr=1e-4,
-        train_optimizer=torch.optim.RMSprop,
-        train_scheduler=torch.optim.lr_scheduler.StepLR,
-        train_step_size=10,
-        dt=0.1,
-        adjoint=False,
-        backend="auto",
-        version=__version__,
+        train_lr: float = 1e-4,
+        train_optimizer: torch.optim.Optimizer = torch.optim.RMSprop,
+        train_scheduler: torch.optim.lr_scheduler._LRScheduler = torch.optim.lr_scheduler.StepLR,
+        train_step_size: int = 10,
+        dt: float = 0.1,
+        adjoint: bool = False,
+        backend: str = "auto",
         loading_existing: bool = False,
         *args,
         **kwargs,
@@ -106,8 +104,6 @@ class LightningSDE(
             Whether to use the adjoint method for backpropagation. Default is False.
         backend : str, optional
             Backend for the SDE solver. Default is "auto".
-        version : str, optional
-            Version of the model. Default is __version__.
         loading_existing : bool, optional
             Whether to load an existing model. Default is False.
 
@@ -122,8 +118,8 @@ class LightningSDE(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.NeuralSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE']:
         return "LightningSDE"

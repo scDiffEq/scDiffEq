@@ -1,21 +1,21 @@
-from . import mix_ins, base
-
-
-from neural_diffeqs import PotentialODE
-import torch_nets
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
+# -- import local dependencies: -----------------------------------------------
+from . import mix_ins, base
 
-from typing import Optional, Union, List
-from ... import __version__
+# -- set type hints: ----------------------------------------------------------
+from typing import Literal, Optional, Union, List
 
-
+# -- lightning model cls: -----------------------------------------------------
 class LightningODE_VAE_FixedPotential(
     mix_ins.BaseForwardMixIn,
     base.BaseLightningDiffEq,
     mix_ins.PreTrainMixIn,
     mix_ins.PotentialMixIn,
 ):
+    """LightningODE-VAE-FixedPotential"""
     def __init__(
         self,
         data_dim,
@@ -36,11 +36,10 @@ class LightningODE_VAE_FixedPotential(
         train_scheduler=torch.optim.lr_scheduler.StepLR,
         pretrain_step_size=None,
         train_step_size=10,
-        dt=0.1,
-        adjoint=False,
-        backend="auto",
+        dt: float =0.1,
+        adjoint: bool =False,
+        backend: str = "auto",
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -93,8 +92,6 @@ class LightningODE_VAE_FixedPotential(
             Backend for the ODE solver, by default "auto".
         loading_existing : bool, optional
             Whether to load an existing model, by default False.
-        version : str, optional
-            Version of the model, by default __version__.
 
         Returns
         -------
@@ -116,7 +113,7 @@ class LightningODE_VAE_FixedPotential(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=PotentialODE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.PotentialODE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
     def forward(self, X0, t, **kwargs):
@@ -142,5 +139,5 @@ class LightningODE_VAE_FixedPotential(
         self.log("pretrain_rl_mse", recon_loss.item())
         return recon_loss
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningODE-VAE-FixedPotential']:
         return "LightningODE-VAE-FixedPotential"

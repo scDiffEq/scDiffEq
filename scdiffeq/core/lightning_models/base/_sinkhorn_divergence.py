@@ -26,7 +26,7 @@ class SinkhornDivergence(SamplesLoss, ABCParse.ABCParse):
 #         potentials=False,
 #         verbose=False,
         **kwargs
-    ):
+    ) -> None:
         super(SinkhornDivergence, self).__init__()
 
         self.__parse__(locals())

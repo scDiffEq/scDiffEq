@@ -8,13 +8,14 @@ import numpy as np
 import ABCParse
 import anndata
 import autodevice
+import logging
 
 # -- import local dependencies: -----------------------------------------------
 from .utils import L2Norm
 
-
-# -- set typing: --------------------------------------------------------------
-
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- base class: --------------------------------------------------------------
 class InstantaneousVelocity(ABCParse.ABCParse):
@@ -28,17 +29,17 @@ class InstantaneousVelocity(ABCParse.ABCParse):
         self._L2Norm = L2Norm()
 
     @property
-    def _t(self):
+    def _t(self) -> None:
         return None
 
     @property
-    def _DEVICE(self):
+    def _DEVICE(self) -> torch.device:
         if isinstance(self._device, str):
             self._device = autodevice.AutoDevice(self._device)
         return self._device
     
     @property
-    def _INPUT_IS_SIMULATED(self):
+    def _INPUT_IS_SIMULATED(self) -> bool:
         return "simulated" in self._adata.uns
     
     @property
@@ -46,7 +47,7 @@ class InstantaneousVelocity(ABCParse.ABCParse):
         """Some added flexibility for adata_sim, which places the target in adata.X"""
         if self._INPUT_IS_SIMULATED:
             try:
-                self._use_key = adata_query.locate(adata_sim, self._use_key)
+                self._use_key = adata_query.locate(self._adata_sim, self._use_key)
             except:
                 return "X"
         return self._use_key
@@ -81,9 +82,9 @@ class InstantaneousVelocity(ABCParse.ABCParse):
         
         if not self._silent:
 
-            self._INFO(f"{key_action}: adata.obsm['{key}']")
+            logger.info(f"{key_action}: adata.obsm['{key}']")
 
-    def _add_to_adata(self, X_pred: np.ndarray):
+    def _add_to_adata(self, X_pred: np.ndarray) -> None:
 
         """
         Add the predicted X_{term} to adata.obsm and compute the L2Norm(X_{term}),
@@ -128,7 +129,7 @@ class InstantaneousDrift(InstantaneousVelocity):
         silent: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(silent = silent)
 
         self.__parse__(locals())
@@ -147,7 +148,7 @@ class InstantaneousDiffusion(InstantaneousVelocity):
         silent: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(silent = silent)
 
         self.__parse__(locals())

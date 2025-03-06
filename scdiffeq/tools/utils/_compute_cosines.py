@@ -1,22 +1,25 @@
-
-# -- import packages: --------------
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import adata_query
 import anndata
+import logging
 import numpy as np
 import scipy.sparse
 import warnings
 
-
-# -- import local dependencies: ----------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from ._norm import L2Norm
 from ._get_neighbor_indices import get_neighbor_indices
 from ._get_iterative_indices import get_iterative_indices
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
+# -- set type hints: ----------------------------------------------------------
 from typing import Optional
 
-# -- supporting operational class: -------------------------------------------------------
+# -- supporting operational class: --------------------------------------------
 class CosineCorrelation(ABCParse.ABCParse):
     def __init__(self, *args, **kwargs) -> None:
         """ """
@@ -56,7 +59,6 @@ class ComputeCosines(ABCParse.ABCParse):
         n_pcs: Optional[int] = None,
         split_negative: bool = True,
         distances_key: str = "distances", # NEW
-        silent: bool = False,
         *args,
         **kwargs
     ) -> None:
@@ -64,7 +66,6 @@ class ComputeCosines(ABCParse.ABCParse):
 
         self._L2Norm = L2Norm()
         self._cosine_correlation = CosineCorrelation()
-        self._INFO._SILENT = silent
 
     def _initialize_results(self):
         self._VALS, self._ROWS, self._COLS = [], [], []
@@ -114,10 +115,10 @@ class ComputeCosines(ABCParse.ABCParse):
             ) # HERE
         return self._nn_idx
 
-    def _contains_non_zero(self, obs_id: int):
+    def _contains_non_zero(self, obs_id: int) -> bool:
         return np.any(np.array([self.V[obs_id].min(), self.V[obs_id].max()]) != 0)
 
-    def forward(self, obs_id):
+    def forward(self, obs_id) -> None:
         if self._contains_non_zero(obs_id):
             iter_nn_idx = get_iterative_indices(
                 self.nn_idx, obs_id, 2, None
@@ -163,10 +164,10 @@ class ComputeCosines(ABCParse.ABCParse):
         for key, obj in zip([pos_key, neg_key], [graph, graph_neg]):
             if key in self._adata.obsp:
                 self._adata.obsp[key] = obj
-                self._INFO(f"Updated: adata.obsp['{key}']")
+                logger.info(f"Updated: adata.obsp['{key}']")
             else:
                 self._adata.obsp[key] = obj
-                self._INFO(f"Added: adata.obsp['{key}']")
+                logger.info(f"Added: adata.obsp['{key}']")
 
     def __call__(self, adata: anndata.AnnData, velocity_key_added: str = "velocity", *args, **kargs) -> None:
         """ """

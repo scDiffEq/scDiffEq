@@ -3,7 +3,6 @@ import ABCParse
 import pathlib
 import yaml
 
-
 # -- set types: ---------------------------------------------------------------
 from typing import Any, Dict, Union
 
@@ -12,37 +11,28 @@ from typing import Any, Dict, Union
 class HParams(ABCParse.ABCParse):
     """scDiffEq container for HyperParams
 
-    Attributes
-    ----------
-    _yaml_path : Union[pathlib.Path, str]
-        Path to the hparams file created by Lightning.
-    _yaml_file : dict
-        Dictionary containing the contents of the yaml file.
-    _attrs : Dict[str, Any]
-        Formatted attribute dictionary from hparams.yaml.
+    Attributes:
+        _yaml_path (Union[pathlib.Path, str]): Path to the hparams file created by Lightning.
+        _yaml_file (dict): Dictionary containing the contents of the yaml file.
+        _attrs (Dict[str, Any]): Formatted attribute dictionary from hparams.yaml.
     """
 
     def __init__(self, yaml_path: Union[pathlib.Path, str]) -> None:
-        """Initialize the HParams object by providing a path to the
-        corresponding yaml file (created by Lightning)
+        """Initialize the HParams object by providing a path to thecorresponding yaml file (created by Lightning)
 
-        Parameters
-        ----------
-        yaml_path : Union[pathlib.Path, str]
-            Path to the hparams file created by Lightning.
+        Args:
+            yaml_path (Union[pathlib.Path, str]): Path to the hparams file created by Lightning.
 
-        Returns
-        -------
-        None
+        Returns:
+            None
         """
         self.__configure__(locals())
 
     def _read(self) -> None:
         """Read path to yaml file and set as class attribute
 
-        Returns
-        -------
-        None
+        Returns:
+            None
         """
         if not hasattr(self, "_file"):
             self._yaml_file = yaml.load(open(self._yaml_path), Loader=yaml.Loader)
@@ -50,16 +40,12 @@ class HParams(ABCParse.ABCParse):
     def __configure__(self, kwargs, private=["yaml_path"]) -> None:
         """Set hparams as class attributes
 
-        Parameters
-        ----------
-        kwargs : dict
-            Dictionary of keyword arguments.
-        private : list, optional
-            List of private attributes, by default ["yaml_path"]
+        Args:
+            kwargs (dict): Dictionary of keyword arguments.
+            private (list, optional): List of private attributes, by default ["yaml_path"]
 
-        Returns
-        -------
-        None
+        Returns:
+            None
         """
         self.__parse__(kwargs, private=private)
         self._read()
@@ -70,9 +56,8 @@ class HParams(ABCParse.ABCParse):
     def _ATTRS(self) -> Dict[str, Any]:
         """Formatted attribute dictionary from hparams.yaml
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns:
+            Dict[str, Any]
             Dictionary of attributes.
         """
         self._attrs = {
@@ -85,24 +70,20 @@ class HParams(ABCParse.ABCParse):
     def __getitem__(self, attr: str) -> Any:
         """Format version key and return path
 
-        Parameters
-        ----------
-        attr : str
-            Attribute name.
+        Args:
+            attr (str): Attribute name.
 
-        Returns
-        -------
-        Any
+        Returns:
+            Any
             Attribute value.
         """
         return self._ATTRS[attr]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a readable representation of the discovered hyperparameters
 
-        Returns
-        -------
-        str
+        Returns:
+            str
             Readable representation of the hyperparameters.
         """
         string = "HyperParameters\n"
@@ -114,9 +95,8 @@ class HParams(ABCParse.ABCParse):
     def __call__(self) -> Dict[str, Any]:
         """Return formatted dictionary of attributes from the hparams.yaml
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns:
+            Dict[str, Any]
             Dictionary of attributes.
         """
         return self._ATTRS

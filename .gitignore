@@ -133,3 +133,6 @@ dmypy.json
 
 # mac
 .DS_Store
+
+# data
+scdiffeq_data/

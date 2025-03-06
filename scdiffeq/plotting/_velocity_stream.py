@@ -1,6 +1,7 @@
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import cellplots as cp
@@ -8,14 +9,15 @@ import matplotlib.cm
 import os
 import pathlib
 
-
 # -- import local dependencies: -----------------------------------------------
 from ..tools import VelocityEmbedding, GridVelocity
 
-
-# -- type setting: ------------------------------------------------------------
+# -- set type hints: ----------------------------------------------------------
 from typing import Any, Dict, List, Optional, Union, Tuple
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- Operational class: -------------------------------------------------------
 class VelocityStreamPlot(ABCParse.ABCParse):
@@ -61,7 +63,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         T_scale: float = 10,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """Initializes the VelocityStreamPlot object with parameters to configure the velocity stream plot.
 
         This method sets up the necessary parameters for generating a velocity stream plot, including the setup for velocity embedding and grid velocity calculation. It parses the arguments and initializes internal states needed for plotting.
@@ -266,7 +268,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
     def _mk_fig_dir(self):
         if not self.scdiffeq_figure_dir.exists():
             os.mkdir(self.scdiffeq_figure_dir)
-            self._INFO(f"mkdir: {self.scdiffeq_figure_dir}")
+            logger.info(f"mkdir: {self.scdiffeq_figure_dir}")
 
     @property
     def sdq_info(self):
@@ -305,7 +307,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         self._mk_fig_dir()
         plt.savefig(self.SVG_path, dpi=self._svg_dpi)
         plt.savefig(self.PNG_path, dpi=self._png_dpi)
-        self._INFO(f"Saved to: \n  {self.SVG_path}\n  {self.PNG_path}")
+        logger.info(f"Saved to: \n  {self.SVG_path}\n  {self.PNG_path}")
 
     def __call__(
         self,

@@ -2,12 +2,12 @@
 import sklearn.decomposition
 import anndata
 import ABCParse
+import logging
 import pandas as pd
 
-
-# -- import local dependencies: -----------------------------------------------
-from ..core import utils
-
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- set typing: --------------------------------------------------------------
 from typing import Optional
@@ -27,20 +27,16 @@ class GeneCompatibility(ABCParse.ABCParse):
         gene_id_key="gene_ids",
         PCA: Optional[sklearn.decomposition.PCA] = None,
         key_added: str = "X_gene",
-        silent: bool = False,
-    ):
+    ) -> None:
 
         self.__parse__(locals(), public=[None])
-        self._INFO = utils.InfoMessage()
-
     @property
     def var_names(self):
         return self.adata.var[self._gene_id_key]
 
     def _format_var_names(self):
         self.adata_sim.uns[self._gene_id_key] = self.var_names
-        if not self._silent:
-            self._INFO(f"Gene names added to: `adata_sim.uns['{self._gene_id_key}']`")
+        logger.info(f"Gene names added to: `adata_sim.uns['{self._gene_id_key}']`")
 
     def _format_inverted_expression(self):
 
@@ -53,13 +49,11 @@ class GeneCompatibility(ABCParse.ABCParse):
             columns=self.var_names,
         )
         self.adata_sim.obsm[self._key_added] = X_gene
-        if not self._silent:
-            msg = f"Inverted expression added to: `adata_sim.obsm['{self._key_added}']`"
-            self._INFO(msg)
+        logger.info(f"Inverted expression added to: `adata_sim.obsm['{self._key_added}']`")
 
     def __call__(
         self, adata: anndata.AnnData, adata_sim: anndata.AnnData, *args, **kwargs
-    ):
+    ) -> None:
 
         self.__update__(locals(), public=["adata", "adata_sim"])
 
@@ -75,7 +69,6 @@ def annotate_gene_features(
     PCA: Optional[sklearn.decomposition.PCA] = None,
     gene_id_key="gene_ids",
     key_added: str = "X_gene",
-    silent: bool = False,
     *args,
     **kwargs,
 ) -> None:
@@ -107,6 +100,5 @@ def annotate_gene_features(
         gene_id_key=gene_id_key,
         PCA=PCA,
         key_added=key_added,
-        silent=silent,
     )
     return gene_compatibility(adata_sim=adata_sim, adata=adata)

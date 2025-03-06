@@ -1,9 +1,3 @@
-__module_name__ = "_checkpoint.py"
-__doc__ = """Module containing the ``Checkpoint`` container object."""
-__author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["mvinyard.ai@gmail.com"])
-
-
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import logging
@@ -23,22 +17,18 @@ logger = logging.getLogger(__name__)
 # -- operational class: -------------------------------------------------------
 class Checkpoint(ABCParse.ABCParse):
     def __init__(self, path: Union[pathlib.Path, str], *args, **kwargs) -> None:
-        """
-        Instantiates checkpoint
+        """Instantiates checkpoint object.
 
-        Parameters
-        ----------
-        path : Union[pathlib.Path, str]
-            Path to saved checkpoint.
+        Args:
+            path (Union[pathlib.Path, str]): Path to saved checkpoint.
         """
         self.__parse__(locals())
 
     @property
     def path(self) -> pathlib.Path:
         """
-        Returns
-        -------
-        pathlib.Path
+        Returns:
+            pathlib.Path
             The path to the checkpoint.
         """
         return pathlib.Path(self._path)
@@ -46,9 +36,8 @@ class Checkpoint(ABCParse.ABCParse):
     @property
     def _fname(self) -> str:
         """
-        Returns
-        -------
-        str
+        Returns:
+            str
             Filename without extension.
         """
         return self.path.name.split(".")[0]
@@ -56,9 +45,8 @@ class Checkpoint(ABCParse.ABCParse):
     @property
     def version(self):
         """
-        Returns
-        -------
-        str
+        Returns:
+            str
             Version of the checkpoint.
         """
         if not hasattr(self, "_version"):
@@ -69,9 +57,8 @@ class Checkpoint(ABCParse.ABCParse):
     @property
     def _PATH_F_HAT_RAW(self):
         """
-        Returns
-        -------
-        pathlib.Path
+        Returns:
+            pathlib.Path
             Path to the raw F_hat file.
         """
         if not hasattr(self, "_FATE_PREDICTION_METRICS_PATH"):
@@ -87,9 +74,8 @@ class Checkpoint(ABCParse.ABCParse):
     @property
     def F_hat(self):
         """
-        Returns
-        -------
-        pd.DataFrame or None
+        Returns:
+            pd.DataFrame or None
             DataFrame containing F_hat data if the path exists, otherwise None.
         """
         if not hasattr(self, "_F_hat"):
@@ -104,9 +90,8 @@ class Checkpoint(ABCParse.ABCParse):
     @property
     def epoch(self) -> Union[int, str]:
         """
-        Returns
-        -------
-        Union[int, str]
+        Returns:
+            Union[int, str]
             Epoch number if not 'last', otherwise 'last'.
         """
         if self._fname != "last":
@@ -116,9 +101,8 @@ class Checkpoint(ABCParse.ABCParse):
     @property
     def state_dict(self) -> Dict[str, "LightningCheckpoint"]:
         """
-        Returns
-        -------
-        Dict[str, "LightningCheckpoint"]
+        Returns:
+            Dict[str, "LightningCheckpoint"]
             State dictionary created by PyTorch Lightning.
         """
         if not hasattr(self, "_ckpt"):
@@ -127,9 +111,8 @@ class Checkpoint(ABCParse.ABCParse):
 
     def __repr__(self) -> str:
         """
-        Returns
-        -------
-        str
+        Returns:
+            str
             Object description of checkpoint at epoch.
         """
         return f"ckpt epoch: {self.epoch} [{self.version}]"

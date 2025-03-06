@@ -46,24 +46,21 @@ def write_pickle(
     obj: Dict[Any, Any],
     path: Union[str, pathlib.Path],
     mode: Optional[str] = "wb",
-    protocol: Optional = pickle.HIGHEST_PROTOCOL,
+    protocol: Optional[int] = pickle.HIGHEST_PROTOCOL,
 ) -> None:
     """Save an object to a pickle file.
 
-    Parameters
-    ----------
-    obj : Dict[Any, Any]
-        Object, usually a dictionary to write to pickle file.
-    path : Union[str, pathlib.Path]
-        Path to which pickle file should be written.
-    mode : Optional[str], default="wb"
-        Write mode.
-    protocol : Optional, default=pickle.HIGHEST_PROTOCOL
-        Pickling protocol.
+    Args:
+        obj (Dict[Any, Any]): Object, usually a dictionary to write to pickle file.
 
-    Returns
-    -------
-    None
+        path (Union[str, pathlib.Path]): Path to which pickle file should be written.
+
+        mode (Optional[str]): Write mode. **Default** = "wb"
+
+        protocol (Optional[int]): Pickling protocol. **Default** = pickle.HIGHEST_PROTOCOL
+
+    Returns:
+        None
     """
 
     pickle_io = PickleIO()

@@ -1,25 +1,22 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import NeuralODE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import mix_ins
 from . import base
 
-from ... import __version__
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Literal, Optional, Union
 
 
-# -- set typing: --------------------------------------------------------------
-from typing import Literal, Optional, Union, List
-
-
-# -- lightning model: ----------------------------------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningODE_VAE(
     mix_ins.VAEMixIn,
     mix_ins.PreTrainMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningODE-VAE"""
     def __init__(
         self,
         data_dim: int,
@@ -61,7 +58,6 @@ class LightningODE_VAE(
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
         loading_existing: bool = False,
-        version: str = __version__,
         *args,
         **kwargs,
     ) -> None:
@@ -144,8 +140,6 @@ class LightningODE_VAE(
             Whether to use output bias in the decoder. Default is True.
         loading_existing : bool, optional
             Whether to load an existing model. Default is False.
-        version : str, optional
-            Version of the model. Default is __version__.
 
         Returns
         -------
@@ -157,8 +151,8 @@ class LightningODE_VAE(
 
         self.save_hyperparameters()
 
-        # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=NeuralODE, kwargs=locals())
+        # -- torch modules: ---------------------------------------------------
+        self._configure_torch_modules(func=neural_diffeqs.NeuralODE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
     def __repr__(self) -> Literal["LightningODE-VAE"]:

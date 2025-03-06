@@ -1,20 +1,20 @@
-from neural_diffeqs import LatentPotentialSDE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
 
-from .. import utils
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Literal, Optional, Union
 
-from typing import Optional, Union, List
-
-from ... import __version__
-
-
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE_PriorPotential(
     mix_ins.PotentialMixIn,
     mix_ins.DriftPriorMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningSDE-PriorPotential"""
     def __init__(
         self,
         latent_dim: int = 50,
@@ -45,7 +45,6 @@ class LightningSDE_PriorPotential(
         coef_prior_drift: float = 1.0,
         backend="auto",
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -110,9 +109,6 @@ class LightningSDE_PriorPotential(
             Backend for the SDE solver, by default "auto".
         loading_existing : bool, optional
             Whether to load an existing model, by default False.
-        version : str, optional
-            Version of the model, by default __version__.
-
         Returns
         -------
         None
@@ -133,8 +129,8 @@ class LightningSDE_PriorPotential(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=LatentPotentialSDE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.LatentPotentialSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-PriorPotential']:
         return "LightningSDE-PriorPotential"

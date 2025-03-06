@@ -1,18 +1,15 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import NeuralSDE
-import torch_nets
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import mix_ins, base
 
-from typing import Optional, Union, List
+# -- set type hints: ----------------------------------------------------------
+from typing import Literal, Optional, Union, List
 
-from ... import __version__
 
-
-# -- lightning model: ----------------------------------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE_VAE(
     mix_ins.VAEMixIn,
     mix_ins.PreTrainMixIn,
@@ -69,7 +66,6 @@ class LightningSDE_VAE(
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -164,8 +160,6 @@ class LightningSDE_VAE(
             Whether to use bias in the output layer of the decoder. Default is True.
         loading_existing : bool, optional
             Whether to load an existing model. Default is False.
-        version : str, optional
-            Version of the model. Default is __version__.
 
         Returns
         -------
@@ -178,8 +172,8 @@ class LightningSDE_VAE(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.NeuralSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-VAE']:
         return "LightningSDE-VAE"

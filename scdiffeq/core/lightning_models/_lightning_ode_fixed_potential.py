@@ -1,24 +1,20 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import PotentialODE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
 
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Literal, Optional, Union
 
-# -- set typing: ---------------------------------------------------------------
-from typing import Optional, Union, List
-from ... import __version__
-
-
-# -- DiffEq: -------------------------------------------------------------------
+# -- DiffEq: ------------------------------------------------------------------
 class LightningODE_FixedPotential(
     mix_ins.BaseForwardMixIn,
     mix_ins.PotentialMixIn,
     base.BaseLightningDiffEq,
 ):
-
+    """LightningODE-FixedPotential"""
     def __init__(
         self,
         latent_dim: int = 50,
@@ -38,7 +34,6 @@ class LightningODE_FixedPotential(
         adjoint=False,
         # -- other: -----------------------------------------------------------
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -79,8 +74,6 @@ class LightningODE_FixedPotential(
             Whether to use the adjoint method for the ODE solver, by default False
         loading_existing : bool, optional
             Whether to load an existing model, by default False
-        version : str, optional
-            Version of the model, by default __version__
 
         Returns:
         --------
@@ -101,8 +94,8 @@ class LightningODE_FixedPotential(
 
         self.save_hyperparameters()
 
-        self._configure_torch_modules(func=PotentialODE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.PotentialODE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> Literal['LightningODE-FixedPotential']:
         return "LightningODE-FixedPotential"

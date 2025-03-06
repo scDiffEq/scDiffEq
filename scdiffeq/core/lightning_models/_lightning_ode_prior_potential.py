@@ -1,20 +1,24 @@
-from neural_diffeqs import LatentPotentialODE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
-
 from .. import utils
 
-from typing import Optional, Union, List
-from ... import __version__
+# -- set type hints: ----------------------------------------------------------
+from typing import Literal, Optional, Union, List
 
-
+# -- lightning model class: ---------------------------------------------------
 class LightningODE_PriorPotential(
+    mix_ins.PotentialMixIn,
+    mix_ins.DriftPriorMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningODE-PriorPotential"""
     def __init__(
         self,
-        # -- general params: ---------------------------------------------------
+        # -- general params: --------------------------------------------------
         latent_dim: int = 50,
         name: Optional[str] = None,
         train_lr: float = 1e-5,
@@ -22,7 +26,7 @@ class LightningODE_PriorPotential(
         train_scheduler: torch.optim.lr_scheduler._LRScheduler = torch.optim.lr_scheduler.StepLR,
         train_step_size: int = 10,
         adjoint: bool = False,
-        # -- ODE params: -------------------------------------------------------
+        # -- ODE params: ------------------------------------------------------
         coef_diff: float = 0,
         dt: float = 0.1,
         mu_hidden: Union[List[int], int] = [400, 400],
@@ -36,7 +40,6 @@ class LightningODE_PriorPotential(
         backend: str = "auto",
         brownian_dim: int = 1,
         loading_existing: bool = False,
-        version: str = __version__,
         *args,
         **kwargs,
     ) -> None:
@@ -85,8 +88,6 @@ class LightningODE_PriorPotential(
             Dimensionality of the Brownian motion, by default 1
         loading_existing : bool, optional
             Whether to load an existing model, by default False
-        version : str, optional
-            Version of the model, by default __version__
 
         Returns:
         --------
@@ -108,7 +109,7 @@ class LightningODE_PriorPotential(
         self.save_hyperparameters()
         self.func = LatentPotentialODE(
             state_size=latent_dim,
-            **utils.extract_func_kwargs(func=LatentPotentialODE, kwargs=locals()),
+            **utils.extract_func_kwargs(func=neural_diffeqs.LatentPotentialODE, kwargs=locals()),
         )
         self._configure_lightning_model(kwargs=locals())
 
@@ -137,5 +138,5 @@ class LightningODE_PriorPotential(
             sinkhorn_loss, t=batch.t, kl_div_loss=kl_div_loss, stage=stage
         )
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningODE-PriorPotential']:
         return "LightningODE-PriorPotential"

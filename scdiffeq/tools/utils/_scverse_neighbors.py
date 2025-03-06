@@ -3,8 +3,12 @@
 import ABCParse
 import adata_query
 import anndata
+import logging
 import scanpy as sc
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- set typing: --------------------------------------------------------------
 from typing import Optional, Union
@@ -17,7 +21,6 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         distances_key: str = "distances",
         connectivities_key: str = "connectivities",
         params_key: str = "neighbors",
-        silent: bool = False,
         *args,
         **kwargs,
     ) -> None:
@@ -31,15 +34,12 @@ class SCVerseNeighbors(ABCParse.ABCParse):
             
             params_key (str): **Default**: "neighbors".
             
-            silent (bool): **Default**: False.
-            
         Returns:
             None
         """
         self.__parse__(locals())
 
         self._neighbor_computation_performed = False
-        self._INFO._SILENT = silent
 
     @property
     def _SCANPY_NEIGHBORS_KWARGS(self):
@@ -100,7 +100,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         for key, val in self._preexisting.items():
             added = [attr for attr in getattr(adata, key).keys() if not attr in val]
             for added_val in added:
-                self._INFO(f"Added: adata.{key}['{added_val}']")
+                logger.info(f"Added: adata.{key}['{added_val}']")
                 
     def forward(self, adata: anndata.AnnData, **kwargs):
         """"""
@@ -109,7 +109,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         self._intake(adata)
 
         if self.neighbors_precomputed and self._force:
-            self._INFO("Force recomputing neighbors")
+            logger.info("Force recomputing neighbors")
 
         if not self.neighbors_precomputed or self._force:
             kw = self._SCANPY_NEIGHBORS_KWARGS.copy()
@@ -128,8 +128,8 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         n_pcs: Optional[int] = None,
         use_rep: Optional[str] = None,
         random_state: Optional[Union[int, None]] = 0,
-        method: Optional = 'umap',
-        metric: Optional = 'euclidean',
+        method: Optional[str] = 'umap',
+        metric: Optional[str] = 'euclidean',
         distances_key: Optional[str] = "distances",
         connectivities_key: Optional[str] = "connectivities",
         params_key: Optional[str] = "neighbors",
@@ -138,7 +138,7 @@ class SCVerseNeighbors(ABCParse.ABCParse):
         return_cls: Optional[bool] = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.__update__(locals())
         
         self.forward(adata)
@@ -157,7 +157,6 @@ def scverse_neighbors(
     connectivities_key: Optional[str] = "connectivities",
     params_key: Optional[str] = "neighbors",
     force: Optional[bool] = False,
-    silent: Optional[bool] = False,
     return_cls: Optional[bool] = False,
     *args,
     **kwargs,
@@ -187,7 +186,6 @@ def scverse_neighbors(
         distances_key=distances_key,
         connectivities_key=connectivities_key,
         params_key=params_key,
-        silent=silent,
     )
     
     funcs = [sc.pp.neighbors, scv_neighbors.__call__]

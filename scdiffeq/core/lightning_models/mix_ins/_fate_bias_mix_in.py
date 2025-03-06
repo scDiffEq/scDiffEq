@@ -7,7 +7,7 @@ from .. import base
 
 
 class FateBiasMixIn(object):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         
         
@@ -19,7 +19,7 @@ class FateBiasMixIn(object):
         fate_bias_multiplier = 1,
         undiff_key = "Undifferentiated",
         PCA = None,
-    ):
+    ) -> None:
         
         self.graph = graph
         self.fate_bias_multiplier = fate_bias_multiplier

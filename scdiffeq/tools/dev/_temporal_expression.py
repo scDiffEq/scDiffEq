@@ -1,11 +1,18 @@
-
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
+import logging
 import numpy as np
 import pandas as pd
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# -- set type hints: ----------------------------------------------------------
 from typing import Optional, Union, Dict, List, Tuple
 
+# -- cls: ---------------------------------------------------------------------
 class TemporalExpression(ABCParse.ABCParse):
     def __init__(
         self,
@@ -53,11 +60,9 @@ class TemporalExpression(ABCParse.ABCParse):
     def _add_to_adata(self, mean, std):
         """"""
         self._adata_sim.uns["gex_mean"] = mean
-        self._INFO("Mean temporal expression added to: `adata_sim.uns['gex_mean']`")
+        logger.info("Mean temporal expression added to: `adata_sim.uns['gex_mean']`")
         self._adata_sim.uns["gex_std"] = std
-        self._INFO(
-            "Standard deviation of temporal expression added to: `adata_sim.uns['gex_std']`"
-        )
+        logger.info("Standard deviation of temporal expression added to: `adata_sim.uns['gex_std']`")
 
     def __call__(
         self,

@@ -7,7 +7,7 @@ from .. import base
 
 
 class FateBiasDriftPriorMixIn(object):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         
         
@@ -18,12 +18,12 @@ class FateBiasDriftPriorMixIn(object):
         t0_idx,
         fate_bias_multiplier = 1,
         undiff_key = "Undifferentiated",
-    ):
+    ) -> None:
         
         self.graph = graph
         self.fate_bias_multiplier = fate_bias_multiplier
         self.fate_df = pd.read_csv(csv_path, index_col=0)
-        self.fate_df.index = t0_idx # adata.obs.loc[adata.obs['Time point']==2].index
+        self.fate_df.index = t0_idx
         self._undiff_key = undiff_key
 
     def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage, note=None):
