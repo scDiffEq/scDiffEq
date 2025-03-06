@@ -1,3 +1,4 @@
+scanpy>=1.11.0
 lightning>=2.1
 anndata>=0.10.3
 torch>=2.1.0
