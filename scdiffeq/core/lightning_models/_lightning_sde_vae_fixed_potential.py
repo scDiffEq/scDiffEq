@@ -1,13 +1,12 @@
 # -- import packages: ---------------------------------------------------------
-from neural_diffeqs import PotentialSDE
+import neural_diffeqs
 import torch
 
-# -- set typing: --------------------------------------------------------------
-from typing import Optional, Union, List
-
 # -- import local dependencies: -----------------------------------------------
-from ... import __version__
-from . import mix_ins, base
+from . import base, mix_ins
+
+# -- set type hints: ----------------------------------------------------------
+from typing import Literal, Optional, Union, List
 
 
 # -- operational class: -------------------------------------------------------
@@ -17,7 +16,7 @@ class LightningSDE_VAE_FixedPotential(
     mix_ins.VAEMixIn,
     base.BaseLightningDiffEq,
 ):
-
+    """LightningSDE-VAE-FixedPotential"""
     def __init__(
         self,
         data_dim,
@@ -64,10 +63,9 @@ class LightningSDE_VAE_FixedPotential(
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
-        dt=0.1,
-        adjoint=False,
+        dt: float = 0.1,
+        adjoint: bool = False,
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -164,8 +162,6 @@ class LightningSDE_VAE_FixedPotential(
             Whether to use the adjoint method for the SDE solver, by default False.
         loading_existing : bool, optional
             Whether to load an existing model, by default False.
-        version : str, optional
-            Version of the model, by default __version__.
 
         Returns
         -------
@@ -187,7 +183,7 @@ class LightningSDE_VAE_FixedPotential(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=PotentialSDE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.PotentialSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
     def pretrain_step(self, batch, batch_idx, stage=None):
@@ -203,5 +199,5 @@ class LightningSDE_VAE_FixedPotential(
             return self.pretrain_step(batch, batch_idx, stage="pretrain")
         return self.step(batch, batch_idx, stage="training")
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-VAE-FixedPotential']:
         return "LightningSDE-VAE-FixedPotential"

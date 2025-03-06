@@ -1,20 +1,20 @@
-from neural_diffeqs import PotentialSDE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
-from typing import Dict, List, Optional, Union
 
-from ... import __version__
+# -- set type hints: ----------------------------------------------------------
+from typing import Dict, List, Literal, Optional, Union
 
-
-# -- lightning model: -----------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE_FixedPotential_RegularizedVelocityRatio(
     mix_ins.PotentialMixIn,
-    #     mix_ins.BaseForwardMixIn,
     mix_ins.RegularizedVelocityRatioMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningSDE-FixedPotential-RegularizedVelocityRatio"""
     def __init__(
         self,
         latent_dim: int = 50,
@@ -36,20 +36,19 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
         sigma_output_bias: bool = True,
         mu_n_augment: int = 0,
         sigma_n_augment: int = 0,
-        sde_type="ito",
-        noise_type="general",
-        brownian_dim=1,
+        sde_type: str = "ito",
+        noise_type: str = "general",
+        brownian_dim: int = 1,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
         train_lr: float = 1e-4,
-        train_optimizer=torch.optim.RMSprop,
-        train_scheduler=torch.optim.lr_scheduler.StepLR,
+        train_optimizer: torch.optim.Optimizer = torch.optim.RMSprop,
+        train_scheduler: torch.optim.lr_scheduler._LRScheduler = torch.optim.lr_scheduler.StepLR,
         train_step_size: int = 10,
         dt: float = 0.1,
-        adjoint=False,
-        backend="auto",
+        adjoint: bool = False,
+        backend: str = "auto",
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -114,8 +113,6 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
             Backend to use for the SDE solver. Default is "auto".
         loading_existing : bool, optional
             Whether to load an existing model. Default is False.
-        version : str, optional
-            Version of the model. Default is __version__.
 
         Returns
         -------
@@ -125,11 +122,11 @@ class LightningSDE_FixedPotential_RegularizedVelocityRatio(
         
         name = self._configure_name(name, loading_existing = loading_existing)
         
-        self.save_hyperparameters(ignore=['version'])
+        self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=PotentialSDE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.PotentialSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-FixedPotential-RegularizedVelocityRatio']:
         return "LightningSDE-FixedPotential-RegularizedVelocityRatio"

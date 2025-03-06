@@ -1,19 +1,15 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import LatentPotentialSDE
-import torch_nets
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import mix_ins
 from . import base
-from .. import utils
 
-from typing import Optional, Union, List
-from ... import __version__
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Literal, Optional, Union
 
-
-# -- lightning model: ----------------------------------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE_VAE_PriorPotential(
     mix_ins.DriftPriorVAEMixIn,
     mix_ins.PotentialMixIn,
@@ -38,7 +34,7 @@ class LightningSDE_VAE_PriorPotential(
         dt=0.1,
         adjoint=False,
         backend="auto",
-        # -- sde params: -----
+        # -- sde params: ------------------------------------------------------
         mu_hidden: Union[List[int], int] = [400, 400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400, 400],
         mu_activation: Union[str, List[str]] = "LeakyReLU",
@@ -57,23 +53,22 @@ class LightningSDE_VAE_PriorPotential(
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
-        # -- encoder parameters: -------
+        # -- encoder parameters: ----------------------------------------------
         encoder_n_hidden: int = 4,
         encoder_power: float = 2,
         encoder_activation: Union[str, List[str]] = "LeakyReLU",
         encoder_dropout: Union[float, List[float]] = 0.2,
         encoder_bias: bool = True,
         encoder_output_bias: bool = True,
-        # -- decoder parameters: -------
+        # -- decoder parameters: ----------------------------------------------
         decoder_n_hidden: int = 4,
         decoder_power: float = 2,
         decoder_activation: Union[str, List[str]] = "LeakyReLU",
         decoder_dropout: Union[float, List[float]] = 0.2,
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
-        # -- other: ----
+        # -- other: ------------------------------------------------------------
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
@@ -174,8 +169,6 @@ class LightningSDE_VAE_PriorPotential(
             Whether to use bias in the output layer of the decoder. Default is True.
         loading_existing : bool, optional
             Whether to load an existing model. Default is False.
-        version : str, optional
-            Version of the model. Default is __version__.
 
         Returns
         -------
@@ -188,8 +181,10 @@ class LightningSDE_VAE_PriorPotential(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=LatentPotentialSDE, kwargs=locals())
+        self._configure_torch_modules(
+            func=neural_diffeqs.LatentPotentialSDE, kwargs=locals()
+        )
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-VAE-PriorPotential']:
         return "LightningSDE-VAE-PriorPotential"

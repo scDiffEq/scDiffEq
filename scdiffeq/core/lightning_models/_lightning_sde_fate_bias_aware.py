@@ -1,24 +1,20 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import NeuralSDE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
 
-# from scdiffeq.core.lightning_models import base, mix_ins
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Literal, Optional, Union
 
-
-from typing import Optional, Union, List
-from ... import __version__
-
-
-# -- lightning model: ----------------------------------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE_FateBiasAware(
     mix_ins.FateBiasMixIn,
     mix_ins.BaseForwardMixIn,
     base.BaseLightningDiffEq,
 ):
+    """LightningSDE-FateBiasAware"""
     def __init__(
         self,
         latent_dim: int = 50,
@@ -35,29 +31,27 @@ class LightningSDE_FateBiasAware(
         sigma_output_bias: bool = True,
         mu_n_augment: int = 0,
         sigma_n_augment: int = 0,
-        sde_type="ito",
-        noise_type="general",
-        brownian_dim=1,
+        sde_type: str = "ito",
+        noise_type: str = "general",
+        brownian_dim: int = 1,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
-        train_lr=1e-4,
-        train_optimizer=torch.optim.RMSprop,
-        train_scheduler=torch.optim.lr_scheduler.StepLR,
-        train_step_size=10,
-        dt=0.1,
-        adjoint=False,
-        t0_idx=None,
-        kNN_Graph=None,
-        fate_bias_csv_path=None,
-        fate_bias_multiplier=1,
-        backend="auto",
+        train_lr: float = 1e-4,
+        train_optimizer: torch.optim.Optimizer = torch.optim.RMSprop,
+        train_scheduler: torch.optim.lr_scheduler._LRScheduler = torch.optim.lr_scheduler.StepLR,
+        train_step_size: int = 10,
+        dt: float = 0.1,
+        adjoint: bool = False,
+        t0_idx: Optional[int] = None,
+        kNN_Graph: Optional[object] = None,
+        fate_bias_csv_path: Optional[str] = None,
+        fate_bias_multiplier: int = 1,
+        backend: str = "auto",
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
     ) -> None:
-        """
-        LightningSDE-FateBiasAware model accessed as model.DiffEq
+        """LightningSDE-FateBiasAware model accessed as model.DiffEq
 
         Parameters
         ----------
@@ -123,8 +117,6 @@ class LightningSDE_FateBiasAware(
             Backend for the SDE solver. Default is "auto".
         loading_existing : bool, optional
             Whether to load an existing model. Default is False.
-        version : str, optional
-            Version of the model. Default is __version__.
 
         Returns
         -------
@@ -136,8 +128,10 @@ class LightningSDE_FateBiasAware(
 
         self.save_hyperparameters(ignore=["kNN_Graph"])
 
-        # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=NeuralSDE, kwargs=locals())
+        # -- torch modules: ---------------------------------------------------
+        self._configure_torch_modules(
+            func=neural_diffeqs.NeuralSDE, kwargs=locals(),
+        )
         self._configure_lightning_model(kwargs=locals())
         self._configure_fate(
             graph=kNN_Graph,
@@ -147,5 +141,5 @@ class LightningSDE_FateBiasAware(
             PCA=None,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-FateBiasAware']:
         return "LightningSDE-FateBiasAware"

@@ -1,23 +1,18 @@
-
-
-# -- import packages: ----------------------------------------------------------
-import lightning
-import torchsde
-from abc import abstractmethod
+# -- import packages: ---------------------------------------------------------
+import abc
 import ABCParse
+import lightning
 import torch
+import torchsde
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from ._batch_processor import BatchProcessor
 from ._sinkhorn_divergence import SinkhornDivergence
 
-from ... import utils
-
-
+# -- set type hints: ----------------------------------------------------------
 from typing import Optional
 
-# -- DiffEq class: -------------------------------------------------------------
+# -- DiffEq class: ------------------------------------------------------------
 class BaseLightningDiffEq(lightning.LightningModule):
     
     """BaseLightningDiffEq: Base class for lightning modules with differential equation solving capabilities.
@@ -115,7 +110,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
         self.process_batch = BatchProcessor
         self.COMPLETED_EPOCHS = 0
 
-    def _configure_torch_modules(self, func, kwargs):
+    def _configure_torch_modules(self, func, kwargs) -> None:
         """Configure Torch modules for the model.
 
         This method configures Torch modules for the model based on the provided function and arguments.
@@ -129,7 +124,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
         """
         kwargs['state_size'] = self.hparams['latent_dim']
-        self.DiffEq = func(**utils.function_kwargs(func, kwargs))
+        self.DiffEq = func(**ABCParse.function_kwargs(func, kwargs))
         
     @property
     def PRETRAIN(self) -> bool:
@@ -202,8 +197,8 @@ class BaseLightningDiffEq(lightning.LightningModule):
 
 
     # -- custom steps: -------------------------------------------------------------
-    @abstractmethod
-    def forward(self, Z0, t, **kwargs):
+    @abc.abstractmethod
+    def forward(self, Z0, t, **kwargs) -> None:
         """
         Abstract method for performing forward pass. Over-written by inheriting class
 
@@ -218,8 +213,8 @@ class BaseLightningDiffEq(lightning.LightningModule):
         """
         ...
 
-    @abstractmethod
-    def step(self, batch, batch_idx, stage=None):
+    @abc.abstractmethod
+    def step(self, batch, batch_idx, stage=None) -> None:
         """Abstract method for performing a step in optimization.
 
         Args:
@@ -235,7 +230,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
         ...
 
     # -- LightningModule methods: ----------------------------------------------
-    def training_step(self, batch, batch_idx, *args, **kwargs):
+    def training_step(self, batch, batch_idx, *args, **kwargs) -> None:
         """LightningModule method for training step.
 
         Args:
@@ -250,7 +245,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
         """
         return self.step(batch, batch_idx, stage="training")
 
-    def validation_step(self, batch, batch_idx=None, *args, **kwargs):
+    def validation_step(self, batch, batch_idx=None, *args, **kwargs) -> None:
         """LightningModule method for validation step.
 
         Args:
@@ -265,7 +260,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
         """
         return self.step(batch, batch_idx, stage="validation")
 
-    def test_step(self, batch, batch_idx=None, *args, **kwargs):
+    def test_step(self, batch, batch_idx=None, *args, **kwargs) -> None:
         """LightningModule method for test step.
 
         Args:
@@ -280,7 +275,7 @@ class BaseLightningDiffEq(lightning.LightningModule):
         """
         return self.step(batch, batch_idx, stage="test")
 
-    def predict_step(self, batch, batch_idx=None, *args, **kwargs):
+    def predict_step(self, batch, batch_idx=None, *args, **kwargs) -> None:
         """LightningModule method for prediction step.
 
         Args:
@@ -330,8 +325,8 @@ class BaseLightningDiffEq(lightning.LightningModule):
             return self.__repr__()
         else:
             return f"{self.__repr__()}{delim}{name}"
-    
-    
+
+
 # -- moved to log callback: ---
 #     def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage):
 #         for i in range(len(t)):
@@ -341,9 +336,9 @@ class BaseLightningDiffEq(lightning.LightningModule):
 #             self.log(msg, val)
 
 #         return sinkhorn_loss.sum()
-    
+
 #     def log_lr(self):
-                
+
 #         if not isinstance(self.optimizers(), list):
 #             lr = self.optimizers().optimizer.state_dict()["param_groups"][0]["lr"]
 #             self.log("opt_param_group_lr", lr)
@@ -355,4 +350,3 @@ class BaseLightningDiffEq(lightning.LightningModule):
 #     def log_total_epochs(self):
 #         """Train model N times --> N"""
 #         self.log("total_epochs", self.COMPLETED_EPOCHS)
-        

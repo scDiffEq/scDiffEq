@@ -1,14 +1,14 @@
-from neural_diffeqs import PotentialSDE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
-from typing import Optional, Union, List
 
-from ... import __version__
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Literal, Optional, Union
 
-
-# -- lightning model: -----------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningSDE_FixedPotential(
     mix_ins.PotentialMixIn,
     mix_ins.BaseForwardMixIn,
@@ -43,10 +43,9 @@ class LightningSDE_FixedPotential(
         adjoint=False,
         backend="auto",
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """
         LightningSDE_FixedPotential
 
@@ -106,8 +105,6 @@ class LightningSDE_FixedPotential(
             Backend for the SDE solver, by default "auto".
         loading_existing : bool, optional
             Whether to load an existing model, by default False.
-        version : str, optional
-            Version of the model, by default __version__.
 
         Returns
         -------
@@ -129,8 +126,8 @@ class LightningSDE_FixedPotential(
         self.save_hyperparameters()
 
         # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=PotentialSDE, kwargs=locals())
+        self._configure_torch_modules(func=neural_diffeqs.PotentialSDE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
-    def __repr__(self):
+    def __repr__(self) -> Literal['LightningSDE-FixedPotential']:
         return "LightningSDE-FixedPotential"

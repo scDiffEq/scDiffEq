@@ -1,17 +1,14 @@
-# -- import packages: ----------------------------------------------------------
-from neural_diffeqs import NeuralODE
+# -- import packages: ---------------------------------------------------------
+import neural_diffeqs
 import torch
 
-
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from . import base, mix_ins
 
+# -- set type hints: ----------------------------------------------------------
+from typing import List, Optional, Union
 
-from typing import Optional, Union, List
-from ... import __version__
-
-
-# -- lightning model: ----------------------------------------------------------
+# -- lightning model: ---------------------------------------------------------
 class LightningODE(
     mix_ins.BaseForwardMixIn,
     base.BaseLightningDiffEq,
@@ -20,7 +17,7 @@ class LightningODE(
 
     def __init__(
         self,
-        # -- ode params: -------------------------------------------------------
+        # -- ode params: ------------------------------------------------------
         latent_dim: int = 50,
         name: Optional[str] = None,
         mu_hidden: Union[List[int], int] = [2000, 2000],
@@ -29,21 +26,20 @@ class LightningODE(
         mu_bias: bool = True,
         mu_output_bias: bool = True,
         mu_n_augment: int = 0,
-        sde_type="ito",
-        noise_type="general",
-        backend="auto",
-        # -- general params: ---------------------------------------------------
+        sde_type: str = "ito",
+        noise_type: str = "general",
+        backend: str = "auto",
+        # -- general params: --------------------------------------------------
         train_lr: float = 1e-4,
-        train_optimizer=torch.optim.RMSprop,
-        train_scheduler=torch.optim.lr_scheduler.StepLR,
+        train_optimizer: torch.optim.Optimizer = torch.optim.RMSprop,
+        train_scheduler: torch.optim.lr_scheduler._LRScheduler = torch.optim.lr_scheduler.StepLR,
         train_step_size: int = 10,
         dt: float = 0.1,
-        adjoint=False,
+        adjoint: bool=False,
         loading_existing: bool = False,
-        version=__version__,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """
         LightningODE
 
@@ -99,8 +95,8 @@ class LightningODE(
 
         self.save_hyperparameters()
 
-        # -- torch modules: ----------------------------------------------------
-        self._configure_torch_modules(func=NeuralODE, kwargs=locals())
+        # -- torch modules: ---------------------------------------------------
+        self._configure_torch_modules(func=neural_diffeqs.NeuralODE, kwargs=locals())
         self._configure_lightning_model(kwargs=locals())
 
     def __repr__(self) -> str:

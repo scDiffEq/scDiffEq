@@ -1,7 +1,7 @@
 
 class DriftPriorMixIn(object):
     logqp = True
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
 
     def forward(self, Z0, t, **kwargs):
@@ -39,7 +39,7 @@ class DriftPriorMixIn(object):
 
 class DriftPriorVAEMixIn(object):
     logqp = True
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
 
     def forward(self, X0, t, logqp=True, **kwargs):
@@ -66,7 +66,7 @@ class DriftPriorVAEMixIn(object):
 
         return sinkhorn_loss + kl_div_loss.sum()
 
-    def step(self, batch, batch_idx, stage=None):
+    def step(self, batch, batch_idx, stage=None) -> None:
         
         train_optim = self.optimizers()[1]
         train_optim.zero_grad()

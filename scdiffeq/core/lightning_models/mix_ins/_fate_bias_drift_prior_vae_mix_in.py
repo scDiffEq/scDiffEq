@@ -7,23 +7,23 @@ from .. import base
 
 
 class FateBiasDriftPriorVAEMixIn(object):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         
         
     def _configure_fate(
         self,
         graph,
-        csv_path,
-        t0_idx,
-        fate_bias_multiplier = 1,
-        undiff_key = "Undifferentiated",
-    ):
+        csv_path: str,
+        t0_idx: pd.Index,
+        fate_bias_multiplier: float = 1,
+        undiff_key: str = "Undifferentiated",
+    ) -> None:
         
         self.graph = graph
         self.fate_bias_multiplier = fate_bias_multiplier
         self.fate_df = pd.read_csv(csv_path, index_col=0)
-        self.fate_df.index = t0_idx # adata.obs.loc[adata.obs['Time point']==2].index
+        self.fate_df.index = t0_idx
         self._undiff_key = undiff_key
 
     def log_sinkhorn_divergence(self, sinkhorn_loss, t, stage, note=None):
@@ -52,7 +52,7 @@ class FateBiasDriftPriorVAEMixIn(object):
         acc_weight = 1 - acc_score
         return acc_score, acc_weight
 
-    def step(self, batch, batch_idx=None, stage=None):
+    def step(self, batch, batch_idx=None, stage=None) -> None:
         
         train_optim = self.optimizers()[1]
         train_optim.zero_grad()
