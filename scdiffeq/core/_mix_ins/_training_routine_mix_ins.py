@@ -1,11 +1,18 @@
-
+# -- import packages: ---------------------------------------------------------
 import lightning
+import logging
 
+# -- import local dependencies: -----------------------------------------------
 from .. import utils
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# -- set type hints: ----------------------------------------------------------
 from typing import List, Optional
 
-
+# -- base mix-in cls: ---------------------------------------------------------
 class BaseRoutineMixIn(object):
     """Base train/pre-train routine container"""
 
@@ -46,7 +53,7 @@ class BaseRoutineMixIn(object):
 
     def _flag_log_dir(self) -> None:
         if hasattr(self, "_csv_logger"):
-            self._INFO(f"Logging locally to: {self._csv_logger.log_dir}")
+            logger.info(f"Logging locally to: {self._csv_logger.log_dir}")
 
     def _initialize__attrs(self):
         """ """
@@ -55,14 +62,14 @@ class BaseRoutineMixIn(object):
             if not hasattr(self, attr_name):
                 setattr(self, attr_name, 0)
 
-
+# -- pre-training mix-in: -----------------------------------------------------
 class PreTrainMixIn(BaseRoutineMixIn):
 
     """Container hosting the pre-training config/execution methods"""   
 
-    def _configure_pretrain_step(self, kwargs):
+    def _configure_pretrain_step(self, kwargs) -> None:
         """"""
-        self._INFO(f"Configuring pretraining step")
+        logger.info("Configuring pretraining step")
 
         self._update_trainer_kwargs(kwargs)
         
@@ -101,7 +108,7 @@ class PreTrainMixIn(BaseRoutineMixIn):
         devices: Optional[int] = None,
         deterministic: Optional[bool] = False,
         **kwargs,
-    ):
+    ) -> None:
         """Pretrain method.
         
         Extended description of the pretrain method.
@@ -120,15 +127,16 @@ class PreTrainMixIn(BaseRoutineMixIn):
             self._configure_pretrain_step(locals())
             self.pretrainer.fit(self.DiffEq, self.LitDataModule)
 
-
+# -- training mix-in: ---------------------------------------------------------
 class TrainMixIn(BaseRoutineMixIn):
     
     """Container hosting the training config/execution methods"""
     
     
-    def _configure_train_step(self, kwargs):
+    def _configure_train_step(self, kwargs) -> None:
         """"""
-        self._INFO(f"Configuring training step")
+
+        logger.info("Configuring training step")
         
         self._update_trainer_kwargs(kwargs)
         
@@ -167,7 +175,7 @@ class TrainMixIn(BaseRoutineMixIn):
         devices: Optional[int] = 1,
         deterministic: Optional[bool] = False,
         **kwargs,
-    ):
+    ) -> None:
         """ """
         
         self.__update__(locals())

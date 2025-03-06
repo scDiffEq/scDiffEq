@@ -1,17 +1,26 @@
-
-from typing import Dict, List, Union, Optional
+# -- import packages: ---------------------------------------------------------
 import anndata
+import logging
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import pathlib
 import ABCParse
 import os
-# import cellplots
+import cellplots
+import scdiffeq_plots as sdq_pl
 
+# -- import local dependencies: -----------------------------------------------
 from ..core import utils
 
+# -- set type hints: ----------------------------------------------------------
+from typing import Dict, Union, Optional
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# -- cls: ---------------------------------------------------------------------
 class FillBetweenPlot:
     
     """KNOWN BUG: CELLPLOTS REQUIRED / NOT YET RELEASED"""
@@ -62,7 +71,7 @@ class FillBetweenPlot:
         label: Optional[str] = None,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self._df = df
         self.ax = self._configure_plot(ax)
         self._plot(label, **kwargs)
@@ -84,9 +93,8 @@ class SmoothedGEXPlot(ABCParse.ABCParse):
         legend_fontsize: float = 8,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.__parse__(locals(), public=[None])
-        self._INFO = utils.InfoMessage()
 
     @property
     def _PLOT_KWARGS(self):
@@ -162,9 +170,9 @@ class SmoothedGEXPlot(ABCParse.ABCParse):
         if self._save:
             if not self._SAVE_PATH.parent.exists():
                 self._SAVE_PATH.parent.mkdir()
-                self._INFO(f"Directory created: {self._SAVE_PATH.parent}")
+                logger.info(f"Directory created: {self._SAVE_PATH.parent}")
             plt.savefig(self._SAVE_PATH)
-            self._INFO(f"Saved to: {self._SAVE_PATH}")
+            logger.info(f"Saved to: {self._SAVE_PATH}")
 
 
 def plot_smoothed_expression(

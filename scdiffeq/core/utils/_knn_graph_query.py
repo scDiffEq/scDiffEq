@@ -16,8 +16,6 @@ class kNNGraphQuery(ABCParse.ABCParse):
         self.__parse__(locals())
         self._IGNORE += ["X_hat", "query_t"]
 
-        self._INFO = InfoMessage()
-
         self._configure_graph()
 
     def configure_used_layer(self):

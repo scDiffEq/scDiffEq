@@ -1,9 +1,16 @@
-
-import lightning
+# -- import packages: --------------------------------------------------------
 import anndata
+import lightning
+import logging
 
+# -- import local dependencies: -----------------------------------------------
 from .. import configs, utils
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# -- set type hints: ----------------------------------------------------------
 from typing import Dict, Optional
 
 class ModelConfigMixIn(object):
@@ -16,13 +23,14 @@ class ModelConfigMixIn(object):
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             save_dir=self._name
         )
+        logger.info(f"TrainerGenerator configured: {self._name}")
 
     def configure_model(
         self,
         DiffEq: Optional[lightning.LightningModule] = None,
         configure_trainer: bool = True,
         loading_existing: bool = False,
-    ):
+    ) -> None:
         if DiffEq is None:
             self._LitModelConfig = configs.LightningModelConfiguration(
                 data_dim=self._data_dim,
@@ -40,7 +48,7 @@ class ModelConfigMixIn(object):
         self.DiffEq = DiffEq
         self._name = self.DiffEq.hparams.name
 
-        self._INFO(f"Using the specified parameters, {self.DiffEq} has been called.")
+        logger.info(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
 
         lightning.seed_everything(self._seed)
@@ -53,15 +61,15 @@ class ModelConfigMixIn(object):
         if configure_trainer:
             self._configure_trainer_generator()
 
-    def configure_data(self, adata: anndata.AnnData):
+    def configure_data(self, adata: anndata.AnnData) -> None:
         """ """
         self.adata = adata.copy()
         
         self._DATA_CONFIG = configs.DataConfiguration()
         self._DATA_CONFIG(scDiffEq = self)
-        self._INFO(f"Input data configured.")
+        logger.info("Input data configured.")
         
-    def __config__(self, kwargs: Dict):
+    def __config__(self, kwargs: Dict) -> None:
         """ """
         # -- Step 1: parse kwargs, set up info msg -----------------------------
         self.__parse__(kwargs, public = [None], ignore=["adata"])

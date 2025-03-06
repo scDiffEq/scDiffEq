@@ -1,4 +1,3 @@
-
 """
 Three main classes that are going to be used here:
 
@@ -6,18 +5,26 @@ Three main classes that are going to be used here:
 2. [ called in callback ] LossTrackingVisualization 
 3. [ lightning.Callback ] VisualizeTrackedLoss
 """
-import lightning
+# -- import packages: --------------------------------------------------------
+import ABCParse
 import glob
+import lightning
+import logging
+import matplotlib.pyplot as plt
 import os
+import scdiffeq_plots as sdq_pl
 
+# -- import local dependencies: -----------------------------------------------
 from .. import utils
 
-from typing import List
-import scdiffeq_plots as sdq_pl
-import matplotlib.pyplot as plt
-import ABCParse
+# -- set type hints: ----------------------------------------------------------
+from typing import Any, Dict, List
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
+# -- cls: -------------------------------------------------------------------
 class ModelTracker(ABCParse.ABCParse):
     def __init__(
         self,
@@ -26,7 +33,7 @@ class ModelTracker(ABCParse.ABCParse):
         working_dir=os.getcwd(),
         train_version=0,
         pretrain_version=0,
-    ):
+    ) -> None:
         super().__init__()
         self.__parse__(locals(), public=[None])
 
@@ -175,31 +182,31 @@ class LossTrackingVisualization(ABCParse.ABCParse):
         }
 
     @property
-    def _PLOT_KWARGS(self):
+    def _PLOT_KWARGS(self) -> Dict[str, Any]
         return utils.extract_func_kwargs(func=sdq_pl.plot, kwargs=self._PARAMS)
 
     @property
-    def _HAS_TRAIN(self):
+    def _HAS_TRAIN(self) -> bool:
         return self._tracker._HAS_TRAIN
-    
+
     @property
-    def _HAS_PRETRAIN(self):
+    def _HAS_PRETRAIN(self) -> bool:
         return self._tracker._HAS_PRETRAIN
 
     @property
     def _PLOT_KEYS(self):
-        
+
         keys = []
         if self._HAS_PRETRAIN:
             keys+= list(self._PLOT_INPUTS["pretrain"].keys())
-            
+
         if self._HAS_TRAIN:
             keys+= self._PLOT_INPUTS["train"].keys()
-            
+
         return keys
 
     @property
-    def _NPLOTS(self):
+    def _NPLOTS(self) -> int:
         nplots = 0        
         if self._HAS_TRAIN:
             nplots += len(self._PLOT_INPUTS["train"].keys())
@@ -208,8 +215,8 @@ class LossTrackingVisualization(ABCParse.ABCParse):
         print(f"nplots: {nplots}")
         return nplots
 
-    def __layout__(self):
-        
+    def __layout__(self) -> None:
+
         self.fig, self.axes = sdq_pl.plot(
             nplots=self._NPLOTS,
             **self._PLOT_KWARGS,
@@ -224,7 +231,7 @@ class LossTrackingVisualization(ABCParse.ABCParse):
             ax.set_xlabel(self._xlabel, fontsize=self._label_fontsize)
             ax.tick_params(axis="both", which="both", labelsize=self._tick_param_size)
 
-    def __plot__(self):
+    def __plot__(self) -> None:
 
         self.__layout__()
 
@@ -256,11 +263,11 @@ class VisualizeTrackedLoss(lightning.Callback):
         fname = "scDiffEq_fit_loss_tracking.png",
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.model_tracker = ModelTracker(
             **utils.extract_func_kwargs(func=ModelTracker, kwargs=locals())
         )
-        self._INFO = utils.InfoMessage()
+
         self.fname = fname
         self.viz_frequency = viz_frequency
         
@@ -274,7 +281,8 @@ class VisualizeTrackedLoss(lightning.Callback):
         
     def _save_plot(self):
         if not os.path.exists(self.save_path):
-            self._INFO(f"Loss visualization saved to: {self.save_path}")
+            logger.info(f"Loss visualization saved to: {self.save_path}")
+
         plt.savefig(self.save_path)
         plt.close()
         
