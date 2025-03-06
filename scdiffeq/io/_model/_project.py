@@ -15,12 +15,9 @@ from typing import Dict, Union
 class Project(ABCParse.ABCParse):
     """Object container for an scDiffEq project
 
-    Attributes
-    ----------
-    path : Union[str, pathlib.Path]
-        Path to the project, created by scDiffeq.
-    metrics_groupby : str
-        Grouping method for metrics, default is "epoch".
+    Attributes:
+        path (Union[str, pathlib.Path]): Path to the project, created by scDiffeq.
+        metrics_groupby (str): Grouping method for metrics, default is "epoch".
     """
 
     def __init__(
@@ -29,19 +26,15 @@ class Project(ABCParse.ABCParse):
         metrics_groupby: str = "epoch",
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize the project object by providing a path.
 
-        Parameters
-        ----------
-        path : Union[str, pathlib.Path], optional
-            Path to the project, created by scDiffeq, by default pathlib.Path("./").absolute()
-        metrics_groupby : str, optional
-            Grouping method for metrics, by default "epoch"
+        Args:
+            path (Union[str, pathlib.Path], optional): Path to the project, created by scDiffeq, by default pathlib.Path("./").absolute()
+            metrics_groupby (str, optional): Grouping method for metrics, by default "epoch"
 
-        Returns
-        -------
-        None
+        Returns:
+            None
         """
         self.__parse__(locals())
 
@@ -51,15 +44,12 @@ class Project(ABCParse.ABCParse):
     def _PROJECT_PATH(self) -> pathlib.Path:
         """Check and format the provided project path
 
-        Returns
-        -------
-        pathlib.Path
+        Returns:
+            pathlib.Path
             Formatted project path
 
-        Raises
-        ------
-        TypeError
-            If the path is not of type pathlib.Path or str
+        Raises:
+            TypeError: If the path is not of type pathlib.Path or str
         """
         if isinstance(self._path, pathlib.Path):
             return self._path
@@ -72,9 +62,8 @@ class Project(ABCParse.ABCParse):
     def _VERSION_PATHS(self) -> Dict[str, pathlib.Path]:
         """Assemble available version paths based on the provided project path
 
-        Returns
-        -------
-        Dict[str, pathlib.Path]
+        Returns:
+            Dict[str, pathlib.Path]
             Dictionary of version names and their corresponding paths
         """
         version_paths = sorted(list(self._PROJECT_PATH.glob("version_*")))
@@ -91,24 +80,14 @@ class Project(ABCParse.ABCParse):
     def __getitem__(self, version: int) -> pathlib.Path:
         """Format version key and return version
 
-        Parameters
-        ----------
-        version : int
-            Version number
+        Args:
+            version (int): Version number
 
-        Returns
-        -------
-        pathlib.Path
+        Returns:
+            pathlib.Path
             Path to the specified version
         """
         return getattr(self, f"version_{version}")
 
     def __repr__(self) -> str:
-        """Return the name of the object
-
-        Returns
-        -------
-        str
-            Name of the object
-        """
         return """scDiffEq Project"""

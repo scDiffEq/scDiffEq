@@ -12,7 +12,13 @@ from typing import Optional
 class GroupedMetrics(ABCParse.ABCParse):
     """Container cls for grouping and reporting metric_df by epochs"""
 
-    def __init__(self, groupby: Optional[str] = "epoch", *args, **kwargs):
+    def __init__(
+        self,
+        groupby: Optional[str] = "epoch",
+        *args,
+        **kwargs,
+    ) -> None:
+        
         """"""
         self.__parse__(locals())
 
