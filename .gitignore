@@ -133,3 +133,10 @@ dmypy.json
 
 # mac
 .DS_Store
+
+# data
+scdiffeq_data/pancreas/_downloaded.pancreas.h5ad
+scdiffeq_data/pancreas/pancreas.pca_model.pkl
+scdiffeq_data/pancreas/pancreas.pp.h5ad
+scdiffeq_data/pancreas/pancreas.scaler_model.pkl
+scdiffeq_data/pancreas/pancreas.umap_model.pkl

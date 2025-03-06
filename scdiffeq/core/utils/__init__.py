@@ -31,7 +31,7 @@ from ._logs import Logs, PretrainLogs, TrainLogs
 
 from ._filter_df import filter_df
 
-from ._display_tracked_loss import display_tracked_loss
+# from ._display_tracked_loss import display_tracked_loss
 
 from ._knn_graph_query import kNNGraphQuery
 from ._flexible_component_loader import FlexibleComponentLoader

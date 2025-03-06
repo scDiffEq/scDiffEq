@@ -11,4 +11,4 @@ from . import utils
 from . import configs
 from . import callbacks
 
-from . import _dummy
+__all__ = ["scDiffEq", "lightning_models", "utils", "configs", "callbacks"]
