@@ -226,6 +226,7 @@ html_theme_options = {
     },
 }
 
+html_show_sourcelink = False
 # Add intersphinx mapping for external package references
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
