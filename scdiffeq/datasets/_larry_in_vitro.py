@@ -66,7 +66,7 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         pca = sklearn.decomposition.PCA(n_components=50)
 
         # -- fit transform data: ----------------------------------------------
-        adata.obsm['X_scaled'] = scaler.fit_transform(adata.X.A)        
+        adata.obsm['X_scaled'] = scaler.fit_transform(adata.X.toarray())        
         adata.obsm['X_pca'] = pca.fit_transform(adata.obsm['X_scaled'])
 
         # -- save models: -----------------------------------------------------
