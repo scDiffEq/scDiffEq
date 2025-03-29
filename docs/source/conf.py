@@ -4,11 +4,15 @@ __doc__ = """Configuration file for the Sphinx documentation builder."""
 project = "scdiffeq"
 copyright = "2024, Michael E. Vinyard"
 author = "Michael E. Vinyard"
-release = "0.1.0"
 
-# -- config: ------------------------------------------------------------------
+# Read version from __version__.py
 import os
 import sys
+sys.path.insert(0, os.path.abspath("../../"))
+from scdiffeq.__version__ import __version__
+release = __version__
+
+# -- config: ------------------------------------------------------------------
 import requests
 import time
 from typing import List, Optional, get_type_hints
