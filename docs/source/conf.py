@@ -10,7 +10,9 @@ import sys
 import requests
 import time
 
-from . import config_utils
+# Add the docs/source directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+import config_utils
 
 from typing import List, Optional, get_type_hints
 
