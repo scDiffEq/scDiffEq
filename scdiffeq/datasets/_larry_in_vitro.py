@@ -1,13 +1,17 @@
 # -- import packages: ----------------------------------------------------------
 import ABCParse
-import pathlib
 import anndata
+import logging
 import os
-import requests
-
+import pathlib
+import sklearn
 
 # -- import local dependencies: ------------------------------------------------
 from .. import io
+from ._figshare_downloader import figshare_downloader
+
+# -- configure logger: ----------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
 # -- Controller class: ---------------------------------------------------------
@@ -15,11 +19,17 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
     FNAME = "larry.h5ad"
     figshare_id = 52612805
 
-    def __init__(self, data_dir=os.getcwd(), *args, **kwargs):
-        self.__parse__(locals())
+    def __init__(
+            self,
+            data_dir=os.getcwd(),
+            filter_genes: bool = True,
+            reduce_dimensions: bool = True,
+            force_download: bool = False,
+            *args,
+            **kwargs,
+        ):
 
-        if not self.data_dir.exists():
-            self.data_dir.mkdir()
+        self.__parse__(locals())
 
     @property
     def _scdiffeq_parent_data_dir(self):
@@ -39,41 +49,83 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
     def h5ad_path(self) -> pathlib.Path:
         return self.data_dir.joinpath(self.FNAME)
 
+    @property
+    def _DO_PREPROCESSING(self):
+        return any([self._filter_genes, self._reduce_dimensions])
+
     def download(self):
-        url = f"https://figshare.com/ndownloader/files/{self.figshare_id}"
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-        
-        with open(self.h5ad_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+        figshare_downloader(figshare_id=self.figshare_id, write_path=self.h5ad_path)
+
+    def _gene_filtering(self, adata: anndata.AnnData) -> anndata.AnnData:
+        return adata[:, adata.var["use_genes"]].copy()
+
+    def _dimension_reduction(self, adata: anndata.AnnData):
+        """Do sample dimension reduction"""
+        # -- instantiate models: ----------------------------------------------
+        scaler = sklearn.preprocessing.StandardScaler()
+        pca = sklearn.decomposition.PCA(n_components=50)
+
+        # -- fit transform data: ----------------------------------------------
+        adata.obsm['X_scaled'] = scaler.fit_transform(adata.X.A)        
+        adata.obsm['X_pca'] = pca.fit_transform(adata.obsm['X_scaled'])
+
+        # -- save models: -----------------------------------------------------
+        io.write_pickle(
+            obj=scaler,
+            path=self.data_dir.joinpath("scaler.pkl"),
+        )
+        io.write_pickle(
+            obj=pca,
+            path=self.data_dir.joinpath("pca.pkl"),
+        )
+
+    def _preprocess(self, adata: anndata.AnnData) -> anndata.AnnData:
+        if self._DO_PREPROCESSING:
+            logger.info("Preprocessing...")
+            if self._filter_genes:
+                adata = self._gene_filtering(adata)
+            if self._reduce_dimensions:
+                self._dimension_reduction(adata)
+            adata.write_h5ad(self.h5ad_path)
+        return adata
 
     @property
-    def adata(self):
+    def adata(self) -> anndata.AnnData:
         if not hasattr(self, "_adata"):
-            if not self.h5ad_path.exists():
+            if not self.h5ad_path.exists() or self._force_download:
                 self.download()
+                adata = anndata.read_h5ad(self.h5ad_path)
+                self._adata = self._preprocess(adata=adata)
+                return self._adata
+            else:
+                logger.info(f"Loading data from {self.h5ad_path}")
+                return anndata.read_h5ad(self.h5ad_path)
 
-            adata = anndata.read_h5ad(self.h5ad_path)
-            adata.obs = adata.obs.reset_index()
-            adata.obs.index = adata.obs.index.astype(str)
-            self._adata = adata
-
-        return self._adata
-
-
-def larry(data_dir: str = os.getcwd()) -> anndata.AnnData:
+def larry(
+        data_dir: str = os.getcwd(),
+        filter_genes: bool = True,
+        reduce_dimensions: bool = True,
+        force_download: bool = False,
+    ) -> anndata.AnnData:
     """LARRY in vitro dataset
 
-    Parameters
-    ----------
-    data_dir : str, default=os.getcwd()
-        Path to the directory where the data will be saved.
+    Args:
+        data_dir: str, default=os.getcwd()
+            Path to the directory where the data will be saved.
+        filter_genes: bool, default=True
+            Whether to filter genes.
+        reduce_dimensions: bool, default=True
+            Whether to reduce dimensions.
+        force_download: bool, default=False
+            Whether to force download the data.
 
-    Returns
-    -------
-    anndata.AnnData
-        Preprocessed AnnData object.
+    Returns:
+        anndata.AnnData: Preprocessed AnnData object.
     """
-    data_handler = LARRYInVitroDataset(data_dir=data_dir)
+    data_handler = LARRYInVitroDataset(
+        data_dir=data_dir,
+        filter_genes=filter_genes,
+        reduce_dimensions=reduce_dimensions,
+        force_download=force_download,
+    )
     return data_handler.adata
