@@ -12,10 +12,16 @@ class MemoryMonitor(lightning.pytorch.callbacks.Callback):
     def __init__(self, log_gpu=True):
         
         super().__init__()
-        
+
+        try:
+            import wandb
+            import psutil
+        except Exception as e:
+            logger.error(f"Exception raised because wandb or psutil not installed. `run pip install wandb psutil`. Exception: {e}")
+
         self.log_gpu = log_gpu
         self.process = psutil.Process(os.getpid())
-        
+
     def _log_cpu_ram(self, trainer):
         mem = self.process.memory_info().rss / 1024 ** 2  # in MB
         print(f"[MemoryLogger] Epoch {trainer.current_epoch}: CPU RAM: {mem:.2f} MB")

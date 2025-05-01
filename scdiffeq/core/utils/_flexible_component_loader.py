@@ -42,8 +42,8 @@ class ComponentStateLoader(ABCParse.ABCParse):
     def ckpt(self):
         return torch.load(self._ckpt_path, map_location=self._map_location)
 
-    def plot_wandb(self):
-        torch_nets.pl.weights_and_biases(self._STATE)
+#    def plot_wandb(self):
+#        torch_nets.pl.weights_and_biases(self._STATE)
 
     def __check__(self):
         if not str(self._msg) == self._EXPECTED_LOAD_MSG:
