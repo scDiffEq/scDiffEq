@@ -1,5 +1,6 @@
 
 # -- import packages: ----------------------------------------------------------
+import anndata
 import annoyance
 import logging
 import numpy as np
@@ -9,6 +10,9 @@ import torch
 
 # -- import local dependencies: ------------------------------------------------
 from ._anndata_inspector import AnnDataInspector
+
+# -- set type hints: -----------------------------------------------------------
+from typing import Optional
 
 # -- configure logging: --------------------------------------------------------
 logger = logging.getLogger(__name__)

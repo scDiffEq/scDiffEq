@@ -152,17 +152,9 @@ class CellPotentialNormalization(ABCParse.ABCParse):
     def _clean_up_adata(self) -> None:
         self.adata.obs.drop("_CLIPPED_PSI", axis=1, inplace=True)
 
-<<<<<<< HEAD
     def __call__(self, adata, key_added="psi") -> None:
         
         self.__update__(locals(), public = ['adata'])
-        
-=======
-    def __call__(self, adata, key_added="psi"):
-
-        self.__update__(locals(), public=["adata"])
->>>>>>> Remove deprecated dependencies and clean up logging across modules
-
         adata.obs[key_added] = self._SCALED_PSI
         self._clean_up_adata()
 
