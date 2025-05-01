@@ -249,7 +249,7 @@ class scDiffEq(
         predict_key: str = "predict",
         # -- general params: ---------------------------------------------------
         logger: Optional["lightning.logger"] = None,
-        num_workers: int = os.cpu_count(),
+        num_workers: int = 0,
         silent: bool = True,
         scale_input_counts: bool = False,
         reduce_dimensions: bool = False,
@@ -345,7 +345,7 @@ class scDiffEq(
             test_key (str, optional): Key for test data. Default is "test".
             predict_key (str, optional): Key for prediction data. Default is "predict".
             logger (Optional["lightning.logger"], optional): Logger. Default is None.
-            num_workers (int, optional): Number of workers. Default is os.cpu_count().
+            num_workers (int, optional): Number of workers. Default is 0.
             silent (bool, optional): Whether to silence output. Default is True.
             scale_input_counts (bool, optional): Whether to scale input counts. Default is False.
             reduce_dimensions (bool, optional): Whether to reduce dimensions. Default is False.
@@ -403,8 +403,8 @@ class scDiffEq(
 
     def fit(
         self,
-        train_epochs: int = 200,
-        pretrain_epochs: int = 500,
+        train_epochs: int = 2500,
+        pretrain_epochs: int = 0,
         train_lr: Optional[float] = None,
         pretrain_callbacks: List = [],
         train_callbacks: List = [],

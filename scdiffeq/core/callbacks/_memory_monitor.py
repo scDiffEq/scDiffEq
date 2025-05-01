@@ -1,10 +1,10 @@
 # -- import packages: ----------------------------------------------------------
+import gc
 import lightning
 import os
 import psutil
 import torch
 import wandb
-
 
 # -- operational cls: ----------------------------------------------------------
 class MemoryMonitor(lightning.pytorch.callbacks.Callback):
@@ -12,12 +12,6 @@ class MemoryMonitor(lightning.pytorch.callbacks.Callback):
     def __init__(self, log_gpu=True):
         
         super().__init__()
-
-        try:
-            import wandb
-            import psutil
-        except Exception as e:
-            logger.error(f"Exception raised because wandb or psutil not installed. `run pip install wandb psutil`. Exception: {e}")
 
         self.log_gpu = log_gpu
         self.process = psutil.Process(os.getpid())
@@ -39,8 +33,13 @@ class MemoryMonitor(lightning.pytorch.callbacks.Callback):
                     "Memory/GPU_Reserved_MB": mem_reserved,
                 }
             )
+            
+    def _report_object_memories(self, trainer):
+        objs = gc.get_objects()
+        print(f"[MemoryLogger] Epoch {trainer.current_epoch}: Number of tracked objects: {len(objs)}")
 
     def on_train_epoch_end(self, trainer, lit_module):
 
         self._log_cpu_ram(trainer=trainer)
         self._log_gpu_ram(trainer=trainer, lit_module=lit_module)
+        self._report_object_memories(trainer=trainer)
