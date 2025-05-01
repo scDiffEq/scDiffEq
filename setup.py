@@ -5,18 +5,20 @@ import re
 import os
 import sys
 
+# -- constants: --------------------------------------------------------------
+name = "scdiffeq"
 
 # -- fetch requirements packages: ---------------------------------------------
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open('scdiffeq/__version__.py') as v:
+with open(f"{name}/__version__.py") as v:
     exec(v.read())
 
 
 # -- run setup: ---------------------------------------------------------------
 setuptools.setup(
-    name="scdiffeq",
+    name=name,
     version=__version__,
     python_requires=">3.9.0",
     author="Michael E. Vinyard",

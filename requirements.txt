@@ -2,7 +2,6 @@ torch>=2.5.0
 lightning>=2.1
 pykeops>=2.1.2
 geomloss>=0.2.6
-licorice_font>=0.0.3
 torchsde>=0.2.6
 ABCParse>=0.1.4
 adata-query>=0.0.2
@@ -14,6 +13,5 @@ autodevice>=0.0.2
 cellplots>=0.0.1rc0
 cell-perturb>=0.0.1rc1
 tqdm
-py-pkg-logging
 anndata>=0.11.3
 scanpy>=1.11.0

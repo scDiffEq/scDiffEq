@@ -1,20 +1,20 @@
 # -- import packages: ---------------------------------------------------------
+import ABCParse
 import anndata
+import cellplots
 import logging
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-import pathlib
-import ABCParse
 import os
-import cellplots
+import pathlib
 import scdiffeq_plots as sdq_pl
 
 # -- import local dependencies: -----------------------------------------------
 from ..core import utils
 
 # -- set type hints: ----------------------------------------------------------
-from typing import Dict, Union, Optional
+from typing import Dict, List, Optional, Union
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
@@ -22,12 +22,9 @@ logger.setLevel(logging.INFO)
 
 # -- cls: ---------------------------------------------------------------------
 class FillBetweenPlot:
-    
     """KNOWN BUG: CELLPLOTS REQUIRED / NOT YET RELEASED"""
-    
-    def __init__(self, *args, **kwargs):
 
-        ...
+    def __init__(self, *args, **kwargs): ...
 
     @property
     def _MEAN(self):
@@ -56,7 +53,7 @@ class FillBetweenPlot:
     def _configure_plot(self, ax):
         if ax is None:
             # KNOWN BUG
-            self.fig, axes = cellplots.plot(1, 1, delete = [["top", "right"]])
+            self.fig, axes = cellplots.plot(1, 1, delete=[["top", "right"]])
             ax = axes[0]
         return ax
 
@@ -75,6 +72,7 @@ class FillBetweenPlot:
         self._df = df
         self.ax = self._configure_plot(ax)
         self._plot(label, **kwargs)
+
 
 class SmoothedGEXPlot(ABCParse.ABCParse):
     def __init__(

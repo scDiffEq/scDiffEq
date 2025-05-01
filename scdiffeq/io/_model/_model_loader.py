@@ -5,6 +5,9 @@ import lightning
 import logging
 import pathlib
 import pandas as pd
+import torch
+import torch_nets
+import yaml
 
 # -- import local dependencies: -----------------------------------------------
 from ...core import lightning_models, utils, scDiffEq
@@ -78,11 +81,6 @@ class ModelLoader(ABCParse.ABCParse):
     def LightningModule(self):
         return getattr(lightning_models, self._MODEL_TYPE)
 
-    #         if not hasattr(self, "_model"):
-    #             LitModel = getattr(lightning_models, self._MODEL_TYPE)
-    #             self._model = LitModel(**self.hparams)
-    #         return self._model
-
     @property
     def ckpt(self):
         return self.version.ckpts[self.epoch]
@@ -137,7 +135,6 @@ class ModelLoader(ABCParse.ABCParse):
         self._validate_epoch()
         ckpt_path = self.ckpt.path
         return self.LightningModule.load_from_checkpoint(ckpt_path, **load_kwargs)
-
 
 def _inputs_from_ckpt_path(ckpt_path):
     """If you give the whole ckpt_path, you can derive the other inputs."""

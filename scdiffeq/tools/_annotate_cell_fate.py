@@ -4,11 +4,11 @@ import ABCParse
 import logging
 import numpy as np
 import pandas as pd
+import logging
 
-# -- configure logger: --------------------------------------------------------
+# -- configure logging: --------------------------------------------------------
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
 
 # -- controlling class: -------------------------------------------------------
 class CellFateAnnotation(ABCParse.ABCParse):

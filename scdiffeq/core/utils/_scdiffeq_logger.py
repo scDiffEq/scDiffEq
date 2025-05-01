@@ -5,7 +5,6 @@ import logging
 import os
 import pathlib
 
-
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -20,7 +19,7 @@ class scDiffEqLogger(ABCParse.ABCParse):
     def __init__(
         self,
         model_name="scDiffEq_model",
-        ckpt_path = None,
+        ckpt_path=None,
         working_dir=os.getcwd(),
     ) -> None:
 
@@ -91,7 +90,7 @@ class scDiffEqLogger(ABCParse.ABCParse):
             else:
                 logger.info(f"Loading from checkpoint:\n\t{self.CKPT_PATH}")
         else:
-            logger.warning(f"Directory: {self.VERSIONED_MODEL_OUTDIR} already exists!")
+            logger.info(f"Directory: {self.VERSIONED_MODEL_OUTDIR} already exists!")
 
     # -- checkpoint loading: ------------------------------------------------
     @property
@@ -103,12 +102,13 @@ class scDiffEqLogger(ABCParse.ABCParse):
         return os.path.dirname(self.CKPT_PATH.split("_logs/version_")[0])
 
     @property
-    def _PASSED_CKPT_MATCHES_MODEL_PARENT_DIR(self)->bool:
+    def _PASSED_CKPT_MATCHES_MODEL_PARENT_DIR(self) -> bool:
         compare = [self.CKPT_PATH, self.PARENT_MODEL_OUTDIR]
         common = os.path.commonprefix(compare)
 
-        return (common == self.PARENT_MODEL_OUTDIR)
+        return common == self.PARENT_MODEL_OUTDIR
 
-    def __call__(self):
+    def __call__(self) -> None:
+
         self._configure_parent_model_outdir()
         self._configure_versioned_model_outdir()

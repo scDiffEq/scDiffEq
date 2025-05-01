@@ -1,11 +1,11 @@
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
+import cellplots as cp
 import logging
+import matplotlib.cm
 import matplotlib.pyplot as plt
 import numpy as np
-import cellplots as cp
-import matplotlib.cm
 import os
 import pathlib
 
@@ -279,7 +279,7 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return f"{self.sdq_info['project']}.version_{self.sdq_info['version']}.ckpt_{self.sdq_info['ckpt']}"
 
     @property
-    def fname_basis(self):
+    def fname_basis(self) -> pathlib.Path:
         if "sdq_info" in self._adata.uns:
             try:
                 return self.scdiffeq_figure_dir.joinpath(
@@ -294,15 +294,15 @@ class VelocityStreamPlot(ABCParse.ABCParse):
         return self.scdiffeq_figure_dir.joinpath("velocity_stream")
 
     @property
-    def SVG_path(self):
+    def SVG_path(self) -> pathlib.Path:
         """ """
         return pathlib.Path(".".join([str(self.fname_basis), "svg"]))
 
     @property
-    def PNG_path(self):
+    def PNG_path(self) -> pathlib.Path:
         return pathlib.Path(".".join([str(self.fname_basis), "png"]))
 
-    def save_img(self):
+    def save_img(self) -> None:
         """Saves the generated plot to both SVG and PNG formats in a specified directory."""
         self._mk_fig_dir()
         plt.savefig(self.SVG_path, dpi=self._svg_dpi)

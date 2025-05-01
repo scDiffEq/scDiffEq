@@ -7,10 +7,16 @@ import logging
 import anndata
 import torch
 import adata_query
+import logging
+
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # -- import local dependencies: -----------------------------------------------
 from ..core import utils
 from ._knn_smoothing import kNNSmoothing
+
 # from ._fetch import fetch
 from ._knn import kNN
 import ABCParse
@@ -24,7 +30,6 @@ logger.setLevel(logging.INFO)
 
 # -- operator classes: --------------------------------------------------------
 class CellPotentialNormalization(ABCParse.ABCParse):
-
     """
     Procedure occurs in 5 steps:
     1. Sign flip
@@ -56,6 +61,7 @@ class CellPotentialNormalization(ABCParse.ABCParse):
         """
 
         self.__parse__(locals(), public=[None])
+
     @property
     def kNN(self) -> kNN:
         if not hasattr(self, "_graph"):
@@ -108,7 +114,7 @@ class CellPotentialNormalization(ABCParse.ABCParse):
         smoothing = kNNSmoothing(
             self.adata,
             kNN=self.kNN,
-            use_key = self._kNN_use_key,
+            use_key=self._kNN_use_key,
             n_iters=self._knn_smoothing_iters,
             use_tqdm=self._use_tqdm,
         )
@@ -149,8 +155,6 @@ class CellPotentialNormalization(ABCParse.ABCParse):
     def __call__(self, adata, key_added="psi") -> None:
         
         self.__update__(locals(), public = ['adata'])
-        
-
         adata.obs[key_added] = self._SCALED_PSI
         self._clean_up_adata()
 
@@ -165,6 +169,9 @@ class CellPotential(ABCParse.ABCParse):
         seed: int = 0,
         gpu = True,
     ) -> None:
+        
+        """ """
+
         self.__parse__(locals(), public=[None])
         lightning.seed_everything(0)
 
@@ -172,7 +179,10 @@ class CellPotential(ABCParse.ABCParse):
     def Z_input(self):
         if not hasattr(self, "_Z_input"):
             self._Z_input = adata_query.fetch(
-                adata=self.adata, key=self._use_key, torch = self._gpu, device=self._device
+                adata=self.adata,
+                key=self._use_key,
+                torch=self._gpu,
+                device=self._device,
             )
         return self._Z_input
 
@@ -184,7 +194,7 @@ class CellPotential(ABCParse.ABCParse):
         self, adata: anndata.AnnData, model, key_added: str = "_psi"
     ) -> None:
 
-        self.__update__(locals(), public = ['adata'])
+        self.__update__(locals(), public=["adata"])
         self.Z_psi = self.forward(model)
         adata.obs[key_added] = self.Z_psi
 
@@ -200,7 +210,7 @@ def normalize_cell_potential(
     use_tqdm=True,
 ) -> None:
     """Can be AnnData from a simulation or the original AnnData object containing observed cells"""
-    
+
     cell_potential_norm = CellPotentialNormalization(
         q=q,
         raw_psi_key=use_key,
@@ -210,7 +220,8 @@ def normalize_cell_potential(
     )
 
     cell_potential_norm(adata, key_added=key_added)
-    
+
+
 def cell_potential(
     adata: anndata.AnnData,
     model,
@@ -226,12 +237,10 @@ def cell_potential(
     use_tqdm: bool = True,
     gpu: bool = True,
 ):
-    """
-    
-    """
-    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed, gpu = gpu)
+    """ """
+    cell_potential = CellPotential(use_key=use_key, device=device, seed=seed, gpu=gpu)
     cell_potential(adata=adata, model=model, key_added=raw_key_added)
-    
+
     if normalize:
         normalize_cell_potential(
             adata=adata,
