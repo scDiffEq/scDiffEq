@@ -1,13 +1,14 @@
 
 # -- import packages: ---------------------------------------------------------
-
 import ABCParse
 import lightning
 import os
 
 # -- import local dependencies: -----------------------------------------------
-from .. import utils, callbacks
+from .. import utils, callbacks as _callbacks
 
+# -- set type hints: ----------------------------------------------------------
+from typing import List
 
 # -- supporting class: --------------------------------------------------------
 class InterTrainerEpochCounter(lightning.pytorch.callbacks.Callback):
@@ -40,12 +41,7 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
                 monitor=self._monitor,
             ),
             InterTrainerEpochCounter(),
-            callbacks.ModelLogging(),
-#             callbacks.VisualizeTrackedLoss(
-#                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
-#             ),
-            # lightning.pytorch.callbacks.StochasticWeightAveraging(swa_lrs=self.swa_lrs),
-            # considering rm SWA pending better understanding
+            _callbacks.ModelLogging(),
         ]
     
     @property
@@ -60,32 +56,26 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
                 monitor=self._monitor,
             ),
             InterTrainerEpochCounter(),
-            
-#             callbacks.ModelLogging(),
-#             callbacks.VisualizeTrackedLoss(
-#                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
-#             ),
-            # lightning.pytorch.callbacks.StochasticWeightAveraging(swa_lrs=self.swa_lrs),
-            # considering rm SWA pending better understanding
         ]
-
+    
     @property
-    def Callbacks(self):
+    def DEPLOYED_CALLBACKS(self):
         return self.cbs + self.BuiltInCallbacks
-#         if self._stage == "TRAIN":
-#             print("returning train cbs")
-#             return self.cbs + self.BuiltInCallbacks
-#         print("returning PRETRAIN cbs")
-#         return self.cbs + self.BuiltInPreTrainCallbacks
+    
+    def _update_callbacks(self, callbacks: List[lightning.pytorch.callbacks.Callback]) -> None:
         
-    @property
-    def GradientRetainedCallbacks(self):
-        return [callbacks.GradientPotentialTest()] + self.cbs
+        [self.cbs.append(cb) for cb in callbacks]
+        
+        if self._monitor_hardware:
+            self.cbs.append(_callbacks.MemoryMonitor())
+        if self._retain_test_gradients:
+            self.cbs.append(_callbacks.GradientPotentialTest())
 
     def __call__(
         self,
         version,
         stage,
+        monitor_hardware: bool = False,
         viz_frequency = 1,
         model_name="scDiffEq_model",
         working_dir=os.getcwd(),
@@ -105,8 +95,6 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
         self._every_n_epochs = ckpt_frequency
         self._save_top_k = keep_ckpts
         
-        [self.cbs.append(cb) for cb in callbacks]
+        self._update_callbacks(callbacks=callbacks)
         
-        if retain_test_gradients:
-            return self.GradientRetainedCallbacks
-        return self.Callbacks
+        return self.DEPLOYED_CALLBACKS

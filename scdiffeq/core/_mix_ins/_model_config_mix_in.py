@@ -14,7 +14,7 @@ class ModelConfigMixIn(object):
         """ """
                 
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
-            save_dir=self._name
+            save_dir=self._name,
         )
 
     def configure_model(
