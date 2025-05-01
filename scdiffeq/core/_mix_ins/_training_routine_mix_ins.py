@@ -87,6 +87,7 @@ class PreTrainMixIn(BaseRoutineMixIn):
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
             callbacks=self._pretrain_callbacks,
+            monitor_hardware=self._monitor_hardware,
             **self._TRAINER_KWARGS,
         )
 

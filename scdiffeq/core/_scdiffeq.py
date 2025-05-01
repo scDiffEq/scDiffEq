@@ -313,6 +313,7 @@ class scDiffEq(
         decoder_bias: bool = True,
         decoder_output_bias: bool = True,
         ckpt_path: Optional[Union[pathlib.Path, str]] = None,
+        monitor_hardware: bool = False,
         version: str = __version__,
         *args,
         **kwargs,

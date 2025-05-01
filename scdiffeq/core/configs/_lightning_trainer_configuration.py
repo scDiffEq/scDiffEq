@@ -50,6 +50,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         
         return callback_config(
             version = self._version,
+            monitor_hardware=self._monitor_hardware,
             stage = self._stage,
             viz_frequency = self._viz_frequency,
             model_name=self._model_name,
@@ -125,6 +126,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         lr: float = None,
         model_name="scDiffEq_model",
         gradient_clip_val: float = 0.5,
+        monitor_hardware: bool = False,
         working_dir=os.getcwd(),
         train_version=0,
         pretrain_version=0,
