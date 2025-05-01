@@ -114,7 +114,7 @@ class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
             n_components=2, n_neighbors=30, random_state=0, min_dist=0.5
         )
 
-        adata.obsm["X_scaled"] = self.SCALER_MODEL.fit_transform(adata.X.A)
+        adata.obsm["X_scaled"] = self.SCALER_MODEL.fit_transform(adata.X.toarray())
         adata.obsm["X_pca"] = self.PCA_MODEL.fit_transform(adata.obsm["X_scaled"])
         adata.obsm["X_umap"] = self.UMAP_MODEL.fit_transform(adata.obsm["X_pca"])
 
