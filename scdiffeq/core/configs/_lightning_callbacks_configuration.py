@@ -1,27 +1,16 @@
 
-__module_name__ = "_lightning_callbacks_configuration.py"
-__doc__ = """where built-in callbacks are configured"""
-__author__ = ", ".join(["Michael E. Vinyard"])
-__email__ = ", ".join(["mvinyard.ai@gmail.com"])
-
-
 # -- import packages: ---------------------------------------------------------
 
-import os
 import ABCParse
-from lightning import Callback
-from lightning.pytorch.callbacks import (
-    ModelCheckpoint, StochasticWeightAveraging
-)
-
-
+import lightning
+import os
 
 # -- import local dependencies: -----------------------------------------------
 from .. import utils, callbacks
 
 
 # -- supporting class: --------------------------------------------------------
-class InterTrainerEpochCounter(Callback):
+class InterTrainerEpochCounter(lightning.pytorch.callbacks.Callback):
     def __init__(self):
         ...
 #         self.COMPLETED_EPOCHS = 0
@@ -43,19 +32,19 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
     def BuiltInCallbacks(self):
 
         return [
-        ModelCheckpoint(
-            every_n_epochs=self._every_n_epochs,
-            save_on_train_epoch_end=True,
-            save_top_k=self._save_top_k,
-            save_last=self._save_last,
-            monitor=self._monitor,
-        ),
+            lightning.pytorch.callbacks.ModelCheckpoint(
+                every_n_epochs=self._every_n_epochs,
+                save_on_train_epoch_end=True,
+                save_top_k=self._save_top_k,
+                save_last=self._save_last,
+                monitor=self._monitor,
+            ),
             InterTrainerEpochCounter(),
             callbacks.ModelLogging(),
 #             callbacks.VisualizeTrackedLoss(
 #                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
 #             ),
-            # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
+            # lightning.pytorch.callbacks.StochasticWeightAveraging(swa_lrs=self.swa_lrs),
             # considering rm SWA pending better understanding
         ]
     
@@ -63,19 +52,20 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
     def BuiltInPreTrainCallbacks(self):
 
         return [
-        ModelCheckpoint(
-            every_n_epochs=self._every_n_epochs,
-            save_on_train_epoch_end=True,
-            save_top_k=self._save_top_k,
-            save_last=self._save_last,
-            monitor=self._monitor,
-        ),
+            ModelCheckpoint(
+                every_n_epochs=self._every_n_epochs,
+                save_on_train_epoch_end=True,
+                save_top_k=self._save_top_k,
+                save_last=self._save_last,
+                monitor=self._monitor,
+            ),
             InterTrainerEpochCounter(),
+            
 #             callbacks.ModelLogging(),
 #             callbacks.VisualizeTrackedLoss(
 #                 **utils.extract_func_kwargs(func = callbacks.VisualizeTrackedLoss, kwargs = self._PARAMS),
 #             ),
-            # StochasticWeightAveraging(swa_lrs=self.swa_lrs),
+            # lightning.pytorch.callbacks.StochasticWeightAveraging(swa_lrs=self.swa_lrs),
             # considering rm SWA pending better understanding
         ]
 

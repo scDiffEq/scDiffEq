@@ -8,3 +8,4 @@ from ._testing import Testing
 # from ._visualize_tracked_loss import ModelTracker, VisualizeTrackedLoss
 # from ._visualize_predictions import VisualizePredictions
 from ._model_logging import ModelLogging
+from ._memory_monitor import MemoryMonitor
