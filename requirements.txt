@@ -15,3 +15,5 @@ cell-perturb>=0.0.1rc1
 tqdm
 anndata>=0.11.3
 scanpy>=1.11.0
+wandb
+psutil
