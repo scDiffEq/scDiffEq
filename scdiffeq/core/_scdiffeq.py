@@ -1,33 +1,25 @@
-# -- type setting: ------------------------------------------------------------
-from typing import Dict, List, Optional, Union
-
-
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
-import autodevice
-import glob
 import lightning
 import logging
 import os
 import pandas as pd
 import pathlib
-
-# import py_pkg_logging
 import torch
-from tqdm.notebook import tqdm
 import warnings
 
-
 # -- import local dependencies: -----------------------------------------------
-from . import configs, lightning_models, utils, callbacks
 from . import _mix_ins as mix_ins
-from .. import __version__  # tools
+from .. import __version__
+
+
+# -- set type hints: ----------------------------------------------------------
+from typing import Dict, List, Literal, Optional, Union
 
 
 # -- setup logging: -----------------------------------------------------------
 logger = logging.getLogger(__name__)
-
 
 # -- remove specific unnecessary warnings from dependency: --------------------
 warnings.filterwarnings(
@@ -49,7 +41,7 @@ class scDiffEq(
 ):
     """scDiffeq model class
 
-    Parameters
+    Parameters:
     ----------
     adata : Optional[anndata.AnnData], optional
         Annotated data matrix, by default None
@@ -215,7 +207,6 @@ class scDiffEq(
         Version of the model, by default __version__
     """
 
-    # @py_pkg_logging.log_function_call(logger)
     def __init__(
         self,
         # -- data params: ------------------------------------------------------
@@ -245,13 +236,13 @@ class scDiffEq(
         pretrain_step_size: int = 100,
         pretrain_scheduler=torch.optim.lr_scheduler.StepLR,
         # -- train params: -----------------------------------------------------
-        train_epochs: int = 1500,
+        train_epochs: int = 2500,
         train_lr: float = 1e-5,
         train_optimizer=torch.optim.RMSprop,
         train_scheduler=torch.optim.lr_scheduler.StepLR,
         train_step_size: int = 10,
         train_val_split: List[float] = [0.9, 0.1],
-        batch_size: int = 2000,
+        batch_size: int = 2048,
         train_key: str = "train",
         val_key: str = "val",
         test_key: str = "test",
@@ -276,13 +267,13 @@ class scDiffEq(
         t0_cluster: Optional[str] = None,
         shuffle_time_labels: bool = False,
         # -- DiffEq params: ---------------------------------------------------
-        mu_hidden: Union[List[int], int] = [400, 400],
+        mu_hidden: Union[List[int], int] = [512, 512],
         mu_activation: Union[str, List[str]] = "LeakyReLU",
         mu_dropout: Union[float, List[float]] = 0.1,
         mu_bias: bool = True,
         mu_output_bias: bool = True,
         mu_n_augment: int = 0,
-        sigma_hidden: Union[List[int], int] = [400, 400],
+        sigma_hidden: Union[List[int], int] = [32, 32],
         sigma_activation: Union[str, List[str]] = "LeakyReLU",
         sigma_dropout: Union[float, List[float]] = 0.1,
         sigma_bias: List[bool] = True,
@@ -296,8 +287,7 @@ class scDiffEq(
         coef_diffusion: float = 1.0,
         coef_prior_drift: float = 1.0,
         DiffEq_type: str = "SDE",
-        potential_type: Union[None, str] = None,
-        # other options: "fixed" or "prior"
+        potential_type: Literal["fixed", "prior"] = "fixed",
         # -- Encoder params: ---------------------------------------------------
         encoder_n_hidden: int = 4,
         encoder_power: float = 2,
@@ -391,7 +381,7 @@ class scDiffEq(
             coef_diffusion (float, optional): Coefficient for diffusion. Default is 1.0.
             coef_prior_drift (float, optional): Coefficient for prior drift. Default is 1.0.
             DiffEq_type (str, optional): Type of differential equation. Default is "SDE".
-            potential_type (Union[None, str], optional): Type of potential. Default is None.
+            potential_type (Literal["fixed","prior"]): Type of potential. Default is "fixed".
             encoder_n_hidden (int, optional): Number of hidden layers for encoder. Default is 4.
             encoder_power (float, optional): Power for encoder. Default is 2.
             encoder_activation (Union[str, List[str]], optional): Activation function for encoder. Default is "LeakyReLU".
@@ -407,12 +397,10 @@ class scDiffEq(
             ckpt_path (Optional[Union[pathlib.Path, str]], optional): Path to checkpoint. Default is None.
             version (str, optional): Version of the model. Default is __version__.
 
-        Returns:
-            None
+        Returns: None
         """
         self.__config__(locals())
 
-    # @py_pkg_logging.log_function_call(logger)
     def fit(
         self,
         train_epochs: int = 200,
@@ -464,29 +452,22 @@ class scDiffEq(
         deterministic : bool, optional
             Whether to use deterministic algorithms, by default False
 
-        Returns
-        -------
-        None
+        Returns: None
         """
         self.train(**ABCParse.function_kwargs(self.train, locals()))
 
-    # @py_pkg_logging.log_function_call(logger)
     def simulate(self) -> anndata.AnnData:
         """Simulate the scDiffEq model.
 
-        Returns
-        -------
-        anndata.AnnData
+        Returns: anndata.AnnData
             Simulated data
         """
         ...
 
     def __repr__(self) -> str:
         """String representation of the scDiffEq model.
-
-        Returns
-        -------
-        str
-            String representation of the model
+        Returns: str
         """
+        if hasattr(self, "DiffEq"):
+            return f"scDiffEq[{self.DiffEq.__repr__()}]"
         return "scDiffEq"
