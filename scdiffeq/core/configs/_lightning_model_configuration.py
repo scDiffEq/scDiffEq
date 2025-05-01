@@ -95,7 +95,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             _model.append("FateBiasAware")
             
             
-        if self._velocity_ratio_params:
+        if (self.DiffEq_type == "SDE") and self._velocity_ratio_params:
             _model.append("RegularizedVelocityRatio")
 
         _model = "_".join(_model)
