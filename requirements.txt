@@ -13,6 +13,5 @@ autodevice>=0.0.2
 cellplots>=0.0.1rc0
 cell-perturb>=0.0.1rc1
 tqdm
-py-pkg-logging
 anndata>=0.11.3
 scanpy>=1.11.0
