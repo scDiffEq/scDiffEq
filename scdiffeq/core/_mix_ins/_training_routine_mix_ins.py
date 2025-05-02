@@ -12,6 +12,7 @@ from typing import List, Optional
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 # -- base mix-in cls: ---------------------------------------------------------
 class BaseRoutineMixIn(object):
     """Base train/pre-train routine container"""
@@ -53,7 +54,7 @@ class BaseRoutineMixIn(object):
 
     def _flag_log_dir(self) -> None:
         if hasattr(self, "_csv_logger"):
-            logger.info(f"Logging locally to: {self._csv_logger.log_dir}")
+            logger.debug(f"Logging locally to: {self._csv_logger.log_dir}")
 
     def _initialize__attrs(self):
         """ """
@@ -62,6 +63,7 @@ class BaseRoutineMixIn(object):
             if not hasattr(self, attr_name):
                 setattr(self, attr_name, 0)
 
+
 # -- pre-training mix-in: -----------------------------------------------------
 class PreTrainMixIn(BaseRoutineMixIn):
     """Container hosting the pre-training config/execution methods"""
@@ -69,7 +71,7 @@ class PreTrainMixIn(BaseRoutineMixIn):
     def _configure_pretrain_step(self, kwargs) -> None:
         """"""
 
-        logger.info("Configuring pretraining step")
+        logger.debug("Configuring pretraining step")
 
         self._update_trainer_kwargs(kwargs)
 
@@ -128,13 +130,14 @@ class PreTrainMixIn(BaseRoutineMixIn):
             self._configure_pretrain_step(locals())
             self.pretrainer.fit(self.DiffEq, self.LitDataModule)
 
+
 # -- training mix-in: ---------------------------------------------------------
 class TrainMixIn(BaseRoutineMixIn):
     """Container hosting the training config/execution methods"""
 
     def _configure_train_step(self, kwargs):
         """"""
-        logger.info(f"Configuring training step")
+        logger.debug(f"Configuring training step")
 
         self._update_trainer_kwargs(kwargs)
 
