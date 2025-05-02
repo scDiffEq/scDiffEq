@@ -221,12 +221,8 @@ class PancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
         if not hasattr(self, "_adata"):
             if not self.h5ad_path.exists() or self._force_download:
                 self.download()
-                adata = anndata.read_h5ad(self.h5ad_path)
-                self._adata = self._preprocess(adata=adata)
-                return self._adata
-            else:
-                logger.info(f"Loading data from {self.h5ad_path}")
-                return anndata.read_h5ad(self.h5ad_path)
+            self._adata = anndata.read_h5ad(self.h5ad_path)
+        return self._adata
 
 
 def pancreatic_endocrinogenesis(
