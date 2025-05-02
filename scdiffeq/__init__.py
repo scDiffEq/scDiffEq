@@ -1,4 +1,3 @@
-
 # -- handle dependency-related warnings: --------------------------------------
 import os as _os
 
@@ -20,3 +19,15 @@ from . import _backend_utilities as utils
 
 # -- version: -----------------------------------------------------------------
 from .__version__ import __version__
+
+
+__all__ = [
+    "scDiffEq",
+    "core",
+    "io",
+    "pl",
+    "tl",
+    "datasets",
+    "utils",
+    "__version__",
+]

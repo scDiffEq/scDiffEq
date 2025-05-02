@@ -27,7 +27,7 @@ class ModelConfigMixIn(object):
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             save_dir=self._name,
         )
-        logger.info(f"TrainerGenerator configured: {self._name}")
+        logger.debug(f"TrainerGenerator configured: {self._name}")
 
     def configure_model(
         self,
@@ -54,7 +54,7 @@ class ModelConfigMixIn(object):
         self.DiffEq = DiffEq
         self._name = self.DiffEq.hparams.name
 
-        logger.info(f"Using the specified parameters, {self.DiffEq} has been called.")
+        logger.debug(f"Using the specified parameters, {self.DiffEq} has been called.")
         self._component_loader = utils.FlexibleComponentLoader(self)
 
         lightning.seed_everything(self._seed)

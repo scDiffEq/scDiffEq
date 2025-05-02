@@ -1,17 +1,21 @@
-
-from types import FunctionType
-from typing import Optional
-
-
-import ABCParse
+# -- import packages: ---------------------------------------------------------
 import anndata
 import autodevice
+import logging
 import torch
 
-
+# -- import local dependencies: -----------------------------------------------
 from ... import tools
 
+# -- set type hints: ----------------------------------------------------------
+from typing import FunctionType, Optional
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+# -- mix-in cls: --------------------------------------------------------------
 class StateCharacterizationMixIn(object):
     """MixIn container for state characterization functions."""
 
@@ -88,7 +92,6 @@ class StateCharacterizationMixIn(object):
             *args,
             **kwargs,
         )
-    
 
     def diffusion(
         self,

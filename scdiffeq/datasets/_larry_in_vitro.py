@@ -20,14 +20,14 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
     figshare_id = 52612805
 
     def __init__(
-            self,
-            data_dir=os.getcwd(),
-            filter_genes: bool = True,
-            reduce_dimensions: bool = True,
-            force_download: bool = False,
-            *args,
-            **kwargs,
-        ):
+        self,
+        data_dir=os.getcwd(),
+        filter_genes: bool = True,
+        reduce_dimensions: bool = True,
+        force_download: bool = False,
+        *args,
+        **kwargs,
+    ):
 
         self.__parse__(locals())
 
@@ -54,7 +54,10 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         return any([self._filter_genes, self._reduce_dimensions])
 
     def download(self):
-        figshare_downloader(figshare_id=self.figshare_id, write_path=self.h5ad_path)
+        figshare_downloader(
+            figshare_id=self.figshare_id,
+            write_path=self.h5ad_path,
+        )
 
     def _gene_filtering(self, adata: anndata.AnnData) -> anndata.AnnData:
         return adata[:, adata.var["use_genes"]].copy()
@@ -66,8 +69,8 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         pca = sklearn.decomposition.PCA(n_components=50)
 
         # -- fit transform data: ----------------------------------------------
-        adata.obsm['X_scaled'] = scaler.fit_transform(adata.X.toarray())        
-        adata.obsm['X_pca'] = pca.fit_transform(adata.obsm['X_scaled'])
+        adata.obsm["X_scaled"] = scaler.fit_transform(adata.X.toarray())
+        adata.obsm["X_pca"] = pca.fit_transform(adata.obsm["X_scaled"])
 
         # -- save models: -----------------------------------------------------
         io.write_pickle(
@@ -101,12 +104,13 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
                 logger.info(f"Loading data from {self.h5ad_path}")
                 return anndata.read_h5ad(self.h5ad_path)
 
+
 def larry(
-        data_dir: str = os.getcwd(),
-        filter_genes: bool = True,
-        reduce_dimensions: bool = True,
-        force_download: bool = False,
-    ) -> anndata.AnnData:
+    data_dir: str = os.getcwd(),
+    filter_genes: bool = True,
+    reduce_dimensions: bool = True,
+    force_download: bool = False,
+) -> anndata.AnnData:
     """LARRY in vitro dataset
 
     Args:
