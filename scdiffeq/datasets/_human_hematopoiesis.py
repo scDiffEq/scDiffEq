@@ -8,7 +8,7 @@ import pathlib
 
 
 # -- import local dependencies: -----------------------------------------------
-from .. import figshare_downloader
+from ._figshare_downloader import figshare_downloader
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
