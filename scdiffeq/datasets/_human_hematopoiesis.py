@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class UnProcessedHumanHematpoiesisDataHandler(ABCParse.ABCParse):
     # HTTPS = "https://www.dropbox.com/s/8m8n6fj8yn1ryjd/hsc_all_combined_all_layers.h5ad?dl=1"
     RAW_FNAME = "_hsc_all_combined_all_layers.h5ad"
-    PROCESSED_FNAME = "human_hematopoiesis.preprocessed.h5ad"
+    PROCESSED_FNAME = "human_hematopoiesis.processed.h5ad"
 
     def __init__(
         self,
@@ -144,7 +144,7 @@ class UnProcessedHumanHematpoiesisDataHandler(ABCParse.ABCParse):
             adata.obsm["X_pca"] = self.PCA_MODEL.fit_transform(adata.layers["X_scaled"])
             io.write_pickle(
                 self.SCALER_MODEL,
-                self.data_dir.joinpath("human_hematopoiesis.scaler_model.pkl"),
+                self.data_dir.joinpath("human_hematopoiesis.scaler.pkl"),
             )
 
         adata.obsm["X_umap"] = self.UMAP_MODEL.fit_transform(
@@ -152,11 +152,11 @@ class UnProcessedHumanHematpoiesisDataHandler(ABCParse.ABCParse):
         )
 
         io.write_pickle(
-            self.PCA_MODEL, self.data_dir.joinpath("human_hematopoiesis.pca_model.pkl")
+            self.PCA_MODEL, self.data_dir.joinpath("human_hematopoiesis.pca.pkl")
         )
         io.write_pickle(
             self.UMAP_MODEL,
-            self.data_dir.joinpath("human_hematopoiesis.umap_model.pkl"),
+            self.data_dir.joinpath("human_hematopoiesis.umap.pkl"),
         )
 
         return self._match_and_filter_on_idx(adata)
@@ -172,7 +172,7 @@ class UnProcessedHumanHematpoiesisDataHandler(ABCParse.ABCParse):
 # -- dataset cls: -------------------------------------------------------------
 class HumanHematopoiesisDataset(ABCParse.ABCParse):
     _FNAME = "human_hematopoiesis"
-    _ADATA_FNAME = f"adata.{_FNAME}.processed.h5ad"
+    _ADATA_FNAME = f"{_FNAME}.processed.h5ad"
     figshare_ids = {
         "adata": {"file_id": 54154232, "fname": _ADATA_FNAME},
         "scaler": {"file_id": 54154226, "fname": f"{_FNAME}.scaler.pkl"},
@@ -216,7 +216,7 @@ class HumanHematopoiesisDataset(ABCParse.ABCParse):
     @property
     def adata(self) -> anndata.AnnData:
         if not hasattr(self, "_adata"):
-            if not self.h5ad_path.exists() or self._force_download:
+            if (not self.h5ad_path.exists()) or self._force_download:
                 self.download()
             self._adata = anndata.read_h5ad(self.h5ad_path)
         return self._adata
