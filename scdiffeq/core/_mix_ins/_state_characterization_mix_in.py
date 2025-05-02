@@ -12,7 +12,6 @@ from typing import Callable, Optional
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 # -- mix-in cls: --------------------------------------------------------------

@@ -1,3 +1,8 @@
+# -- configure logging: -------------------------------------------------------
+from ._backend_utilities._configure_logging import configure_logging
+
+logger = configure_logging()
+
 # -- handle dependency-related warnings: --------------------------------------
 import os as _os
 
@@ -30,4 +35,5 @@ __all__ = [
     "datasets",
     "utils",
     "__version__",
+    "logger",
 ]

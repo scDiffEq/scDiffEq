@@ -6,7 +6,6 @@ import pandas as pd
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 # -- mix-in cls: --------------------------------------------------------------

@@ -10,7 +10,6 @@ from typing import List, Optional
 
 # -- configure logging: --------------------------------------------------------
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 # -- base mix-in cls: ---------------------------------------------------------

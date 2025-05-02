@@ -13,11 +13,11 @@ logger.setLevel(logging.INFO)
 # -- set type hints: ----------------------------------------------------------
 from typing import Dict, Optional
 
-# -- configure logging: --------------------------------------------------------
+# -- configure logging: -------------------------------------------------------
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
+# -- mix-in cls: --------------------------------------------------------------
 class ModelConfigMixIn(object):
     """configure_model and configure_data can/should be accessed from the public handle"""
 

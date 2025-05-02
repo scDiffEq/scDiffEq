@@ -1,4 +1,4 @@
- # -- import packages: --------------------------------------------------------
+# -- import packages: --------------------------------------------------------
 import ABCParse
 import anndata
 import logging
@@ -12,7 +12,6 @@ from typing import Optional
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 # -- mix-in cls: --------------------------------------------------------------
@@ -34,12 +33,11 @@ class kNNMixIn(ABCParse.ABCParse, object):
         kNN_key: Optional[str] = None,
         kNN_fit_subset: Optional[str] = None,
     ) -> None:
-        
         """
         subset key should point to a col in adata.obs of bool vals
         """
         self.__update__(locals())
-        
+
         logger.info(f"Bulding Annoy kNN Graph on adata.obsm['{self._kNN_fit_subset}']")
 
         self._kNN = tools.kNN(

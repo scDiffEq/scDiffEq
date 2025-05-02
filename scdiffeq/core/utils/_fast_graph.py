@@ -1,4 +1,3 @@
-
 # -- import packages: ----------------------------------------------------------
 import anndata
 import annoyance
@@ -16,18 +15,18 @@ from typing import Optional
 
 # -- configure logging: --------------------------------------------------------
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
 
 # -- operational cls: ----------------------------------------------------------
 class FastGraph:
     """ """
+
     def __init__(
         self,
         adata: anndata.AnnData,
         use_key: str,
         annot_key: str = "Cell type annotation",
     ) -> None:
-        
         """ """
 
         self.adata = adata
@@ -80,5 +79,5 @@ class FastGraph:
 
         if not dimension_reduction_model is None:
             X_hat_ = self._TRANSFORM(dimension_reduction_model, X_fin=X_hat_)
-            
+
         return self._fate_df(self._query(X_fin=X_hat_))
