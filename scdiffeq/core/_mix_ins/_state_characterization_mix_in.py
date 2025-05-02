@@ -8,7 +8,7 @@ import torch
 from ... import tools
 
 # -- set type hints: ----------------------------------------------------------
-from typing import FunctionType, Optional
+from typing import Callable, Optional
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class StateCharacterizationMixIn(object):
 
     def _drift_diffusion_fwd(
         self,
-        func: FunctionType,
+        func: Callable,
         obsm_key_added: str,
         obs_key_added: str,
         adata: Optional[anndata.AnnData] = None,
