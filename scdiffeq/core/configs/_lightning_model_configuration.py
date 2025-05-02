@@ -1,17 +1,13 @@
-
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import logging
 import os
 
-
 # -- import local dependencies: -----------------------------------------------
 from .. import lightning_models, utils
 
-
 # -- set typing: --------------------------------------------------------------
 from typing import Dict, Optional
-
 
 # -- setup logging: -----------------------------------------------------------
 logger = logging.getLogger(__name__)
@@ -20,6 +16,7 @@ logger = logging.getLogger(__name__)
 # -- operational class: -------------------------------------------------------
 class LightningModelConfiguration(ABCParse.ABCParse):
     """ """
+
     _potential_types = {
         "fixed": "FixedPotential",
         "prior": "PriorPotential",
@@ -31,7 +28,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
         latent_dim: int = 50,
         DiffEq_type: str = "SDE",
         potential_type: str = "fixed",
-        fate_bias_csv_path = None,
+        fate_bias_csv_path=None,
         velocity_ratio_params: Dict = None,
     ):
         """ """
@@ -41,9 +38,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
     @property
     def available_lightning_models(self):
         return [
-            attr
-            for attr in lightning_models.__dir__()
-            if attr.startswith("Lightning")
+            attr for attr in lightning_models.__dir__() if attr.startswith("Lightning")
         ]
 
     @property
@@ -58,7 +53,7 @@ class LightningModelConfiguration(ABCParse.ABCParse):
     def potential_type(self):
         if self._potential_type:
             return self._potential_types[self._potential_type]
-        
+
     @property
     def fate_bias_aware(self) -> bool:
         """
@@ -72,15 +67,18 @@ class LightningModelConfiguration(ABCParse.ABCParse):
                 return True
         else:
             return False
-        
+
     @property
     def _USE_CKPT(self) -> bool:
         return not self._ckpt_path is None
-    
+
     def __call__(
-        self, kwargs: Dict, ckpt_path: Optional[str] = None, loading_existing: bool = False,
-                ):
-        
+        self,
+        kwargs: Dict,
+        ckpt_path: Optional[str] = None,
+        loading_existing: bool = False,
+    ):
+
         self._ckpt_path = ckpt_path
 
         _model = [self.DiffEq_type]
@@ -90,25 +88,26 @@ class LightningModelConfiguration(ABCParse.ABCParse):
 
         if self.potential_type:
             _model.append(self.potential_type)
-            
+
         if self.fate_bias_aware:
             _model.append("FateBiasAware")
-            
-            
+
         if (self.DiffEq_type == "SDE") and self._velocity_ratio_params:
             _model.append("RegularizedVelocityRatio")
 
         _model = "_".join(_model)
-        
+
         if _model in self.available_lightning_models:
             lit_model = getattr(lightning_models, _model)
-            
+
             if self._USE_CKPT:
                 return lit_model.load_from_checkpoint(self._ckpt_path)
-            
+
             model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
-            model_kwargs['loading_existing'] = loading_existing
-            logger.warning(model_kwargs)
-            return lit_model(**model_kwargs) # data_dim = self._data_dim, 
-        
-        raise ValueError(f"Configuration tried: {_model} - this does not exist as an available model.")
+            model_kwargs["loading_existing"] = loading_existing
+            logger.debug(model_kwargs)
+            return lit_model(**model_kwargs)  # data_dim = self._data_dim,
+
+        raise ValueError(
+            f"Configuration tried: {_model} - this does not exist as an available model."
+        )

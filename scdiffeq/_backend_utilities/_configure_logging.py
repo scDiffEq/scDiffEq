@@ -22,10 +22,12 @@ def configure_logging(name="scdiffeq", log_file="scdiffeq.log"):
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
 
+    stream_formatter = logging.Formatter("scDiffEq: %(message)s")
+
     # Stream handler (INFO+)
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
-    ch.setFormatter(formatter)
+    ch.setFormatter(stream_formatter)
 
     logger.addHandler(fh)
     logger.addHandler(ch)
