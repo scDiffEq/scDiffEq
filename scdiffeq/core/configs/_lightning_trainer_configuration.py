@@ -1,26 +1,25 @@
 # -- import packages: ----------------------------------------------------------
-from lightning import Trainer
-from lightning.pytorch import loggers
-import torch
-import os
 import ABCParse
-
+import lightning
+import logging
+import os
+import torch
 
 # -- import local dependencies: ------------------------------------------------
 from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
-from .. import utils, callbacks
 from ._progress_bar_config import ProgressBarConfig
 
-# -- define typing: ------------------------------------------------------------
-from typing import Union, Dict, List, Optional
+# -- set type hints: ----------------------------------------------------------
+from typing import Optional, Union
+
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
-# -- Main class: ---------------------------------------------------------------
+# -- Main class: --------------------------------------------------------------
 class LightningTrainerConfiguration(ABCParse.ABCParse):
     def __init__(self, save_dir: str = "scDiffEq_Model"):
         super().__init__()
-
-        self._progress_bar_config = ProgressBarConfig()
 
         self.__parse__(locals())
         if not os.path.exists(self._save_dir):
@@ -37,7 +36,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
     def _Trainer_kwargs(self):
         ignore = ["accelerator", "callbacks", "version", "logger"]
         tk = ABCParse.function_kwargs(
-            func=Trainer,
+            func=lightning.pytorch.Trainer,
             kwargs=self._PARAMS,
         )
         for val in ignore:
@@ -98,7 +97,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         If pre-train routine was used, Trainer loads from ckpt path.
         """
 
-        return Trainer(
+        return lightning.pytorch.Trainer(
             accelerator=self.accelerator,
             logger=self._logger,  # loggers.CSVLogger(**self._CSVLogger_kwargs),
             callbacks=self.Callbacks,
@@ -116,7 +115,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         self._Trainer_kwargs["max_epochs"] = 0
         self._Trainer_kwargs["callbacks"] = self.Callbacks
 
-        return Trainer(
+        return lightning.pytorch.Trainer(
             accelerator=self.accelerator,
             logger=self._logger,  # loggers.CSVLogger(**self._CSVLogger_kwargs),
             num_sanity_val_steps=-1,
@@ -155,59 +154,23 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         val_check_interval=None,
         #         swa_lrs: float = None,
         reload_dataloaders_every_n_epochs=1,
-        **kwargs
+        **kwargs,
     ):
         """
-        Return trainer upon call.
 
-        Parameters:
-        -----------
-        stage
-            type: str
-            default: None
+        Args:
+        stage (str): stage of the training.
+        max_epochs (int): maximum number of epochs to train.
+        callbacks (list): list of callbacks to use.
+        potential_model (bool): whether the model is a potential model.
+        check_val_every_n_epoch (int): number of epochs to check validation.
+        limit_val_batches (int): number of validation batches to use.
+        num_sanity_val_steps (int): number of sanity validation steps.
+        val_check_interval (int): number of epochs to check validation.
+        reload_dataloaders_every_n_epochs (int): number of epochs to reload dataloaders.
+        **kwargs: additional keyword arguments to pass to the Trainer.
 
-        max_epochs
-            type: int
-            default: 500
-
-        accelerator
-            type: str
-            default: None
-
-        devices
-            type: int
-            default: None
-
-        prefix
-            type: str
-            default: ""
-
-        log_every_n_steps
-            type: int
-            default: 1
-
-        flush_logs_every_n_steps
-            type: int
-            default: 1
-
-        version
-            type: [int, str]
-            default: None
-
-        callbacks
-            type: list
-            default: []
-
-        potential_model
-            type: bool
-            default: False
-
-        kwargs:
-        -------
-        Keyword arguments that may be passed to pytorch_lightning.Trainer()
-
-        Notes:
-        ------
+        Returns: TrainerGenerator
         """
 
         self._gradient_clip_val = gradient_clip_val
@@ -217,18 +180,12 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         if stage is None:
             stage = ""
         self._stage = stage
-        #         if isinstance(swa_lrs, NoneType):
-        #             swa_lrs = lr
+        self._progress_bar_config = ProgressBarConfig(total_epochs=max_epochs)
 
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()
 
-        self.__parse__(locals())  #  private=['accelerator', 'callbacks'])
-
-        #         self._PARAMS["name"] = "{}_logs".format(stage)
-        #         log_save_dir = os.path.join(self.save_dir, self._PARAMS["name"])
-        #         if not os.path.exists(log_save_dir):
-        #             os.mkdir(log_save_dir)
+        self.__parse__(locals())
 
         if (potential_model) and (stage in ["test", "predict"]):
             self._retain_test_gradients = True

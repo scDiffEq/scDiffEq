@@ -1,11 +1,9 @@
-
 import abc
 import numpy as np
 
 
 class AnnDataIndexLookup(abc.ABC):
-    def __init__(self):
-        ...
+    def __init__(self): ...
 
     def _configure(self, adata):
         if not hasattr(self, "adata"):
@@ -13,8 +11,7 @@ class AnnDataIndexLookup(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def NAMES(self):
-        ...
+    def NAMES(self): ...
 
     def forward(self, idx):
         """Locate an individual cell index"""
@@ -26,11 +23,10 @@ class AnnDataIndexLookup(abc.ABC):
 
 
 class VarIndexLookUp(AnnDataIndexLookup):
-    
     """
     At __call__, var_names are set and looked up.
     """
-    
+
     def __init__(self, var_name_key: str = "gene_ids"):
         super().__init__()
 
@@ -50,8 +46,7 @@ class VarIndexLookUp(AnnDataIndexLookup):
 
 
 class ObsIndexLookUp(AnnDataIndexLookup):
-    def __init__(self):
-        ...
+    def __init__(self): ...
 
     @property
     def NAMES(self):
