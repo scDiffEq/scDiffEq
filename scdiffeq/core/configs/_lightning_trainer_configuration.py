@@ -9,7 +9,7 @@ import ABCParse
 # -- import local dependencies: ------------------------------------------------
 from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
 from .. import utils, callbacks
-
+from ._progress_bar_config import ProgressBarConfig
 
 # -- define typing: ------------------------------------------------------------
 from typing import Union, Dict, List, Optional
@@ -19,6 +19,8 @@ from typing import Union, Dict, List, Optional
 class LightningTrainerConfiguration(ABCParse.ABCParse):
     def __init__(self, save_dir: str = "scDiffEq_Model"):
         super().__init__()
+
+        self._progress_bar_config = ProgressBarConfig()
 
         self.__parse__(locals())
         if not os.path.exists(self._save_dir):
@@ -47,7 +49,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
     def Callbacks(self):
         callback_config = LightningCallbacksConfiguration()
 
-        return callback_config(
+        callbacks = callback_config(
             version=self._version,
             monitor_hardware=self._monitor_hardware,
             stage=self._stage,
@@ -64,6 +66,8 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
             save_last=self._save_last_ckpt,
             # swa_lrs=1e-5,
         )
+        callbacks.extend(self._progress_bar_config.pbar)
+        return callbacks
 
     #         return callback_config(
     #             callbacks=self._callbacks,
@@ -98,6 +102,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
             accelerator=self.accelerator,
             logger=self._logger,  # loggers.CSVLogger(**self._CSVLogger_kwargs),
             callbacks=self.Callbacks,
+            enable_progress_bar=self._progress_bar_config.enable_progress_bar,
             **self._Trainer_kwargs,
         )
 
@@ -115,7 +120,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
             accelerator=self.accelerator,
             logger=self._logger,  # loggers.CSVLogger(**self._CSVLogger_kwargs),
             num_sanity_val_steps=-1,
-            enable_progress_bar=False,
+            enable_progress_bar=self._progress_bar_config.enable_progress_bar,
             **self._Trainer_kwargs,
         )
 
