@@ -17,6 +17,9 @@ class BasicProgressBar(lightning.pytorch.callbacks.Callback):
         Args:
             total_epochs (int): total number of epochs
             metric_keys (list or None): which metrics to log (e.g., ["val_loss"])
+
+        Notes:
+            Added in v0.1.4
         """
         self.total_epochs = total_epochs
         self.epoch_start_time = None
