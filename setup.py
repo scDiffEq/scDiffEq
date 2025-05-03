@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import setuptools
 import re
@@ -20,7 +19,7 @@ with open(f"{name}/__version__.py") as v:
 setuptools.setup(
     name=name,
     version=__version__,
-    python_requires=">3.9.0",
+    python_requires=">3.10",
     author="Michael E. Vinyard",
     author_email="mvinyard.ai@gmail.com",
     url="https://github.com/scDiffEq/scDiffEq",
@@ -31,7 +30,7 @@ setuptools.setup(
     install_requires=requirements,
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
