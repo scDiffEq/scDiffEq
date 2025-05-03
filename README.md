@@ -40,7 +40,7 @@ model.fit(train_epochs = 1500)
 
 
 ## System requirements
-- Developed on linux20.04 and MacOS (with Apple Silicon), using Python3.9.
+- Developed on linux20.04 and MacOS (with Apple Silicon), using Python3.11.
 - Software dependencies are listed in [requirements.txt](./requirements.txt)
 - Tested with NVIDIA GPUs (A100, T4) and Apple Silicon. Most datasets likely only require an NVIDIA Tesla T4 (free in Google Colab).
 
