@@ -3,6 +3,7 @@ import ABCParse
 import anndata
 import logging
 import os
+import pandas as pd
 import pathlib
 import sklearn
 
@@ -10,9 +11,40 @@ import sklearn
 from .. import io
 from ._figshare_downloader import figshare_downloader
 
+# -- set type hints: -----------------------------------------------------------
+from typing import Dict, Union
+
 # -- configure logger: ----------------------------------------------------------
 logger = logging.getLogger(__name__)
 
+
+def _annotate_larry_cytotrace(adata: anndata.AnnData, data_dir: Union[str, pathlib.Path]) -> Dict[str, pd.DataFrame]:
+    
+    """ """
+    
+    obs_write_path = str(pathlib.Path(data_dir).joinpath("larry.ct_obs_df.csv"))
+    var_write_path = str(pathlib.Path(data_dir).joinpath("larry.ct_var_df.csv"))    
+    
+    figshare_downloader(
+        figshare_id="54312011",
+        write_path=obs_write_path,
+    )
+    figshare_downloader(
+        figshare_id="54312008",
+        write_path=var_write_path,
+    )
+    
+
+    obs_df = pd.read_csv(obs_write_path, index_col = 0)
+    var_df = pd.read_csv(var_write_path, index_col = 0)
+
+    obs_df.index = obs_df.index.astype(str)
+    var_df.index = var_df.index.astype(str)
+
+    adata.obs = pd.concat([adata.obs, obs_df, axis = 1)
+    adata.var = pd.concat([adata.var, var_df, axis = 1)
+
+    return adata
 
 # -- Controller class: ---------------------------------------------------------
 class LARRYInVitroDataset(ABCParse.ABCParse):
@@ -24,6 +56,7 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         data_dir=os.getcwd(),
         filter_genes: bool = True,
         reduce_dimensions: bool = True,
+        cytotrace: bool = True,
         force_download: bool = False,
         *args,
         **kwargs,
@@ -89,6 +122,8 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
                 adata = self._gene_filtering(adata)
             if self._reduce_dimensions:
                 self._dimension_reduction(adata)
+            if self._cytrotrace:
+                _annotate_larry_cytotrace(adata=adata, data_dir=data_dir)
             adata.write_h5ad(self.h5ad_path)
         return adata
 
@@ -109,6 +144,7 @@ def larry(
     data_dir: str = os.getcwd(),
     filter_genes: bool = True,
     reduce_dimensions: bool = True,
+    cytotrace: bool = True,
     force_download: bool = False,
 ) -> anndata.AnnData:
     """LARRY in vitro dataset
@@ -120,6 +156,8 @@ def larry(
             Whether to filter genes.
         reduce_dimensions: bool, default=True
             Whether to reduce dimensions.
+        cytotrace: bool, default=True
+            Whether to annotate LARRY with pre-computed CytoTRACE annotations.
         force_download: bool, default=False
             Whether to force download the data.
 
@@ -130,6 +168,7 @@ def larry(
         data_dir=data_dir,
         filter_genes=filter_genes,
         reduce_dimensions=reduce_dimensions,
+        cytotrace=cytotrace,
         force_download=force_download,
     )
     return data_handler.adata
