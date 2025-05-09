@@ -41,8 +41,8 @@ def _annotate_larry_cytotrace(adata: anndata.AnnData, data_dir: Union[str, pathl
     obs_df.index = obs_df.index.astype(str)
     var_df.index = var_df.index.astype(str)
 
-    adata.obs = pd.concat([adata.obs, obs_df, axis = 1)
-    adata.var = pd.concat([adata.var, var_df, axis = 1)
+    adata.obs = pd.concat([adata.obs, obs_df], axis = 1)
+    adata.var = pd.concat([adata.var, var_df], axis = 1)
 
     return adata
 
