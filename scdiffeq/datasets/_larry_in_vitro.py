@@ -122,7 +122,7 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
                 adata = self._gene_filtering(adata)
             if self._reduce_dimensions:
                 self._dimension_reduction(adata)
-            if self._cytrotrace:
+            if self._cytotrace:
                 _annotate_larry_cytotrace(adata=adata, data_dir=data_dir)
             adata.write_h5ad(self.h5ad_path)
         return adata
