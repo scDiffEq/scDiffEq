@@ -34,12 +34,18 @@ def _annotate_larry_cytotrace(adata: anndata.AnnData, data_dir: Union[str, pathl
         write_path=var_write_path,
     )
     
-
     obs_df = pd.read_csv(obs_write_path, index_col = 0)
     var_df = pd.read_csv(var_write_path, index_col = 0)
 
+    # Convert indices to strings
     obs_df.index = obs_df.index.astype(str)
     var_df.index = var_df.index.astype(str)
+    
+    # Convert all columns to strings
+    for col in obs_df.columns:
+        obs_df[col] = obs_df[col].astype(str)
+    for col in var_df.columns:
+        var_df[col] = var_df[col].astype(str)
 
     adata.obs = pd.concat([adata.obs, obs_df], axis = 1)
     adata.var = pd.concat([adata.var, var_df], axis = 1)
@@ -118,12 +124,12 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
     def _preprocess(self, adata: anndata.AnnData) -> anndata.AnnData:
         if self._DO_PREPROCESSING:
             logger.info("Preprocessing...")
+            if self._cytotrace:
+                _annotate_larry_cytotrace(adata=adata, data_dir=self.data_dir)
             if self._filter_genes:
                 adata = self._gene_filtering(adata)
             if self._reduce_dimensions:
                 self._dimension_reduction(adata)
-            if self._cytotrace:
-                _annotate_larry_cytotrace(adata=adata, data_dir=data_dir)
             adata.write_h5ad(self.h5ad_path)
         return adata
 
