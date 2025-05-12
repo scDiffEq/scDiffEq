@@ -21,6 +21,7 @@ class FatePerturbationScreen(ABCParse.ABCParse):
         N: int = 200,
         time_key: str = "t",
         nb: bool = True,
+        disable_tqdm: Optional[bool] = False,
         *args,
         **kwargs,
     ):
@@ -58,9 +59,14 @@ class FatePerturbationScreen(ABCParse.ABCParse):
 
     @property
     def _progress_bar(self):
-        if self._nb:
-            return tqdm.notebook.tqdm(self.genes)
-        return tqdm_sh.tqdm(self.genes)
+        if not self._disable_tqdm:
+            if self._nb:
+                try:
+                    return tqdm.notebook.tqdm(self.genes)
+                except:
+                    return self.genes
+            return tqdm_sh.tqdm(self.genes)
+        return self.genes
     
     def __call__(
         self,
