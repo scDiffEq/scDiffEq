@@ -1,14 +1,9 @@
 
-__module_name__ = "__init__.py"
-__doc__ = """tools __init__ module. Sub-package of the main scdiffeq API."""
-__author__ = ", ".join(["Michael E. Vinyard",])
-__email__ = ", ".join(["mvinyard.ai@gmail.org",])
-
-
 # import functions accessed as sdq.tl.<func>: ---------------------------------
-
 from . import utils
 
+# -- pseudotime: --------------------------------------------------------------
+from ._bin_pseudotime import bin_pseudotime
 
 # -- kNN: ---------------------------------------------------------------------
 from ._knn import kNN
@@ -43,6 +38,31 @@ from ._velocity_graph import velocity_graph
 # -- general characterization: ------------------------------------------------
 from ._drift_diffusion_state_characterization import drift, diffusion
 from ._cell_potential import cell_potential, normalize_cell_potential
+
+__all__ = [
+    "bin_pseudotime",
+    "kNN",
+    "kNNSmoothing",
+    "Simulation",
+    "simulate",
+    "GeneCompatibility",
+    "annotate_gene_features",
+    "annotate_cell_state",
+    "annotate_cell_fate",
+    "invert_scaled_gex",
+    "FatePerturbationExperiment",
+    "FatePerturbationScreen",
+    "perturb",
+    "perturb_scan_z_range",
+    "GridVelocity",
+    "VelocityEmbedding",
+    "velocity_graph",
+    "drift",
+    "diffusion",
+    "cell_potential",
+    "normalize_cell_potential",
+    "utils",
+]
 
 # -- --------------------------------------------------------------------------
 # from ._feature_correlation import (

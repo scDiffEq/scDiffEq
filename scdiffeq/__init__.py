@@ -19,6 +19,7 @@ from . import io
 from . import plotting as pl
 from . import tools as tl
 from . import datasets
+from . import callbacks
 from . import _backend_utilities as utils
 
 
@@ -28,6 +29,7 @@ from .__version__ import __version__
 
 __all__ = [
     "scDiffEq",
+    "callbacks",
     "core",
     "io",
     "pl",
