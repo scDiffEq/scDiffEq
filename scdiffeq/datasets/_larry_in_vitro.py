@@ -132,6 +132,18 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
                 self._dimension_reduction(adata)
             adata.write_h5ad(self.h5ad_path)
         return adata
+    
+    def _safe_read(self):
+        logger.info(f"Loading data from {self.h5ad_path}")
+        try:
+            adata = anndata.read_h5ad(self.h5ad_path)
+            if "ct_pseudotime" in adata.obs.columns:
+                adata.obs['ct_pseudotime'] = adata.obs['ct_pseudotime'].astype(float)
+            adata.obs.index.name = "index"
+        except Exception as e:
+            logger.error(f"Error loading data from {self.h5ad_path}: {e}")
+            raise e
+        return adata
 
     @property
     def adata(self) -> anndata.AnnData:
@@ -142,8 +154,7 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
                 self._adata = self._preprocess(adata=adata)
                 return self._adata
             else:
-                logger.info(f"Loading data from {self.h5ad_path}")
-                return anndata.read_h5ad(self.h5ad_path)
+                return self._safe_read()
 
 
 def larry(
