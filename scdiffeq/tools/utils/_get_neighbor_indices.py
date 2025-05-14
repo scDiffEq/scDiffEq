@@ -1,4 +1,3 @@
-
 # -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
@@ -64,7 +63,29 @@ class DistancesHandler(ABCParse.ABCParse):
     def _return_mode_distances(self):
         """scvelo also enables return mode on connectivities. we'll
         forego that for now."""
-        return self.distances.indices.reshape((-1, self.n_neighbors))
+        # Create a new CSR matrix with exactly n_neighbors per row
+        n_obs = self._adata.n_obs
+        indices = []
+        
+        for i in range(n_obs):
+            # Get row indices
+            row_indices = self.distances.indices[self.distances.indptr[i]:self.distances.indptr[i+1]]
+            # Sort by distance (closest first)
+            row_data = self.distances.data[self.distances.indptr[i]:self.distances.indptr[i+1]]
+            idx_sorted = np.argsort(row_data)
+            
+            # Take only the n_neighbors closest neighbors
+            if len(idx_sorted) >= self.n_neighbors:
+                nn_idx = row_indices[idx_sorted[:self.n_neighbors]]
+            else:
+                # If not enough neighbors, pad with the cell's own index
+                nn_idx = np.zeros(self.n_neighbors, dtype=int)
+                nn_idx[:len(idx_sorted)] = row_indices[idx_sorted]
+                nn_idx[len(idx_sorted):] = i
+            
+            indices.append(nn_idx)
+            
+        return np.array(indices)
 
     def __call__(
         self, adata: anndata.AnnData, n_neighbors: Optional[int] = None, *args, **kwargs
