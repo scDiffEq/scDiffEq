@@ -1,20 +1,17 @@
-import pandas as pd
-
-# import larry
-import numpy as np
-import adata_query
-import autodevice
-import torch
-import matplotlib.pyplot as plt
-import tqdm.notebook
+# -- import packages: ---------------------------------------------------------
 import ABCParse
+import adata_query
 import anndata
+import autodevice
 import lightning
+import numpy as np
+import pandas as pd
+import torch
 
-
+# -- set type hints: ----------------------------------------------------------
 from typing import Optional
 
-
+# -- operational cls: ---------------------------------------------------------
 class Simulation(ABCParse.ABCParse):
     """Sampled trajectories from an scDiffEq model"""
 
