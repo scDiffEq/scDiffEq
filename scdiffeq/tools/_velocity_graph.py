@@ -1,15 +1,19 @@
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
 import time
 import logging
 
-from .utils import ComputeCosines, scverse_neighbors
+ # -- import local dependencies: ----------------------------------------------
+from . import utils
 
-
+# -- set type hints: ----------------------------------------------------------
 from typing import Dict, Optional
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
 
-# -- API-facing function: ------------------------------------------------
+# -- API-facing function: -----------------------------------------------------
 def velocity_graph(
     adata: anndata.AnnData,
     state_key: str = "X_pca",
@@ -43,18 +47,17 @@ def velocity_graph(
         (None)
     """
     
-    logger = logging.getLogger(__name__)
     start_time = time.time()
     logger.debug("Starting velocity_graph computation...")
     
-    scverse_neighbors(adata, silent=silent, **neighbor_kwargs)
+    utils.scverse_neighbors(adata, silent=silent, **neighbor_kwargs)
     
-    init_kw = ABCParse.function_kwargs(ComputeCosines.__init__, locals())
-    call_kw = ABCParse.function_kwargs(ComputeCosines.__call__, locals())
+    init_kw = ABCParse.function_kwargs(utils.ComputeCosines.__init__, locals())
+    call_kw = ABCParse.function_kwargs(utils.ComputeCosines.__call__, locals())
 
     logger.debug("Starting ComputeCosines computation...")
     cc_start = time.time()
-    compute_cosines = ComputeCosines(**init_kw)
+    compute_cosines = utils.ComputeCosines(**init_kw)
     compute_cosines(**call_kw)
     cc_end = time.time()
     logger.debug(f"ComputeCosines computation finished in {cc_end - cc_start:.2f} seconds.")
