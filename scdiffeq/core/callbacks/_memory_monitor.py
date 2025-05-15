@@ -26,6 +26,9 @@ class MemoryMonitor(lightning.pytorch.callbacks.Callback):
         wandb.log({"Memory/CPU_RAM_MB": mem})
 
     def _log_gpu_ram(self, trainer, lit_module):
+
+        import wandb
+        
         if self.log_gpu and lit_module.device.type == "cuda":
             gpu_mem_allocated = lit_module.device
             mem_allocated = torch.cuda.memory_allocated(lit_module.device) / 1024**2

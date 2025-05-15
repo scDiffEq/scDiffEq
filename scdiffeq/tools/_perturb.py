@@ -1,12 +1,13 @@
 # -- import packages: ---------------------------------------------------------
 import anndata
-from scdiffeq.tools._fate_perturbation_experiment import PerturbationExperimentResult
+import sklearn.decomposition
 import torch
 
-
 # -- import local dependencies: -----------------------------------------------
-from ._fate_perturbation_experiment import FatePerturbationExperiment
-
+from ._fate_perturbation_experiment import (
+    FatePerturbationExperiment,
+    PerturbationExperimentResult,
+)
 
 # -- set typing: --------------------------------------------------------------
 from typing import List, Optional
@@ -23,7 +24,7 @@ def perturb(
     subset_val: str,
     gene_id_key: str = "gene_ids",
     target_value: float = 10,
-    PCA: Optional = None,
+    PCA: Optional[sklearn.decomposition.PCA] = None,
     seed: int = 0,
     use_key: str = "X_scaled",
     replicates: int = 5,
