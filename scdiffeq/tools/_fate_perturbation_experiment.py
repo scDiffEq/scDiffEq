@@ -24,10 +24,10 @@ from ._simulation import simulate
 
 
 # -- set typing: --------------------------------------------------------------
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 
-# -- Operational class: -------------------------------------------------------
+# -- operational class: -------------------------------------------------------
 class PerturbationExperimentResult(ABCParse.ABCParse):
     """Container for the results of a perturbation of experiment. Both the control
     and perturbed arms of the experiment are given as input.

@@ -1,13 +1,21 @@
-import warnings
-import adata_query
-
+# -- import packages: ---------------------------------------------------------
 import ABCParse
-import numpy as np
+import adata_query
 import anndata
+import logging
+import numpy as np
+import warnings
 
+# -- import local dependencies: ----------------------------------------------
+from . import utils
 
-from .utils import L2Norm, transition_matrix
+# -- set type hints: ----------------------------------------------------------
+from typing import Optional
 
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
+
+# -- operational cls: ---------------------------------------------------------
 class VelocityEmbedding(ABCParse.ABCParse):
     """Compute X_emb and V_emb"""
 
@@ -22,7 +30,7 @@ class VelocityEmbedding(ABCParse.ABCParse):
     ):
         self.__parse__(locals())
 
-        self._L2Norm = L2Norm()
+        self._L2Norm = utils.L2Norm()
 
     @property
     def X_emb(self):
@@ -35,7 +43,7 @@ class VelocityEmbedding(ABCParse.ABCParse):
     @property
     def T(self):
         if not hasattr(self, "_T"):
-            self._T = transition_matrix(
+            self._T = utils.transition_matrix(
                 adata=self._adata,
                 self_transitions=self._self_transitions,
                 use_negative_cosines=self._use_negative_cosines,
@@ -64,7 +72,7 @@ class VelocityEmbedding(ABCParse.ABCParse):
         self,
         adata: anndata.AnnData,
         basis: str = "umap",
-        retain_scale: bool = False,
+        retain_scale: Optional[bool] = False,
         *args,
         **kwargs,
     ):
