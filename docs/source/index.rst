@@ -105,7 +105,7 @@
    :class-container: only-light
 
    .. grid-item-card::
-      :link: https://https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2
+      :link: https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
@@ -233,7 +233,7 @@
    :class-container: only-dark
 
    .. grid-item-card::
-      :link: https://https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2
+      :link: https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-dark.png
       :class-card: only-dark
