@@ -47,7 +47,9 @@ class TransitionMatrix(ABCParse.ABCParse):
         return self._graph_neg
 
     def compute_self_transitions(self, graph):
-        confidence = graph.max(1).A.flatten()
+        # Convert to CSR format before accessing .A attribute
+        graph_csr = graph.tocsr()
+        confidence = graph_csr.max(1).A.flatten()
         self_prob = np.clip(np.percentile(confidence, 98) - confidence, 0, 1)
         graph.setdiag(self_prob)
         return graph
