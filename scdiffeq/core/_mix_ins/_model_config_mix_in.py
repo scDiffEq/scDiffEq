@@ -35,6 +35,9 @@ class ModelConfigMixIn(object):
         configure_trainer: bool = True,
         loading_existing: bool = False,
     ) -> None:
+        
+        print(f"Velocity Ratio params [configure_model]: {self._velocity_ratio_params}")
+
         if DiffEq is None:
             self._LitModelConfig = configs.LightningModelConfiguration(
                 data_dim=self._data_dim,
