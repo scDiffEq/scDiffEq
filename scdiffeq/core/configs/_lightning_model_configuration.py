@@ -7,7 +7,7 @@ import os
 from .. import lightning_models, utils
 
 # -- set typing: --------------------------------------------------------------
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 # -- setup logging: -----------------------------------------------------------
 logger = logging.getLogger(__name__)
@@ -24,15 +24,14 @@ class LightningModelConfiguration(ABCParse.ABCParse):
 
     def __init__(
         self,
-        data_dim,
+        data_dim: int,
         latent_dim: int = 50,
         DiffEq_type: str = "SDE",
         potential_type: str = "fixed",
-        fate_bias_csv_path=None,
-        velocity_ratio_params: Dict = None,
+        fate_bias_csv_path: Optional[str] = None,
+        velocity_ratio_params: Optional[Dict[str, Union[float, str]]] = None,
     ):
         """ """
-
         self.__parse__(locals(), public=[None])
 
     @property
@@ -92,13 +91,14 @@ class LightningModelConfiguration(ABCParse.ABCParse):
         if self.fate_bias_aware:
             _model.append("FateBiasAware")
 
-        if (self.DiffEq_type == "SDE") and self._velocity_ratio_params:
+        if (self.DiffEq_type == "LightningSDE") and (not self._velocity_ratio_params is None):
             _model.append("RegularizedVelocityRatio")
 
         _model = "_".join(_model)
 
         if _model in self.available_lightning_models:
             lit_model = getattr(lightning_models, _model)
+            logger.debug(f"Model fetched: {repr(lit_model.__name__)}")
 
             if self._USE_CKPT:
                 return lit_model.load_from_checkpoint(self._ckpt_path)

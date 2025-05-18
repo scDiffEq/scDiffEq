@@ -6,7 +6,7 @@ import sys
 # -- configure logger: --------------------------------------------------------
 def configure_logging(name="scdiffeq", log_file="scdiffeq.log"):
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)  # Keep at DEBUG to allow file handler to capture all levels
 
     # Prevent adding handlers multiple times (important in notebooks!)
     if logger.hasHandlers():
@@ -28,6 +28,13 @@ def configure_logging(name="scdiffeq", log_file="scdiffeq.log"):
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
     ch.setFormatter(stream_formatter)
+    
+    # Add filter to stream handler to only show INFO and above
+    class InfoFilter(logging.Filter):
+        def filter(self, record):
+            return record.levelno >= logging.INFO
+    
+    ch.addFilter(InfoFilter())
 
     logger.addHandler(fh)
     logger.addHandler(ch)
