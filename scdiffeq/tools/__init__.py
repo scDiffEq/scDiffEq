@@ -38,8 +38,11 @@ from ._velocity_graph import velocity_graph
 # -- general characterization: ------------------------------------------------
 from ._drift_diffusion_state_characterization import drift, diffusion
 from ._cell_potential import cell_potential, normalize_cell_potential
+from ._detect_manifold_outliers import detect_manifold_outliers, ManifoldOutlierDetection
 
 __all__ = [
+    "detect_manifold_outliers",
+    "ManifoldOutlierDetection",
     "bin_pseudotime",
     "kNN",
     "kNNSmoothing",
