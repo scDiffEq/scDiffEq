@@ -61,13 +61,19 @@ class kNN(ABCParse.ABCParse):
         idx.build(self._n_trees)
         return idx
 
-    def query(self, X_query: np.ndarray) -> np.ndarray:
-        return np.array(
+    def query(self, X_query: np.ndarray, include_distances: bool = False) -> np.ndarray:
+        result = np.array(
             [
-                self.idx.get_nns_by_vector(X_query[i], self._n_neighbors)
+                self.idx.get_nns_by_vector(X_query[i], int(self._n_neighbors + 1), include_distances=include_distances)
                 for i in range(X_query.shape[0])
             ]
         )
+        if include_distances:
+            neighbors = result[:,0, 1:].astype(int)
+            distances = result[:,1, 1:]
+            return neighbors, distances
+        else:
+            return result
 
     def _count_values(self, col: pd.Series) -> dict:
         return col.value_counts().to_dict()
