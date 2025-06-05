@@ -3,6 +3,7 @@ import anndata
 import ABCParse
 import logging
 import pandas as pd
+import numpy as np
 import sklearn.decomposition
 
 # -- import local dependencies: -----------------------------------------------
@@ -30,6 +31,7 @@ class GeneCompatibility(ABCParse.ABCParse):
         PCA: Optional[sklearn.decomposition.PCA] = None,
         key_added: str = "X_gene",
         silent: bool = False,
+        batch_size: int = 1024,
     ) -> None:
 
         self.__parse__(locals(), public=[None])
@@ -47,9 +49,18 @@ class GeneCompatibility(ABCParse.ABCParse):
 
         assert not self._PCA is None, "Must supply PCA model!"
 
-        X_gene = self._PCA.inverse_transform(self.adata_sim.X)
+        n_obs = self.adata_sim.shape[0]
+        X_gene_list = []
+
+        for i in range(0, n_obs, self._batch_size):
+            batch_X = self.adata_sim.X[i : i + self._batch_size]
+            X_gene_batch = self._PCA.inverse_transform(batch_X)
+            X_gene_list.append(X_gene_batch)
+        
+        X_gene_transformed = np.concatenate(X_gene_list, axis=0)
+
         X_gene = pd.DataFrame(
-            X_gene,
+            X_gene_transformed,
             index=self.adata_sim.obs.index,
             columns=self.var_names,
         )
@@ -77,6 +88,7 @@ def annotate_gene_features(
     PCA: Optional[sklearn.decomposition.PCA] = None,
     gene_id_key="gene_ids",
     key_added: str = "X_gene",
+    batch_size: int = 1024,
     *args,
     **kwargs,
 ) -> None:
@@ -100,6 +112,9 @@ def annotate_gene_features(
     key_added: str
         default: "X_gene"
 
+    batch_size: int
+        default: 1024
+
     Returns
     -------
     None, modifies adata_sim in-place.
@@ -108,5 +123,6 @@ def annotate_gene_features(
         gene_id_key=gene_id_key,
         PCA=PCA,
         key_added=key_added,
+        batch_size=batch_size,
     )
     return gene_compatibility(adata_sim=adata_sim, adata=adata)

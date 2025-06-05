@@ -63,6 +63,8 @@ class PseudotimeBinning(ABCParse.ABCParse):
 
         self.__update__(locals())
 
+        self._adata.obs.index.name = "index"
+
         if not self._TIME_BIN_COLS_PRESENT:
             self._time_df = self._adata.obs[self._pseudotime_key].apply(
                 self._assign_bin, bins=self.bins
