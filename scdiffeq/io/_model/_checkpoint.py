@@ -99,15 +99,17 @@ class Checkpoint(ABCParse.ABCParse):
         return self._fname
 
     @property
-    def state_dict(self) -> Dict[str, "LightningCheckpoint"]:
+    def ckpt(self) -> Dict[str, "LightningCheckpoint"]:
         """
         Returns:
             Dict[str, "LightningCheckpoint"]
             State dictionary created by PyTorch Lightning.
         """
         if not hasattr(self, "_ckpt"):
-            self._state_dict = torch.load(self.path)  # ["state_dict"]
-        return self._state_dict
+            self._ckpt = torch.load(
+                self.path, weights_only=False, map_location="cpu"
+            )
+        return self._ckpt
 
     def __repr__(self) -> str:
         """

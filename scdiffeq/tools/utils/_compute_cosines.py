@@ -102,13 +102,11 @@ class ComputeCosines(ABCParse.ABCParse):
         return range(len(self._adata))
 
     @property
-    def n_neighbors(self) -> int:  # NEW
+    def n_neighbors(self) -> int:
         if not hasattr(self, "_n_neighbors"):
             n_neighbor_param = self._adata.uns["neighbors"]["params"]["n_neighbors"]
-            if isinstance(n_neighbor_param, int):
-                self._n_neighbors = n_neighbor_param
-            else:
-                self._n_neighbors = n_neighbor_param[0]
+            n_neighbor_param = ABCParse.as_list(n_neighbor_param)
+            self._n_neighbors = n_neighbor_param[0]
         return self._n_neighbors
 
     @property
