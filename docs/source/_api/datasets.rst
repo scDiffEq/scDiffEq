@@ -23,13 +23,13 @@ Datasets (``sdq.datasets``)
 
         More: ``sdq.datasets.human_hematopoiesis``
 
-.. dropdown:: ``sdq.datasets.pancreas``
+.. dropdown:: ``sdq.datasets.pancreatic_endocrinogenesis``
 
-    .. autofunction:: scdiffeq.datasets._pancreas.pancreas
+    .. autofunction:: scdiffeq.datasets._pancreatic_endocrinogenesis.pancreatic_endocrinogenesis
         :no-index:
     
-    .. button-link:: _datasets/pancreas.rst
+    .. button-link:: _datasets/pancreatic_endocrinogenesis.rst
         :color: dark
         :outline:
 
-        More: ``sdq.datasets.pancreas``
+        More: ``sdq.datasets.pancreatic_endocrinogenesis``
