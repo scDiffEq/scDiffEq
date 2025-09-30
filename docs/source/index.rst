@@ -28,7 +28,7 @@
 .. toctree::
    :hidden:
    
-   _notebooks/quickstart
+   quickstart
    install
    api
    tutorials
@@ -41,7 +41,7 @@
    :class-container: only-light
 
    .. grid-item-card::
-      :link: _notebooks/quickstart.rst
+      :link: quickstart.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
@@ -169,7 +169,7 @@
    :class-container: only-dark
 
    .. grid-item-card::
-      :link: _notebooks/quickstart.rst
+      :link: quickstart.rst
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-dark.png
       :class-card: only-dark
