@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "scdiffeq/__version__.py"
+path = "src/scdiffeq/__version__.py"
 pattern = "__version__ = \"(?P<version>.*)\""
 
 [project]
