@@ -62,7 +62,7 @@ class ModelConfigMixIn(object):
 
         lightning.seed_everything(self._seed)
 
-        # -- Step 5: configure bridge to lightning logger ----------------------
+        # -- Step 5: configure bridge to lightning logger ---------------------
         # was its own step before: now in-line here, since it
         # doesn't make sense to separate it, functionally
         self._LOGGING = utils.LoggerBridge(self.DiffEq)
@@ -78,25 +78,40 @@ class ModelConfigMixIn(object):
         self._DATA_CONFIG(scDiffEq=self)
         logger.info(f"Input data configured.")
 
+    def _adjust_step_size(self) -> None:
+        """ """
+        if self._train_step_size is None:
+            self._train_step_size = int(self._train_epochs * 0.9)
+        logger.debug(f"Train step size adjusted to {self._train_step_size}.")
+        
+        if self._pretrain_step_size is None:
+            self._pretrain_step_size = int(self._pretrain_epochs * 0.9)
+        logger.debug(f"Pretrain step size adjusted to {self._pretrain_step_size}.")
+        
+        self._PARAMS["train_step_size"] = self._train_step_size
+        self._PARAMS["pretrain_step_size"] = self._pretrain_step_size
+
     def __config__(self, kwargs: Dict):
         """ """
-        # -- Step 1: parse kwargs, set up info msg -----------------------------
+        # -- Step 1: parse kwargs, set up info msg ----------------------------
         self.__parse__(kwargs, public=[None], ignore=["adata"])
 
-        # -- Step 2: configure data ----------------------------------------------
+        # -- Step 1a: Make adjustments: ---------------------------------------
+        self._adjust_step_size()
+
+        # -- Step 2: configure data -------------------------------------------
         if not kwargs["adata"] is None:
             # if adata is given, triggers 2 through 4
             self.configure_data(adata=kwargs["adata"])
 
-            # -- Step 3: configure kNN --------------------------------------------
+            # -- Step 3: configure kNN ----------------------------------------
             if self._PARAMS["build_kNN"]:
                 self._PARAMS["kNN"] = self.kNN
 
-            # -- Step 4: configure model -------------------------------------------
+            # -- Step 4: configure model --------------------------------------
             self.configure_model(DiffEq=None, configure_trainer=True)
 
-            # -- Step 5: extras (was step 6): ---------------------------------------
-
+            # -- Step 5: extras (was step 6): ---------------------------------
 
 #             if kwargs["reduce_dimensions"]:
 #                 self._configure_dimension_reduction()
