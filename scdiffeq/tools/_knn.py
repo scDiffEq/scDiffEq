@@ -1,17 +1,18 @@
 
-from ..core import utils
-
-import adata_query
+# -- import packages: ---------------------------------------------------------
 import ABCParse
+import adata_query
 import anndata
+import annoy
 import pandas as pd
 import numpy as np
-import annoy
 
 
+# -- set type hints: ----------------------------------------------------------
 from typing import List, Optional
 
 
+# -- operational cls: ---------------------------------------------------------
 class kNN(ABCParse.ABCParse):
     """kNN container"""
     _IDX_BUILT = False
@@ -69,8 +70,8 @@ class kNN(ABCParse.ABCParse):
             ]
         )
         if include_distances:
-            neighbors = result[:,0, 1:].astype(int)
-            distances = result[:,1, 1:]
+            neighbors = result[:, 0][:, 1:].astype(int)
+            distances = result[:, 1][:, 1:]
             return neighbors, distances
         else:
             return result
