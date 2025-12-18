@@ -139,3 +139,7 @@ dmypy.json
 
 # data
 scdiffeq_data/
+
+# uv
+.venv/
+uv.lock

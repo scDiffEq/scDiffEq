@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "scdiffeq/__version__.py"
+pattern = "__version__ = \"(?P<version>.*)\""
+
+[project]
+name = "scdiffeq"
+dynamic = ["version"]
+description = "scDiffEq: modeling single-cell dynamics using neural differential equations."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Michael E. Vinyard", email = "mvinyard.ai@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.11",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "torch>=2.5.0",
+    "lightning>=2.1",
+    "pykeops>=2.1.2",
+    "geomloss>=0.2.6",
+    "torchsde>=0.2.6",
+    "ABCParse>=0.1.4",
+    "adata-query>=0.1.0",
+    "annoyance>=0.0.18",
+    "neural-diffeqs>=0.3.2",
+    "torch-nets>=0.1.0",
+    "torch-adata>=0.1.1",
+    "autodevice>=0.0.2",
+    "cellplots>=0.0.1rc0",
+    "cell-perturb>=0.0.1rc1",
+    "tqdm",
+    "anndata>=0.11.3",
+    "scanpy>=1.11.0",
+    "requests",
+]
+
+[project.optional-dependencies]
+docs = [
+    "numpy<2.0",
+    "scikit-learn>=1.5",
+    "sphinx",
+    "autodoc",
+    "sphinxcontrib-napoleon",
+    "nbsphinx",
+    "ipython",
+    "sphinx-autodoc-typehints",
+    "pydata-sphinx-theme",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-favicon",
+    "myst-parser",
+]
+
+[project.urls]
+Homepage = "https://github.com/scDiffEq/scDiffEq"

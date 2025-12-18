@@ -12,14 +12,35 @@ An analysis framework for modeling dynamical single-cell data with **neural diff
 
 Please see the [**scDiffEq website**](https://docs.scdiffeq.com/en/latest/index.html) for a quickstart notebook: [link](https://docs.scdiffeq.com/en/latest/_notebooks/quickstart.html)
 
-## Install the development package:
+## Install the development package
 
 Install generally only takes a few seconds.
 
+### Using uv (recommended)
+
 ```BASH
-git clone https://github.com/mvinyard/sc-neural-diffeqs.git; cd ./sc-neural-diffeqs;
+git clone https://github.com/scDiffEq/scDiffEq.git; cd ./scDiffEq;
+
+# Install uv if you haven't already: curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+```
+
+### Using pip
+
+```BASH
+git clone https://github.com/scDiffEq/scDiffEq.git; cd ./scDiffEq;
 
 pip install -e .
+```
+
+### With documentation dependencies
+
+```BASH
+# Using uv
+uv sync --extra docs
+
+# Using pip
+pip install -e ".[docs]"
 ```
 
 ## Main API
@@ -27,9 +48,8 @@ pip install -e .
 ```python
 import scdiffeq as sdq
 
-model = sdq.scDiffEq(
-    adata=adata, potential_type="fixed", train_lr=1e-4, train_step_size=1200
-)
+model = sdq.scDiffEq(adata=adata)
+
 model.fit(train_epochs = 1500)
 ```
   
@@ -41,7 +61,7 @@ model.fit(train_epochs = 1500)
 
 ## System requirements
 - Developed on linux20.04 and MacOS (with Apple Silicon), using Python3.11.
-- Software dependencies are listed in [requirements.txt](./requirements.txt)
+- Software dependencies are listed in [pyproject.toml](./pyproject.toml) (or [requirements.txt](./requirements.txt) for pip-based installs).
 - Tested with NVIDIA GPUs (A100, T4) and Apple Silicon. Most datasets likely only require an NVIDIA Tesla T4 (free in Google Colab).
 
 ## Reproducibiliuty
