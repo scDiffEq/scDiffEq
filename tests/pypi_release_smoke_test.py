@@ -27,6 +27,10 @@ def main():
         raise SystemExit(f"❌ Could not import package '{PACKAGE_NAME}' after build.")
 
     version = getattr(pkg, "__version__", None)
+    if version is None:
+        raise SystemExit(f"❌ Package '{PACKAGE_NAME}' does not have '__version__' attribute.")
+    if not isinstance(version, str) or not version.strip():
+        raise SystemExit(f"❌ Package '{PACKAGE_NAME}' has invalid '__version__': {version!r}")
     logger.info(f"✅ Successfully imported '{PACKAGE_NAME}' (version={version})")
 
 if __name__ == "__main__":
