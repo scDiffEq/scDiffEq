@@ -1,6 +1,6 @@
 # -- import packages: ----------------------------------------------------------
 import anndata
-import annoyance
+import cell_neighbors
 import logging
 import numpy as np
 import pandas as pd
@@ -36,14 +36,14 @@ class FastGraph:
         if use_key in self._inspector.layers:
             adata.obsm[use_key] = adata.layers[use_key]
 
-        self.Graph = annoyance.kNN(adata, use_key=self.use_key)
-        self.Graph.build()
+        # cell_neighbors.kNN builds automatically in __init__
+        self.Graph = cell_neighbors.kNN(adata, use_key=self.use_key)
 
     def _fast_count(self, X_nn):
         return (
             self.adata[X_nn.flatten().astype(str)]
             .obs[self.annot_key]
-            .values.reshape(-1, self.Graph._n_neighbors)
+            .values.reshape(-1, self.Graph.n_neighbors)
         )
 
     def _query(self, X_fin):
