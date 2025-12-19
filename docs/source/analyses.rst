@@ -12,12 +12,36 @@ Reproducibility
    _analyses/Figure2F
    _analyses/Figure3AB
    _analyses/Figure3CD
-   _analyses/Figure3EFG
+   _analyses/Figure3EFG.v2
+   _analyses/Figure3HI
    _analyses/Figure3J
-   _analyses/human_hematopoiesis.preprocessing
+   _analyses/Figure3J.make_supplementary_tables
+   _analyses/Figure3KL
+   _analyses/Figure3M
+   _analyses/Figure4ABC
+   _analyses/Figure4D
+   _analyses/Figure4EF
+   _analyses/Figure4G
+   _analyses/Figure4HI
+   _analyses/Figure4JKLM
+   _analyses/FigureS1
+   _analyses/FigureS2A
+   _analyses/FigureS2B
+   _analyses/FigureS2C
+   _analyses/FigureS3
+   _analyses/FigureS4
+   _analyses/FigureS5AB
+   _analyses/FigureS5C
+   _analyses/FigureS7
+   _analyses/FigureS9
+   _analyses/FigureS10
+   _analyses/FigureS11
+   _analyses/FigureS12ABC
+   _analyses/FigureS12D
+   _analyses/FigureS12EFGHI
 
 
-Here we feature a breakdown of analyses inclucded in the manuscript associated
+Here we feature a breakdown of analyses included in the manuscript associated
 with ``scdiffeq``. While **Figure 1** contains an overview that does not host
 any analyses, **Figure 2** demonstrates the accuracy of *scDiffEq* compared to
 other contemporary models. **Figure 3** demonstrates *scDiffEq*'s ability to 
@@ -89,8 +113,16 @@ Figure 3
 
       :octicon:`book;2em;sd-text-dark`
 
-.. grid-item-card:: ``Figure3EFG.ipynb``
-      :link: _analyses/Figure3EFG.ipynb
+.. grid-item-card:: ``Figure3EFG.v2.ipynb``
+      :link: _analyses/Figure3EFG.v2.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure3HI.ipynb``
+      :link: _analyses/Figure3HI.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
@@ -114,15 +146,220 @@ Figure 3
 
       :octicon:`book;2em;sd-text-dark`
 
-.. grid-item-card:: ``human_hematopoiesis.preprocessing.ipynb``
-      :link: _analyses/human_hematopoiesis.preprocessing.ipynb
+.. grid-item-card:: ``Figure3KL.ipynb``
+      :link: _analyses/Figure3KL.ipynb
       :text-align: right
       :columns: 8
       :margin: 0 2 auto 0
 
       :octicon:`book;2em;sd-text-dark`
 
-.. note::
-   
-   Additional analyses for Figures 4 and Supplementary Figures are available in the 
-   `scdiffeq-analyses repository <https://github.com/scDiffEq/scdiffeq-analyses>`_.
+.. grid-item-card:: ``Figure3M.ipynb``
+      :link: _analyses/Figure3M.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Figure 4
+========
+
+.. grid-item-card:: ``Figure4ABC.ipynb``
+      :link: _analyses/Figure4ABC.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4D.ipynb``
+      :link: _analyses/Figure4D.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4EF.ipynb``
+      :link: _analyses/Figure4EF.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4G.ipynb``
+      :link: _analyses/Figure4G.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4HI.ipynb``
+      :link: _analyses/Figure4HI.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``Figure4JKLM.ipynb``
+      :link: _analyses/Figure4JKLM.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+      
+Supplementary Figure 1
+======================
+
+.. grid-item-card:: ``FigureS1.ipynb``
+      :link: _analyses/FigureS1.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+Supplementary Figure 2
+======================
+
+.. grid-item-card:: ``FigureS2A.ipynb``
+      :link: _analyses/FigureS2A.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+.. grid-item-card:: ``FigureS2B.ipynb``
+      :link: _analyses/FigureS2B.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+.. grid-item-card:: ``FigureS2C.ipynb``
+      :link: _analyses/FigureS2C.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+Supplementary Figure 3
+======================
+
+.. grid-item-card:: ``FigureS3.ipynb``
+      :link: _analyses/FigureS3.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+      
+Supplementary Figure 4
+======================
+
+.. grid-item-card:: ``FigureS4.ipynb``
+      :link: _analyses/FigureS4.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 5
+======================
+
+.. grid-item-card:: ``FigureS5AB.ipynb``
+      :link: _analyses/FigureS5AB.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``FigureS5C.ipynb``
+      :link: _analyses/FigureS5C.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 7
+======================
+
+.. grid-item-card:: ``FigureS7.ipynb``
+      :link: _analyses/FigureS7.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 9
+======================
+
+.. grid-item-card:: ``FigureS9.ipynb``
+      :link: _analyses/FigureS9.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 10
+=======================
+
+.. grid-item-card:: ``FigureS10.ipynb``
+      :link: _analyses/FigureS10.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 11
+=======================
+
+.. grid-item-card:: ``FigureS11.ipynb``
+      :link: _analyses/FigureS11.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+Supplementary Figure 12
+=======================
+
+.. grid-item-card:: ``FigureS12ABC.ipynb``
+      :link: _analyses/FigureS12ABC.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``FigureS12D.ipynb``
+      :link: _analyses/FigureS12D.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`
+
+.. grid-item-card:: ``FigureS12EFGHI.ipynb``
+      :link: _analyses/FigureS12EFGHI.ipynb
+      :text-align: right
+      :columns: 8
+      :margin: 0 2 auto 0
+
+      :octicon:`book;2em;sd-text-dark`

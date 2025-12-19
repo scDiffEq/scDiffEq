@@ -17,13 +17,17 @@ from scdiffeq.__version__ import __version__
 release = __version__
 
 # -- download reproducibility notebooks ---------------------------------------
-# Skip notebook downloading on ReadTheDocs to avoid build timeouts.
-# The many GitHub API calls cause the build to exceed RTD's time limit.
-# For local builds, notebooks will be downloaded as before.
+# Notebook downloading strategy:
+# - GitHub Actions: Notebooks are copied via shell commands before Sphinx runs
+# - ReadTheDocs: Skip downloading (would timeout due to many API calls)
+# - Local builds: Download notebooks via GitHub API
 on_rtd = os.environ.get("READTHEDOCS") == "True"
+on_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
 
 if on_rtd:
-    print("ReadTheDocs build detected. Skipping notebook downloads to avoid timeout.")
+    print("ReadTheDocs build detected. Skipping notebook downloads.")
+elif on_github_actions:
+    print("GitHub Actions build detected. Notebooks already copied via workflow.")
 else:
     # Only download notebooks for local builds
     try:
@@ -136,6 +140,9 @@ exclude_patterns = []
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 html_css_files = ["css/custom.css"]
+
+# Include .nojekyll for GitHub Pages (prevents ignoring _static, _analyses folders)
+html_extra_path = [".nojekyll"]
 
 html_theme_options = {
     "github_url": "https://github.com/scDiffEq/scDiffEq",
