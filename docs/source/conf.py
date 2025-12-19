@@ -7,56 +7,82 @@ author = "Michael E. Vinyard"
 
 import os
 import sys
-import requests
 
 # Add the docs/source directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-import config_utils
 
 # Read version from __version__.py
 sys.path.insert(0, os.path.abspath("../../"))
 from scdiffeq.__version__ import __version__
 release = __version__
-repository_url = "https://github.com/scDiffEq/scdiffeq-analyses.git"
 
 # -- download reproducibility notebooks ---------------------------------------
-class ReproducibilityNotebookPaths(list):
-    def __init__(self) -> None:
-        self._extensions = [
-            "2",
-            "3",
-            "4",
-            "s1",
-            "s2",
-            "s3",
-            "s4",
-            "s5",
-            "s7",
-            "s9",
-            "s10",
-            "s11",
-            "s12",
-        ]
-        for ext in self._extensions:
-            self.extend(
-                config_utils.fetch_notebook_urls(
-                    repository_url=repository_url,
-                    path=f"manuscript/figure_{ext}/notebooks/",
-                )
+# Wrap notebook downloading in try-except to prevent build failures
+# if network requests fail (e.g., GitHub API rate limiting, network issues)
+try:
+    import config_utils
+    repository_url = "https://github.com/scDiffEq/scdiffeq-analyses.git"
+    
+    class ReproducibilityNotebookPaths(list):
+        def __init__(self) -> None:
+            self._extensions = [
+                "2",
+                "3",
+                "4",
+                "s1",
+                "s2",
+                "s3",
+                "s4",
+                "s5",
+                "s7",
+                "s9",
+                "s10",
+                "s11",
+                "s12",
+            ]
+            for ext in self._extensions:
+                try:
+                    urls = config_utils.fetch_notebook_urls(
+                        repository_url=repository_url,
+                        path=f"manuscript/figure_{ext}/notebooks/",
+                    )
+                    self.extend(urls)
+                except Exception as e:
+                    print(f"Warning: Failed to fetch notebook URLs for figure_{ext}: {e}")
+                    continue
+    
+    notebook_urls = ReproducibilityNotebookPaths()
+    if notebook_urls:
+        try:
+            _ = config_utils.download_notebooks(
+                notebook_urls=notebook_urls, destination_dir="./_analyses"
             )
-notebook_urls = ReproducibilityNotebookPaths()
-_ = config_utils.download_notebooks(
-    notebook_urls=notebook_urls, destination_dir="./_analyses"
-)
+        except Exception as e:
+            print(f"Warning: Failed to download reproducibility notebooks: {e}")
+    else:
+        print("Warning: No reproducibility notebook URLs found. Skipping download.")
+    
+    # -- download tutorial notebooks ----------------------------------------------
+    try:
+        tutorial_urls = config_utils.fetch_notebook_urls(
+            repository_url=repository_url, path="tutorials/"
+        )
+        if tutorial_urls:
+            try:
+                _ = config_utils.download_notebooks(
+                    notebook_urls=tutorial_urls, destination_dir="./_tutorials"
+                )
+            except Exception as e:
+                print(f"Warning: Failed to download tutorial notebooks: {e}")
+        else:
+            print("Warning: No tutorial notebook URLs found. Skipping download.")
+    except Exception as e:
+        print(f"Warning: Failed to fetch tutorial notebook URLs: {e}")
 
-# -- download tutorial notebooks ----------------------------------------------
-notebook_urls = config_utils.fetch_notebook_urls(repository_url=repository_url, path="tutorials/")
-_ = config_utils.download_notebooks(
-    notebook_urls=notebook_urls, destination_dir="./_tutorials"
-)
-
-# -- Your existing path setup -------------------------------------------------
-sys.path.insert(0, os.path.abspath("../../"))
+except Exception as e:
+    # If config_utils import or any other critical error occurs, log and continue
+    print(f"Warning: Notebook downloading disabled due to error: {e}")
+    print("Warning: Documentation build will continue without downloaded notebooks.")
 
 # -- Add autodoc settings -----------------------------------------------------
 autodoc_default_options = {
