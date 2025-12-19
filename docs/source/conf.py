@@ -17,72 +17,77 @@ from scdiffeq.__version__ import __version__
 release = __version__
 
 # -- download reproducibility notebooks ---------------------------------------
-# Wrap notebook downloading in try-except to prevent build failures
-# if network requests fail (e.g., GitHub API rate limiting, network issues)
-try:
-    import config_utils
-    repository_url = "https://github.com/scDiffEq/scdiffeq-analyses.git"
-    
-    class ReproducibilityNotebookPaths(list):
-        def __init__(self) -> None:
-            self._extensions = [
-                "2",
-                "3",
-                "4",
-                "s1",
-                "s2",
-                "s3",
-                "s4",
-                "s5",
-                "s7",
-                "s9",
-                "s10",
-                "s11",
-                "s12",
-            ]
-            for ext in self._extensions:
-                try:
-                    urls = config_utils.fetch_notebook_urls(
-                        repository_url=repository_url,
-                        path=f"manuscript/figure_{ext}/notebooks/",
-                    )
-                    self.extend(urls)
-                except Exception as e:
-                    print(f"Warning: Failed to fetch notebook URLs for figure_{ext}: {e}")
-                    continue
-    
-    notebook_urls = ReproducibilityNotebookPaths()
-    if notebook_urls:
-        try:
-            _ = config_utils.download_notebooks(
-                notebook_urls=notebook_urls, destination_dir="./_analyses"
-            )
-        except Exception as e:
-            print(f"Warning: Failed to download reproducibility notebooks: {e}")
-    else:
-        print("Warning: No reproducibility notebook URLs found. Skipping download.")
-    
-    # -- download tutorial notebooks ----------------------------------------------
+# Skip notebook downloading on ReadTheDocs to avoid build timeouts.
+# The many GitHub API calls cause the build to exceed RTD's time limit.
+# For local builds, notebooks will be downloaded as before.
+on_rtd = os.environ.get("READTHEDOCS") == "True"
+
+if on_rtd:
+    print("ReadTheDocs build detected. Skipping notebook downloads to avoid timeout.")
+else:
+    # Only download notebooks for local builds
     try:
-        tutorial_urls = config_utils.fetch_notebook_urls(
-            repository_url=repository_url, path="tutorials/"
-        )
-        if tutorial_urls:
+        import config_utils
+        repository_url = "https://github.com/scDiffEq/scdiffeq-analyses.git"
+        
+        class ReproducibilityNotebookPaths(list):
+            def __init__(self) -> None:
+                self._extensions = [
+                    "2",
+                    "3",
+                    "4",
+                    "s1",
+                    "s2",
+                    "s3",
+                    "s4",
+                    "s5",
+                    "s7",
+                    "s9",
+                    "s10",
+                    "s11",
+                    "s12",
+                ]
+                for ext in self._extensions:
+                    try:
+                        urls = config_utils.fetch_notebook_urls(
+                            repository_url=repository_url,
+                            path=f"manuscript/figure_{ext}/notebooks/",
+                        )
+                        self.extend(urls)
+                    except Exception as e:
+                        print(f"Warning: Failed to fetch notebook URLs for figure_{ext}: {e}")
+                        continue
+        
+        notebook_urls = ReproducibilityNotebookPaths()
+        if notebook_urls:
             try:
                 _ = config_utils.download_notebooks(
-                    notebook_urls=tutorial_urls, destination_dir="./_tutorials"
+                    notebook_urls=notebook_urls, destination_dir="./_analyses"
                 )
             except Exception as e:
-                print(f"Warning: Failed to download tutorial notebooks: {e}")
+                print(f"Warning: Failed to download reproducibility notebooks: {e}")
         else:
-            print("Warning: No tutorial notebook URLs found. Skipping download.")
-    except Exception as e:
-        print(f"Warning: Failed to fetch tutorial notebook URLs: {e}")
+            print("Warning: No reproducibility notebook URLs found. Skipping download.")
+        
+        # -- download tutorial notebooks ----------------------------------------------
+        try:
+            tutorial_urls = config_utils.fetch_notebook_urls(
+                repository_url=repository_url, path="tutorials/"
+            )
+            if tutorial_urls:
+                try:
+                    _ = config_utils.download_notebooks(
+                        notebook_urls=tutorial_urls, destination_dir="./_tutorials"
+                    )
+                except Exception as e:
+                    print(f"Warning: Failed to download tutorial notebooks: {e}")
+            else:
+                print("Warning: No tutorial notebook URLs found. Skipping download.")
+        except Exception as e:
+            print(f"Warning: Failed to fetch tutorial notebook URLs: {e}")
 
-except Exception as e:
-    # If config_utils import or any other critical error occurs, log and continue
-    print(f"Warning: Notebook downloading disabled due to error: {e}")
-    print("Warning: Documentation build will continue without downloaded notebooks.")
+    except Exception as e:
+        print(f"Warning: Notebook downloading disabled due to error: {e}")
 
 # -- Add autodoc settings -----------------------------------------------------
 autodoc_default_options = {

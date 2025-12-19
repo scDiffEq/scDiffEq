@@ -2,20 +2,9 @@
 Tutorials
 =========
 
-.. toctree::
-   :hidden:
+Tutorials are available in the `scdiffeq-analyses repository <https://github.com/scDiffEq/scdiffeq-analyses/tree/main/tutorials>`_.
+
+.. note::
    
-   _tutorials/scdiffeq_tutorial.load_trained_model.ipynb
-
-
-
-I/O tutorials
-=============
-
-.. grid-item-card:: ``load_trained_model.ipynb``
-      :link: _tutorials/scdiffeq_tutorial.load_trained_model.ipynb
-      :text-align: right
-      :columns: 8
-      :margin: 0 2 auto 0
-
-      :octicon:`book;2em;sd-text-dark`
+   Additional tutorials will be added here soon. In the meantime, check out the 
+   :doc:`quickstart` guide for a quick introduction to scDiffEq.
