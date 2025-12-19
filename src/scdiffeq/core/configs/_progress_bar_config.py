@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 # -- config cls: --------------------------------------------------------------
 class ProgressBarConfig:
-    def __init__(self, total_epochs: int):
+    def __init__(self, total_epochs: int, print_every: int = 10):
         self.total_epochs = total_epochs
+        self.print_every = print_every
         self._pbar = None
         self._env = None
 
@@ -32,12 +33,12 @@ class ProgressBarConfig:
         except (NameError, ImportError):
             return "terminal"
 
-    def _build_pbar(self, total_epochs: int):
+    def _build_pbar(self, total_epochs: int, print_every: int = 10):
 
         if self.env == "colab":
             return [lightning.pytorch.callbacks.RichProgressBar()]
         elif self.env == "jupyter":
-            return [callbacks.BasicProgressBar(total_epochs=self.total_epochs)]
+            return [callbacks.BasicProgressBar(total_epochs=self.total_epochs, print_every=print_every)]
         else:
             return []
 
@@ -51,7 +52,7 @@ class ProgressBarConfig:
     @property
     def pbar(self):
         if self._pbar is None:
-            self._pbar = self._build_pbar(total_epochs=self.total_epochs)
+            self._pbar = self._build_pbar(total_epochs=self.total_epochs, print_every=self.print_every)
         return self._pbar
 
     @property

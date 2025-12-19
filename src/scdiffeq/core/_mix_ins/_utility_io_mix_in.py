@@ -33,7 +33,7 @@ class UtilityIOMixIn(object):
 
         self.__update__(locals())
 
-        self.DiffEq = self.DiffEq.load_from_checkpoint(self._ckpt_path)
+        self.DiffEq = self.DiffEq.load_from_checkpoint(self._ckpt_path, weights_only=False)
         self.DiffEq = self.DiffEq.to(self._device)
 
         if freeze:

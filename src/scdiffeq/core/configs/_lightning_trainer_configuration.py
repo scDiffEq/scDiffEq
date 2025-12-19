@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # -- Main class: --------------------------------------------------------------
 class LightningTrainerConfiguration(ABCParse.ABCParse):
-    def __init__(self, save_dir: str = "scDiffEq_Model"):
+    def __init__(self, save_dir: str = "scDiffEq_Model", print_every: int = 10):
         super().__init__()
 
         self.__parse__(locals())
@@ -136,6 +136,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         viz_frequency=1,
         stage=None,
         max_epochs=500,
+        print_every=10,
         monitor=None,
         accelerator=None,
         devices=1,
@@ -180,7 +181,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         if stage is None:
             stage = ""
         self._stage = stage
-        self._progress_bar_config = ProgressBarConfig(total_epochs=max_epochs)
+        self._progress_bar_config = ProgressBarConfig(total_epochs=max_epochs, print_every=print_every)
 
         if torch.cuda.device_count() > 0:
             devices = torch.cuda.device_count()

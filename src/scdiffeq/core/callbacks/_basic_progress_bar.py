@@ -12,16 +12,23 @@ aliases = {"epoch_train_loss": "train loss", "epoch_validation_loss": "val loss"
 
 # -- callback cls: ------------------------------------------------------------
 class BasicProgressBar(lightning.pytorch.callbacks.Callback):
-    def __init__(self, total_epochs, metric_keys: Optional[List[str]] = []) -> None:
+    def __init__(
+        self,
+        total_epochs,
+        metric_keys: Optional[List[str]] = [],
+        print_every: int = 10,
+    ) -> None:
         """
         Args:
             total_epochs (int): total number of epochs
             metric_keys (list or None): which metrics to log (e.g., ["val_loss"])
+            print_every (int): print progress every N epochs (default: 10)
 
         Notes:
             Added in v0.1.4
         """
         self.total_epochs = total_epochs
+        self.print_every = print_every
         self.epoch_start_time = None
         self._metric_keys = ["epoch_train_loss", "epoch_validation_loss"]  # metric_keys
 
@@ -38,6 +45,14 @@ class BasicProgressBar(lightning.pytorch.callbacks.Callback):
 
     def on_train_epoch_end(self, trainer, pl_module):
         current_epoch = trainer.current_epoch + 1
+        
+        # Only print every N epochs or on the last epoch
+        is_print_epoch = (current_epoch % self.print_every == 0)
+        is_last_epoch = (current_epoch == self.total_epochs)
+        
+        if not (is_print_epoch or is_last_epoch):
+            return
+        
         elapsed = time.time() - self.epoch_start_time
         msg = f"[{self._now}] Epoch {current_epoch}/{self.total_epochs} | ({elapsed:.2f}s)"
 

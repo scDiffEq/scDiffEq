@@ -221,7 +221,7 @@ class scDiffEq(
         gradient_clip_val: float = 0.5,
         # -- velocity ratio keys: ----------------------------------------------
         velocity_ratio_params: Dict[str, Union[float, bool]] = {
-            "target": 2,
+            "target": 2.5,
             "enforce": 100,  # zero to disable
             "method": "square",  # abs -> calls torch.abs or torch.square
         },
@@ -417,6 +417,7 @@ class scDiffEq(
         reload_dataloaders_every_n_epochs: int = 1,
         devices: int = 1,
         deterministic: bool = False,
+        print_every: int = 10,
         **kwargs: dict,
     ) -> None:
         """Fit the scDiffEq model to some data.
@@ -451,7 +452,8 @@ class scDiffEq(
             Number of devices to use, by default 1
         deterministic : bool, optional
             Whether to use deterministic algorithms, by default False
-
+        print_every : int, optional
+            Print every n epochs, by default 10
         Returns: None
         """
         self.train(**ABCParse.function_kwargs(self.train, locals()))

@@ -26,6 +26,7 @@ class ModelConfigMixIn(object):
 
         self.TrainerGenerator = configs.LightningTrainerConfiguration(
             save_dir=self._name,
+            print_every=getattr(self, "_print_every", 10),
         )
         logger.debug(f"TrainerGenerator configured: {self._name}")
 

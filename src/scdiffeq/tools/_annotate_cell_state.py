@@ -28,7 +28,7 @@ class CellStateAnnotation(ABCParse.ABCParse):
     @property
     def _REF_DIM(self) -> int:
         """basis dim of kNN graph"""
-        return self._kNN.X_use.shape[1]
+        return self._kNN.n_dim
 
     @property
     def _QUERY_DIM(self) -> int:

@@ -8,13 +8,10 @@ author = "Michael E. Vinyard"
 import os
 import sys
 import requests
-import time
 
 # Add the docs/source directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 import config_utils
-
-from typing import List, Optional, get_type_hints
 
 # Read version from __version__.py
 sys.path.insert(0, os.path.abspath("../../"))

@@ -30,7 +30,7 @@ dependencies = [
     "torchsde>=0.2.6",
     "ABCParse>=0.1.4",
     "adata-query>=0.1.0",
-    "annoyance>=0.0.18",
+    "cell-neighbors>=0.1.0",
     "neural-diffeqs>=0.3.2",
     "torch-nets>=0.1.0",
     "torch-adata>=0.1.1",
@@ -58,6 +58,10 @@ docs = [
     "sphinx-design",
     "sphinx-favicon",
     "myst-parser",
+]
+dev = [
+    "jupyter",
+    "jupyterlab",
 ]
 
 [project.urls]
