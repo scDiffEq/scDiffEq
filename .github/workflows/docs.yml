@@ -55,9 +55,21 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
       
+      - name: Free up disk space
+        run: |
+          # Remove unnecessary pre-installed software to free up space
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          df -h
+      
       - name: Install dependencies
         run: |
           pip install --upgrade pip
+          # Install CPU-only PyTorch first (much smaller than CUDA version)
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          # Install remaining dependencies
           pip install -r docs/requirements.txt
       
       - name: Build documentation
