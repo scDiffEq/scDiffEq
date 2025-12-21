@@ -1,12 +1,15 @@
 __doc__ = """Configuration file for the Sphinx documentation builder."""
 
-# -- project info: ------------------------------------------------------------
-project = "scdiffeq"
-copyright = "2025, Michael E. Vinyard"
-author = "Michael E. Vinyard"
-
+# -- import packages: ---------------------------------------------------------
+import datetime
 import os
 import sys
+
+# -- project info: ------------------------------------------------------------
+project = "scdiffeq"
+current_year = datetime.datetime.now().year
+author = "Michael E. Vinyard"
+copyright = f"{current_year}, {author}"
 
 # Add the docs/source directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
