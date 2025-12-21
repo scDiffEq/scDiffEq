@@ -110,6 +110,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      # NOTE: GitHub Pages must be enabled in repository settings:
+      # https://github.com/scDiffEq/scDiffEq/settings/pages
+      # Source should be set to "GitHub Actions"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
