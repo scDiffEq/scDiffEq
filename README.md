@@ -8,7 +8,7 @@ An analysis framework for modeling dynamical single-cell data with **neural diff
 
 ## Quickstart
 
-Please see the [**scDiffEq website**](https://docs.scdiffeq.com/en/latest/index.html) for a quickstart notebook: [link](https://docs.scdiffeq.com/en/latest/_notebooks/quickstart.html)
+Please see the [**scDiffEq website**](https://scdiffeq.com/en/latest/index.html) for a quickstart notebook: [link](https://scdiffeq.com/en/latest/_notebooks/quickstart.html)
 
 ## Install the development package
 
