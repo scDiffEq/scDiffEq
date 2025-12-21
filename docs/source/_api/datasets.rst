@@ -8,9 +8,20 @@ Datasets (``sdq.datasets``)
 .. toctree::
     :hidden:
 
+    _datasets/larry
     _datasets/human_hematopoiesis
     _datasets/pancreas
 
+.. dropdown:: ``sdq.datasets.larry``
+
+    .. autofunction:: scdiffeq.datasets._larry_in_vitro.larry
+        :no-index:
+    
+    .. button-link:: _datasets/larry.rst
+        :color: dark
+        :outline:
+
+        More: ``sdq.datasets.larry``
 
 .. dropdown:: ``sdq.datasets.human_hematopoiesis``
 
