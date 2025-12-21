@@ -3,12 +3,14 @@ Installation
 ============
 
 
-To begin using ``scdiffeq``, recommend install from PYPI ().  GitHub.
+To begin using ``scdiffeq``, we recommend installing from PyPI for the 
+stable release, or from GitHub for the latest developer version.
 
 
-Install via pip (recommended)
-"""""""""""""""""""""""""""""
-.. code-block:: python
+Install via pip (recommended for stable release)
+""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: bash
 
     pip install scdiffeq
 
@@ -17,15 +19,41 @@ GitHub (Developer version)
 """"""""""""""""""""""""""
 
 To access the latest version of ``scdiffeq`` from GitHub, clone the 
-repository, ``cd`` into the project's root directory and install the
-editable version.
+repository and install the editable version. Installation generally only 
+takes a few seconds.
 
-.. code-block:: python
+Using uv (recommended)
+"""""""""""""""""""""""
 
-    # Install the developer version via GitHub
+.. code-block:: bash
+
+    git clone https://github.com/scDiffEq/scDiffEq.git; cd ./scDiffEq;
     
+    # Install uv if you haven't already: curl -LsSf https://astral.sh/uv/install.sh | sh
+    uv sync
+
+
+Using pip
+"""""""""
+
+.. code-block:: bash
+
     git clone https://github.com/scDiffEq/scDiffEq.git; cd ./scDiffEq;
     pip install -e .
+
+
+With documentation dependencies
+"""""""""""""""""""""""""""""""
+
+If you want to build the documentation locally:
+
+.. code-block:: bash
+
+    # Using uv
+    uv sync --extra docs
+    
+    # Using pip
+    pip install -e ".[docs]"
 
 
 Troubleshooting
