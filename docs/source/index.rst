@@ -245,7 +245,7 @@
 
          <embed><div><br><br></div></embed>
 
-      :octicon:`book;4em;sd-text-light`
+      :octicon:`book;3em;sd-text-light`
       
    .. grid-item-card::
       :link: analyses.rst
