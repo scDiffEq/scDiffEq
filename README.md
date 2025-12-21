@@ -54,7 +54,7 @@ model.fit(train_epochs = 1500)
 ## Built on
 
 <img width="50" hspace="20" alt="pytorch_logo" href="https://pytorch.org/" src="https://user-images.githubusercontent.com/47393421/187940001-61655a05-5393-419a-be96-75d11f233d6e.png"><img width="50" href="https://www.pytorchlightning.ai/" hspace="20" alt="pytorch_lightning_logo" src="https://user-images.githubusercontent.com/47393421/187939281-19139d2c-84fe-47b8-a77c-b87e04feca36.png">
-<img width="70" href="https://github.com/mvinyard/neural-diffeqs" alt="neural_diffeqs_logo" src="https://user-images.githubusercontent.com/47393421/187945512-c6b9e9e9-92ca-4578-bbbc-f2216727b0e9.png">
+<img width="110" href="https://github.com/mvinyard/neural-diffeqs" alt="neural_diffeqs_logo" src="https://github.com/user-attachments/assets/e9cc2860-bfa4-43a1-bc15-85d074b44fc7" />
 
 ## System requirements
 
