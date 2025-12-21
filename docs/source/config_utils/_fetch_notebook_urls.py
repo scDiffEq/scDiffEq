@@ -92,7 +92,7 @@ class GitHubNotebookURLFetcher:
                     ]
                 elif response.status_code == 403:
                     self._handle_rate_limit(response)
-                    if attempt < max_retries - 1:
+                    if attempt < self._max_retries - 1:
                         continue
                     print(f"GitHub API access forbidden. Response: {response.text}")
                     return []
@@ -104,7 +104,7 @@ class GitHubNotebookURLFetcher:
                     return []
 
             except requests.exceptions.RequestException as e:
-                if attempt < max_retries - 1:
+                if attempt < self._max_retries - 1:
                     wait_time = (attempt + 1) * 2
                     print(f"Request failed, retrying in {wait_time} seconds...")
                     time.sleep(wait_time)

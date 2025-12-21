@@ -28,7 +28,7 @@
 .. toctree::
    :hidden:
    
-   quickstart
+   _tutorials/quickstart.ipynb
    install
    api
    tutorials
@@ -41,7 +41,7 @@
    :class-container: only-light
 
    .. grid-item-card::
-      :link: quickstart.rst
+      :link: _tutorials/quickstart.ipynb
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
@@ -105,7 +105,7 @@
    :class-container: only-light
 
    .. grid-item-card::
-      :link: https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2
+      :link: https://rdcu.be/eVhnL
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-light.png
       :class-card: only-light
@@ -169,7 +169,7 @@
    :class-container: only-dark
 
    .. grid-item-card::
-      :link: quickstart.rst
+      :link: _tutorials/quickstart.ipynb
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-dark.png
       :class-card: only-dark
@@ -233,7 +233,7 @@
    :class-container: only-dark
 
    .. grid-item-card::
-      :link: https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2
+      :link: https://rdcu.be/eVhnL
       :text-align: right
       :img-background: _static/scdiffeq-sd-card-dark.png
       :class-card: only-dark

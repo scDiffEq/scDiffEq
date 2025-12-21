@@ -1,29 +1,78 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+# This workflow will upload a Python Package using uv when a release is created
+name: Publish
 
-name: Upload python package to pypi.org
 on:
+  # Pre-releases from CLI tag pushes (e.g., v0.3.0-rc1)
+  push:
+    tags:
+      - 'v*rc*'
+  # Real releases from the GitHub Releases UI (must be non-prerelease)
   release:
     types: [published]
 
 jobs:
-  deploy:
+  publish:
+    # Run on rc tag pushes, or on release events that are NOT "prerelease"
+    # AND whose tag does not contain 'rc'
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'release' &&
+       !github.event.release.prerelease &&
+       !contains(github.event.release.tag_name, 'rc'))
+
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+      - uses: actions/checkout@v5
+
+      - name: Debug event info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Tag: ${{ github.ref_name }}"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Pin Python version
+        run: uv python pin 3.12
+
+      - name: Build
+        run: uv build
+
+      - name: Verify dist contents
+        run: |
+          echo "=== dist contents ==="
+          ls -lah dist || echo "No dist folder found"
+
+      - name: Smoke test (wheel)
+        run: uv run --python 3.12 --isolated --no-project --with dist/*.whl tests/pypi_release_smoke_test.py
+
+      - name: Smoke test (sdist)
+        run: uv run --python 3.12 --isolated --no-project --with dist/*.tar.gz tests/pypi_release_smoke_test.py
+
+      # Pre-releases: triggered by CLI tag push (refs/tags/v*rc*)
+      - name: Publish to TestPyPI (rc tags)
+        if: github.event_name == 'push'
+        # run: uv publish \
+        #        --publish-url https://test.pypi.org/legacy/ \
+        #        --check-url   https://test.pypi.org/simple
+        run: |
+            echo "Current dir: $(pwd)"
+            echo "Listing dist:"
+            ls -lah dist
+            uv publish --publish-url https://test.pypi.org/legacy/ --check-url https://test.pypi.org/simple
+        working-directory: .
+
+      # Real releases: triggered by GitHub Release publication (non-prerelease, non-rc)
+      - name: Publish to PyPI (GitHub Release)
+        if: github.event_name == 'release'
+        run: uv publish --check-url https://pypi.org/simple

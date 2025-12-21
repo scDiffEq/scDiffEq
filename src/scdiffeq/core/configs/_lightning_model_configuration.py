@@ -101,9 +101,9 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             logger.debug(f"Model fetched: {repr(lit_model.__name__)}")
 
             if self._USE_CKPT:
-                return lit_model.load_from_checkpoint(self._ckpt_path)
+                return lit_model.load_from_checkpoint(self._ckpt_path, weights_only=False)
 
-            model_kwargs = utils.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
+            model_kwargs = ABCParse.function_kwargs(func=lit_model.__init__, kwargs=kwargs)
             model_kwargs["loading_existing"] = loading_existing
             logger.debug(model_kwargs)
             return lit_model(**model_kwargs)  # data_dim = self._data_dim,

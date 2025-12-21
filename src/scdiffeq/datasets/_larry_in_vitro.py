@@ -2,17 +2,20 @@
 import ABCParse
 import anndata
 import logging
+import numpy as np
 import os
 import pandas as pd
 import pathlib
-import sklearn
+import sklearn.decomposition
+import sklearn.preprocessing
+
 
 # -- import local dependencies: ------------------------------------------------
 from .. import io
 from ._figshare_downloader import figshare_downloader
 
 # -- set type hints: -----------------------------------------------------------
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 # -- configure logger: ----------------------------------------------------------
 logger = logging.getLogger(__name__)
@@ -54,12 +57,15 @@ def _annotate_larry_cytotrace(adata: anndata.AnnData, data_dir: Union[str, pathl
 
 # -- Controller class: ---------------------------------------------------------
 class LARRYInVitroDataset(ABCParse.ABCParse):
-    FNAME = "larry.h5ad"
-    figshare_id = 52612805
+    FIGSHARE_IDS = {
+        None: 55415231,           # New biology-rich dataset (default)
+        "fate_prediction": 52612805,  # Original fate prediction dataset
+    }
 
     def __init__(
         self,
         data_dir=os.getcwd(),
+        variant: Optional[str] = None,
         filter_genes: bool = True,
         reduce_dimensions: bool = True,
         cytotrace: bool = True,
@@ -85,6 +91,11 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         return path
 
     @property
+    def FNAME(self):
+        suffix = f"_{self._variant}" if self._variant else ""
+        return f"larry{suffix}.h5ad"
+
+    @property
     def h5ad_path(self) -> pathlib.Path:
         return self.data_dir.joinpath(self.FNAME)
 
@@ -93,8 +104,9 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         return any([self._filter_genes, self._reduce_dimensions])
 
     def download(self):
+        figshare_id = self.FIGSHARE_IDS[self._variant]
         figshare_downloader(
-            figshare_id=self.figshare_id,
+            figshare_id=figshare_id,
             write_path=self.h5ad_path,
         )
 
@@ -108,7 +120,11 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         pca = sklearn.decomposition.PCA(n_components=50)
 
         # -- fit transform data: ----------------------------------------------
-        adata.obsm["X_scaled"] = scaler.fit_transform(adata.X.toarray())
+
+        X_raw = adata.X
+        if not isinstance(X_raw, np.ndarray):
+            X_raw = X_raw.toarray()
+        adata.obsm["X_scaled"] = scaler.fit_transform(X_raw)
         adata.obsm["X_pca"] = pca.fit_transform(adata.obsm["X_scaled"])
 
         # -- save models: -----------------------------------------------------
@@ -159,6 +175,7 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
 
 def larry(
     data_dir: str = os.getcwd(),
+    variant: Optional[str] = None,
     filter_genes: bool = True,
     reduce_dimensions: bool = True,
     cytotrace: bool = True,
@@ -169,6 +186,9 @@ def larry(
     Args:
         data_dir: str, default=os.getcwd()
             Path to the directory where the data will be saved.
+        variant: Optional[str], default=None
+            Dataset variant to download. None (default) downloads the full biology-rich
+            dataset. "fate_prediction" downloads the original fate prediction dataset.
         filter_genes: bool, default=True
             Whether to filter genes.
         reduce_dimensions: bool, default=True
@@ -183,6 +203,7 @@ def larry(
     """
     data_handler = LARRYInVitroDataset(
         data_dir=data_dir,
+        variant=variant,
         filter_genes=filter_genes,
         reduce_dimensions=reduce_dimensions,
         cytotrace=cytotrace,

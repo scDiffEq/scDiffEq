@@ -221,7 +221,7 @@ class scDiffEq(
         gradient_clip_val: float = 0.5,
         # -- velocity ratio keys: ----------------------------------------------
         velocity_ratio_params: Dict[str, Union[float, bool]] = {
-            "target": 2,
+            "target": 2.5,
             "enforce": 100,  # zero to disable
             "method": "square",  # abs -> calls torch.abs or torch.square
         },
@@ -231,16 +231,16 @@ class scDiffEq(
         kNN_fit_subset: Optional[str] = "train",
         # -- pretrain params: --------------------------------------------------
         pretrain_epochs: int = 500,
-        pretrain_lr: float = 1e-3,
+        pretrain_lr: float = 1e-4,
         pretrain_optimizer=torch.optim.Adam,
-        pretrain_step_size: int = 100,
+        pretrain_step_size: Optional[int] = None,
         pretrain_scheduler=torch.optim.lr_scheduler.StepLR,
         # -- train params: -----------------------------------------------------
         train_epochs: int = 2500,
-        train_lr: float = 1e-5,
+        train_lr: float = 1e-4,
         train_optimizer=torch.optim.RMSprop,
         train_scheduler=torch.optim.lr_scheduler.StepLR,
-        train_step_size: int = 10,
+        train_step_size: Optional[int] = None,
         train_val_split: List[float] = [0.9, 0.1],
         batch_size: int = 2048,
         train_key: str = "train",
@@ -417,6 +417,7 @@ class scDiffEq(
         reload_dataloaders_every_n_epochs: int = 1,
         devices: int = 1,
         deterministic: bool = False,
+        print_every: int = 10,
         **kwargs: dict,
     ) -> None:
         """Fit the scDiffEq model to some data.
@@ -451,7 +452,8 @@ class scDiffEq(
             Number of devices to use, by default 1
         deterministic : bool, optional
             Whether to use deterministic algorithms, by default False
-
+        print_every : int, optional
+            Print every n epochs, by default 10
         Returns: None
         """
         self.train(**ABCParse.function_kwargs(self.train, locals()))

@@ -1,6 +1,6 @@
 # -- import packages: ----------------------------------------------------------
 import ABCParse
-import annoyance
+import cell_neighbors
 import logging
 import pandas as pd
 import torch
@@ -29,13 +29,13 @@ class kNNGraphQuery(ABCParse.ABCParse):
 
     @property
     def _GRAPH_KWARGS(self):
-        return extract_func_kwargs(annoyance.kNN, self._PARAMS)
+        return extract_func_kwargs(cell_neighbors.kNN, self._PARAMS)
 
     def _configure_graph(self):
 
         self.configure_used_layer()
-        self.Graph = annoyance.kNN(**self._GRAPH_KWARGS)
-        self.Graph.build()
+        # cell_neighbors.kNN builds automatically in __init__
+        self.Graph = cell_neighbors.kNN(**self._GRAPH_KWARGS)
 
     def _format_input_shape(self, X_hat, query_t):
         """"""
@@ -56,7 +56,7 @@ class kNNGraphQuery(ABCParse.ABCParse):
         return (
             self.adata[X_nn.flatten().astype(str)]
             .obs[self.annot_key]
-            .values.reshape(-1, self.Graph._n_neighbors)
+            .values.reshape(-1, self.Graph.n_neighbors)
         )
 
     def _query(self, X_hat):
