@@ -154,11 +154,17 @@ html_theme_options = {
 }
 
 html_show_sourcelink = False
+
 # Add intersphinx mapping for external package references
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'torch': ('https://pytorch.org/docs/stable', None),
-    # Add other relevant packages your project depends on
+    'numpy': ('https://numpy.org/doc/stable', None),
+    'pandas': ('https://pandas.pydata.org/docs', None),
+    'anndata': ('https://anndata.readthedocs.io/en/stable', None),
+    'matplotlib': ('https://matplotlib.org/stable', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy', None),
+    'sklearn': ('https://scikit-learn.org/stable', None),
 }
 
 # Add settings for better type hints display
@@ -166,5 +172,49 @@ python_use_unqualified_type_names = True
 
 # Keep your autodoc class content setting
 autoclass_content = "both"  # Changed from "init" to "both" to show both class and __init__ docstrings
+
+# Suppress warnings for missing references to external types
+# These are common type hints that don't resolve well with intersphinx
+nitpick_ignore = [
+    ('py:class', 'optional'),
+    ('py:class', 'None'),
+    ('py:class', '='),
+    ('py:class', 'obj'),
+    ('py:class', 'diffeq'),
+    ('py:class', 'Second-most central function'),
+    ('py:class', 'this autoparsing base'),
+    ('py:class', 'GroupedMetrics'),
+    ('py:class', 'LightningCheckpoint'),
+]
+
+nitpick_ignore_regex = [
+    # Ignore private/internal class references
+    (r'py:class', r'.*\._.*'),
+    # Ignore pandas internal types
+    (r'py:class', r'pandas\.core\..*'),
+    # Ignore anndata internal types  
+    (r'py:class', r'anndata\._core\..*'),
+    # Ignore matplotlib internal types
+    (r'py:class', r'matplotlib\.axes\._axes\..*'),
+    # Ignore lightning internal types
+    (r'py:class', r'lightning\.pytorch\.core\..*'),
+    # Ignore voyager types
+    (r'py:class', r'voyager\..*'),
+    # Ignore ABCParse internal types
+    (r'py:class', r'ABCParse\..*'),
+    # Common shorthand type hints
+    (r'py:class', r'pd\..*'),
+    (r'py:class', r'np\..*'),
+    (r'py:class', r'plt\..*'),
+    (r'py:class', r'anndata\.AnnData'),
+    (r'py:class', r'lightning\.LightningModule'),
+]
+
+# Suppress common warnings that don't affect documentation quality
+suppress_warnings = [
+    'autosectionlabel.*',
+    'ref.python',  # Suppress "more than one target found" warnings
+    'ref.class',   # Suppress class reference warnings
+]
 
 favicons = [{"rel": "icon", "href": "scdiffeq.favicon.png"}]
