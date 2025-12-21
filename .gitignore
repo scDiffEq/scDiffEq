@@ -143,3 +143,6 @@ scdiffeq_data/
 # uv
 .venv/
 uv.lock
+
+# VS Code workspace files
+*.code-workspace
