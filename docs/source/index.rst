@@ -28,7 +28,7 @@
 .. toctree::
    :hidden:
    
-   quickstart
+   _tutorials/quickstart.ipynb
    install
    api
    tutorials
