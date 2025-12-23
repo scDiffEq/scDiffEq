@@ -59,9 +59,9 @@ model.fit(train_epochs = 1500)
 ## System requirements
 
 - Developed on linux20.04 and MacOS (with Apple Silicon), using Python3.11.
-- Software dependencies are listed in [pyproject.toml](./pyproject.toml) (or [requirements.txt](./requirements.txt) for pip-based installs).
+- Software dependencies are listed in [pyproject.toml](./pyproject.toml).
 - Tested with NVIDIA GPUs (A100, T4) and Apple Silicon. Most datasets likely only require an NVIDIA Tesla T4 (free in Google Colab).
 
 ## Reproducibility
 
-- All results described in the [manuscript](https://www.biorxiv.org/content/10.1101/2023.12.06.570508v2) detailing scDiffEq can be reproduced using notebooks in the companion repository: [scdiffeq-analyses](https://github.com/scDiffEq/scdiffeq-analyses)
+- All results described in the [manuscript](https://rdcu.be/eVhnL) detailing scDiffEq can be reproduced using notebooks in the companion repository: [scdiffeq-analyses](https://github.com/scDiffEq/scdiffeq-analyses)
