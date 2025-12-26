@@ -33,6 +33,7 @@ def simulation_umap(
     savename: Optional[str] = None,
     save_format: str = "svg",
     dpi: int = 300,
+    **kwargs,
 ) -> plt.Axes:
     """
     Plot UMAP embedding of simulated data, colored by obs attribute or gene expression.
@@ -87,6 +88,9 @@ def simulation_umap(
         Format for saving figure.
     dpi : int, default=300
         Resolution for saving figure.
+    **kwargs
+        Additional keyword arguments passed to ``ax.scatter()``
+        (e.g., ``zorder``, ``edgecolors``, ``linewidths``).
 
     Returns
     -------
@@ -178,14 +182,14 @@ def simulation_umap(
         for cat in unique_cats:
             mask = color_values == cat
             cat_color = categorical_cmap.get(cat, "gray")
-            ax.scatter(x[mask], y[mask], c=[cat_color], s=s, alpha=alpha, label=cat)
+            ax.scatter(x[mask], y[mask], c=[cat_color], s=s, alpha=alpha, label=cat, **kwargs)
 
         if show_legend:
             ax.legend(loc=legend_loc, frameon=True, facecolor="white",
                      edgecolor="lightgray", fontsize=8, markerscale=3)
     else:
         # Continuous
-        scatter = ax.scatter(x, y, c=color_values, cmap=cmap, s=s, alpha=alpha)
+        scatter = ax.scatter(x, y, c=color_values, cmap=cmap, s=s, alpha=alpha, **kwargs)
 
         if show_colorbar:
             cbar = plt.colorbar(scatter, ax=ax, shrink=0.8)
