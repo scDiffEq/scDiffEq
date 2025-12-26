@@ -109,21 +109,36 @@ def temporal_expression(
     ... )
     """
     # -- Get gene index -------------------------------------------------------
-    gene_ids = adata_sim.uns[gene_ids_key]
-    if isinstance(gene_ids, (pd.Index, pd.Series)):
-        gene_ids = gene_ids.tolist()
-    elif isinstance(gene_ids, np.ndarray):
-        gene_ids = gene_ids.tolist()
-    elif not isinstance(gene_ids, list):
-        gene_ids = list(gene_ids)
+    gene_ids_raw = adata_sim.uns[gene_ids_key]
 
-    if gene not in gene_ids:
-        preview = gene_ids[:5] if len(gene_ids) >= 5 else gene_ids
-        raise ValueError(
-            f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. "
-            f"Available genes: {preview}..."
-        )
-    gene_idx = gene_ids.index(gene)
+    # Handle dict format: {index: gene_name}
+    if isinstance(gene_ids_raw, dict):
+        gene_names = list(gene_ids_raw.values())
+        if gene not in gene_names:
+            preview = gene_names[:5]
+            raise ValueError(
+                f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. "
+                f"Available genes: {preview}..."
+            )
+        gene_idx = gene_names.index(gene)
+    else:
+        # Handle list-like formats
+        if isinstance(gene_ids_raw, (pd.Index, pd.Series)):
+            gene_ids = gene_ids_raw.tolist()
+        elif isinstance(gene_ids_raw, np.ndarray):
+            gene_ids = gene_ids_raw.tolist()
+        elif isinstance(gene_ids_raw, list):
+            gene_ids = gene_ids_raw
+        else:
+            gene_ids = list(gene_ids_raw)
+
+        if gene not in gene_ids:
+            preview = gene_ids[:5] if len(gene_ids) >= 5 else gene_ids
+            raise ValueError(
+                f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. "
+                f"Available genes: {preview}..."
+            )
+        gene_idx = gene_ids.index(gene)
 
     # -- Extract expression and metadata --------------------------------------
     expression = adata_sim.obsm[use_key][:, gene_idx]
