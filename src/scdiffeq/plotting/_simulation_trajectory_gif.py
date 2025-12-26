@@ -278,11 +278,14 @@ def simulation_trajectory_gif(
         cbar.set_label(color, fontsize=10)
 
         # Add progress indicator on colorbar
-        progress = (t_current - t_min) / (t_max - t_min) if t_max > t_min else 1.0
         cbar_ax = cbar.ax
+        # Get the actual y-limits of the colorbar axis
+        cbar_ymin, cbar_ymax = cbar_ax.get_ylim()
+        # Map current time to colorbar position
+        progress_y = cbar_ymin + (t_current - t_min) / (t_max - t_min) * (cbar_ymax - cbar_ymin) if t_max > t_min else cbar_ymax
         # Draw a marker on the colorbar at current time position
-        cbar_ax.axhline(y=progress, color='white', linewidth=3, zorder=10)
-        cbar_ax.axhline(y=progress, color='black', linewidth=1.5, zorder=11)
+        cbar_ax.axhline(y=progress_y, color='white', linewidth=3, zorder=10)
+        cbar_ax.axhline(y=progress_y, color='black', linewidth=1.5, zorder=11)
 
         return fig, ax
 
