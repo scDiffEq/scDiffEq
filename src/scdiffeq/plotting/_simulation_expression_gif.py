@@ -364,6 +364,18 @@ def simulation_expression_gif(
         ax_umap.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
         ax_umap.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
 
+        # Add colorbar with progress indicator at start
+        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+        sm = cm.ScalarMappable(cmap=umap_cmap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax_umap, shrink=0.6, orientation='horizontal', location='bottom')
+        cbar.set_label(color, fontsize=10)
+
+        # Progress indicator at start
+        cbar_ax = cbar.ax
+        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+        cbar_ax.axvline(x=cbar_xmin, color='dodgerblue', linewidth=2, zorder=10)
+
         # === Expression Panel ===
         # Empty expression panel with just axes
         ax_expr.set_xlim(t_min, t_max)
@@ -447,6 +459,19 @@ def simulation_expression_gif(
         ax_umap.set_ylabel("")
         ax_umap.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
         ax_umap.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+        # Add colorbar with progress indicator
+        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+        sm = cm.ScalarMappable(cmap=umap_cmap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax_umap, shrink=0.6, orientation='horizontal', location='bottom')
+        cbar.set_label(color, fontsize=10)
+
+        # Progress indicator on colorbar
+        cbar_ax = cbar.ax
+        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+        progress_x = cbar_xmin + (t_current - t_min) / (t_max - t_min) * (cbar_xmax - cbar_xmin) if t_max > t_min else cbar_xmax
+        cbar_ax.axvline(x=progress_x, color='dodgerblue', linewidth=2, zorder=10)
 
         # === Expression Panel ===
         # Filter stats up to current time
