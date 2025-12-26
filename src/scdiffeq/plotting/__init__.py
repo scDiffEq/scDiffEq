@@ -8,3 +8,4 @@ from ._velocity_stream import velocity_stream
 from ._temporal_expression import temporal_expression
 from ._simulation_umap import simulation_umap
 from ._simulation_trajectory_gif import simulation_trajectory_gif
+from ._simulation_expression_gif import simulation_expression_gif
