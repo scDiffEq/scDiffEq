@@ -12,6 +12,242 @@ import os
 from typing import Callable, Dict, List, Optional, Union
 
 
+# -- Helper functions: --------------------------------------------------------
+def _create_default_background(adata_sim, ax, use_key, background_s, background_inner_s):
+    """Default background with black outline and white fill."""
+    xu = adata_sim.obsm[use_key]
+    if isinstance(xu, pd.DataFrame):
+        xu = xu.values
+    ax.scatter(xu[:, 0], xu[:, 1], c="k", ec="None", rasterized=True, s=background_s)
+    ax.scatter(xu[:, 0], xu[:, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
+
+
+def _create_grouped_background(
+    adata_sim, ax, use_key, background_groupby, background_cmap, background_s, background_inner_s
+):
+    """Background colored by group membership."""
+    groups = adata_sim.obs[background_groupby]
+    xu = adata_sim.obsm[use_key]
+    if isinstance(xu, pd.DataFrame):
+        xu = xu.values
+
+    unique_groups = groups.unique()
+    if background_cmap is None:
+        default_colors = plt.cm.tab10.colors
+        group_colors = {g: default_colors[i % len(default_colors)] for i, g in enumerate(unique_groups)}
+    else:
+        group_colors = background_cmap
+
+    for group in unique_groups:
+        mask = groups == group
+        c = group_colors.get(group, "k")
+        ax.scatter(xu[mask, 0], xu[mask, 1], c=c, ec="None", rasterized=True, s=background_s)
+        ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
+
+
+def _create_trajectory_progenitor_frame(
+    adata_sim,
+    ax,
+    background_fn,
+    progenitor_x,
+    progenitor_y,
+    progenitor_color,
+    progenitor_s,
+    progenitor_label,
+    show_time_label,
+    time_label_loc,
+    time_label_fmt,
+    time_label_fontsize,
+    t_min,
+    t_max,
+    title,
+    x_all,
+    y_all,
+    cmap,
+    color,
+):
+    """Create content for progenitor intro frame on a given axes."""
+    background_fn(adata_sim, ax)
+
+    ax.scatter(
+        progenitor_x,
+        progenitor_y,
+        c=progenitor_color,
+        s=progenitor_s,
+        edgecolors="white",
+        linewidths=1.5,
+        zorder=300,
+    )
+
+    ax.annotate(
+        progenitor_label,
+        xy=(progenitor_x, progenitor_y),
+        xytext=(progenitor_x + 1.5, progenitor_y + 1.5),
+        fontsize=12,
+        fontweight="bold",
+        color=progenitor_color,
+        arrowprops=dict(arrowstyle="->", color=progenitor_color, lw=2),
+        zorder=301,
+    )
+
+    if show_time_label:
+        ax.text(
+            time_label_loc[0],
+            time_label_loc[1],
+            time_label_fmt.format(t_min),
+            transform=ax.transAxes,
+            fontsize=time_label_fontsize,
+            verticalalignment="top",
+            fontweight="bold",
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+        )
+
+    if title:
+        ax.set_title(title, fontsize=12)
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
+    ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+    norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+    sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax, shrink=0.6, orientation="horizontal", location="bottom")
+    cbar.set_label(color, fontsize=10)
+
+    cbar_ax = cbar.ax
+    cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+    cbar_ax.axvline(x=cbar_xmin, color="dodgerblue", linewidth=2, zorder=10)
+
+
+def _create_trajectory_frame(
+    adata_sim,
+    ax,
+    t_current,
+    frame_alpha,
+    background_fn,
+    x_all,
+    y_all,
+    time_values,
+    color_values,
+    cmap,
+    s,
+    alpha,
+    trail_alpha,
+    leading_edge_scale,
+    vmin,
+    vmax,
+    show_time_label,
+    time_label_loc,
+    time_label_fmt,
+    time_label_fontsize,
+    title,
+    t_min,
+    t_max,
+    color,
+    **kwargs,
+):
+    """Create content for a single animation frame on a given axes."""
+    background_fn(adata_sim, ax)
+
+    mask = time_values <= t_current
+    x = x_all[mask]
+    y = y_all[mask]
+    c = color_values[mask]
+    t_pts = time_values[mask]
+
+    trail_mask = t_pts < t_current
+    if np.any(trail_mask):
+        ax.scatter(
+            x[trail_mask],
+            y[trail_mask],
+            c=c[trail_mask],
+            cmap=cmap,
+            s=s,
+            alpha=alpha * trail_alpha * frame_alpha,
+            vmin=vmin,
+            vmax=vmax,
+            zorder=200,
+            edgecolors="none",
+            **kwargs,
+        )
+
+    leading_mask = t_pts == t_current
+    if np.any(leading_mask):
+        ax.scatter(
+            x[leading_mask],
+            y[leading_mask],
+            c=c[leading_mask],
+            cmap=cmap,
+            s=s * leading_edge_scale,
+            alpha=frame_alpha,
+            vmin=vmin,
+            vmax=vmax,
+            zorder=202,
+            edgecolors="none",
+            **kwargs,
+        )
+    else:
+        ax.scatter(
+            x,
+            y,
+            c=c,
+            cmap=cmap,
+            s=s,
+            alpha=alpha * trail_alpha * frame_alpha,
+            vmin=vmin,
+            vmax=vmax,
+            zorder=200,
+            edgecolors="none",
+            **kwargs,
+        )
+
+    if show_time_label:
+        ax.text(
+            time_label_loc[0],
+            time_label_loc[1],
+            time_label_fmt.format(t_current),
+            transform=ax.transAxes,
+            fontsize=time_label_fontsize,
+            verticalalignment="top",
+            fontweight="bold",
+            alpha=frame_alpha,
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8 * frame_alpha),
+        )
+
+    if title:
+        ax.set_title(title, fontsize=12)
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
+    ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+    norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+    sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax, shrink=0.6, orientation="horizontal", location="bottom")
+    cbar.set_label(color, fontsize=10)
+
+    cbar_ax = cbar.ax
+    cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+    progress_x = (
+        cbar_xmin + (t_current - t_min) / (t_max - t_min) * (cbar_xmax - cbar_xmin)
+        if t_max > t_min
+        else cbar_xmax
+    )
+    cbar_ax.axvline(x=progress_x, color="dodgerblue", linewidth=2, zorder=10)
+
+
 # -- API-facing function: -----------------------------------------------------
 def simulation_trajectory_gif(
     adata_sim: anndata.AnnData,
@@ -151,8 +387,7 @@ def simulation_trajectory_gif(
         from PIL import Image
     except ImportError:
         raise ImportError(
-            "PIL (Pillow) is required for GIF creation. "
-            "Install it with: pip install Pillow"
+            "PIL (Pillow) is required for GIF creation. " "Install it with: pip install Pillow"
         )
 
     # -- Get UMAP coordinates -------------------------------------------------
@@ -180,7 +415,6 @@ def simulation_trajectory_gif(
     if color in adata_sim.obs.columns:
         color_values = adata_sim.obs[color].values
     else:
-        # Try gene name
         gene_ids_raw = adata_sim.uns.get(gene_ids_key, {})
         if isinstance(gene_ids_raw, dict):
             gene_names = list(gene_ids_raw.values())
@@ -210,214 +444,20 @@ def simulation_trajectory_gif(
                     color_values = expr_matrix[:, gene_idx]
 
     if color_values is None:
-        # Default to time
         color_values = time_values
 
-    # -- Compute global color limits ------------------------------------------
     vmin, vmax = np.nanmin(color_values), np.nanmax(color_values)
 
-    # -- Default background function ------------------------------------------
-    def default_background(adata_sim, ax):
-        xu = adata_sim.obsm[use_key]
-        if isinstance(xu, pd.DataFrame):
-            xu = xu.values
-        ax.scatter(xu[:, 0], xu[:, 1], c="k", ec="None", rasterized=True, s=background_s)
-        ax.scatter(xu[:, 0], xu[:, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
-
-    def grouped_background(adata_sim, ax):
-        """Background colored by group membership."""
-        groups = adata_sim.obs[background_groupby]
-        xu = adata_sim.obsm[use_key]
-        if isinstance(xu, pd.DataFrame):
-            xu = xu.values
-
-        # Default colors if not provided
-        unique_groups = groups.unique()
-        if background_cmap is None:
-            default_colors = plt.cm.tab10.colors
-            group_colors = {g: default_colors[i % len(default_colors)]
-                           for i, g in enumerate(unique_groups)}
-        else:
-            group_colors = background_cmap
-
-        # Plot each group
-        for group in unique_groups:
-            mask = groups == group
-            c = group_colors.get(group, "k")
-            ax.scatter(xu[mask, 0], xu[mask, 1], c=c, ec="None", rasterized=True, s=background_s)
-            ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
-
+    # -- Setup background function --------------------------------------------
     if background_fn is None:
         if background_groupby is not None:
-            background_fn = grouped_background
-        else:
-            background_fn = default_background
-
-    # -- Helper to create progenitor intro frame ------------------------------
-    def create_progenitor_frame():
-        fig, ax = plt.subplots(figsize=figsize)
-
-        # Plot background
-        background_fn(adata_sim, ax)
-
-        # Plot progenitor point
-        ax.scatter(
-            progenitor_x, progenitor_y,
-            c=progenitor_color, s=progenitor_s,
-            edgecolors='white', linewidths=1.5,
-            zorder=300
-        )
-
-        # Add arrow annotation pointing to progenitor
-        ax.annotate(
-            progenitor_label,
-            xy=(progenitor_x, progenitor_y),
-            xytext=(progenitor_x + 1.5, progenitor_y + 1.5),
-            fontsize=12,
-            fontweight='bold',
-            color=progenitor_color,
-            arrowprops=dict(
-                arrowstyle='->',
-                color=progenitor_color,
-                lw=2,
-            ),
-            zorder=301
-        )
-
-        # Time label
-        if show_time_label:
-            ax.text(
-                time_label_loc[0], time_label_loc[1],
-                time_label_fmt.format(t_min),
-                transform=ax.transAxes,
-                fontsize=time_label_fontsize,
-                verticalalignment='top',
-                fontweight='bold',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
-            )
-
-        # Formatting
-        if title:
-            ax.set_title(title, fontsize=12)
-
-        # Remove all spines, ticks, and labels for clean UMAP look
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_xlabel("")
-        ax.set_ylabel("")
-
-        # Fix axis limits to full data range
-        ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
-        ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
-
-        # Add colorbar with progress indicator at start
-        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
-        sm = cm.ScalarMappable(cmap=cmap, norm=norm)
-        sm.set_array([])
-        cbar = plt.colorbar(sm, ax=ax, shrink=0.6, orientation='horizontal', location='bottom')
-        cbar.set_label(color, fontsize=10)
-
-        # Progress indicator at start
-        cbar_ax = cbar.ax
-        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
-        cbar_ax.axvline(x=cbar_xmin, color='dodgerblue', linewidth=2, zorder=10)
-
-        return fig, ax
-
-    # -- Helper to create a single frame --------------------------------------
-    def create_frame(t_current, frame_alpha=1.0, is_final=False):
-        fig, ax = plt.subplots(figsize=figsize)
-
-        # Plot background
-        background_fn(adata_sim, ax)
-
-        # Get points up to current time
-        mask = time_values <= t_current
-        x = x_all[mask]
-        y = y_all[mask]
-        c = color_values[mask]
-        t_pts = time_values[mask]
-
-        # Plot trail points (not at current time) with faded alpha
-        trail_mask = t_pts < t_current
-        if np.any(trail_mask):
-            ax.scatter(
-                x[trail_mask], y[trail_mask],
-                c=c[trail_mask], cmap=cmap, s=s,
-                alpha=alpha * trail_alpha * frame_alpha,
-                vmin=vmin, vmax=vmax, zorder=200,
-                edgecolors='none', **kwargs
-            )
-
-        # Plot leading edge points (at current time) - larger and full alpha
-        leading_mask = t_pts == t_current
-        if np.any(leading_mask):
-            scatter = ax.scatter(
-                x[leading_mask], y[leading_mask],
-                c=c[leading_mask], cmap=cmap,
-                s=s * leading_edge_scale,
-                alpha=frame_alpha,
-                vmin=vmin, vmax=vmax, zorder=202,
-                edgecolors='none', **kwargs
+            background_fn = lambda adata, ax: _create_grouped_background(
+                adata, ax, use_key, background_groupby, background_cmap, background_s, background_inner_s
             )
         else:
-            # Need scatter for colorbar reference
-            scatter = ax.scatter(
-                x, y, c=c, cmap=cmap, s=s,
-                alpha=alpha * trail_alpha * frame_alpha,
-                vmin=vmin, vmax=vmax, zorder=200,
-                edgecolors='none', **kwargs
+            background_fn = lambda adata, ax: _create_default_background(
+                adata, ax, use_key, background_s, background_inner_s
             )
-
-        # Time label
-        if show_time_label:
-            ax.text(
-                time_label_loc[0], time_label_loc[1],
-                time_label_fmt.format(t_current),
-                transform=ax.transAxes,
-                fontsize=time_label_fontsize,
-                verticalalignment='top',
-                fontweight='bold',
-                alpha=frame_alpha,
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8 * frame_alpha)
-            )
-
-        # Formatting
-        if title:
-            ax.set_title(title, fontsize=12)
-
-        # Remove all spines, ticks, and labels for clean UMAP look
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_xlabel("")
-        ax.set_ylabel("")
-
-        # Fix axis limits to full data range
-        ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
-        ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
-
-        # Add colorbar with progress indicator
-        # Create a ScalarMappable for the colorbar
-        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
-        sm = cm.ScalarMappable(cmap=cmap, norm=norm)
-        sm.set_array([])
-        cbar = plt.colorbar(sm, ax=ax, shrink=0.6, orientation='horizontal', location='bottom')
-        cbar.set_label(color, fontsize=10)
-
-        # Add progress indicator on colorbar
-        cbar_ax = cbar.ax
-        # Get the actual x-limits of the colorbar axis (horizontal orientation)
-        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
-        # Map current time to colorbar position
-        progress_x = cbar_xmin + (t_current - t_min) / (t_max - t_min) * (cbar_xmax - cbar_xmin) if t_max > t_min else cbar_xmax
-        # Draw a marker on the colorbar at current time position
-        cbar_ax.axvline(x=progress_x, color='dodgerblue', linewidth=2, zorder=10)
-
-        return fig, ax
 
     # -- Create frames --------------------------------------------------------
     frames = []
@@ -426,7 +466,28 @@ def simulation_trajectory_gif(
 
         # Progenitor intro frames
         if show_progenitor and progenitor_frames > 0:
-            fig, ax = create_progenitor_frame()
+            fig, ax = plt.subplots(figsize=figsize)
+            _create_trajectory_progenitor_frame(
+                adata_sim,
+                ax,
+                background_fn,
+                progenitor_x,
+                progenitor_y,
+                progenitor_color,
+                progenitor_s,
+                progenitor_label,
+                show_time_label,
+                time_label_loc,
+                time_label_fmt,
+                time_label_fontsize,
+                t_min,
+                t_max,
+                title,
+                x_all,
+                y_all,
+                cmap,
+                color,
+            )
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
@@ -437,8 +498,34 @@ def simulation_trajectory_gif(
 
         # Main animation frames
         for i, t in enumerate(unique_times):
-            fig, ax = create_frame(t)
-
+            fig, ax = plt.subplots(figsize=figsize)
+            _create_trajectory_frame(
+                adata_sim,
+                ax,
+                t,
+                1.0,
+                background_fn,
+                x_all,
+                y_all,
+                time_values,
+                color_values,
+                cmap,
+                s,
+                alpha,
+                trail_alpha,
+                leading_edge_scale,
+                vmin,
+                vmax,
+                show_time_label,
+                time_label_loc,
+                time_label_fmt,
+                time_label_fontsize,
+                title,
+                t_min,
+                t_max,
+                color,
+                **kwargs,
+            )
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
@@ -453,8 +540,34 @@ def simulation_trajectory_gif(
         # Fade out frames
         for fade_i in range(fade_frames):
             fade_alpha = 1.0 - (fade_i + 1) / fade_frames
-            fig, ax = create_frame(unique_times[-1], frame_alpha=fade_alpha)
-
+            fig, ax = plt.subplots(figsize=figsize)
+            _create_trajectory_frame(
+                adata_sim,
+                ax,
+                unique_times[-1],
+                fade_alpha,
+                background_fn,
+                x_all,
+                y_all,
+                time_values,
+                color_values,
+                cmap,
+                s,
+                alpha,
+                trail_alpha,
+                leading_edge_scale,
+                vmin,
+                vmax,
+                show_time_label,
+                time_label_loc,
+                time_label_fmt,
+                time_label_fontsize,
+                title,
+                t_min,
+                t_max,
+                color,
+                **kwargs,
+            )
             frame_path = os.path.join(tmpdir, f"fade_{fade_i:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
@@ -462,7 +575,7 @@ def simulation_trajectory_gif(
 
         # -- Create GIF -------------------------------------------------------
         if duration is not None:
-            frame_duration = int(duration * 1000 / len(unique_times))  # Base on main frames
+            frame_duration = int(duration * 1000 / len(unique_times))
         else:
             frame_duration = int(1000 / fps)
 
@@ -471,12 +584,38 @@ def simulation_trajectory_gif(
             save_all=True,
             append_images=frames[1:],
             duration=frame_duration,
-            loop=0
+            loop=0,
         )
 
     if return_fig:
-        # Create final frame for returning
-        final_fig, final_ax = create_frame(unique_times[-1])
+        final_fig, final_ax = plt.subplots(figsize=figsize)
+        _create_trajectory_frame(
+            adata_sim,
+            final_ax,
+            unique_times[-1],
+            1.0,
+            background_fn,
+            x_all,
+            y_all,
+            time_values,
+            color_values,
+            cmap,
+            s,
+            alpha,
+            trail_alpha,
+            leading_edge_scale,
+            vmin,
+            vmax,
+            show_time_label,
+            time_label_loc,
+            time_label_fmt,
+            time_label_fontsize,
+            title,
+            t_min,
+            t_max,
+            color,
+            **kwargs,
+        )
         return savename, final_fig, final_ax
 
     return savename

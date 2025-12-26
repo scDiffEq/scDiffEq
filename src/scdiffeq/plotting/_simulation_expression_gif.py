@@ -12,6 +12,310 @@ import os
 from typing import Callable, Dict, List, Optional, Union
 
 
+# -- Helper functions: --------------------------------------------------------
+def _create_expr_default_background(adata_sim, ax, use_key, background_s, background_inner_s):
+    """Default background with black outline and white fill."""
+    xu = adata_sim.obsm[use_key]
+    if isinstance(xu, pd.DataFrame):
+        xu = xu.values
+    ax.scatter(xu[:, 0], xu[:, 1], c="k", ec="None", rasterized=True, s=background_s)
+    ax.scatter(xu[:, 0], xu[:, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
+
+
+def _create_expr_grouped_background(
+    adata_sim, ax, use_key, background_groupby, background_cmap, background_s, background_inner_s
+):
+    """Background colored by group membership."""
+    groups = adata_sim.obs[background_groupby]
+    xu = adata_sim.obsm[use_key]
+    if isinstance(xu, pd.DataFrame):
+        xu = xu.values
+
+    unique_groups = groups.unique()
+    if background_cmap is None:
+        default_colors = plt.cm.tab10.colors
+        group_colors = {g: default_colors[i % len(default_colors)] for i, g in enumerate(unique_groups)}
+    else:
+        group_colors = background_cmap
+
+    for group in unique_groups:
+        mask = groups == group
+        c = group_colors.get(group, "k")
+        ax.scatter(xu[mask, 0], xu[mask, 1], c=c, ec="None", rasterized=True, s=background_s)
+        ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
+
+
+def _create_expression_progenitor_frame(
+    adata_sim,
+    ax_umap,
+    ax_expr,
+    background_fn,
+    progenitor_x,
+    progenitor_y,
+    progenitor_color,
+    progenitor_s,
+    progenitor_label,
+    show_time_label,
+    time_label_loc,
+    time_label_fmt,
+    time_label_fontsize,
+    t_min,
+    t_max,
+    umap_title,
+    x_all,
+    y_all,
+    umap_cmap,
+    color,
+    expr_ylim,
+    x_label,
+    y_label,
+    gene,
+    plot_groups,
+    expr_cmap,
+    linewidth,
+):
+    """Create content for dual-panel progenitor intro frame."""
+    # === UMAP Panel ===
+    background_fn(adata_sim, ax_umap)
+
+    ax_umap.scatter(
+        progenitor_x,
+        progenitor_y,
+        c=progenitor_color,
+        s=progenitor_s,
+        edgecolors="white",
+        linewidths=1.5,
+        zorder=300,
+    )
+
+    ax_umap.annotate(
+        progenitor_label,
+        xy=(progenitor_x, progenitor_y),
+        xytext=(progenitor_x + 1.5, progenitor_y + 1.5),
+        fontsize=12,
+        fontweight="bold",
+        color=progenitor_color,
+        arrowprops=dict(arrowstyle="->", color=progenitor_color, lw=2),
+        zorder=301,
+    )
+
+    if show_time_label:
+        ax_umap.text(
+            time_label_loc[0],
+            time_label_loc[1],
+            time_label_fmt.format(t_min),
+            transform=ax_umap.transAxes,
+            fontsize=time_label_fontsize,
+            verticalalignment="top",
+            fontweight="bold",
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+        )
+
+    if umap_title:
+        ax_umap.set_title(umap_title, fontsize=12)
+
+    for spine in ax_umap.spines.values():
+        spine.set_visible(False)
+    ax_umap.set_xticks([])
+    ax_umap.set_yticks([])
+    ax_umap.set_xlabel("")
+    ax_umap.set_ylabel("")
+    ax_umap.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
+    ax_umap.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+    norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+    sm = cm.ScalarMappable(cmap=umap_cmap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax_umap, shrink=0.6, orientation="horizontal", location="bottom")
+    cbar.set_label(color, fontsize=10)
+
+    cbar_ax = cbar.ax
+    cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+    cbar_ax.axvline(x=cbar_xmin, color="dodgerblue", linewidth=2, zorder=10)
+
+    # === Expression Panel ===
+    ax_expr.set_xlim(t_min, t_max)
+    ax_expr.set_ylim(expr_ylim)
+    ax_expr.set_xlabel(x_label, fontsize=10)
+    ax_expr.set_ylabel(y_label, fontsize=10)
+    ax_expr.set_title(f"$\\it{{{gene}}}$", fontsize=11)
+    ax_expr.spines["top"].set_visible(False)
+    ax_expr.spines["right"].set_visible(False)
+    ax_expr.grid(True, alpha=0.3, zorder=0)
+
+    ax_expr.axvline(x=t_min, color="dodgerblue", linewidth=2, linestyle="--", alpha=0.7, zorder=5)
+
+    for group in plot_groups:
+        ax_expr.plot([], [], color=expr_cmap.get(group, "gray"), linewidth=linewidth, label=group)
+    ax_expr.legend(loc="best", frameon=True, facecolor="white", edgecolor="lightgray", fontsize=8)
+
+
+def _create_expression_frame(
+    adata_sim,
+    ax_umap,
+    ax_expr,
+    t_current,
+    frame_alpha,
+    background_fn,
+    x_all,
+    y_all,
+    time_values,
+    color_values,
+    umap_cmap,
+    s,
+    alpha,
+    trail_alpha,
+    leading_edge_scale,
+    vmin,
+    vmax,
+    show_time_label,
+    time_label_loc,
+    time_label_fmt,
+    time_label_fontsize,
+    umap_title,
+    t_min,
+    t_max,
+    color,
+    stats_full,
+    plot_groups,
+    expr_cmap,
+    linewidth,
+    show_std,
+    std_alpha,
+    expr_ylim,
+    x_label,
+    y_label,
+    gene,
+    **kwargs,
+):
+    """Create content for a dual-panel animation frame."""
+    # === UMAP Panel ===
+    background_fn(adata_sim, ax_umap)
+
+    mask = time_values <= t_current
+    x = x_all[mask]
+    y = y_all[mask]
+    c = color_values[mask]
+    t_pts = time_values[mask]
+
+    trail_mask = t_pts < t_current
+    if np.any(trail_mask):
+        ax_umap.scatter(
+            x[trail_mask],
+            y[trail_mask],
+            c=c[trail_mask],
+            cmap=umap_cmap,
+            s=s,
+            alpha=alpha * trail_alpha * frame_alpha,
+            vmin=vmin,
+            vmax=vmax,
+            zorder=200,
+            edgecolors="none",
+            **kwargs,
+        )
+
+    leading_mask = t_pts == t_current
+    if np.any(leading_mask):
+        ax_umap.scatter(
+            x[leading_mask],
+            y[leading_mask],
+            c=c[leading_mask],
+            cmap=umap_cmap,
+            s=s * leading_edge_scale,
+            alpha=frame_alpha,
+            vmin=vmin,
+            vmax=vmax,
+            zorder=202,
+            edgecolors="none",
+            **kwargs,
+        )
+
+    if show_time_label:
+        ax_umap.text(
+            time_label_loc[0],
+            time_label_loc[1],
+            time_label_fmt.format(t_current),
+            transform=ax_umap.transAxes,
+            fontsize=time_label_fontsize,
+            verticalalignment="top",
+            fontweight="bold",
+            alpha=frame_alpha,
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8 * frame_alpha),
+        )
+
+    if umap_title:
+        ax_umap.set_title(umap_title, fontsize=12)
+
+    for spine in ax_umap.spines.values():
+        spine.set_visible(False)
+    ax_umap.set_xticks([])
+    ax_umap.set_yticks([])
+    ax_umap.set_xlabel("")
+    ax_umap.set_ylabel("")
+    ax_umap.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
+    ax_umap.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+    norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+    sm = cm.ScalarMappable(cmap=umap_cmap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax_umap, shrink=0.6, orientation="horizontal", location="bottom")
+    cbar.set_label(color, fontsize=10)
+
+    cbar_ax = cbar.ax
+    cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+    progress_x = (
+        cbar_xmin + (t_current - t_min) / (t_max - t_min) * (cbar_xmax - cbar_xmin)
+        if t_max > t_min
+        else cbar_xmax
+    )
+    cbar_ax.axvline(x=progress_x, color="dodgerblue", linewidth=2, zorder=10)
+
+    # === Expression Panel ===
+    stats_current = stats_full[stats_full["time"] <= t_current]
+
+    for group in plot_groups:
+        group_data = stats_current[stats_current["group"] == group].sort_values("time")
+        if len(group_data) == 0:
+            continue
+
+        t = group_data["time"].values
+        mean = group_data["mean"].values
+        std = group_data["std"].values
+        color_line = expr_cmap.get(group, "gray")
+
+        ax_expr.plot(t, mean, color=color_line, linewidth=linewidth, label=group, alpha=frame_alpha, zorder=2)
+
+        if show_std:
+            ax_expr.fill_between(
+                t,
+                mean - std,
+                mean + std,
+                color=color_line,
+                alpha=std_alpha * frame_alpha,
+                linewidth=0,
+                zorder=1,
+            )
+
+    ax_expr.set_xlim(t_min, t_max)
+    ax_expr.set_ylim(expr_ylim)
+    ax_expr.set_xlabel(x_label, fontsize=10)
+    ax_expr.set_ylabel(y_label, fontsize=10)
+    ax_expr.set_title(f"$\\it{{{gene}}}$", fontsize=11)
+    ax_expr.spines["top"].set_visible(False)
+    ax_expr.spines["right"].set_visible(False)
+    ax_expr.grid(True, alpha=0.3, zorder=0)
+
+    ax_expr.axvline(
+        x=t_current, color="dodgerblue", linewidth=2, linestyle="--", alpha=0.7 * frame_alpha, zorder=5
+    )
+
+    handles, labels = ax_expr.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    ax_expr.legend(
+        by_label.values(), by_label.keys(), loc="best", frameon=True, facecolor="white", edgecolor="lightgray", fontsize=8
+    )
+
+
 # -- API-facing function: -----------------------------------------------------
 def simulation_expression_gif(
     adata_sim: anndata.AnnData,
@@ -24,7 +328,7 @@ def simulation_expression_gif(
     time_key: str = "t",
     gene_key: str = "X_gene_inv",
     gene_ids_key: str = "gene_ids",
-    figsize: tuple = (12, 5),
+    figsize: tuple = (12, 6),
     # UMAP panel options
     umap_cmap: Union[str, mcolors.Colormap] = "plasma_r",
     s: float = 10.0,
@@ -91,7 +395,7 @@ def simulation_expression_gif(
         Key in ``adata_sim.obsm`` containing gene expression matrix.
     gene_ids_key : str, default="gene_ids"
         Key in ``adata_sim.uns`` containing gene names.
-    figsize : tuple, default=(12, 5)
+    figsize : tuple, default=(12, 6)
         Figure size (width, height) in inches for the dual-panel figure.
     umap_cmap : str or Colormap, default="plasma_r"
         Colormap for UMAP continuous values.
@@ -181,10 +485,7 @@ def simulation_expression_gif(
     try:
         from PIL import Image
     except ImportError:
-        raise ImportError(
-            "PIL (Pillow) is required for GIF creation. "
-            "Install it with: pip install Pillow"
-        )
+        raise ImportError("PIL (Pillow) is required for GIF creation. Install it with: pip install Pillow")
 
     # -- Get UMAP coordinates -------------------------------------------------
     umap_coords = adata_sim.obsm[use_key]
@@ -252,8 +553,7 @@ def simulation_expression_gif(
         if gene not in gene_names_list:
             preview = gene_names_list[:5]
             raise ValueError(
-                f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. "
-                f"Available genes: {preview}..."
+                f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. " f"Available genes: {preview}..."
             )
         gene_idx = gene_names_list.index(gene)
     else:
@@ -269,8 +569,7 @@ def simulation_expression_gif(
         if gene not in gene_ids_list:
             preview = gene_ids_list[:5] if len(gene_ids_list) >= 5 else gene_ids_list
             raise ValueError(
-                f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. "
-                f"Available genes: {preview}..."
+                f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. " f"Available genes: {preview}..."
             )
         gene_idx = gene_ids_list.index(gene)
 
@@ -282,283 +581,34 @@ def simulation_expression_gif(
 
     group_labels = adata_sim.obs[groupby].values
 
-    # Build dataframe for expression stats
-    df = pd.DataFrame({
-        "expression": expression,
-        "time": time_values,
-        "group": group_labels,
-    })
-
-    # Compute full stats for axis limits
+    df = pd.DataFrame({"expression": expression, "time": time_values, "group": group_labels})
     stats_full = df.groupby(["time", "group"])["expression"].agg(["mean", "std"]).reset_index()
 
-    # Determine groups to plot
     unique_groups = df["group"].unique()
     if groups is not None:
         plot_groups = [g for g in groups if g in unique_groups]
     else:
         plot_groups = list(unique_groups)
 
-    # Default colormap for expression
     if expr_cmap is None:
         default_colors = plt.cm.tab10.colors
         expr_cmap = {g: default_colors[i % len(default_colors)] for i, g in enumerate(plot_groups)}
 
-    # Compute y-axis limits for expression panel
     expr_ymin = (stats_full["mean"] - stats_full["std"]).min()
     expr_ymax = (stats_full["mean"] + stats_full["std"]).max()
     expr_y_margin = (expr_ymax - expr_ymin) * 0.1
     expr_ylim = (expr_ymin - expr_y_margin, expr_ymax + expr_y_margin)
 
-    # -- Default background function ------------------------------------------
-    def default_background(adata_sim, ax):
-        xu = adata_sim.obsm[use_key]
-        if isinstance(xu, pd.DataFrame):
-            xu = xu.values
-        ax.scatter(xu[:, 0], xu[:, 1], c="k", ec="None", rasterized=True, s=background_s)
-        ax.scatter(xu[:, 0], xu[:, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
-
-    def grouped_background(adata_sim, ax):
-        """Background colored by group membership."""
-        bg_groups = adata_sim.obs[background_groupby]
-        xu = adata_sim.obsm[use_key]
-        if isinstance(xu, pd.DataFrame):
-            xu = xu.values
-
-        # Default colors if not provided
-        unique_bg_groups = bg_groups.unique()
-        if background_cmap is None:
-            default_colors = plt.cm.tab10.colors
-            group_colors = {g: default_colors[i % len(default_colors)]
-                           for i, g in enumerate(unique_bg_groups)}
-        else:
-            group_colors = background_cmap
-
-        # Plot each group
-        for group in unique_bg_groups:
-            mask = bg_groups == group
-            c = group_colors.get(group, "k")
-            ax.scatter(xu[mask, 0], xu[mask, 1], c=c, ec="None", rasterized=True, s=background_s)
-            ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
-
+    # -- Setup background function --------------------------------------------
     if background_fn is None:
         if background_groupby is not None:
-            background_fn = grouped_background
+            background_fn = lambda adata, ax: _create_expr_grouped_background(
+                adata, ax, use_key, background_groupby, background_cmap, background_s, background_inner_s
+            )
         else:
-            background_fn = default_background
-
-    # -- Helper to create progenitor intro frame ------------------------------
-    def create_progenitor_frame():
-        fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize)
-
-        # === UMAP Panel ===
-        background_fn(adata_sim, ax_umap)
-
-        # Plot progenitor point
-        ax_umap.scatter(
-            progenitor_x, progenitor_y,
-            c=progenitor_color, s=progenitor_s,
-            edgecolors='white', linewidths=1.5,
-            zorder=300
-        )
-
-        # Add arrow annotation
-        ax_umap.annotate(
-            progenitor_label,
-            xy=(progenitor_x, progenitor_y),
-            xytext=(progenitor_x + 1.5, progenitor_y + 1.5),
-            fontsize=12,
-            fontweight='bold',
-            color=progenitor_color,
-            arrowprops=dict(
-                arrowstyle='->',
-                color=progenitor_color,
-                lw=2,
-            ),
-            zorder=301
-        )
-
-        # Time label
-        if show_time_label:
-            ax_umap.text(
-                time_label_loc[0], time_label_loc[1],
-                time_label_fmt.format(t_min),
-                transform=ax_umap.transAxes,
-                fontsize=time_label_fontsize,
-                verticalalignment='top',
-                fontweight='bold',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
+            background_fn = lambda adata, ax: _create_expr_default_background(
+                adata, ax, use_key, background_s, background_inner_s
             )
-
-        # UMAP formatting
-        if umap_title:
-            ax_umap.set_title(umap_title, fontsize=12)
-        for spine in ax_umap.spines.values():
-            spine.set_visible(False)
-        ax_umap.set_xticks([])
-        ax_umap.set_yticks([])
-        ax_umap.set_xlabel("")
-        ax_umap.set_ylabel("")
-        ax_umap.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
-        ax_umap.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
-
-        # Add colorbar with progress indicator at start
-        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
-        sm = cm.ScalarMappable(cmap=umap_cmap, norm=norm)
-        sm.set_array([])
-        cbar = plt.colorbar(sm, ax=ax_umap, shrink=0.6, orientation='horizontal', location='bottom')
-        cbar.set_label(color, fontsize=10)
-
-        # Progress indicator at start
-        cbar_ax = cbar.ax
-        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
-        cbar_ax.axvline(x=cbar_xmin, color='dodgerblue', linewidth=2, zorder=10)
-
-        # === Expression Panel ===
-        # Empty expression panel with just axes
-        ax_expr.set_xlim(t_min, t_max)
-        ax_expr.set_ylim(expr_ylim)
-        ax_expr.set_xlabel(x_label, fontsize=10)
-        ax_expr.set_ylabel(y_label, fontsize=10)
-        ax_expr.set_title(f"$\\it{{{gene}}}$", fontsize=11)
-        ax_expr.spines["top"].set_visible(False)
-        ax_expr.spines["right"].set_visible(False)
-        ax_expr.grid(True, alpha=0.3, zorder=0)
-
-        # Vertical line at t=0
-        ax_expr.axvline(x=t_min, color='dodgerblue', linewidth=2, linestyle='--', alpha=0.7, zorder=5)
-
-        # Legend placeholder
-        for group in plot_groups:
-            ax_expr.plot([], [], color=expr_cmap.get(group, "gray"), linewidth=linewidth, label=group)
-        ax_expr.legend(loc="best", frameon=True, facecolor="white", edgecolor="lightgray", fontsize=8)
-
-        plt.tight_layout()
-        return fig
-
-    # -- Helper to create a single frame --------------------------------------
-    def create_frame(t_current, frame_alpha=1.0):
-        fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize)
-
-        # === UMAP Panel ===
-        background_fn(adata_sim, ax_umap)
-
-        # Get points up to current time
-        mask = time_values <= t_current
-        x = x_all[mask]
-        y = y_all[mask]
-        c = color_values[mask]
-        t_pts = time_values[mask]
-
-        # Plot trail points
-        trail_mask = t_pts < t_current
-        if np.any(trail_mask):
-            ax_umap.scatter(
-                x[trail_mask], y[trail_mask],
-                c=c[trail_mask], cmap=umap_cmap, s=s,
-                alpha=alpha * trail_alpha * frame_alpha,
-                vmin=vmin, vmax=vmax, zorder=200,
-                edgecolors='none', **kwargs
-            )
-
-        # Plot leading edge points
-        leading_mask = t_pts == t_current
-        if np.any(leading_mask):
-            ax_umap.scatter(
-                x[leading_mask], y[leading_mask],
-                c=c[leading_mask], cmap=umap_cmap,
-                s=s * leading_edge_scale,
-                alpha=frame_alpha,
-                vmin=vmin, vmax=vmax, zorder=202,
-                edgecolors='none', **kwargs
-            )
-
-        # Time label
-        if show_time_label:
-            ax_umap.text(
-                time_label_loc[0], time_label_loc[1],
-                time_label_fmt.format(t_current),
-                transform=ax_umap.transAxes,
-                fontsize=time_label_fontsize,
-                verticalalignment='top',
-                fontweight='bold',
-                alpha=frame_alpha,
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8 * frame_alpha)
-            )
-
-        # UMAP formatting
-        if umap_title:
-            ax_umap.set_title(umap_title, fontsize=12)
-        for spine in ax_umap.spines.values():
-            spine.set_visible(False)
-        ax_umap.set_xticks([])
-        ax_umap.set_yticks([])
-        ax_umap.set_xlabel("")
-        ax_umap.set_ylabel("")
-        ax_umap.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
-        ax_umap.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
-
-        # Add colorbar with progress indicator
-        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
-        sm = cm.ScalarMappable(cmap=umap_cmap, norm=norm)
-        sm.set_array([])
-        cbar = plt.colorbar(sm, ax=ax_umap, shrink=0.6, orientation='horizontal', location='bottom')
-        cbar.set_label(color, fontsize=10)
-
-        # Progress indicator on colorbar
-        cbar_ax = cbar.ax
-        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
-        progress_x = cbar_xmin + (t_current - t_min) / (t_max - t_min) * (cbar_xmax - cbar_xmin) if t_max > t_min else cbar_xmax
-        cbar_ax.axvline(x=progress_x, color='dodgerblue', linewidth=2, zorder=10)
-
-        # === Expression Panel ===
-        # Filter stats up to current time
-        stats_current = stats_full[stats_full["time"] <= t_current]
-
-        for group in plot_groups:
-            group_data = stats_current[stats_current["group"] == group].sort_values("time")
-            if len(group_data) == 0:
-                continue
-
-            t = group_data["time"].values
-            mean = group_data["mean"].values
-            std = group_data["std"].values
-            color_line = expr_cmap.get(group, "gray")
-
-            # Plot mean line
-            ax_expr.plot(t, mean, color=color_line, linewidth=linewidth, label=group,
-                        alpha=frame_alpha, zorder=2)
-
-            # Plot std fill-between
-            if show_std:
-                ax_expr.fill_between(
-                    t, mean - std, mean + std,
-                    color=color_line, alpha=std_alpha * frame_alpha,
-                    linewidth=0, zorder=1
-                )
-
-        # Expression formatting
-        ax_expr.set_xlim(t_min, t_max)
-        ax_expr.set_ylim(expr_ylim)
-        ax_expr.set_xlabel(x_label, fontsize=10)
-        ax_expr.set_ylabel(y_label, fontsize=10)
-        ax_expr.set_title(f"$\\it{{{gene}}}$", fontsize=11)
-        ax_expr.spines["top"].set_visible(False)
-        ax_expr.spines["right"].set_visible(False)
-        ax_expr.grid(True, alpha=0.3, zorder=0)
-
-        # Vertical progress line
-        ax_expr.axvline(x=t_current, color='dodgerblue', linewidth=2, linestyle='--',
-                       alpha=0.7 * frame_alpha, zorder=5)
-
-        # Legend (only add once, without duplicates)
-        handles, labels = ax_expr.get_legend_handles_labels()
-        by_label = dict(zip(labels, handles))
-        ax_expr.legend(by_label.values(), by_label.keys(),
-                      loc="best", frameon=True, facecolor="white", edgecolor="lightgray", fontsize=8)
-
-        plt.tight_layout()
-        return fig, ax_umap, ax_expr
 
     # -- Create frames --------------------------------------------------------
     frames = []
@@ -567,7 +617,37 @@ def simulation_expression_gif(
 
         # Progenitor intro frames
         if show_progenitor and progenitor_frames > 0:
-            fig = create_progenitor_frame()
+            fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize)
+            _create_expression_progenitor_frame(
+                adata_sim,
+                ax_umap,
+                ax_expr,
+                background_fn,
+                progenitor_x,
+                progenitor_y,
+                progenitor_color,
+                progenitor_s,
+                progenitor_label,
+                show_time_label,
+                time_label_loc,
+                time_label_fmt,
+                time_label_fontsize,
+                t_min,
+                t_max,
+                umap_title,
+                x_all,
+                y_all,
+                umap_cmap,
+                color,
+                expr_ylim,
+                x_label,
+                y_label,
+                gene,
+                plot_groups,
+                expr_cmap,
+                linewidth,
+            )
+            plt.tight_layout()
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
@@ -578,8 +658,46 @@ def simulation_expression_gif(
 
         # Main animation frames
         for i, t in enumerate(unique_times):
-            fig, _, _ = create_frame(t)
-
+            fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize)
+            _create_expression_frame(
+                adata_sim,
+                ax_umap,
+                ax_expr,
+                t,
+                1.0,
+                background_fn,
+                x_all,
+                y_all,
+                time_values,
+                color_values,
+                umap_cmap,
+                s,
+                alpha,
+                trail_alpha,
+                leading_edge_scale,
+                vmin,
+                vmax,
+                show_time_label,
+                time_label_loc,
+                time_label_fmt,
+                time_label_fontsize,
+                umap_title,
+                t_min,
+                t_max,
+                color,
+                stats_full,
+                plot_groups,
+                expr_cmap,
+                linewidth,
+                show_std,
+                std_alpha,
+                expr_ylim,
+                x_label,
+                y_label,
+                gene,
+                **kwargs,
+            )
+            plt.tight_layout()
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
@@ -594,8 +712,46 @@ def simulation_expression_gif(
         # Fade out frames
         for fade_i in range(fade_frames):
             fade_alpha = 1.0 - (fade_i + 1) / fade_frames
-            fig, _, _ = create_frame(unique_times[-1], frame_alpha=fade_alpha)
-
+            fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize)
+            _create_expression_frame(
+                adata_sim,
+                ax_umap,
+                ax_expr,
+                unique_times[-1],
+                fade_alpha,
+                background_fn,
+                x_all,
+                y_all,
+                time_values,
+                color_values,
+                umap_cmap,
+                s,
+                alpha,
+                trail_alpha,
+                leading_edge_scale,
+                vmin,
+                vmax,
+                show_time_label,
+                time_label_loc,
+                time_label_fmt,
+                time_label_fontsize,
+                umap_title,
+                t_min,
+                t_max,
+                color,
+                stats_full,
+                plot_groups,
+                expr_cmap,
+                linewidth,
+                show_std,
+                std_alpha,
+                expr_ylim,
+                x_label,
+                y_label,
+                gene,
+                **kwargs,
+            )
+            plt.tight_layout()
             frame_path = os.path.join(tmpdir, f"fade_{fade_i:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
@@ -612,12 +768,50 @@ def simulation_expression_gif(
             save_all=True,
             append_images=frames[1:],
             duration=frame_duration,
-            loop=0
+            loop=0,
         )
 
     if return_fig:
-        # Create final frame for returning
-        final_fig, final_ax_umap, final_ax_expr = create_frame(unique_times[-1])
+        final_fig, (final_ax_umap, final_ax_expr) = plt.subplots(1, 2, figsize=figsize)
+        _create_expression_frame(
+            adata_sim,
+            final_ax_umap,
+            final_ax_expr,
+            unique_times[-1],
+            1.0,
+            background_fn,
+            x_all,
+            y_all,
+            time_values,
+            color_values,
+            umap_cmap,
+            s,
+            alpha,
+            trail_alpha,
+            leading_edge_scale,
+            vmin,
+            vmax,
+            show_time_label,
+            time_label_loc,
+            time_label_fmt,
+            time_label_fontsize,
+            umap_title,
+            t_min,
+            t_max,
+            color,
+            stats_full,
+            plot_groups,
+            expr_cmap,
+            linewidth,
+            show_std,
+            std_alpha,
+            expr_ylim,
+            x_label,
+            y_label,
+            gene,
+            **kwargs,
+        )
+        plt.tight_layout()
         return savename, final_fig, final_ax_umap, final_ax_expr
 
     return savename
