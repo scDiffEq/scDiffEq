@@ -353,7 +353,8 @@ def simulation_expression_gif(
     gene_key: str = "X_gene_inv",
     gene_ids_key: str = "gene_ids",
     figsize: tuple = (12, 6),
-    width_ratios: tuple = (1.0, 0.8),
+    expr_width_scale: float = 0.8,
+    expr_height_scale: float = 0.8,
     # UMAP panel options
     umap_cmap: Union[str, mcolors.Colormap] = "plasma_r",
     s: float = 10.0,
@@ -423,9 +424,13 @@ def simulation_expression_gif(
         Key in ``adata_sim.uns`` containing gene names.
     figsize : tuple, default=(12, 6)
         Figure size (width, height) in inches for the dual-panel figure.
-    width_ratios : tuple, default=(1.0, 0.8)
-        Relative width ratios for (UMAP panel, expression panel).
-        Default makes expression panel 80% the width of UMAP panel.
+    expr_width_scale : float, default=0.8
+        Width of expression panel relative to UMAP panel.
+        0.8 means expression panel is 80% as wide as UMAP panel.
+    expr_height_scale : float, default=0.8
+        Height scaling for expression panel. Uses GridSpec height_ratios
+        to make expression panel shorter. 0.8 means expression panel
+        is 80% as tall, with remaining space as padding.
     umap_cmap : str or Colormap, default="plasma_r"
         Colormap for UMAP continuous values.
     s : float, default=10.0
@@ -633,6 +638,29 @@ def simulation_expression_gif(
     expr_y_margin = (expr_ymax - expr_ymin) * 0.1
     expr_ylim = (expr_ymin - expr_y_margin, expr_ymax + expr_y_margin)
 
+    # -- Setup figure layout --------------------------------------------------
+    width_ratios = (1.0, expr_width_scale)
+    # For height: use 2 rows, expression panel spans only top portion
+    # height_ratios = (expr_height_scale, 1 - expr_height_scale) for the expr column
+    # But UMAP spans both rows
+
+    def _create_dual_figure():
+        """Create figure with UMAP (full height) and expression (scaled height) panels."""
+        fig = plt.figure(figsize=figsize)
+        # 2 columns: UMAP gets width_ratios[0], expression gets width_ratios[1]
+        # 2 rows for expression column: top row is expr_height_scale, bottom is padding
+        gs = fig.add_gridspec(
+            2, 2,
+            width_ratios=width_ratios,
+            height_ratios=(expr_height_scale, 1 - expr_height_scale),
+            hspace=0.05,
+        )
+        # UMAP spans both rows in column 0
+        ax_umap = fig.add_subplot(gs[:, 0])
+        # Expression panel only in top row of column 1
+        ax_expr = fig.add_subplot(gs[0, 1])
+        return fig, ax_umap, ax_expr
+
     # -- Setup background function --------------------------------------------
     if background_fn is None:
         if background_groupby is not None:
@@ -651,7 +679,7 @@ def simulation_expression_gif(
 
         # Progenitor intro frames
         if show_progenitor and progenitor_frames > 0:
-            fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize, gridspec_kw={"width_ratios": width_ratios})
+            fig, ax_umap, ax_expr = _create_dual_figure()
             _create_expression_progenitor_frame(
                 adata_sim,
                 ax_umap,
@@ -693,7 +721,7 @@ def simulation_expression_gif(
 
         # Main animation frames
         for i, t in enumerate(unique_times):
-            fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize, gridspec_kw={"width_ratios": width_ratios})
+            fig, ax_umap, ax_expr = _create_dual_figure()
             _create_expression_frame(
                 adata_sim,
                 ax_umap,
@@ -748,7 +776,7 @@ def simulation_expression_gif(
         # Fade out frames
         for fade_i in range(fade_frames):
             fade_alpha = 1.0 - (fade_i + 1) / fade_frames
-            fig, (ax_umap, ax_expr) = plt.subplots(1, 2, figsize=figsize, gridspec_kw={"width_ratios": width_ratios})
+            fig, ax_umap, ax_expr = _create_dual_figure()
             _create_expression_frame(
                 adata_sim,
                 ax_umap,
@@ -809,7 +837,7 @@ def simulation_expression_gif(
         )
 
     if return_fig:
-        final_fig, (final_ax_umap, final_ax_expr) = plt.subplots(1, 2, figsize=figsize, gridspec_kw={"width_ratios": width_ratios})
+        final_fig, final_ax_umap, final_ax_expr = _create_dual_figure()
         _create_expression_frame(
             adata_sim,
             final_ax_umap,
