@@ -26,6 +26,8 @@ def simulation_trajectory_gif(
     s: float = 10.0,
     alpha: float = 0.8,
     background_fn: Optional[Callable] = None,
+    background_groupby: Optional[str] = None,
+    background_cmap: Optional[Dict[str, str]] = None,
     background_s: float = 100.0,
     background_inner_s: float = 65.0,
     show_time_label: bool = True,
@@ -77,7 +79,13 @@ def simulation_trajectory_gif(
         Point transparency.
     background_fn : Callable, optional
         Custom function to plot background. Should accept (adata_sim, ax).
-        If None, uses default background (black outline with white fill).
+        If None, uses default background (or fate-colored if background_groupby set).
+    background_groupby : str, optional
+        Column in obs to group background cells by (e.g., "final_state").
+        When set, background cells are colored by group using background_cmap.
+    background_cmap : Dict[str, str], optional
+        Mapping from group names to colors for background. Required if
+        background_groupby is set. Example: {"Mon.": "orange", "Neu.": "#4a7298"}
     background_s : float, default=100.0
         Point size for background outer points.
     background_inner_s : float, default=65.0
@@ -212,8 +220,34 @@ def simulation_trajectory_gif(
         ax.scatter(xu[:, 0], xu[:, 1], c="k", ec="None", rasterized=True, s=background_s)
         ax.scatter(xu[:, 0], xu[:, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
 
+    def grouped_background(adata_sim, ax):
+        """Background colored by group membership."""
+        groups = adata_sim.obs[background_groupby]
+        xu = adata_sim.obsm[use_key]
+        if isinstance(xu, pd.DataFrame):
+            xu = xu.values
+
+        # Default colors if not provided
+        unique_groups = groups.unique()
+        if background_cmap is None:
+            default_colors = plt.cm.tab10.colors
+            group_colors = {g: default_colors[i % len(default_colors)]
+                           for i, g in enumerate(unique_groups)}
+        else:
+            group_colors = background_cmap
+
+        # Plot each group
+        for group in unique_groups:
+            mask = groups == group
+            c = group_colors.get(group, "k")
+            ax.scatter(xu[mask, 0], xu[mask, 1], c=c, ec="None", rasterized=True, s=background_s)
+            ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
+
     if background_fn is None:
-        background_fn = default_background
+        if background_groupby is not None:
+            background_fn = grouped_background
+        else:
+            background_fn = default_background
 
     # -- Helper to create progenitor intro frame ------------------------------
     def create_progenitor_frame():

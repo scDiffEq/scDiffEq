@@ -30,6 +30,8 @@ def simulation_expression_gif(
     s: float = 10.0,
     alpha: float = 0.8,
     background_fn: Optional[Callable] = None,
+    background_groupby: Optional[str] = None,
+    background_cmap: Optional[Dict[str, str]] = None,
     background_s: float = 100.0,
     background_inner_s: float = 65.0,
     # Expression panel options
@@ -98,6 +100,12 @@ def simulation_expression_gif(
         Point transparency on UMAP.
     background_fn : Callable, optional
         Custom function to plot UMAP background. Should accept (adata_sim, ax).
+    background_groupby : str, optional
+        Column in obs to group background cells by (e.g., "final_state").
+        When set, background cells are colored by group using background_cmap.
+    background_cmap : Dict[str, str], optional
+        Mapping from group names to colors for background. Example:
+        {"Mon.": "orange", "Neu.": "#4a7298"}
     background_s : float, default=100.0
         Point size for background outer points.
     background_inner_s : float, default=65.0
@@ -306,8 +314,34 @@ def simulation_expression_gif(
         ax.scatter(xu[:, 0], xu[:, 1], c="k", ec="None", rasterized=True, s=background_s)
         ax.scatter(xu[:, 0], xu[:, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
 
+    def grouped_background(adata_sim, ax):
+        """Background colored by group membership."""
+        bg_groups = adata_sim.obs[background_groupby]
+        xu = adata_sim.obsm[use_key]
+        if isinstance(xu, pd.DataFrame):
+            xu = xu.values
+
+        # Default colors if not provided
+        unique_bg_groups = bg_groups.unique()
+        if background_cmap is None:
+            default_colors = plt.cm.tab10.colors
+            group_colors = {g: default_colors[i % len(default_colors)]
+                           for i, g in enumerate(unique_bg_groups)}
+        else:
+            group_colors = background_cmap
+
+        # Plot each group
+        for group in unique_bg_groups:
+            mask = bg_groups == group
+            c = group_colors.get(group, "k")
+            ax.scatter(xu[mask, 0], xu[mask, 1], c=c, ec="None", rasterized=True, s=background_s)
+            ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
+
     if background_fn is None:
-        background_fn = default_background
+        if background_groupby is not None:
+            background_fn = grouped_background
+        else:
+            background_fn = default_background
 
     # -- Helper to create progenitor intro frame ------------------------------
     def create_progenitor_frame():
