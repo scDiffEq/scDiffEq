@@ -7,3 +7,4 @@ __doc__ = """plotting __init__ module. Sub-package of the main scdiffeq API."""
 from ._velocity_stream import velocity_stream
 from ._temporal_expression import temporal_expression
 from ._simulation_umap import simulation_umap
+from ._simulation_trajectory_gif import simulation_trajectory_gif
