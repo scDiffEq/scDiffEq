@@ -39,6 +39,11 @@ def simulation_trajectory_gif(
     fade_frames: int = 8,
     leading_edge_scale: float = 2.0,
     trail_alpha: float = 0.5,
+    show_progenitor: bool = True,
+    progenitor_frames: int = 8,
+    progenitor_label: str = "Progenitor",
+    progenitor_s: float = 80.0,
+    progenitor_color: str = "dodgerblue",
     dpi: int = 100,
     **kwargs,
 ) -> str:
@@ -99,6 +104,16 @@ def simulation_trajectory_gif(
         Size multiplier for leading edge points (current time step).
     trail_alpha : float, default=0.5
         Alpha multiplier for trail points (older time steps), relative to base alpha.
+    show_progenitor : bool, default=True
+        Whether to show progenitor intro frames at the start.
+    progenitor_frames : int, default=8
+        Number of frames to hold on the progenitor before starting animation.
+    progenitor_label : str, default="Progenitor"
+        Label text for the progenitor annotation.
+    progenitor_s : float, default=80.0
+        Point size for the progenitor marker.
+    progenitor_color : str, default="dodgerblue"
+        Color for the progenitor marker and annotation.
     dpi : int, default=100
         Resolution for each frame.
     **kwargs
@@ -141,6 +156,11 @@ def simulation_trajectory_gif(
     time_values = adata_sim.obs[time_key].values
     unique_times = np.sort(np.unique(time_values))
     t_min, t_max = unique_times.min(), unique_times.max()
+
+    # -- Compute progenitor mean position (t=0 cells) -------------------------
+    t0_mask = time_values == t_min
+    progenitor_x = np.mean(x_all[t0_mask])
+    progenitor_y = np.mean(y_all[t0_mask])
 
     # -- Get color values -----------------------------------------------------
     color_values = None
@@ -194,6 +214,79 @@ def simulation_trajectory_gif(
 
     if background_fn is None:
         background_fn = default_background
+
+    # -- Helper to create progenitor intro frame ------------------------------
+    def create_progenitor_frame():
+        fig, ax = plt.subplots(figsize=figsize)
+
+        # Plot background
+        background_fn(adata_sim, ax)
+
+        # Plot progenitor point
+        ax.scatter(
+            progenitor_x, progenitor_y,
+            c=progenitor_color, s=progenitor_s,
+            edgecolors='white', linewidths=1.5,
+            zorder=300
+        )
+
+        # Add arrow annotation pointing to progenitor
+        ax.annotate(
+            progenitor_label,
+            xy=(progenitor_x, progenitor_y),
+            xytext=(progenitor_x + 1.5, progenitor_y + 1.5),
+            fontsize=12,
+            fontweight='bold',
+            color=progenitor_color,
+            arrowprops=dict(
+                arrowstyle='->',
+                color=progenitor_color,
+                lw=2,
+            ),
+            zorder=301
+        )
+
+        # Time label
+        if show_time_label:
+            ax.text(
+                time_label_loc[0], time_label_loc[1],
+                time_label_fmt.format(t_min),
+                transform=ax.transAxes,
+                fontsize=time_label_fontsize,
+                verticalalignment='top',
+                fontweight='bold',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
+            )
+
+        # Formatting
+        if title:
+            ax.set_title(title, fontsize=12)
+
+        # Remove all spines, ticks, and labels for clean UMAP look
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+
+        # Fix axis limits to full data range
+        ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
+        ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+        # Add colorbar with progress indicator at start
+        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+        sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax, shrink=0.6, orientation='horizontal', location='bottom')
+        cbar.set_label(color, fontsize=10)
+
+        # Progress indicator at start
+        cbar_ax = cbar.ax
+        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
+        cbar_ax.axvline(x=cbar_xmin, color='dodgerblue', linewidth=2, zorder=10)
+
+        return fig, ax
 
     # -- Helper to create a single frame --------------------------------------
     def create_frame(t_current, frame_alpha=1.0, is_final=False):
@@ -291,14 +384,28 @@ def simulation_trajectory_gif(
     # -- Create frames --------------------------------------------------------
     frames = []
     with tempfile.TemporaryDirectory() as tmpdir:
+        frame_idx = 0
+
+        # Progenitor intro frames
+        if show_progenitor and progenitor_frames > 0:
+            fig, ax = create_progenitor_frame()
+            frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
+            plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
+            plt.close(fig)
+            progenitor_img = Image.open(frame_path)
+            for _ in range(progenitor_frames):
+                frames.append(progenitor_img.copy())
+            frame_idx += 1
+
         # Main animation frames
         for i, t in enumerate(unique_times):
             fig, ax = create_frame(t)
 
-            frame_path = os.path.join(tmpdir, f"frame_{i:04d}.png")
+            frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
             frames.append(Image.open(frame_path))
+            frame_idx += 1
 
         # Hold frames at the end
         last_frame = frames[-1]
