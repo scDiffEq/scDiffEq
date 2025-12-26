@@ -13,6 +13,7 @@ def temporal_expression(
     adata_sim: anndata.AnnData,
     gene: str,
     groupby: str = "final_state",
+    groups: Optional[List[str]] = None,
     use_key: str = "X_gene_inv",
     time_key: str = "t",
     gene_ids_key: str = "gene_ids",
@@ -49,6 +50,10 @@ def temporal_expression(
         Gene name to plot.
     groupby : str, default="final_state"
         Column in ``adata_sim.obs`` for grouping trajectories (e.g., cell fate).
+    groups : List[str], optional
+        Specific groups to plot. If None, plots all groups. Use this to
+        exclude certain groups (e.g., ``groups=["Mon.", "Neu."]`` to only
+        plot those two fates).
     use_key : str, default="X_gene_inv"
         Key in ``adata_sim.obsm`` containing the gene expression matrix.
     time_key : str, default="t"
@@ -167,14 +172,21 @@ def temporal_expression(
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
 
-    # -- Default colormap -----------------------------------------------------
+    # -- Determine which groups to plot ---------------------------------------
     unique_groups = df["group"].unique()
+    if groups is not None:
+        # Filter to only requested groups
+        plot_groups = [g for g in groups if g in unique_groups]
+    else:
+        plot_groups = list(unique_groups)
+
+    # -- Default colormap -----------------------------------------------------
     if cmap is None:
         default_colors = plt.cm.tab10.colors
-        cmap = {g: default_colors[i % len(default_colors)] for i, g in enumerate(unique_groups)}
+        cmap = {g: default_colors[i % len(default_colors)] for i, g in enumerate(plot_groups)}
 
     # -- Plot each group ------------------------------------------------------
-    for group in unique_groups:
+    for group in plot_groups:
         group_data = stats[stats["group"] == group].sort_values("time")
         t = group_data["time"].values
         mean = group_data["mean"].values
