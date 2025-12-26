@@ -217,12 +217,14 @@ def simulation_trajectory_gif(
             # Formatting
             if title:
                 ax.set_title(title, fontsize=12)
-            ax.set_xlabel("UMAP 1", fontsize=10)
-            ax.set_ylabel("UMAP 2", fontsize=10)
-            ax.spines["top"].set_visible(False)
-            ax.spines["right"].set_visible(False)
+
+            # Remove all spines, ticks, and labels for clean UMAP look
+            for spine in ax.spines.values():
+                spine.set_visible(False)
             ax.set_xticks([])
             ax.set_yticks([])
+            ax.set_xlabel("")
+            ax.set_ylabel("")
 
             # Fix axis limits to full data range
             ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)

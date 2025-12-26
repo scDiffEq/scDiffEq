@@ -27,8 +27,6 @@ def simulation_umap(
     colorbar_label: Optional[str] = None,
     show_legend: bool = True,
     legend_loc: str = "best",
-    x_label: str = "UMAP 1",
-    y_label: str = "UMAP 2",
     save: bool = False,
     savename: Optional[str] = None,
     save_format: str = "svg",
@@ -76,10 +74,6 @@ def simulation_umap(
         Whether to show legend for categorical values.
     legend_loc : str, default="best"
         Legend location.
-    x_label : str, default="UMAP 1"
-        Label for x-axis.
-    y_label : str, default="UMAP 2"
-        Label for y-axis.
     save : bool, default=False
         Whether to save the figure.
     savename : str, optional
@@ -198,18 +192,17 @@ def simulation_umap(
             cbar.set_label(colorbar_label, fontsize=10)
 
     # -- Formatting -----------------------------------------------------------
-    ax.set_xlabel(x_label, fontsize=10)
-    ax.set_ylabel(y_label, fontsize=10)
-
     if title is None:
         title = color
     ax.set_title(title, fontsize=11)
 
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
+    # Remove all spines, ticks, and labels for clean UMAP look
+    for spine in ax.spines.values():
+        spine.set_visible(False)
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_xlabel("")
+    ax.set_ylabel("")
 
     # -- Save -----------------------------------------------------------------
     if save:
