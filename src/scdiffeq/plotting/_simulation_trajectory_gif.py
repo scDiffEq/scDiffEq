@@ -45,6 +45,22 @@ def _create_grouped_background(
         ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
 
 
+def _draw_umap_labels(ax, umap_labels):
+    """Draw text labels on the UMAP axes."""
+    if umap_labels is None:
+        return
+    for label in umap_labels:
+        text = label.get("text", "")
+        x = label.get("x", 0)
+        y = label.get("y", 0)
+        kwargs = {k: v for k, v in label.items() if k not in ("text", "x", "y")}
+        # Set defaults
+        kwargs.setdefault("fontsize", 10)
+        kwargs.setdefault("ha", "center")
+        kwargs.setdefault("va", "center")
+        ax.text(x, y, text, **kwargs)
+
+
 def _create_trajectory_progenitor_frame(
     adata_sim,
     ax,
@@ -65,6 +81,7 @@ def _create_trajectory_progenitor_frame(
     y_all,
     cmap,
     color,
+    umap_labels=None,
 ):
     """Create content for progenitor intro frame on a given axes."""
     background_fn(adata_sim, ax)
@@ -124,6 +141,9 @@ def _create_trajectory_progenitor_frame(
     cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
     cbar_ax.axvline(x=cbar_xmin, color="dodgerblue", linewidth=2, zorder=10)
 
+    # Draw UMAP labels
+    _draw_umap_labels(ax, umap_labels)
+
 
 def _create_trajectory_frame(
     adata_sim,
@@ -150,6 +170,7 @@ def _create_trajectory_frame(
     t_min,
     t_max,
     color,
+    umap_labels=None,
     **kwargs,
 ):
     """Create content for a single animation frame on a given axes."""
@@ -247,6 +268,9 @@ def _create_trajectory_frame(
     )
     cbar_ax.axvline(x=progress_x, color="dodgerblue", linewidth=2, zorder=10)
 
+    # Draw UMAP labels
+    _draw_umap_labels(ax, umap_labels)
+
 
 # -- API-facing function: -----------------------------------------------------
 def simulation_trajectory_gif(
@@ -266,6 +290,7 @@ def simulation_trajectory_gif(
     background_cmap: Optional[Dict[str, str]] = None,
     background_s: float = 100.0,
     background_inner_s: float = 65.0,
+    umap_labels: Optional[List[Dict]] = None,
     show_time_label: bool = True,
     time_label_fmt: str = "t = {:.1f}d",
     time_label_loc: tuple = (0.05, 0.95),
@@ -327,6 +352,11 @@ def simulation_trajectory_gif(
         Point size for background outer points.
     background_inner_s : float, default=65.0
         Point size for background inner points.
+    umap_labels : List[Dict], optional
+        List of label dictionaries to draw on the UMAP. Each dict should
+        have keys "text", "x", "y", and optionally any matplotlib text kwargs
+        like "color", "fontsize", "weight", "ha", "va". Example:
+        [{"text": "Monocyte", "x": 10.5, "y": 10, "color": "#F08700", "weight": "bold"}]
     show_time_label : bool, default=True
         Whether to show time label on each frame.
     time_label_fmt : str, default="t = {:.1f}d"
@@ -487,6 +517,7 @@ def simulation_trajectory_gif(
                 y_all,
                 cmap,
                 color,
+                umap_labels=umap_labels,
             )
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
@@ -524,6 +555,7 @@ def simulation_trajectory_gif(
                 t_min,
                 t_max,
                 color,
+                umap_labels=umap_labels,
                 **kwargs,
             )
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
@@ -566,6 +598,7 @@ def simulation_trajectory_gif(
                 t_min,
                 t_max,
                 color,
+                umap_labels=umap_labels,
                 **kwargs,
             )
             frame_path = os.path.join(tmpdir, f"fade_{fade_i:04d}.png")
@@ -614,6 +647,7 @@ def simulation_trajectory_gif(
             t_min,
             t_max,
             color,
+            umap_labels=umap_labels,
             **kwargs,
         )
         return savename, final_fig, final_ax

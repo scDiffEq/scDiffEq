@@ -45,6 +45,22 @@ def _create_expr_grouped_background(
         ax.scatter(xu[mask, 0], xu[mask, 1], c="w", ec="None", rasterized=True, s=background_inner_s)
 
 
+def _draw_umap_labels(ax, umap_labels):
+    """Draw text labels on the UMAP axes."""
+    if umap_labels is None:
+        return
+    for label in umap_labels:
+        text = label.get("text", "")
+        x = label.get("x", 0)
+        y = label.get("y", 0)
+        kwargs = {k: v for k, v in label.items() if k not in ("text", "x", "y")}
+        # Set defaults
+        kwargs.setdefault("fontsize", 10)
+        kwargs.setdefault("ha", "center")
+        kwargs.setdefault("va", "center")
+        ax.text(x, y, text, **kwargs)
+
+
 def _create_expression_progenitor_frame(
     adata_sim,
     ax_umap,
@@ -73,6 +89,7 @@ def _create_expression_progenitor_frame(
     plot_groups,
     expr_cmap,
     linewidth,
+    umap_labels=None,
 ):
     """Create content for dual-panel progenitor intro frame."""
     # === UMAP Panel ===
@@ -133,6 +150,9 @@ def _create_expression_progenitor_frame(
     cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
     cbar_ax.axvline(x=cbar_xmin, color="dodgerblue", linewidth=2, zorder=10)
 
+    # Draw UMAP labels
+    _draw_umap_labels(ax_umap, umap_labels)
+
     # === Expression Panel ===
     ax_expr.set_xlim(t_min, t_max)
     ax_expr.set_ylim(expr_ylim)
@@ -186,6 +206,7 @@ def _create_expression_frame(
     x_label,
     y_label,
     gene,
+    umap_labels=None,
     **kwargs,
 ):
     """Create content for a dual-panel animation frame."""
@@ -270,6 +291,9 @@ def _create_expression_frame(
     )
     cbar_ax.axvline(x=progress_x, color="dodgerblue", linewidth=2, zorder=10)
 
+    # Draw UMAP labels
+    _draw_umap_labels(ax_umap, umap_labels)
+
     # === Expression Panel ===
     stats_current = stats_full[stats_full["time"] <= t_current]
 
@@ -338,6 +362,7 @@ def simulation_expression_gif(
     background_cmap: Optional[Dict[str, str]] = None,
     background_s: float = 100.0,
     background_inner_s: float = 65.0,
+    umap_labels: Optional[List[Dict]] = None,
     # Expression panel options
     expr_cmap: Optional[Dict[str, str]] = None,
     linewidth: float = 2.0,
@@ -415,6 +440,11 @@ def simulation_expression_gif(
         Point size for background outer points.
     background_inner_s : float, default=65.0
         Point size for background inner points.
+    umap_labels : List[Dict], optional
+        List of label dictionaries to draw on the UMAP panel. Each dict should
+        have keys "text", "x", "y", and optionally any matplotlib text kwargs
+        like "color", "fontsize", "weight", "ha", "va". Example:
+        [{"text": "Monocyte", "x": 10.5, "y": 10, "color": "#F08700", "weight": "bold"}]
     expr_cmap : Dict[str, str], optional
         Mapping from group names to colors for expression panel.
     linewidth : float, default=2.0
@@ -646,6 +676,7 @@ def simulation_expression_gif(
                 plot_groups,
                 expr_cmap,
                 linewidth,
+                umap_labels=umap_labels,
             )
             plt.tight_layout()
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
@@ -695,6 +726,7 @@ def simulation_expression_gif(
                 x_label,
                 y_label,
                 gene,
+                umap_labels=umap_labels,
                 **kwargs,
             )
             plt.tight_layout()
@@ -749,6 +781,7 @@ def simulation_expression_gif(
                 x_label,
                 y_label,
                 gene,
+                umap_labels=umap_labels,
                 **kwargs,
             )
             plt.tight_layout()
@@ -809,6 +842,7 @@ def simulation_expression_gif(
             x_label,
             y_label,
             gene,
+            umap_labels=umap_labels,
             **kwargs,
         )
         plt.tight_layout()
