@@ -38,7 +38,7 @@ def simulation_trajectory_gif(
     hold_frames: int = 10,
     fade_frames: int = 8,
     leading_edge_scale: float = 2.0,
-    leading_edge_linewidth: float = 1.5,
+    trail_alpha: float = 0.5,
     dpi: int = 100,
     **kwargs,
 ) -> str:
@@ -97,8 +97,8 @@ def simulation_trajectory_gif(
         Number of frames for the fade-out transition.
     leading_edge_scale : float, default=2.0
         Size multiplier for leading edge points (current time step).
-    leading_edge_linewidth : float, default=1.5
-        Edge linewidth for leading edge points (creates glow effect).
+    trail_alpha : float, default=0.5
+        Alpha multiplier for trail points (older time steps), relative to base alpha.
     dpi : int, default=100
         Resolution for each frame.
     **kwargs
@@ -209,41 +209,33 @@ def simulation_trajectory_gif(
         c = color_values[mask]
         t_pts = time_values[mask]
 
-        # Plot trail points (not at current time)
+        # Plot trail points (not at current time) with faded alpha
         trail_mask = t_pts < t_current
         if np.any(trail_mask):
             ax.scatter(
                 x[trail_mask], y[trail_mask],
-                c=c[trail_mask], cmap=cmap, s=s, alpha=alpha * frame_alpha,
+                c=c[trail_mask], cmap=cmap, s=s,
+                alpha=alpha * trail_alpha * frame_alpha,
                 vmin=vmin, vmax=vmax, zorder=200,
                 edgecolors='none', **kwargs
             )
 
-        # Plot leading edge points (at current time) with glow
+        # Plot leading edge points (at current time) - larger and full alpha
         leading_mask = t_pts == t_current
         if np.any(leading_mask):
-            # Glow/halo effect - larger, semi-transparent background
-            ax.scatter(
-                x[leading_mask], y[leading_mask],
-                c=c[leading_mask], cmap=cmap,
-                s=s * leading_edge_scale * 2,
-                alpha=0.3 * frame_alpha,
-                vmin=vmin, vmax=vmax, zorder=201,
-                edgecolors='none', **kwargs
-            )
-            # Main leading edge points with edge
             scatter = ax.scatter(
                 x[leading_mask], y[leading_mask],
                 c=c[leading_mask], cmap=cmap,
                 s=s * leading_edge_scale,
                 alpha=frame_alpha,
                 vmin=vmin, vmax=vmax, zorder=202,
-                edgecolors='white', linewidths=leading_edge_linewidth, **kwargs
+                edgecolors='none', **kwargs
             )
         else:
             # Need scatter for colorbar reference
             scatter = ax.scatter(
-                x, y, c=c, cmap=cmap, s=s, alpha=alpha * frame_alpha,
+                x, y, c=c, cmap=cmap, s=s,
+                alpha=alpha * trail_alpha * frame_alpha,
                 vmin=vmin, vmax=vmax, zorder=200,
                 edgecolors='none', **kwargs
             )
