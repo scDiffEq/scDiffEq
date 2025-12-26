@@ -274,18 +274,17 @@ def simulation_trajectory_gif(
         norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
         sm = cm.ScalarMappable(cmap=cmap, norm=norm)
         sm.set_array([])
-        cbar = plt.colorbar(sm, ax=ax, shrink=0.8)
+        cbar = plt.colorbar(sm, ax=ax, shrink=0.6, orientation='horizontal', location='bottom')
         cbar.set_label(color, fontsize=10)
 
         # Add progress indicator on colorbar
         cbar_ax = cbar.ax
-        # Get the actual y-limits of the colorbar axis
-        cbar_ymin, cbar_ymax = cbar_ax.get_ylim()
+        # Get the actual x-limits of the colorbar axis (horizontal orientation)
+        cbar_xmin, cbar_xmax = cbar_ax.get_xlim()
         # Map current time to colorbar position
-        progress_y = cbar_ymin + (t_current - t_min) / (t_max - t_min) * (cbar_ymax - cbar_ymin) if t_max > t_min else cbar_ymax
+        progress_x = cbar_xmin + (t_current - t_min) / (t_max - t_min) * (cbar_xmax - cbar_xmin) if t_max > t_min else cbar_xmax
         # Draw a marker on the colorbar at current time position
-        cbar_ax.axhline(y=progress_y, color='white', linewidth=3, zorder=10)
-        cbar_ax.axhline(y=progress_y, color='black', linewidth=1.5, zorder=11)
+        cbar_ax.axvline(x=progress_x, color='dodgerblue', linewidth=2, zorder=10)
 
         return fig, ax
 
