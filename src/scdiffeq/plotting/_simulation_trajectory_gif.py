@@ -21,7 +21,7 @@ def simulation_trajectory_gif(
     time_key: str = "t",
     gene_key: str = "X_gene_inv",
     gene_ids_key: str = "gene_ids",
-    figsize: tuple = (6, 5),
+    figsize: tuple = (6, 6),
     cmap: Union[str, mcolors.Colormap] = "plasma_r",
     s: float = 10.0,
     alpha: float = 0.8,
@@ -67,7 +67,7 @@ def simulation_trajectory_gif(
         Key in ``adata_sim.obsm`` containing gene expression matrix.
     gene_ids_key : str, default="gene_ids"
         Key in ``adata_sim.uns`` containing gene names.
-    figsize : tuple, default=(6, 5)
+    figsize : tuple, default=(6, 6)
         Figure size (width, height) in inches.
     cmap : str or Colormap, default="plasma_r"
         Colormap for continuous values.
