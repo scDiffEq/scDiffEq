@@ -155,13 +155,13 @@ def temporal_expression(
         expression = expr_matrix[:, gene_idx]
 
     time = adata_sim.obs[time_key].values
-    groups = adata_sim.obs[groupby].values
+    group_labels = adata_sim.obs[groupby].values
 
     # -- Build dataframe for groupby operations -------------------------------
     df = pd.DataFrame({
         "expression": expression,
         "time": time,
-        "group": groups,
+        "group": group_labels,
     })
 
     # -- Compute mean and std per (time, group) -------------------------------
