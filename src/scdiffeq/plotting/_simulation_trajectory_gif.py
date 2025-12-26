@@ -2,6 +2,7 @@
 import anndata
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
 import tempfile
@@ -34,6 +35,10 @@ def simulation_trajectory_gif(
     title: Optional[str] = None,
     fps: int = 10,
     duration: Optional[float] = None,
+    hold_frames: int = 10,
+    fade_frames: int = 8,
+    leading_edge_scale: float = 2.0,
+    leading_edge_linewidth: float = 1.5,
     dpi: int = 100,
     **kwargs,
 ) -> str:
@@ -86,6 +91,14 @@ def simulation_trajectory_gif(
         Frames per second for the GIF.
     duration : float, optional
         Total duration in seconds. If provided, overrides fps.
+    hold_frames : int, default=10
+        Number of frames to hold at the end before fading.
+    fade_frames : int, default=8
+        Number of frames for the fade-out transition.
+    leading_edge_scale : float, default=2.0
+        Size multiplier for leading edge points (current time step).
+    leading_edge_linewidth : float, default=1.5
+        Edge linewidth for leading edge points (creates glow effect).
     dpi : int, default=100
         Resolution for each frame.
     **kwargs
@@ -127,6 +140,7 @@ def simulation_trajectory_gif(
     # -- Get time values ------------------------------------------------------
     time_values = adata_sim.obs[time_key].values
     unique_times = np.sort(np.unique(time_values))
+    t_min, t_max = unique_times.min(), unique_times.max()
 
     # -- Get color values -----------------------------------------------------
     color_values = None
@@ -181,69 +195,135 @@ def simulation_trajectory_gif(
     if background_fn is None:
         background_fn = default_background
 
+    # -- Helper to create a single frame --------------------------------------
+    def create_frame(t_current, frame_alpha=1.0, is_final=False):
+        fig, ax = plt.subplots(figsize=figsize)
+
+        # Plot background
+        background_fn(adata_sim, ax)
+
+        # Get points up to current time
+        mask = time_values <= t_current
+        x = x_all[mask]
+        y = y_all[mask]
+        c = color_values[mask]
+        t_pts = time_values[mask]
+
+        # Plot trail points (not at current time)
+        trail_mask = t_pts < t_current
+        if np.any(trail_mask):
+            ax.scatter(
+                x[trail_mask], y[trail_mask],
+                c=c[trail_mask], cmap=cmap, s=s, alpha=alpha * frame_alpha,
+                vmin=vmin, vmax=vmax, zorder=200,
+                edgecolors='none', **kwargs
+            )
+
+        # Plot leading edge points (at current time) with glow
+        leading_mask = t_pts == t_current
+        if np.any(leading_mask):
+            # Glow/halo effect - larger, semi-transparent background
+            ax.scatter(
+                x[leading_mask], y[leading_mask],
+                c=c[leading_mask], cmap=cmap,
+                s=s * leading_edge_scale * 2,
+                alpha=0.3 * frame_alpha,
+                vmin=vmin, vmax=vmax, zorder=201,
+                edgecolors='none', **kwargs
+            )
+            # Main leading edge points with edge
+            scatter = ax.scatter(
+                x[leading_mask], y[leading_mask],
+                c=c[leading_mask], cmap=cmap,
+                s=s * leading_edge_scale,
+                alpha=frame_alpha,
+                vmin=vmin, vmax=vmax, zorder=202,
+                edgecolors='white', linewidths=leading_edge_linewidth, **kwargs
+            )
+        else:
+            # Need scatter for colorbar reference
+            scatter = ax.scatter(
+                x, y, c=c, cmap=cmap, s=s, alpha=alpha * frame_alpha,
+                vmin=vmin, vmax=vmax, zorder=200,
+                edgecolors='none', **kwargs
+            )
+
+        # Time label
+        if show_time_label:
+            ax.text(
+                time_label_loc[0], time_label_loc[1],
+                time_label_fmt.format(t_current),
+                transform=ax.transAxes,
+                fontsize=time_label_fontsize,
+                verticalalignment='top',
+                fontweight='bold',
+                alpha=frame_alpha,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8 * frame_alpha)
+            )
+
+        # Formatting
+        if title:
+            ax.set_title(title, fontsize=12)
+
+        # Remove all spines, ticks, and labels for clean UMAP look
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+
+        # Fix axis limits to full data range
+        ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
+        ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
+
+        # Add colorbar with progress indicator
+        # Create a ScalarMappable for the colorbar
+        norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
+        sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax, shrink=0.8)
+        cbar.set_label(color, fontsize=10)
+
+        # Add progress indicator on colorbar
+        progress = (t_current - t_min) / (t_max - t_min) if t_max > t_min else 1.0
+        cbar_ax = cbar.ax
+        # Draw a marker on the colorbar at current time position
+        cbar_ax.axhline(y=progress, color='white', linewidth=3, zorder=10)
+        cbar_ax.axhline(y=progress, color='black', linewidth=1.5, zorder=11)
+
+        return fig, ax
+
     # -- Create frames --------------------------------------------------------
     frames = []
     with tempfile.TemporaryDirectory() as tmpdir:
+        # Main animation frames
         for i, t in enumerate(unique_times):
-            fig, ax = plt.subplots(figsize=figsize)
+            fig, ax = create_frame(t)
 
-            # Plot background
-            background_fn(adata_sim, ax)
-
-            # Get points up to current time
-            mask = time_values <= t
-            x = x_all[mask]
-            y = y_all[mask]
-            c = color_values[mask]
-
-            # Plot simulation points
-            scatter = ax.scatter(
-                x, y, c=c, cmap=cmap, s=s, alpha=alpha,
-                vmin=vmin, vmax=vmax, zorder=200, **kwargs
-            )
-
-            # Time label
-            if show_time_label:
-                ax.text(
-                    time_label_loc[0], time_label_loc[1],
-                    time_label_fmt.format(t),
-                    transform=ax.transAxes,
-                    fontsize=time_label_fontsize,
-                    verticalalignment='top',
-                    fontweight='bold',
-                    bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
-                )
-
-            # Formatting
-            if title:
-                ax.set_title(title, fontsize=12)
-
-            # Remove all spines, ticks, and labels for clean UMAP look
-            for spine in ax.spines.values():
-                spine.set_visible(False)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.set_xlabel("")
-            ax.set_ylabel("")
-
-            # Fix axis limits to full data range
-            ax.set_xlim(x_all.min() - 0.5, x_all.max() + 0.5)
-            ax.set_ylim(y_all.min() - 0.5, y_all.max() + 0.5)
-
-            # Add colorbar on last frame (it will show on all frames with same scale)
-            if i == len(unique_times) - 1:
-                cbar = plt.colorbar(scatter, ax=ax, shrink=0.8)
-                cbar.set_label(color, fontsize=10)
-
-            # Save frame
             frame_path = os.path.join(tmpdir, f"frame_{i:04d}.png")
+            plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
+            plt.close(fig)
+            frames.append(Image.open(frame_path))
+
+        # Hold frames at the end
+        last_frame = frames[-1]
+        for _ in range(hold_frames):
+            frames.append(last_frame.copy())
+
+        # Fade out frames
+        for fade_i in range(fade_frames):
+            fade_alpha = 1.0 - (fade_i + 1) / fade_frames
+            fig, ax = create_frame(unique_times[-1], frame_alpha=fade_alpha)
+
+            frame_path = os.path.join(tmpdir, f"fade_{fade_i:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
             plt.close(fig)
             frames.append(Image.open(frame_path))
 
         # -- Create GIF -------------------------------------------------------
         if duration is not None:
-            frame_duration = int(duration * 1000 / len(frames))
+            frame_duration = int(duration * 1000 / len(unique_times))  # Base on main frames
         else:
             frame_duration = int(1000 / fps)
 
