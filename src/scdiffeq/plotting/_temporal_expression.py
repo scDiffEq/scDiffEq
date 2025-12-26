@@ -110,15 +110,18 @@ def temporal_expression(
     """
     # -- Get gene index -------------------------------------------------------
     gene_ids = adata_sim.uns[gene_ids_key]
-    if isinstance(gene_ids, pd.Index):
+    if isinstance(gene_ids, (pd.Index, pd.Series)):
         gene_ids = gene_ids.tolist()
     elif isinstance(gene_ids, np.ndarray):
         gene_ids = gene_ids.tolist()
+    elif not isinstance(gene_ids, list):
+        gene_ids = list(gene_ids)
 
     if gene not in gene_ids:
+        preview = gene_ids[:5] if len(gene_ids) >= 5 else gene_ids
         raise ValueError(
             f"Gene '{gene}' not found in adata_sim.uns['{gene_ids_key}']. "
-            f"Available genes: {gene_ids[:5]}..."
+            f"Available genes: {preview}..."
         )
     gene_idx = gene_ids.index(gene)
 
