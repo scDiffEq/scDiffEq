@@ -4,8 +4,8 @@ __doc__ = """plotting __init__ module. Sub-package of the main scdiffeq API."""
 
 
 # import functions accessed as sdq.pl.<func>: --------------------------------------------
-# from .potential_landscape import potential_landscape
 from ._velocity_stream import velocity_stream
-# from ._smoothed_gene_expression import plot_smoothed_expression as smoothed_expression
-
-# from ._temporal_expression import temporal_expression
+from ._temporal_expression import temporal_expression
+from ._simulation_umap import simulation_umap
+from ._simulation_trajectory_gif import simulation_trajectory_gif
+from ._simulation_expression_gif import simulation_expression_gif

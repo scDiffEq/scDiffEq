@@ -6,12 +6,19 @@
 
 .. title:: perturb
 
-.. autofunction:: scdiffeq.tools._perturbation.perturb
+.. autofunction:: scdiffeq.tools._perturb.perturb
 
-Operational class
-^^^^^^^^^^^^^^^^^
+Operational classes
+^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: scdiffeq.tools._perturbation.Perturbation
+.. autoclass:: scdiffeq.tools._fate_perturbation_experiment.FatePerturbationExperiment
+    :members:
+    :inherited-members:
+    :undoc-members:
+    :show-inheritance:
+    :member-order: bysource
+
+.. autoclass:: scdiffeq.tools._fate_perturbation_experiment.PerturbationExperimentResult
     :members:
     :inherited-members:
     :undoc-members:

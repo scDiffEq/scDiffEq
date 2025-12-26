@@ -179,7 +179,7 @@ Plotting
 
       .. button-link:: _api/plotting.rst
          :color: primary
-   
+
          Go
 
    .. grid-item::
@@ -191,7 +191,7 @@ Plotting
             :maxdepth: 2
             :hidden:
 
-            _api/_plotting
+            _api/plotting
 
          .. button-link:: _api/_plotting/velocity_stream.rst
             :color: primary
@@ -199,6 +199,34 @@ Plotting
             :expand:
 
             sdq.pl.velocity_stream
+
+         .. button-link:: _api/_plotting/temporal_expression.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.pl.temporal_expression
+
+         .. button-link:: _api/_plotting/simulation_umap.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.pl.simulation_umap
+
+         .. button-link:: _api/_plotting/simulation_trajectory_gif.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.pl.simulation_trajectory_gif
+
+         .. button-link:: _api/_plotting/simulation_expression_gif.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.pl.simulation_expression_gif
 
 
 Tools
