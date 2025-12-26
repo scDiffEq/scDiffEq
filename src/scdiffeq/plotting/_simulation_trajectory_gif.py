@@ -47,8 +47,9 @@ def simulation_trajectory_gif(
     progenitor_s: float = 80.0,
     progenitor_color: str = "dodgerblue",
     dpi: int = 100,
+    return_fig: bool = False,
     **kwargs,
-) -> str:
+) -> Union[str, tuple]:
     """
     Create a GIF of simulation trajectories growing over UMAP space.
 
@@ -124,13 +125,16 @@ def simulation_trajectory_gif(
         Color for the progenitor marker and annotation.
     dpi : int, default=100
         Resolution for each frame.
+    return_fig : bool, default=False
+        If True, also returns the final frame's (fig, ax) tuple.
     **kwargs
         Additional keyword arguments passed to scatter.
 
     Returns
     -------
-    str
-        Path to the saved GIF file.
+    str or tuple
+        Path to the saved GIF file. If return_fig=True, returns
+        (savename, fig, ax) tuple with the final frame.
 
     Examples
     --------
@@ -469,5 +473,10 @@ def simulation_trajectory_gif(
             duration=frame_duration,
             loop=0
         )
+
+    if return_fig:
+        # Create final frame for returning
+        final_fig, final_ax = create_frame(unique_times[-1])
+        return savename, final_fig, final_ax
 
     return savename

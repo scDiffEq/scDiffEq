@@ -59,8 +59,9 @@ def simulation_expression_gif(
     progenitor_s: float = 80.0,
     progenitor_color: str = "dodgerblue",
     dpi: int = 100,
+    return_fig: bool = False,
     **kwargs,
-) -> str:
+) -> Union[str, tuple]:
     """
     Create a dual-panel GIF with synchronized UMAP trajectory and gene expression.
 
@@ -156,13 +157,16 @@ def simulation_expression_gif(
         Color for the progenitor marker and annotation.
     dpi : int, default=100
         Resolution for each frame.
+    return_fig : bool, default=False
+        If True, also returns the final frame's (fig, ax_umap, ax_expr) tuple.
     **kwargs
         Additional keyword arguments passed to UMAP scatter.
 
     Returns
     -------
-    str
-        Path to the saved GIF file.
+    str or tuple
+        Path to the saved GIF file. If return_fig=True, returns
+        (savename, fig, ax_umap, ax_expr) tuple with the final frame.
 
     Examples
     --------
@@ -554,7 +558,7 @@ def simulation_expression_gif(
                       loc="best", frameon=True, facecolor="white", edgecolor="lightgray", fontsize=8)
 
         plt.tight_layout()
-        return fig
+        return fig, ax_umap, ax_expr
 
     # -- Create frames --------------------------------------------------------
     frames = []
@@ -574,7 +578,7 @@ def simulation_expression_gif(
 
         # Main animation frames
         for i, t in enumerate(unique_times):
-            fig = create_frame(t)
+            fig, _, _ = create_frame(t)
 
             frame_path = os.path.join(tmpdir, f"frame_{frame_idx:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
@@ -590,7 +594,7 @@ def simulation_expression_gif(
         # Fade out frames
         for fade_i in range(fade_frames):
             fade_alpha = 1.0 - (fade_i + 1) / fade_frames
-            fig = create_frame(unique_times[-1], frame_alpha=fade_alpha)
+            fig, _, _ = create_frame(unique_times[-1], frame_alpha=fade_alpha)
 
             frame_path = os.path.join(tmpdir, f"fade_{fade_i:04d}.png")
             plt.savefig(frame_path, dpi=dpi, bbox_inches="tight")
@@ -610,5 +614,10 @@ def simulation_expression_gif(
             duration=frame_duration,
             loop=0
         )
+
+    if return_fig:
+        # Create final frame for returning
+        final_fig, final_ax_umap, final_ax_expr = create_frame(unique_times[-1])
+        return savename, final_fig, final_ax_umap, final_ax_expr
 
     return savename
