@@ -141,7 +141,14 @@ def temporal_expression(
         gene_idx = gene_ids.index(gene)
 
     # -- Extract expression and metadata --------------------------------------
-    expression = adata_sim.obsm[use_key][:, gene_idx]
+    expr_matrix = adata_sim.obsm[use_key]
+    if isinstance(expr_matrix, pd.DataFrame):
+        # DataFrame: use iloc for positional indexing
+        expression = expr_matrix.iloc[:, gene_idx].values
+    else:
+        # numpy array: use direct indexing
+        expression = expr_matrix[:, gene_idx]
+
     time = adata_sim.obs[time_key].values
     groups = adata_sim.obs[groupby].values
 
