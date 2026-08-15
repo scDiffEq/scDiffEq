@@ -5,8 +5,9 @@
 name: Tests
 
 on:
+  # No branch filter: stacked pull requests target another feature branch rather
+  # than main, and would otherwise get no CI at all.
   pull_request:
-    branches: [main, master]
   push:
     branches: [main, master]
   workflow_dispatch:
