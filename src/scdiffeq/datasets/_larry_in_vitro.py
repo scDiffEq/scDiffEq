@@ -1,4 +1,4 @@
-# -- import packages: ----------------------------------------------------------
+# -- import packages: ---------------------------------------------------------
 import ABCParse
 import anndata
 import dataclasses
@@ -13,18 +13,18 @@ import sklearn.preprocessing
 import warnings
 
 
-# -- import local dependencies: ------------------------------------------------
+# -- import local dependencies: -----------------------------------------------
 from .. import io
 from ._figshare_downloader import figshare_downloader, zenodo_file_downloader
 
-# -- set type hints: -----------------------------------------------------------
+# -- set type hints: ----------------------------------------------------------
 from typing import Dict, Optional, Tuple, Union
 
-# -- configure logger: ----------------------------------------------------------
+# -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
 
 
-# -- variant registry: ---------------------------------------------------------
+# -- variant registry: --------------------------------------------------------
 _VARIANTS = {
     None: {
         "figshare_id": 55415231,
@@ -35,19 +35,14 @@ _VARIANTS = {
         "figshare_id": 52612805,
         "stem": "larry_unprocessed",
         "legacy_fnames": ("larry_fate_prediction.h5ad",),
-        # A prebuilt "larry_unprocessed.processed.h5ad" exists in the Zenodo
-        # record but is deliberately not registered here. It is 2.93 GB against
-        # 2.16 GB for the raw file, and local preprocessing takes ~30 s, so
-        # fetching it costs roughly 285 s of extra transfer at the measured
-        # ~2.7 MB/s to save ~30 s of compute. Set "processed_fname" to re-enable.
+        # Prebuilt "larry_unprocessed.processed.h5ad" exists in Zenodo but
+        # deliberately not registered here. 2.93 GB vs. 2.16 GB for the raw
+        # file. Local preprocessing takes ~30s; fetching it costs ~285s of
+        # extra transfer at ~2.7 MB/s (measured). Set "processed_fname" to
+        # re-enable. 
     },
 }
 
-# ``fate_prediction`` was a misleading name. It resolves to
-# ``adata.Weinreb2020.in_vitro.gene_filtered.h5ad``, but despite that filename the
-# object is 130,887 x 25,289 with no ``X_pca`` and a ``use_genes`` column to filter
-# *by* -- it is the unprocessed input. The default variant is the one that is
-# already filtered (2,492 genes) and ships a precomputed ``X_pca``.
 _VARIANT_ALIASES = {"fate_prediction": "unprocessed"}
 
 
@@ -81,7 +76,7 @@ def _resolve_variant(variant: Optional[str]) -> Optional[str]:
     return variant
 
 
-# -- lightweight, read-only h5ad introspection: --------------------------------
+# -- lightweight, read-only h5ad introspection: -------------------------------
 @dataclasses.dataclass(frozen=True)
 class _H5ADProbe:
     """Metadata-only summary of an ``.h5ad`` file.
@@ -106,7 +101,8 @@ def _decode(value) -> str:
 
 
 def _frame_shape_and_columns(node) -> Tuple[Optional[int], Tuple[str, ...]]:
-    """Length and column names of an h5ad-encoded DataFrame, reading no column data."""
+    """Length and column names of an h5ad-encoded DataFrame, reading no column
+    data."""
     if isinstance(node, h5py.Dataset):  # legacy structured-array layout
         return int(node.shape[0]), tuple(node.dtype.names or ())
 
@@ -158,11 +154,11 @@ def _probe_h5ad(path: Union[str, pathlib.Path]) -> _H5ADProbe:
                 pca_dim=pca_dim,
             )
     except (OSError, KeyError, ValueError) as e:
-        # truncated download, or a non-HDF5 payload such as a WAF challenge page
+        # truncated download, or non-HDF5 payload such as a WAF challenge page
         return _H5ADProbe(path=path, error=f"{type(e).__name__}: {e}")
 
 
-# -- atomic write helpers: -----------------------------------------------------
+# -- atomic write helpers: ----------------------------------------------------
 def _tmp_sibling(path: pathlib.Path, suffix: str) -> pathlib.Path:
     """Hidden sibling path in the same directory, so ``os.replace`` stays atomic."""
     return path.with_name(f".{path.name}.{suffix}")
@@ -184,7 +180,7 @@ def _write_h5ad_atomic(adata: anndata.AnnData, write_path: pathlib.Path) -> None
         raise
 
 
-# -- CytoTRACE annotation: -----------------------------------------------------
+# -- CytoTRACE annotation: ----------------------------------------------------
 _CYTOTRACE_FILES = {
     "obs": (54312011, "larry.ct_obs_df.csv"),
     "var": (54312008, "larry.ct_var_df.csv"),
@@ -310,7 +306,7 @@ def _annotate_larry_cytotrace(
     return adata
 
 
-# -- Controller class: ---------------------------------------------------------
+# -- Controller class: --------------------------------------------------------
 class LARRYInVitroDataset(ABCParse.ABCParse):
     N_PCS = 50
     PCA_RANDOM_STATE = 0
@@ -375,8 +371,9 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
     def _pp_tag(self) -> str:
         """Filename tag for non-default flag combinations ('' for the default).
 
-        Without this, ``larry(reduce_dimensions=False)`` would write a PCA-less file
-        to the shared processed path and poison the cache for every other caller.
+        Without this, ``larry(reduce_dimensions=False)`` would write a PCA-less
+        file to the shared processed path and poison the cache for every other
+        caller.
         """
         tags = []
         if not self._filter_genes:
@@ -406,9 +403,9 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
     def _model_path(self, kind: str) -> pathlib.Path:
         """Path for a fitted scaler/PCA.
 
-        The default variant keeps the bare ``scaler.pkl`` / ``pca.pkl`` names that
-        the published quickstart notebook loads. Other variants are namespaced so
-        they no longer silently overwrite each other's models.
+        Default variant keeps the bare ``scaler.pkl`` / ``pca.pkl`` names
+        that the published quickstart notebook loads. Other variants are
+        namespaced so they no longer silently overwrite each other's models.
         """
         prefix = "" if self._variant is None else f"{self._stem}."
         return self.data_dir.joinpath(f"{prefix}{kind}{self._pp_tag}.pkl")
@@ -418,9 +415,9 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
         """Adopt a pre-existing ``larry.h5ad`` rather than re-downloading GBs.
 
         Existing installs hold a single file that may be raw *or* processed
-        depending on how it got there, so classify it from HDF5 metadata instead of
-        assuming. The move is an ``os.replace`` within one directory: instant and
-        atomic even at 5.3 GB.
+        depending on how it got there. Classified from HDF5 metadata instead of
+        assuming. The move is an ``os.replace`` within one directory: instant
+        and atomic even at 5.3 GB.
         """
         if getattr(self, "_migrated", False):
             return

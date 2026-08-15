@@ -55,9 +55,10 @@ class FigshareDownloadError(Exception):
 
 # -- payload validation: ------------------------------------------------------
 # Leading bytes that identify a well-formed payload, keyed by target suffix.
-# A WAF challenge page or a truncated transfer fails these, which is what keeps a
-# corrupt file from being written to the cache and only exploding much later
-# inside `anndata.read_h5ad`.
+# WAF challenge page or a truncated transfer fails these: keeps a corrupt file
+# from being written to the cache and only problematic later, inside
+# `anndata.read_h5ad`.
+
 _MAGIC_BY_SUFFIX = {
     ".h5ad": (b"\x89HDF\r\n\x1a\n",),
     ".h5": (b"\x89HDF\r\n\x1a\n",),
@@ -75,8 +76,8 @@ def _validate_payload(path: pathlib.Path, suffix: str) -> Tuple[bool, str]:
 
     Args:
         path: Location of the freshly downloaded (temporary) file.
-        suffix: Suffix of the *final* destination, e.g. ``".h5ad"``. The temp file
-            carries a ``.part`` suffix, so it cannot be used for this.
+        suffix: Suffix of the *final* destination, e.g. ``".h5ad"``. The temp
+        file carries a ``.part`` suffix, so it cannot be used for this.
 
     Returns:
         ``(is_valid, reason)``.
@@ -124,17 +125,17 @@ def _unlink(path: pathlib.Path) -> None:
 
 # -- operational class: -------------------------------------------------------
 class FigshareDownloader:
-    """Download dataset files, preferring sources that work without authentication.
+    """Download dataset files, preferring sources that work without auth.
 
     Sources are attempted in this order:
 
-    1. Zenodo (public record, no authentication)
-    2. Figshare API v2 (works anonymously; a token is used only if one is set)
+    1. Zenodo (public record, no auth)
+    2. Figshare API v2 (works anonymously; token used only if one is set)
     3. Figshare direct download (usually blocked by AWS WAF; last resort)
 
-    The download is written to a temporary sibling file and validated before being
-    moved into place, so a failed or challenged transfer never leaves a partial
-    file that later looks like a populated cache.
+    Download written to a temporary sibling file and validated before being
+    stored. Prevents a failed or challenged transfer leaving a file that
+    populates the cache erroneously.
     """
 
     def __init__(
@@ -145,9 +146,9 @@ class FigshareDownloader:
         """
         Args:
             chunk_size: Download chunk size in bytes (default: 8 MB)
-            api_token: Figshare API token. Optional - the API endpoint serves these
-                files anonymously. Can also be set via the FIGSHARE_API_TOKEN
-                environment variable.
+            api_token: Figshare API token. Optional - the API endpoint serves
+                these files anonymously. Can also be set via the
+                FIGSHARE_API_TOKEN environment variable.
         """
         self.chunk_size = chunk_size
         self.api_token = api_token or os.getenv("FIGSHARE_API_TOKEN")
@@ -206,10 +207,10 @@ class FigshareDownloader:
     def _try_figshare_api(self, write_path: str) -> bool:
         """Try the Figshare API v2 endpoint. Returns True if bytes were written.
 
-        This endpoint serves the files anonymously, so no token is required. When a
-        token happens to be configured we send it, but its absence is not a reason
-        to skip the attempt - that gate was why anonymous users could not download
-        anything while the WAF was blocking the direct host.
+        This endpoint serves the files anonymously; no token required. Token
+        sent if configured. Absence does not prevent the attempt. That gate
+        prevents anonymous users from downloading anything while the WAF was
+        blocking the direct host.
         """
         try:
             logger.info("Attempting Figshare API v2 download...")
@@ -241,8 +242,8 @@ class FigshareDownloader:
     def _try_figshare_direct(self, write_path: str) -> bool:
         """Try the direct Figshare host. Returns True if bytes were written.
 
-        This host sits behind an AWS WAF that answers our requests with an HTTP 202
-        challenge and no body, so this is a last-resort fallback.
+        This host sits behind an AWS WAF that answers our requests with an
+        HTTP 202 challenge and no body, so this is a last-resort fallback.
         """
         try:
             logger.info("Attempting direct Figshare download...")

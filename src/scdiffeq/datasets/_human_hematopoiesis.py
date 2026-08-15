@@ -222,7 +222,7 @@ class HumanHematopoiesisDataset(ABCParse.ABCParse):
         return self._adata
 
 
-# -- download function for unprocessed data: -----------------------------------
+# -- download function for unprocessed data: ----------------------------------
 def _download_unprocessed_human_hematopoiesis(
     data_dir=os.getcwd(),
     skip_scaling: bool = False,

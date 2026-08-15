@@ -154,7 +154,7 @@ def test_reduce_dimensions_false_does_not_loop(planted):
     assert is_valid, reason
 
 
-# -- property semantics -------------------------------------------------------
+# -- property semantics: ------------------------------------------------------
 def test_adata_property_is_stable_across_accesses(planted):
     """The property used to return None on its second access."""
 
@@ -166,7 +166,7 @@ def test_adata_property_is_stable_across_accesses(planted):
     assert second is first
 
 
-# -- determinism (Fix 2) ------------------------------------------------------
+# -- determinism (Fix 2): -----------------------------------------------------
 def test_pca_is_deterministic(tmp_path, make_adata, cytotrace_csvs):
     """Two independent preprocessing runs must produce an identical basis."""
 
@@ -181,7 +181,7 @@ def test_pca_is_deterministic(tmp_path, make_adata, cytotrace_csvs):
     np.testing.assert_array_equal(results[0], results[1])
 
 
-# -- legacy cache migration (Fix 1, migration path) ---------------------------
+# -- legacy cache migration (Fix 1, migration path): --------------------------
 def test_legacy_raw_cache_is_migrated_not_redownloaded(tmp_path, make_adata, cytotrace_csvs):
     """A pre-existing larry.h5ad without X_pca is adopted as the raw input."""
 
@@ -241,7 +241,7 @@ def test_unreadable_legacy_file_is_left_alone(tmp_path, make_adata, cytotrace_cs
     assert not handler.raw_h5ad_path.exists()
 
 
-# -- variant naming (Fix 4) ---------------------------------------------------
+# -- variant naming (Fix 4): --------------------------------------------------
 def test_fate_prediction_alias_warns_and_resolves():
     with pytest.warns(DeprecationWarning, match="unprocessed"):
         assert _resolve_variant("fate_prediction") == "unprocessed"
@@ -285,7 +285,7 @@ def test_deprecated_alias_reaches_the_unprocessed_paths(tmp_path):
     assert "unprocessed" in handler.raw_h5ad_path.name
 
 
-# -- gene-filtered variant without use_genes ----------------------------------
+# -- gene-filtered variant without use_genes: ---------------------------------
 def test_missing_use_genes_is_a_no_op_not_a_crash(tmp_path, make_adata, cytotrace_csvs):
     """The gene-filtered variant ships no use_genes column; that must not raise."""
 
@@ -301,7 +301,7 @@ def test_missing_use_genes_is_a_no_op_not_a_crash(tmp_path, make_adata, cytotrac
     assert result.n_vars == adata.n_vars
 
 
-# -- annotation merge semantics ------------------------------------------------
+# -- annotation merge semantics: ----------------------------------------------
 def test_partial_annotation_coverage_preserves_frame_length():
     """The real var annotations cover only the filtered gene subset."""
 
@@ -377,7 +377,7 @@ def test_repeated_merge_does_not_duplicate_columns():
     assert isinstance(merged["ct_pseudotime"], pd.Series)
 
 
-# -- prebuilt processed artifact ----------------------------------------------
+# -- prebuilt processed artifact: ---------------------------------------------
 def test_no_variant_registers_a_prebuilt_artifact(tmp_path, make_adata, cytotrace_csvs):
     """Currently none should: the prebuilt file costs more to fetch than to build.
 
