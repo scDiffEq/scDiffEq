@@ -15,7 +15,7 @@ import warnings
 
 # -- import local dependencies: ------------------------------------------------
 from .. import io
-from ._figshare_downloader import figshare_downloader
+from ._figshare_downloader import figshare_downloader, zenodo_file_downloader
 
 # -- set type hints: -----------------------------------------------------------
 from typing import Dict, Optional, Tuple, Union
@@ -31,18 +31,22 @@ _VARIANTS = {
         "stem": "larry",
         "legacy_fnames": ("larry.h5ad",),
     },
-    "gene_filtered": {
+    "unprocessed": {
         "figshare_id": 52612805,
-        "stem": "larry_gene_filtered",
-        "legacy_fnames": ("larry_fate_prediction.h5ad", "larry_gene_filtered.h5ad"),
+        "stem": "larry_unprocessed",
+        "legacy_fnames": ("larry_fate_prediction.h5ad",),
+        # Prebuilt equivalent of running the default preprocessing on this
+        # variant; downloaded instead of recomputed when available.
+        "processed_fname": "larry_unprocessed.processed.h5ad",
     },
 }
 
-# ``fate_prediction`` was a misleading name: it resolves to
-# ``adata.Weinreb2020.in_vitro.gene_filtered.h5ad``, the recipe's gene-filtered
-# intermediate, while the *default* variant is the object that ships a precomputed
-# ``X_pca``. The names pointed the wrong way round.
-_VARIANT_ALIASES = {"fate_prediction": "gene_filtered"}
+# ``fate_prediction`` was a misleading name. It resolves to
+# ``adata.Weinreb2020.in_vitro.gene_filtered.h5ad``, but despite that filename the
+# object is 130,887 x 25,289 with no ``X_pca`` and a ``use_genes`` column to filter
+# *by* -- it is the unprocessed input. The default variant is the one that is
+# already filtered (2,492 genes) and ships a precomputed ``X_pca``.
+_VARIANT_ALIASES = {"fate_prediction": "unprocessed"}
 
 
 def _resolve_variant(variant: Optional[str]) -> Optional[str]:
@@ -57,7 +61,8 @@ def _resolve_variant(variant: Optional[str]) -> Optional[str]:
         message = (
             f"variant={variant!r} is deprecated and will be removed in a future "
             f"release; use variant={canonical!r} instead. Note that this variant is "
-            f"the gene-filtered intermediate and does not ship a precomputed X_pca."
+            f"the unprocessed input (25,289 genes, no precomputed X_pca), not the "
+            f"gene-filtered object its upstream filename suggests."
         )
         warnings.warn(message, DeprecationWarning, stacklevel=3)
         # DeprecationWarning is hidden by default outside __main__, so also log it.
@@ -593,6 +598,36 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
 
         return adata
 
+    def _try_download_processed(self) -> bool:
+        """Fetch a prebuilt processed artifact instead of recomputing it.
+
+        Only valid when the requested flags match the defaults the artifact was
+        built with -- otherwise the prebuilt object is not what was asked for and
+        preprocessing has to run locally. Returns ``False`` whenever the artifact
+        is unavailable, so this is always an optimization, never a requirement.
+        """
+        processed_fname = self._spec.get("processed_fname")
+        if not processed_fname or self._pp_tag:
+            return False
+
+        logger.info(f"Checking for a prebuilt {processed_fname}...")
+        if not zenodo_file_downloader(
+            filename=processed_fname,
+            write_path=self.processed_h5ad_path,
+        ):
+            return False
+
+        is_valid, reason = self._validate_processed(self.processed_h5ad_path)
+        if not is_valid:
+            logger.warning(
+                f"Prebuilt {processed_fname} failed validation ({reason}); "
+                f"falling back to local preprocessing."
+            )
+            self.processed_h5ad_path.unlink(missing_ok=True)
+            return False
+
+        return True
+
     def _ensure_processed(self) -> None:
         """Guarantee that ``self.h5ad_path`` exists and is valid."""
         self._migrate_legacy_cache()
@@ -617,6 +652,9 @@ class LARRYInVitroDataset(ABCParse.ABCParse):
                 f"({reason}); regenerating from raw."
             )
             self.processed_h5ad_path.unlink()
+
+        if self._try_download_processed():
+            return
 
         adata = self.raw_adata  # downloads only if the raw file is absent
         self._preprocess(adata=adata)
@@ -671,14 +709,21 @@ def larry(
         data_dir: str, default=os.getcwd()
             Path to the directory where the data will be saved.
         variant: Optional[str], default=None
-            Dataset variant. ``None`` (default) downloads the full, biology-rich
-            dataset, which ships a precomputed ``X_pca``. ``"gene_filtered"``
-            downloads the smaller gene-filtered intermediate
-            (``adata.Weinreb2020.in_vitro.gene_filtered.h5ad``), which does not,
-            and for which ``X_pca`` is computed locally.
+            Dataset variant.
+
+            ``None`` (default) is the biology-rich object: 130,887 x 2,492, already
+            gene-filtered, shipping a precomputed ``X_pca``, ``X_umap`` and
+            ``X_scaled``.
+
+            ``"unprocessed"`` is the upstream input: 130,887 x 25,289 with no
+            ``X_pca``, carrying a ``use_genes`` column that preprocessing filters
+            by (down to 2,447 genes). ``X_pca`` is computed locally, or downloaded
+            prebuilt when available.
 
             ``variant="fate_prediction"`` is a deprecated alias for
-            ``"gene_filtered"`` and will be removed in a future release.
+            ``"unprocessed"`` and will be removed in a future release. Despite its
+            upstream filename (``...in_vitro.gene_filtered.h5ad``), that object is
+            the unfiltered one.
         filter_genes: bool, default=True
             Whether to subset to ``adata.var['use_genes']``. A no-op for variants
             that are already gene-filtered.

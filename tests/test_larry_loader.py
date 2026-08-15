@@ -17,6 +17,7 @@ pre-written, so no download is attempted.
 """
 
 # -- import packages: ---------------------------------------------------------
+import pathlib
 import warnings
 
 import numpy as np
@@ -242,15 +243,15 @@ def test_unreadable_legacy_file_is_left_alone(tmp_path, make_adata, cytotrace_cs
 
 # -- variant naming (Fix 4) ---------------------------------------------------
 def test_fate_prediction_alias_warns_and_resolves():
-    with pytest.warns(DeprecationWarning, match="gene_filtered"):
-        assert _resolve_variant("fate_prediction") == "gene_filtered"
+    with pytest.warns(DeprecationWarning, match="unprocessed"):
+        assert _resolve_variant("fate_prediction") == "unprocessed"
 
 
 def test_canonical_variants_do_not_warn():
     with warnings.catch_warnings():
         warnings.simplefilter("error", DeprecationWarning)
         assert _resolve_variant(None) is None
-        assert _resolve_variant("gene_filtered") == "gene_filtered"
+        assert _resolve_variant("unprocessed") == "unprocessed"
 
 
 def test_unknown_variant_raises_a_useful_error():
@@ -260,7 +261,7 @@ def test_unknown_variant_raises_a_useful_error():
 
 def test_variant_paths_do_not_collide(tmp_path):
     default = LARRYInVitroDataset(data_dir=str(tmp_path), variant=None)
-    filtered = LARRYInVitroDataset(data_dir=str(tmp_path), variant="gene_filtered")
+    filtered = LARRYInVitroDataset(data_dir=str(tmp_path), variant="unprocessed")
 
     assert default.raw_h5ad_path != filtered.raw_h5ad_path
     assert default.processed_h5ad_path != filtered.processed_h5ad_path
@@ -276,19 +277,19 @@ def test_default_variant_keeps_documented_pickle_names(tmp_path):
     assert handler._model_path("pca").name == "pca.pkl"
 
 
-def test_deprecated_alias_reaches_the_gene_filtered_paths(tmp_path):
+def test_deprecated_alias_reaches_the_unprocessed_paths(tmp_path):
     with pytest.warns(DeprecationWarning):
         handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant="fate_prediction")
 
-    assert handler._variant == "gene_filtered"
-    assert "gene_filtered" in handler.raw_h5ad_path.name
+    assert handler._variant == "unprocessed"
+    assert "unprocessed" in handler.raw_h5ad_path.name
 
 
 # -- gene-filtered variant without use_genes ----------------------------------
 def test_missing_use_genes_is_a_no_op_not_a_crash(tmp_path, make_adata, cytotrace_csvs):
     """The gene-filtered variant ships no use_genes column; that must not raise."""
 
-    handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant="gene_filtered")
+    handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant="unprocessed")
     cytotrace_csvs(handler.data_dir)
 
     adata = make_adata()
@@ -376,12 +377,56 @@ def test_repeated_merge_does_not_duplicate_columns():
     assert isinstance(merged["ct_pseudotime"], pd.Series)
 
 
+# -- prebuilt processed artifact ----------------------------------------------
+def test_prebuilt_artifact_is_skipped_when_unavailable(tmp_path, make_adata, cytotrace_csvs):
+    """With no Zenodo record configured, preprocessing must still run locally."""
+
+    handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant="unprocessed")
+    cytotrace_csvs(handler.data_dir)
+    make_adata().write_h5ad(handler.raw_h5ad_path)
+
+    assert handler._try_download_processed() is False
+    assert "X_pca" in handler.adata.obsm
+
+
+def test_prebuilt_artifact_not_used_for_non_default_flags(tmp_path):
+    """The prebuilt object only matches the defaults it was built with."""
+
+    handler = LARRYInVitroDataset(
+        data_dir=str(tmp_path), variant="unprocessed", reduce_dimensions=False
+    )
+    assert handler._pp_tag  # non-default
+    assert handler._try_download_processed() is False
+
+
+def test_invalid_prebuilt_artifact_falls_back_to_local(
+    tmp_path, make_adata, cytotrace_csvs, monkeypatch
+):
+    """A corrupt prebuilt download must not be returned or left on disk."""
+
+    handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant="unprocessed")
+    cytotrace_csvs(handler.data_dir)
+    make_adata().write_h5ad(handler.raw_h5ad_path)
+
+    def _fake_download(filename, write_path, **kwargs):
+        pathlib.Path(write_path).write_bytes(b"not an hdf5 file")
+        return True
+
+    monkeypatch.setattr(
+        "scdiffeq.datasets._larry_in_vitro.zenodo_file_downloader", _fake_download
+    )
+
+    assert handler._try_download_processed() is False
+    assert not handler.processed_h5ad_path.exists(), "bad artifact must be removed"
+    assert "X_pca" in handler.adata.obsm
+
+
 # -- opt-in integration -------------------------------------------------------
 @pytest.mark.slow
-def test_larry_gene_filtered_end_to_end(tmp_path):
+def test_larry_unprocessed_end_to_end(tmp_path):
     """Downloads ~2.2 GB. Run with `pytest -m slow`."""
 
-    adata = larry(variant="gene_filtered", data_dir=str(tmp_path))
+    adata = larry(variant="unprocessed", data_dir=str(tmp_path))
 
     assert "X_pca" in adata.obsm
     assert adata.obsm["X_pca"].shape[1] == LARRYInVitroDataset.N_PCS
