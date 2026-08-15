@@ -35,9 +35,11 @@ _VARIANTS = {
         "figshare_id": 52612805,
         "stem": "larry_unprocessed",
         "legacy_fnames": ("larry_fate_prediction.h5ad",),
-        # Prebuilt equivalent of running the default preprocessing on this
-        # variant; downloaded instead of recomputed when available.
-        "processed_fname": "larry_unprocessed.processed.h5ad",
+        # A prebuilt "larry_unprocessed.processed.h5ad" exists in the Zenodo
+        # record but is deliberately not registered here. It is 2.93 GB against
+        # 2.16 GB for the raw file, and local preprocessing takes ~30 s, so
+        # fetching it costs roughly 285 s of extra transfer at the measured
+        # ~2.7 MB/s to save ~30 s of compute. Set "processed_fname" to re-enable.
     },
 }
 

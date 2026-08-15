@@ -378,15 +378,42 @@ def test_repeated_merge_does_not_duplicate_columns():
 
 
 # -- prebuilt processed artifact ----------------------------------------------
-def test_prebuilt_artifact_is_skipped_when_unavailable(tmp_path, make_adata, cytotrace_csvs):
-    """With no Zenodo record configured, preprocessing must still run locally."""
+def test_no_variant_registers_a_prebuilt_artifact(tmp_path, make_adata, cytotrace_csvs):
+    """Currently none should: the prebuilt file costs more to fetch than to build.
+
+    2.93 GB prebuilt vs 2.16 GB raw + ~30 s of local preprocessing, at ~2.7 MB/s.
+    """
+
+    for variant in (None, "unprocessed"):
+        handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant=variant)
+        assert handler._spec.get("processed_fname") is None
+        assert handler._try_download_processed() is False
+
+
+def test_prebuilt_artifact_is_used_when_registered(
+    tmp_path, make_adata, cytotrace_csvs, monkeypatch
+):
+    """The mechanism still works, so re-enabling it is a one-line change."""
 
     handler = LARRYInVitroDataset(data_dir=str(tmp_path), variant="unprocessed")
     cytotrace_csvs(handler.data_dir)
-    make_adata().write_h5ad(handler.raw_h5ad_path)
+    monkeypatch.setitem(
+        handler._spec, "processed_fname", "larry_unprocessed.processed.h5ad"
+    )
 
-    assert handler._try_download_processed() is False
-    assert "X_pca" in handler.adata.obsm
+    prebuilt = make_adata(with_pca=LARRYInVitroDataset.N_PCS)
+    prebuilt.obs["ct_pseudotime"] = np.linspace(0, 1, prebuilt.n_obs)
+
+    def _fake_download(filename, write_path, **kwargs):
+        prebuilt.write_h5ad(write_path)
+        return True
+
+    monkeypatch.setattr(
+        "scdiffeq.datasets._larry_in_vitro.zenodo_file_downloader", _fake_download
+    )
+
+    assert handler._try_download_processed() is True
+    assert handler.processed_h5ad_path.exists()
 
 
 def test_prebuilt_artifact_not_used_for_non_default_flags(tmp_path):
