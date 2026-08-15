@@ -146,3 +146,7 @@ uv.lock
 
 # VS Code workspace files
 *.code-workspace
+
+# secrets - Zenodo deposit token used by scripts/mirror_to_zenodo.py
+.zenodo_token
+*.token

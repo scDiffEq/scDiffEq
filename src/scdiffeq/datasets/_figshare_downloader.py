@@ -16,16 +16,17 @@ logger = logging.getLogger(__name__)
 
 
 # -- Zenodo configuration: ----------------------------------------------------
-# Primary data source - Zenodo public record (no authentication required)
-# TODO: Update this after uploading files to Zenodo
-ZENODO_RECORD_ID = None  # e.g., "1234567"
+# Primary data source: a public Zenodo record, downloadable without
+# authentication and checksum-verified on arrival.
+# https://doi.org/10.5281/zenodo.21947161
+ZENODO_RECORD_ID = "21947161"
 
 # Mapping from Figshare IDs to Zenodo filenames
 # Only files uploaded to Zenodo should be listed here
 ZENODO_FILES = {
     # LARRY dataset (primary tutorial data)
     "55415231": "larry.h5ad",
-    "52612805": "larry_gene_filtered.h5ad",
+    "52612805": "larry_unprocessed.h5ad",
     "54312011": "larry.ct_obs_df.csv",
     "54312008": "larry.ct_var_df.csv",
     "54635780": "Weinreb2020_growth-all_kegg.pt",
@@ -337,6 +338,48 @@ class FigshareDownloader:
 
 
 # -- function: ----------------------------------------------------------------
+def zenodo_file_downloader(
+    filename: str,
+    write_path: Union[str, pathlib.Path],
+    chunk_size: int = 8 * 1024 * 1024,
+) -> bool:
+    """Download a file that exists only on Zenodo, with no Figshare counterpart.
+
+    Used for artifacts we publish ourselves (e.g. prebuilt preprocessed objects)
+    rather than mirror. Returns ``False`` when Zenodo is not configured or the
+    file is unavailable, so callers can fall back to computing it locally.
+    """
+    if ZENODO_RECORD_ID is None:
+        logger.debug("Zenodo record ID not configured; cannot fetch Zenodo-only file")
+        return False
+
+    write_path = pathlib.Path(write_path)
+    write_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = write_path.with_name(f".{write_path.name}.part")
+
+    try:
+        zenodo_downloader(
+            record_id=ZENODO_RECORD_ID,
+            filename=filename,
+            write_path=str(tmp_path),
+            chunk_size=chunk_size,
+        )
+        is_valid, reason = _validate_payload(tmp_path, write_path.suffix)
+        if not is_valid:
+            logger.warning(f"Zenodo returned an unusable {filename} ({reason}).")
+            return False
+
+        os.replace(tmp_path, write_path)
+        logger.info(f"Downloaded {filename} from Zenodo -> {write_path}")
+        return True
+
+    except Exception as e:
+        logger.warning(f"Could not fetch {filename} from Zenodo: {e}")
+        return False
+    finally:
+        _unlink(tmp_path)
+
+
 def figshare_downloader(
     figshare_id: Union[int, str],
     write_path: Union[str, pathlib.Path],
