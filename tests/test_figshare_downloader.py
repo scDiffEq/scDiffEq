@@ -246,6 +246,52 @@ def test_non_h5ad_targets_are_validated_too(recorder, tmp_path):
     assert target.read_text().startswith("index,")
 
 
+def test_pickle_protocol_pt_files_are_accepted(recorder, tmp_path):
+    """The real .pt artifact is a raw pickle stream, not a zip archive.
+
+    torch.save has written zip archives since 1.6, but the published
+    Weinreb2020_growth-all_kegg.pt predates that and begins with \\x80\\x02.
+    Rejecting it would break larry_kegg_growth_weights().
+    """
+
+    recorder["responses"]["api.figshare.com"] = FakeResponse(
+        status_code=200, body=b"\x80\x02" + b"\x8a\x0a" + b"payload"
+    )
+
+    target = tmp_path / "Weinreb2020_growth-all_kegg.pt"
+    fd.figshare_downloader(figshare_id="54635780", write_path=target)
+
+    assert target.exists()
+
+
+def test_zip_format_pt_files_are_also_accepted(recorder, tmp_path):
+    """Newer torch.save output is a zip archive."""
+
+    recorder["responses"]["api.figshare.com"] = FakeResponse(
+        status_code=200, body=b"PK\x03\x04" + b"payload"
+    )
+
+    target = tmp_path / "model.pt"
+    fd.figshare_downloader(figshare_id="54635780", write_path=target)
+
+    assert target.exists()
+
+
+def test_html_page_is_rejected_for_a_pt_target(recorder, tmp_path):
+    recorder["responses"]["api.figshare.com"] = FakeResponse(
+        status_code=200, body=b"<html>nope</html>"
+    )
+    recorder["responses"]["figshare.com/ndownloader"] = FakeResponse(
+        status_code=200, body=b"<html>nope</html>"
+    )
+
+    target = tmp_path / "model.pt"
+    with pytest.raises(fd.FigshareDownloadError):
+        fd.figshare_downloader(figshare_id="54635780", write_path=target)
+
+    assert not target.exists()
+
+
 def test_token_is_sent_when_configured(recorder, tmp_path, monkeypatch):
     """A configured token is still used - it just is not required."""
 
