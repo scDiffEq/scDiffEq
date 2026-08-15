@@ -31,7 +31,13 @@ git clone https://github.com/scDiffEq/scDiffEq.git; cd ./scDiffEq;
 pip install -e .
 ```
 
-### With documentation dependencies
+### Optional dependency groups
+
+| Extra | Contents |
+| --- | --- |
+| `docs` | Sphinx and theme packages for building the documentation |
+| `test` | `pytest`, for running the test suite |
+| `dev` | Jupyter, `ipykernel`, and `pytest` for interactive development |
 
 ```BASH
 # Using uv
@@ -40,6 +46,23 @@ uv sync --extra docs
 # Using pip
 pip install -e ".[docs]"
 ```
+
+## Datasets
+
+```python
+import scdiffeq as sdq
+
+adata = sdq.datasets.larry()
+```
+
+Datasets are downloaded on first use and cached under
+`<data_dir>/scdiffeq_data/`. They are hosted on Zenodo
+([10.5281/zenodo.21947161](https://doi.org/10.5281/zenodo.21947161)); downloads
+need no authentication and are verified against the record's md5 checksums.
+
+The record redistributes data published by other groups — **please cite the
+original publications**, listed on the
+[data page](https://www.scdiffeq.com/data.html) and in the Zenodo record.
 
 ## Main API
   
@@ -65,3 +88,22 @@ model.fit(train_epochs = 1500)
 ## Reproducibility
 
 - All results described in the [manuscript](https://rdcu.be/eVhnL) detailing scDiffEq can be reproduced using notebooks in the companion repository: [scdiffeq-analyses](https://github.com/scDiffEq/scdiffeq-analyses)
+
+## Citation
+
+```bibtex
+@article{vinyard2025scdiffeq,
+  title   = {Learning cell dynamics with neural differential equations},
+  author  = {Vinyard, Michael E. and Rasmussen, Anders W. and Li, Ruitong
+             and Klein, Allon M. and Getz, Gad and Pinello, Luca},
+  journal = {Nature Machine Intelligence},
+  volume  = {7},
+  number  = {12},
+  pages   = {1969--1984},
+  year    = {2025},
+  doi     = {10.1038/s42256-025-01150-3}
+}
+```
+
+If you use the packaged datasets, please also cite their original publications
+(see the [data page](https://www.scdiffeq.com/data.html)).

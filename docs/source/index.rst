@@ -31,6 +31,7 @@
    _tutorials/quickstart.ipynb
    install
    api
+   data
    tutorials
    analyses
    dependencies

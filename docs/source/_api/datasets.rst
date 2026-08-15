@@ -10,7 +10,7 @@ Datasets (``sdq.datasets``)
 
     _datasets/larry
     _datasets/human_hematopoiesis
-    _datasets/pancreas
+    _datasets/pancreatic_endocrinogenesis
 
 .. dropdown:: ``sdq.datasets.larry``
 
