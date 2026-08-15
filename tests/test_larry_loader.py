@@ -329,6 +329,40 @@ def test_annotations_outside_the_target_are_dropped():
     assert list(merged.index) == ["0", "1"]
 
 
+def test_partially_covered_bool_column_stays_writable(tmp_path, make_adata):
+    """A bool annotation with gaps must not become an unwritable object column.
+
+    The real ct_correlates column is bool and covers only 2,492 of the unfiltered
+    variant's 25,289 genes. Reindexing upcasts bool -> object with NaN, which h5py
+    rejects with "Can't implicitly convert non-string objects to strings".
+    """
+
+    adata = make_adata()
+    annotations = pd.DataFrame(
+        {"ct_correlates": [True, False]}, index=list(adata.var_names[:2])
+    )
+
+    adata.var = _merge_annotations(adata.var, annotations, axis_name="var")
+
+    # The real assertion: this must not raise.
+    out = tmp_path / "written.h5ad"
+    adata.write_h5ad(out)
+    assert out.exists()
+
+
+def test_partially_covered_numeric_column_keeps_nan(make_adata):
+    adata = make_adata()
+    annotations = pd.DataFrame(
+        {"ct_gene_corr": [0.5, -0.5]}, index=list(adata.var_names[:2])
+    )
+
+    merged = _merge_annotations(adata.var, annotations, axis_name="var")
+
+    assert merged["ct_gene_corr"].dtype.kind == "f"
+    assert merged["ct_gene_corr"].iloc[0] == pytest.approx(0.5)
+    assert pd.isna(merged["ct_gene_corr"].iloc[-1])
+
+
 def test_repeated_merge_does_not_duplicate_columns():
     """Re-running used to produce duplicate names, breaking .astype(float)."""
 

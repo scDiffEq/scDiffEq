@@ -258,9 +258,37 @@ def _merge_annotations(
     for col in aligned.columns:
         if col in target.columns:
             logger.debug(f"Overwriting existing {axis_name} column {col!r}.")
-        target[col] = aligned[col].values
+        target[col] = _h5ad_safe_column(aligned[col]).values
 
     return target
+
+
+def _h5ad_safe_column(values: pd.Series):
+    """Coerce a reindexed column into something anndata can serialize.
+
+    Partial coverage introduces NaN wherever an annotation was unavailable. A
+    bool column then upcasts to ``object`` holding True/False/NaN, which h5py
+    rejects with "Can't implicitly convert non-string objects to strings" -- the
+    var annotations cover only the gene-filtered subset, so this is the normal
+    case for the unfiltered variant, not an edge case.
+
+    Numeric columns represent gaps as NaN natively and are left alone. Anything
+    else becomes a categorical of strings, which encodes missingness properly.
+    """
+    if pd.api.types.is_bool_dtype(values):
+        return values  # a real bool dtype cannot contain NaN
+
+    if pd.api.types.is_numeric_dtype(values):
+        return values
+
+    present = values.notna()
+    if present.all():
+        # Fully covered object column: plain strings write cleanly.
+        return values.astype(str)
+
+    as_str = pd.Series(np.nan, index=values.index, dtype=object)
+    as_str[present] = values[present].astype(str)
+    return pd.Series(pd.Categorical(as_str), index=values.index)
 
 
 def _annotate_larry_cytotrace(
