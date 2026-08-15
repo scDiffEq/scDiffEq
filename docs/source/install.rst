@@ -51,9 +51,35 @@ If you want to build the documentation locally:
 
     # Using uv
     uv sync --extra docs
-    
+
     # Using pip
     pip install -e ".[docs]"
+
+
+Optional dependency groups
+""""""""""""""""""""""""""
+
+.. list-table::
+   :header-rows: 1
+   :widths: 12 88
+
+   * - Extra
+     - Contents
+   * - ``docs``
+     - Sphinx and theme packages needed to build this documentation.
+   * - ``test``
+     - ``pytest``, for running the test suite.
+   * - ``dev``
+     - Jupyter, ``ipykernel``, and ``pytest`` for interactive development.
+
+.. code-block:: bash
+
+    # run the test suite
+    uv sync --extra test
+    uv run pytest
+
+Network-dependent tests are marked ``slow`` and excluded by default; run them
+with ``pytest -m slow``. Note that they download multi-gigabyte datasets.
 
 
 Troubleshooting

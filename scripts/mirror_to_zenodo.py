@@ -64,7 +64,10 @@ class ZenodoDeposition:
             "https://sandbox.zenodo.org/api" if sandbox else "https://zenodo.org/api"
         )
         self.session = requests.Session()
-        self.session.params = {"access_token": token}
+        # Send the token as a header, not a query parameter. As a query parameter
+        # it ends up in server logs, proxies, and -- as this script demonstrated --
+        # in the URL echoed by requests' own HTTPError messages.
+        self.session.headers["Authorization"] = f"Bearer {token}"
         self.deposition_id = None
         self.bucket_url = None
 
@@ -84,8 +87,36 @@ class ZenodoDeposition:
         response.raise_for_status()
         return self._adopt(response.json())
 
+    def unlock(self) -> bool:
+        """Reopen a published record for metadata editing.
+
+        A published deposition is locked; PUT returns 404 until it is unlocked
+        with the ``edit`` action. Files stay immutable either way -- only metadata
+        can change. Returns True if the record was published and is now editable.
+        """
+        response = self.session.post(
+            f"{self.base}/deposit/depositions/{self.deposition_id}/actions/edit",
+            timeout=TIMEOUT,
+        )
+        if response.status_code == 201:
+            return True
+        # 400 == already an open draft, which is fine.
+        if response.status_code == 400:
+            return False
+        response.raise_for_status()
+        return False
+
+    def publish(self) -> dict:
+        """Publish the deposition. Required to make edits to a published record live."""
+        response = self.session.post(
+            f"{self.base}/deposit/depositions/{self.deposition_id}/actions/publish",
+            timeout=TIMEOUT,
+        )
+        response.raise_for_status()
+        return response.json()
+
     def update_metadata(self, metadata: dict) -> dict:
-        """Replace the draft's metadata. Editable right up until publication."""
+        """Replace the deposition's metadata."""
         response = self.session.put(
             f"{self.base}/deposit/depositions/{self.deposition_id}",
             json={"metadata": metadata},
@@ -148,11 +179,28 @@ the data at all.</p>
       the fitted scaler/PCA/UMAP models.</li>
 </ul>
 
-<p><strong>Provenance.</strong> These are redistributed and derived copies of
-data published by their original authors; please cite the original publications
-alongside this record. The <code>.h5ad</code> objects carry preprocessing applied
-by scDiffEq (gene filtering, standardization, and a 50-component PCA with a fixed
-random seed).</p>
+<p><strong>Provenance.</strong> These are redistributed and derived copies of data
+published by their original authors. <strong>Please cite the original
+publications</strong> alongside this record:</p>
+<ul>
+  <li><em>LARRY in vitro</em> &mdash; Weinreb C, Rodriguez-Fraticelli A, Camargo
+      FD, Klein AM. Lineage tracing on transcriptional landscapes links state to
+      fate during differentiation. <em>Science</em> (2020).
+      <a href="https://doi.org/10.1126/science.aaw3381">10.1126/science.aaw3381</a></li>
+  <li><em>Human hematopoiesis</em> &mdash; Qiu X, Zhang Y, Martin-Rufino JD, et al.
+      Mapping transcriptomic vector fields of single cells. <em>Cell</em> (2022).
+      <a href="https://doi.org/10.1016/j.cell.2021.12.045">10.1016/j.cell.2021.12.045</a></li>
+  <li><em>Pancreatic endocrinogenesis</em> &mdash; Bastidas-Ponce A, Tritschler S,
+      Dony L, et al. Comprehensive single cell mRNA profiling reveals a detailed
+      roadmap for pancreatic endocrinogenesis. <em>Development</em> (2019).
+      <a href="https://doi.org/10.1242/dev.173849">10.1242/dev.173849</a></li>
+</ul>
+
+<p>The <code>.h5ad</code> objects carry preprocessing applied by scDiffEq (gene
+filtering, standardization, and a 50-component PCA with a fixed random seed).
+Note that the seeded PCA is reproducible going forward but does not reproduce the
+basis distributed with the original publications, which was computed with an
+unseeded randomized SVD.</p>
 """
 
 DEFAULT_METADATA = {
@@ -171,11 +219,45 @@ DEFAULT_METADATA = {
         "neural differential equations",
         "scDiffEq",
     ],
+    # DOIs verified against Crossref (title, journal, year, first author) before
+    # being written here -- these become part of the permanent record.
     "related_identifiers": [
         {
             "identifier": "https://github.com/scDiffEq/scDiffEq",
             "relation": "isSupplementTo",
             "scheme": "url",
+        },
+        # The paper this data supports.
+        {
+            "identifier": "10.1038/s42256-025-01150-3",
+            "relation": "isSupplementTo",
+            "scheme": "doi",
+            "resource_type": "publication-article",
+        },
+        {
+            "identifier": "10.1101/2023.12.06.570508",
+            "relation": "isSupplementTo",
+            "scheme": "doi",
+            "resource_type": "publication-preprint",
+        },
+        # Originating publications for the redistributed datasets.
+        {
+            "identifier": "10.1126/science.aaw3381",  # LARRY in vitro
+            "relation": "isDerivedFrom",
+            "scheme": "doi",
+            "resource_type": "publication-article",
+        },
+        {
+            "identifier": "10.1016/j.cell.2021.12.045",  # human hematopoiesis
+            "relation": "isDerivedFrom",
+            "scheme": "doi",
+            "resource_type": "publication-article",
+        },
+        {
+            "identifier": "10.1242/dev.173849",  # pancreatic endocrinogenesis
+            "relation": "isDerivedFrom",
+            "scheme": "doi",
+            "resource_type": "publication-article",
         },
     ],
 }
@@ -340,8 +422,19 @@ def main() -> int:
                 f"Resuming deposition {deposition.deposition_id} "
                 f"({len(already_uploaded)} file(s) already uploaded)"
             )
+            was_published = deposition.unlock()
+            if was_published:
+                logger.info("Record is published; reopened it for metadata editing")
+
             deposition.update_metadata(metadata)
             logger.info(f"Metadata updated (license: {args.license})")
+
+            if was_published:
+                # An unlocked record stays in edit mode until republished, and its
+                # public metadata does not reflect the change until then. Files are
+                # untouched; this republishes metadata only, keeping the same DOI.
+                deposition.publish()
+                logger.info("Republished (same DOI; files unchanged)")
         else:
             deposition.create(metadata)
             logger.info(

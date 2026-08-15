@@ -154,12 +154,19 @@ Datasets
 
             _api/datasets
 
-         .. button-link:: _api/_datasets/pancreas.rst
+         .. button-link:: _api/_datasets/larry.rst
             :color: primary
             :outline:
             :expand:
 
-            sdq.datasets.pancreas
+            sdq.datasets.larry
+
+         .. button-link:: _api/_datasets/pancreatic_endocrinogenesis.rst
+            :color: primary
+            :outline:
+            :expand:
+
+            sdq.datasets.pancreatic_endocrinogenesis
             
          .. button-link:: _api/_datasets/human_hematopoiesis.rst
             :color: primary

@@ -1,30 +1,10 @@
-numpy<2.0
-scikit-learn>=1.5
-sphinx
-autodoc
-sphinxcontrib-napoleon
-nbsphinx
-tqdm
-lightning>=2.1
-anndata>=0.10.3
-torch>=2.1.0
-pykeops>=2.1.2
-geomloss>=0.2.6
-torchsde>=0.2.6
-ABCParse>=0.0.7
-adata-query>=0.2.1
-cell-neighbors>=0.1.0
-neural-diffeqs>=0.3.2
-torch-nets>=0.1.0
-torch-adata>=0.1
-autodevice>=0.0.2
-cellplots>=0.0.1rc0
-cell-perturb>=0.0.1rc1
-ipython
-sphinx-autodoc-typehints
-pydata-sphinx-theme
-sphinx-copybutton
-sphinx-design
-sphinx-favicon
-myst-parser
--e .
+# Documentation build requirements.
+#
+# Everything is declared in pyproject.toml under [project.optional-dependencies]
+# docs, so this file only points at it. It previously restated the runtime
+# dependency list and drifted out of sync -- pinning torch>=2.1 against a
+# declared >=2.5, ABCParse>=0.0.7 against >=0.1.4, and omitting h5py, scanpy and
+# requests entirely. Add new documentation dependencies to the `docs` extra, not
+# here.
+
+-e ".[docs]"
