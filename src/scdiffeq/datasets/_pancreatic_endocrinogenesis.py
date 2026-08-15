@@ -50,7 +50,6 @@ class UnProcessedPancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
         figshare_downloader(
             figshare_id=self.FIGSHARE_ID,
             write_path=str(self.raw_h5ad_path),
-            url_prefix="files",
         )
 
     @property
