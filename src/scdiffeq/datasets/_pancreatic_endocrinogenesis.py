@@ -109,7 +109,7 @@ class UnProcessedPancreaticEndocrinogenesisDataset(ABCParse.ABCParse):
         adata = adata.copy()
 
         self.SCALER_MODEL = sklearn.preprocessing.StandardScaler()
-        self.PCA_MODEL = sklearn.decomposition.PCA(n_components=50)
+        self.PCA_MODEL = sklearn.decomposition.PCA(n_components=50, random_state=0)
         self.UMAP_MODEL = umap.UMAP(
             n_components=2, n_neighbors=30, random_state=0, min_dist=0.5
         )

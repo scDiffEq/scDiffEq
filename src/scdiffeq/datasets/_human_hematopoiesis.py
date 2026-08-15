@@ -129,7 +129,7 @@ class UnProcessedHumanHematpoiesisDataHandler(ABCParse.ABCParse):
         adata = adata.copy()
 
         self.SCALER_MODEL = sklearn.preprocessing.StandardScaler()
-        self.PCA_MODEL = sklearn.decomposition.PCA(n_components=50)
+        self.PCA_MODEL = sklearn.decomposition.PCA(n_components=50, random_state=0)
         self.UMAP_MODEL = umap.UMAP(
             n_components=2,
             n_neighbors=25,
@@ -222,7 +222,7 @@ class HumanHematopoiesisDataset(ABCParse.ABCParse):
         return self._adata
 
 
-# -- download function for unprocessed data: -----------------------------------
+# -- download function for unprocessed data: ----------------------------------
 def _download_unprocessed_human_hematopoiesis(
     data_dir=os.getcwd(),
     skip_scaling: bool = False,
