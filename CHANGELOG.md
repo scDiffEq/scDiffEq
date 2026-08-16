@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.1.2 (unreleased)
+
+### Declare the dependencies scdiffeq imports
+
+`numpy`, `pandas`, `scipy`, `matplotlib`, `statsmodels`, `pyyaml` and `plotly` are
+imported at module scope but were never declared. They arrived transitively via
+scanpy, anndata and lightning, which works right up until an upstream stops
+providing one.
+
+That is not hypothetical: pandas 3.0 moved `pytz` to an optional extra, and
+because `pydk` imported `pytz` without declaring it, `import scdiffeq` began
+failing through a chain of transitive dependencies. Fixed in `pydk 0.0.55`; this
+change closes the same gap in scdiffeq itself.
+
+`plotly` was the one already broken —
+`scdiffeq.plotting.potential_landscape` could not be imported after a clean
+install, since nothing else in the dependency tree provides plotly.
+
+### Added
+
+- An `optional` extra for integrations that are imported lazily, inside the
+  functions that use them, so the package works without them until you use the
+  corresponding feature: `umap-learn`, `pillow`, `ipython`, `psutil`, `wandb`.
+
 ## 1.1.1 (2026-08-15)
 
 ### Dataset downloads are working again

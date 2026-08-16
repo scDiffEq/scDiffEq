@@ -41,10 +41,19 @@ dependencies = [
     "anndata>=0.11.3",
     "scanpy>=1.11.0",
     "requests",
-    # imported directly by scdiffeq.datasets / scdiffeq.tools; previously satisfied
-    # only transitively via scanpy/anndata.
+    # Imported at module scope by scdiffeq itself. These were previously
+    # satisfied only transitively (via scanpy/anndata/lightning), which works
+    # until an upstream drops one -- exactly how pandas 3.0 moving pytz to an
+    # optional extra made `import scdiffeq` fail through a transitive dependency.
     "scikit-learn>=1.5",
     "h5py>=3.8",
+    "numpy",
+    "pandas",
+    "scipy",
+    "matplotlib",
+    "statsmodels",
+    "pyyaml",
+    "plotly",
 ]
 
 [project.optional-dependencies]
@@ -62,6 +71,15 @@ docs = [
     "sphinx-design",
     "sphinx-favicon",
     "myst-parser",
+]
+# Imported lazily, inside the functions that need them, so the package works
+# without them until you use the corresponding feature.
+optional = [
+    "umap-learn",  # datasets: UMAP during unprocessed-variant preprocessing
+    "pillow",  # plotting: simulation GIFs
+    "ipython",  # notebook-aware progress bars and loss display
+    "psutil",  # MemoryMonitor callback
+    "wandb",  # MemoryMonitor logging to Weights & Biases
 ]
 test = [
     "pytest>=8.0",
