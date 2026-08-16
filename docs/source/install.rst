@@ -65,6 +65,11 @@ Optional dependency groups
 
    * - Extra
      - Contents
+   * - ``optional``
+     - Integrations imported lazily by the features that use them:
+       ``umap-learn`` (UMAP during preprocessing), ``pillow`` (simulation GIFs),
+       ``ipython`` (notebook progress bars), and ``psutil`` / ``wandb`` (the
+       ``MemoryMonitor`` callback). Install these if you use those features.
    * - ``docs``
      - Sphinx and theme packages needed to build this documentation.
    * - ``test``

@@ -35,6 +35,7 @@ pip install -e .
 
 | Extra | Contents |
 | --- | --- |
+| `optional` | Lazily-imported integrations: `umap-learn`, `pillow`, `ipython`, `psutil`, `wandb` |
 | `docs` | Sphinx and theme packages for building the documentation |
 | `test` | `pytest`, for running the test suite |
 | `dev` | Jupyter, `ipykernel`, and `pytest` for interactive development |
