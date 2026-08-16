@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.2 (unreleased)
+## 1.1.2 (2026-08-16)
 
 ### Declare the dependencies scdiffeq imports
 
