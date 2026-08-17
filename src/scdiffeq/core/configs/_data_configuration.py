@@ -4,6 +4,7 @@ from torch_adata import LightningAnnDataModule
 import pandas as pd
 import numpy as np
 import anndata
+import logging
 import torch
 import os
 import ABCParse
@@ -18,6 +19,10 @@ from ._configure_time_key import TimeKeyConfiguration
 
 # -- set typing: -------------------------------------------------------------------------
 from typing import Optional, Dict
+
+
+# -- configure logger: -------------------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
 class TimeConfiguration(ABCParse.ABCParse):
@@ -192,8 +197,13 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
         **kwargs,
     ):
         super(LightningData, self).__init__()
-        
-                    
+
+        # `_format_sinkhorn_weight_key` appends to this list. Copy it first: the
+        # caller's list is often `scDiffEq.__init__`'s `obs_keys=[]` default,
+        # and appending to that leaks the weight key into every subsequent model
+        # built in the same session -- a multi-seed sweep would fail on seed 2.
+        obs_keys = list(obs_keys) if obs_keys is not None else []
+
         self.__parse__(locals(), public=[None])
         self._format_sinkhorn_weight_key()
         self._format_train_test_exposed_data()
@@ -208,8 +218,14 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
         return self._n_dim
     
     def _format_sinkhorn_weight_key(self):
-              
+
         if not self._weight_key in self._adata.obs.columns:
+            logger.warning(
+                f"weight_key={self._weight_key!r} is not a column in adata.obs; "
+                f"filling it with 1 (every cell weighted equally). Pass growth "
+                f"weights as an adata.obs column and name it with weight_key to "
+                f"weight the Sinkhorn loss."
+            )
             self._adata.obs[self._weight_key] = 1
         if not self._weight_key in self._obs_keys:
             self._obs_keys.append(self._weight_key)
