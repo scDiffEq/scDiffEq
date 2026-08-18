@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.4 (unreleased)
 
 ### Training no longer crashes in a notebook on a multi-GPU machine
 
