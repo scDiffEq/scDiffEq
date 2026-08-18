@@ -415,7 +415,7 @@ class scDiffEq(
         accelerator: Optional[Union[str, List[str]]] = None,
         log_every_n_steps: int = 1,
         reload_dataloaders_every_n_epochs: int = 1,
-        devices: int = 1,
+        devices: Optional[Union[int, str, List[int]]] = None,
         deterministic: bool = False,
         print_every: int = 10,
         **kwargs: dict,
@@ -448,8 +448,11 @@ class scDiffEq(
             Log every n steps, by default 1
         reload_dataloaders_every_n_epochs : int, optional
             Reload dataloaders every n epochs, by default 1
-        devices : int, optional
-            Number of devices to use, by default 1
+        devices : int or str or List[int], optional
+            Devices to train on, passed through to the Lightning Trainer. By
+            default None, which uses every visible CUDA device, or one device
+            if there are none. Multi-device training is not available from a
+            notebook and is capped to one device there.
         deterministic : bool, optional
             Whether to use deterministic algorithms, by default False
         print_every : int, optional

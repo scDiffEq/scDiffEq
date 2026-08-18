@@ -6,7 +6,7 @@ import logging
 from .. import utils
 
 # -- set type hints: ----------------------------------------------------------
-from typing import List, Optional
+from typing import List, Optional, Union
 
 # -- configure logging: --------------------------------------------------------
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class PreTrainMixIn(BaseRoutineMixIn):
         accelerator: Optional[str] = None,
         log_every_n_steps: int = 1,
         reload_dataloaders_every_n_epochs: int = 1,
-        devices: Optional[int] = None,
+        devices: Optional[Union[int, str, List[int]]] = None,
         deterministic: Optional[bool] = False,
         **kwargs,
     ) -> None:
@@ -172,7 +172,7 @@ class TrainMixIn(BaseRoutineMixIn):
         accelerator: Optional[str] = None,
         log_every_n_steps: int = 1,
         reload_dataloaders_every_n_epochs: int = 1,
-        devices: Optional[int] = 1,
+        devices: Optional[Union[int, str, List[int]]] = None,
         deterministic: Optional[bool] = False,
         **kwargs,
     ) -> None:
