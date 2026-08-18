@@ -4,12 +4,16 @@ import adata_query
 import anndata
 import autodevice
 import lightning
+import logging
 import numpy as np
 import pandas as pd
 import torch
 
 # -- set type hints: ----------------------------------------------------------
 from typing import Optional
+
+# -- configure logger: --------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 # -- operational cls: ---------------------------------------------------------
 class Simulation(ABCParse.ABCParse):
@@ -85,10 +89,26 @@ class Simulation(ABCParse.ABCParse):
     def _N_STEPS(self) -> float:
         return int(((self._T_MAX - self._T_MIN) / self._dt) + 1)
 
+    def _assert_time_span(self) -> None:
+        """The span is read from ``adata.obs[time_key]`` of the object passed --
+        not from ``idx``. Passing only the t0 cells therefore collapses the span
+        to a single point, which would integrate nothing and return the input.
+        """
+        if self._T_MAX > self._T_MIN:
+            return
+        raise ValueError(
+            f"Cannot simulate: adata.obs[{self._time_key!r}] spans a single value "
+            f"({self._T_MIN}). The integration span is taken from the object passed "
+            f"as `adata`, while `idx` only selects the cells trajectories start "
+            f"from -- so pass the full time course as `adata`, or give `t` "
+            f"explicitly."
+        )
+
     @property
     def t(self) -> torch.Tensor:
         """ """
         if not hasattr(self, "_t"):
+            self._assert_time_span()
             self._t = torch.linspace(
                 self._T_MIN,
                 self._T_MAX,
@@ -117,9 +137,14 @@ class Simulation(ABCParse.ABCParse):
         adata_sim.obs["sim_i"] = np.tile(
             np.arange(self._N).repeat(len(self.idx)), self._N_STEPS
         )
-        adata_sim.obs["sim"] = adata_sim.obs["z0_idx"].astype(str) + adata_sim.obs[
-            "sim_i"
-        ].astype(str)
+        # separator-delimited: "13199" + "90" and "131999" + "0" both concatenate
+        # to "1319990", which would merge two trajectories into one when grouped
+        # on this key.
+        adata_sim.obs["sim"] = (
+            adata_sim.obs["z0_idx"].astype(str)
+            + "-"
+            + adata_sim.obs["sim_i"].astype(str)
+        )
         adata_sim.uns["sim_idx"] = self.idx
         adata_sim.uns["simulated"] = True
 
