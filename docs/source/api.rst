@@ -54,8 +54,8 @@ Model
             sdq.core
 
 
-Data I/O
-========
+I/O
+===
 
 .. grid:: 2
    :gutter: 1
@@ -71,7 +71,7 @@ Data I/O
    .. grid-item::
       :columns: 11
 
-      .. dropdown:: Data I/O (``sdq.io``) modules
+      .. dropdown:: I/O (``sdq.io``) modules
 
          .. toctree::
             :maxdepth: 2
