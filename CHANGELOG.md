@@ -1,14 +1,14 @@
 # Changelog
 
-## 1.1.4 (unreleased)
+## 1.1.4 (2026-08-18)
 
 ### Training no longer crashes in a notebook on a multi-GPU machine
 
 `fit` in a Jupyter or Colab kernel on a host with more than one GPU raised `RuntimeError: Cannot re-initialize CUDA in forked subprocess` ([#111](https://github.com/scDiffEq/scDiffEq/issues/111)).
 
-The trainer configuration overwrote whatever `devices` the caller passed with `torch.cuda.device_count()`, so any multi-GPU host selected DDP. Lightning launches DDP from a notebook by forking the kernel, and a forked process cannot re-initialize CUDA. The number of GPUs on the machine therefore decided whether the quickstart ran at all.
+The trainer config overwrote `devices` the caller passed with `torch.cuda.device_count()`, so any multi-GPU host selected DDP. Lightning launches DDP from a notebook by forking the kernel, and a forked process cannot re-initialize CUDA. Machine GPU count dictated success of the quickstart notebook.
 
-`devices` is now honored as passed. Multi-device training is capped to one device inside a notebook, with a warning saying so and pointing at running as a script. Lightning's fork-based launcher cannot do it. Outside a notebook the previous default is unchanged: `devices=None` still uses (and logs) all visible CUDA devices. Pin with `fit(devices=1)`.
+`devices` argument now honored as passed. Multi-device training is capped to one device inside a notebook, with a warning saying so and pointing at running as a script. Lightning's fork-based launcher cannot do it. Outside a notebook the previous default is unchanged: `devices=None` still uses (and logs) all visible CUDA devices. Pin with `fit(devices=1)`.
 
 ### Fixed
 
