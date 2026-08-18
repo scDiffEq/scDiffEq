@@ -10,10 +10,25 @@ from ._lightning_callbacks_configuration import LightningCallbacksConfiguration
 from ._progress_bar_config import ProgressBarConfig
 
 # -- set type hints: ----------------------------------------------------------
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 # -- configure logger: --------------------------------------------------------
 logger = logging.getLogger(__name__)
+
+# -- constants: ---------------------------------------------------------------
+INTERACTIVE_ENVS = ["jupyter", "colab"]
+
+
+# -- supporting functions: ----------------------------------------------------
+def _n_requested_devices(devices: Union[int, str, List[int]]) -> int:
+    """Number of devices asked for by a Lightning ``devices`` spec."""
+    if isinstance(devices, int):
+        return devices
+    if isinstance(devices, (list, tuple)):
+        return len(devices)
+    if isinstance(devices, str):
+        return len([device for device in devices.split(",") if device.strip()])
+    return 1
 
 
 # -- Main class: --------------------------------------------------------------
@@ -80,6 +95,43 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
     #         )
 
     @property
+    def _is_interactive(self) -> bool:
+        """True when running inside a notebook kernel (Jupyter or Colab)."""
+        return self._progress_bar_config.env in INTERACTIVE_ENVS
+
+    def _resolve_devices(
+        self, devices: Optional[Union[int, str, List[int]]]
+    ) -> Union[int, str, List[int]]:
+        """Resolve the ``devices`` spec handed to the Lightning Trainer.
+
+        ``None``, ``"auto"`` and ``-1`` mean every visible CUDA device, or one
+        device when there are none. Any other value is honored as given.
+
+        Multi-device training is capped to one device inside a notebook:
+        Lightning launches it by forking the kernel, and a forked process
+        cannot re-initialize CUDA (#111).
+        """
+        n_cuda = torch.cuda.device_count()
+
+        if devices is None or devices in ["auto", -1, "-1"]:
+            devices = n_cuda if n_cuda > 0 else 1
+
+        n_requested = _n_requested_devices(devices)
+
+        if n_requested > 1:
+            if self._is_interactive:
+                logger.warning(
+                    f"{n_requested} devices requested from a notebook: using 1. "
+                    "Lightning trains on multiple devices by forking the kernel, "
+                    "and CUDA cannot be re-initialized in a forked process. Run "
+                    "as a script to train on multiple devices."
+                )
+                return 1
+            logger.info(f"Training on {n_requested} devices.")
+
+        return devices
+
+    @property
     def accelerator(self):
         if not self._accelerator is None:
             return self._accelerator
@@ -139,7 +191,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         print_every=10,
         monitor=None,
         accelerator=None,
-        devices=1,
+        devices: Optional[Union[int, str, List[int]]] = None,
         prefix: str = "",
         log_every_n_steps=1,
         flush_logs_every_n_steps: int = 1,
@@ -183,8 +235,7 @@ class LightningTrainerConfiguration(ABCParse.ABCParse):
         self._stage = stage
         self._progress_bar_config = ProgressBarConfig(total_epochs=max_epochs, print_every=print_every)
 
-        if torch.cuda.device_count() > 0:
-            devices = torch.cuda.device_count()
+        devices = self._resolve_devices(devices)
 
         self.__parse__(locals())
 
