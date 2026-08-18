@@ -63,7 +63,7 @@ need no authentication and are verified against the record's md5 checksums.
 
 The record redistributes data published by other groups — **please cite the
 original publications**, listed on the
-[data page](https://www.scdiffeq.com/data.html) and in the Zenodo record.
+[data page](https://www.scdiffeq.com/_api/datasets.html) and in the Zenodo record.
 
 ## Main API
   
@@ -107,4 +107,4 @@ model.fit(train_epochs = 1500)
 ```
 
 If you use the packaged datasets, please also cite their original publications
-(see the [data page](https://www.scdiffeq.com/data.html)).
+(see the [data page](https://www.scdiffeq.com/_api/datasets.html)).
