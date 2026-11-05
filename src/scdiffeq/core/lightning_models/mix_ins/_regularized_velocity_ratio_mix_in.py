@@ -85,7 +85,10 @@ class RegularizedVelocityRatioMixIn(object):
             torch.Tensor: Magnitude of diffusion.
 
         """
-        return self._L2Norm(torch.stack([self.DiffEq.diffusion(Z) for Z in Z_hat]).squeeze(-1)).mean(1)
+        diffusion = torch.stack([self.DiffEq.diffusion(Z) for Z in Z_hat])
+        # Frobenius norm per cell across state and Brownian dimensions. For
+        # brownian_dim=1 this is the existing vector norm.
+        return self._L2Norm(diffusion.flatten(start_dim=2)).mean(1)
 
     def _velocity_ratio_loss(self, Z_hat: torch.Tensor) -> torch.Tensor:
         """Compute the velocity ratio loss.
@@ -99,6 +102,9 @@ class RegularizedVelocityRatioMixIn(object):
         """
         
         vr_params = self.hparams['velocity_ratio_params']
+
+        if vr_params["enforce"] == 0:
+            return Z_hat.new_zeros(Z_hat.shape[0])
         
         self.reg_f = self._compute_magnitude_f(Z_hat)
         self.reg_g = self._compute_magnitude_g(Z_hat)
