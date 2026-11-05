@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.1.5 (2026-11-04)
+
+### Fixed-potential VAE training and model selection
+
+Default model construction now supports input representations wider than the
+default latent dimension of 50. The new
+`LightningSDE_VAE_FixedPotential_RegularizedVelocityRatio` encodes the input,
+integrates in latent space, and decodes the trajectory for distribution matching.
+Velocity-ratio regularization is applied to latent drift and diffusion.
+
+Fixed-potential VAE pretraining now updates encoder and decoder parameters.
+`fit(pretrain_epochs=..., train_epochs=...)` runs reconstruction pretraining before
+dynamics training; `fit` defaults to zero pretraining epochs. Training results can
+change because pretraining previously returned a loss without optimizer updates.
+
+### Fixed
+
+- Repaired public pretraining setup, stage transitions, and validation with
+  potential gradients; summed per-timepoint Sinkhorn losses before backward.
+- Applied gradient clipping during manual VAE optimization and kept automatically
+  computed scheduler step sizes positive for short training runs.
+- Saved completed epoch counts in new VAE checkpoints to preserve the training
+  stage when reloading.
+- Corrected velocity-ratio diffusion norms for multiple Brownian dimensions and
+  skipped ratio computation when enforcement is zero, including zero diffusion.
+- Read H5AD cell/gene counts from nullable index encodings written by current
+  AnnData/Pandas versions, without loading the index data.
+
+### Added
+
+- Unsupported model combinations now report the dimensions and settings that
+  selected them, along with registered alternatives and their modeling effects.
+- Model API guidance for dimension-dependent selection, pretraining, and
+  discovering and inspecting registered classes.
+
+The VAE training and model-selection changes were implemented in
+[#124](https://github.com/scDiffEq/scDiffEq/pull/124) and
+[#125](https://github.com/scDiffEq/scDiffEq/pull/125).
+
 ## 1.1.4 (2026-08-18)
 
 ### Training no longer crashes in a notebook on a multi-GPU machine
