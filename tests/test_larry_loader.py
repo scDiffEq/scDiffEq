@@ -20,6 +20,7 @@ pre-written, so no download is attempted.
 import pathlib
 import warnings
 
+import h5py
 import numpy as np
 import pandas as pd
 import pytest
@@ -79,6 +80,29 @@ def test_gene_filtering_is_applied(planted):
 
     raw_n_vars = _probe_h5ad(handler.raw_h5ad_path).n_vars
     assert adata.n_vars < raw_n_vars
+
+
+def test_probe_reads_nullable_string_indices(tmp_path):
+    """AnnData can encode string indices as values/mask groups, not datasets."""
+    path = tmp_path / "nullable-indices.h5ad"
+    with h5py.File(path, "w") as handle:
+        for key, size in [("obs", 3), ("var", 5)]:
+            frame = handle.create_group(key)
+            frame.attrs["_index"] = "_index"
+            frame.attrs["encoding-type"] = "dataframe"
+            frame.attrs["encoding-version"] = "0.2.0"
+            frame.attrs["column-order"] = np.array([], dtype=h5py.string_dtype())
+            index = frame.create_group("_index")
+            index.attrs["encoding-type"] = "nullable-string-array"
+            index.attrs["encoding-version"] = "0.1.0"
+            index.create_dataset("values", data=[str(i) for i in range(size)])
+            index.create_dataset("mask", data=np.zeros(size, dtype=bool))
+
+    probe = _probe_h5ad(path)
+    assert probe.readable
+    assert probe.n_obs == 3
+    assert probe.n_vars == 5
+    assert probe.obs_columns == ()
 
 
 def test_cytotrace_runs_without_the_other_flags(planted):

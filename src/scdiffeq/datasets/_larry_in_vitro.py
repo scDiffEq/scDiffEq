@@ -115,6 +115,11 @@ def _frame_shape_and_columns(node) -> Tuple[Optional[int], Tuple[str, ...]]:
             n = int(index_node.shape[0])
         elif "codes" in index_node:  # categorical index
             n = int(index_node["codes"].shape[0])
+        elif (
+            _decode(index_node.attrs.get("encoding-type", "")).startswith("nullable-")
+            and "values" in index_node
+        ):
+            n = int(index_node["values"].shape[0])
 
     columns = node.attrs.get("column-order")
     if columns is None:
