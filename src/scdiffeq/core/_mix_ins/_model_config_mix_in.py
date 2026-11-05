@@ -82,11 +82,11 @@ class ModelConfigMixIn(object):
     def _adjust_step_size(self) -> None:
         """ """
         if self._train_step_size is None:
-            self._train_step_size = int(self._train_epochs * 0.9)
+            self._train_step_size = max(1, int(self._train_epochs * 0.9))
         logger.debug(f"Train step size adjusted to {self._train_step_size}.")
         
         if self._pretrain_step_size is None:
-            self._pretrain_step_size = int(self._pretrain_epochs * 0.9)
+            self._pretrain_step_size = max(1, int(self._pretrain_epochs * 0.9))
         logger.debug(f"Pretrain step size adjusted to {self._pretrain_step_size}.")
         
         self._PARAMS["train_step_size"] = self._train_step_size
