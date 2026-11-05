@@ -108,6 +108,28 @@ class LightningModelConfiguration(ABCParse.ABCParse):
             logger.debug(model_kwargs)
             return lit_model(**model_kwargs)  # data_dim = self._data_dim,
 
-        raise ValueError(
-            f"Configuration tried: {_model} - this does not exist as an available model."
+        raise ValueError(self._unsupported_model_message(_model))
+
+    def _unsupported_model_message(self, model_name):
+        """Explain selection and offer only alternatives present in the registry."""
+        message = (
+            f"Configuration tried: {model_name} - this does not exist as an available model. "
+            f"Settings: data_dim={self._data_dim}, latent_dim={self._latent_dim}, "
+            f"DiffEq_type={self._DiffEq_type!r}, potential_type={self._potential_type!r}, "
+            f"fate_bias_aware={self.fate_bias_aware}, "
+            f"velocity_ratio_params={self._velocity_ratio_params!r}. "
+            "VAE is selected when data_dim > latent_dim. "
+            "SDE velocity-ratio regularization is selected whenever "
+            "velocity_ratio_params is not None, including enforce=0."
         )
+        alternatives = [
+            ("_RegularizedVelocityRatio", "velocity_ratio_params=None", "disables regularization"),
+            ("_VAE", f"latent_dim={self._data_dim}", "models dynamics directly in input space"),
+            ("_FateBiasAware", "fate_bias_csv_path=None", "disables fate bias"),
+        ]
+        for suffix, setting, effect in alternatives:
+            alternative = model_name.replace(suffix, "")
+            if alternative != model_name and alternative in self.available_lightning_models:
+                message += f" Set {setting} to select {alternative} ({effect})."
+        message += " Available models: " + ", ".join(sorted(self.available_lightning_models))
+        return message

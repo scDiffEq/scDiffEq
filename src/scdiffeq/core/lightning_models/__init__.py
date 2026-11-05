@@ -29,3 +29,6 @@ from ._lightning_sde_vae_fate_bias_aware import LightningSDE_VAE_FateBiasAware
 # -- reg velo ratio: ----------------------------------------------------------
 from ._lightning_sde_regularized_velocity_ratio import LightningSDE_RegularizedVelocityRatio
 from ._lightning_sde_fixed_potential_regularized_velocity_ratio import LightningSDE_FixedPotential_RegularizedVelocityRatio
+from ._lightning_sde_vae_fixed_potential_regularized_velocity_ratio import (
+    LightningSDE_VAE_FixedPotential_RegularizedVelocityRatio,
+)

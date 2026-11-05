@@ -25,6 +25,14 @@ class PreTrainMixIn(object):
     def PRETRAIN(self):
         return self.COMPLETED_EPOCHS < self.hparams["pretrain_epochs"]
 
+    def on_save_checkpoint(self, checkpoint):
+        super().on_save_checkpoint(checkpoint)
+        checkpoint["scdiffeq_completed_epochs"] = self.COMPLETED_EPOCHS
+
+    def on_load_checkpoint(self, checkpoint):
+        super().on_load_checkpoint(checkpoint)
+        self.COMPLETED_EPOCHS = checkpoint.get("scdiffeq_completed_epochs", 0)
+
     @abstractmethod
     def pretrain_step(self):
         ...
