@@ -151,9 +151,17 @@ class VAEMixIn(object):
 #         self.log_lr()
         
         self.manual_backward(recon_loss)
+        self._clip_vae_gradients(pretrain_optim)
         pretrain_optim.step()
         pretrain_scheduler = self.lr_schedulers()[0]
         pretrain_scheduler.step()
+        return recon_loss.detach()
+
+    def _clip_vae_gradients(self, optimizer):
+        """Manual optimization must apply clipping before stepping the optimizer."""
+        clip_value = self.hparams.get("gradient_clip_val", 0)
+        if clip_value:
+            self.clip_gradients(optimizer, gradient_clip_val=clip_value)
 
     def step(self, batch, batch_idx, stage=None):
         
@@ -171,10 +179,12 @@ class VAEMixIn(object):
 #         self.log_lr()
         
         if stage == "training":
-            self.manual_backward(self.sinkhorn_loss) # loss)
+            self.manual_backward(self.sinkhorn_loss.sum())
+            self._clip_vae_gradients(train_optim)
             train_optim.step()
             train_scheduler = self.lr_schedulers()[1]
             train_scheduler.step()
+        return self.sinkhorn_loss.sum().detach()
 
     def __repr__(self) -> str:
         return "scDiffEq MixIn: VAEMixIn"

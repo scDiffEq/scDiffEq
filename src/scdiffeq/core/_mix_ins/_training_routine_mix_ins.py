@@ -50,6 +50,11 @@ class BaseRoutineMixIn(object):
             )
 
         self._check_disable_validation(self._TRAINER_KWARGS)
+        if not self.DiffEq.automatic_optimization:
+            self.DiffEq.hparams["gradient_clip_val"] = self._TRAINER_KWARGS.get(
+                "gradient_clip_val", 0
+            )
+            self._TRAINER_KWARGS["gradient_clip_val"] = None
 
     def _flag_log_dir(self) -> None:
         if hasattr(self, "_csv_logger"):
@@ -88,11 +93,10 @@ class PreTrainMixIn(BaseRoutineMixIn):
             pretrain_version=self._PRETRAIN_CONFIG_COUNT,
             train_version=self._TRAIN_CONFIG_COUNT,
             callbacks=self._pretrain_callbacks,
-            monitor_hardware=self._monitor_hardware,
             **self._TRAINER_KWARGS,
         )
 
-        self.__flag_log_dir()
+        self._flag_log_dir()
 
         self._PRETRAIN_CONFIG_COUNT += 1
 
@@ -126,6 +130,9 @@ class PreTrainMixIn(BaseRoutineMixIn):
         self.__update__(locals())
 
         if self._pretrain_epochs > 0:
+            self.DiffEq.hparams["pretrain_epochs"] = (
+                self.DiffEq.COMPLETED_EPOCHS + self._pretrain_epochs
+            )
             self._configure_pretrain_step(locals())
             self.pretrainer.fit(self.DiffEq, self.LitDataModule)
 
@@ -181,5 +188,7 @@ class TrainMixIn(BaseRoutineMixIn):
         self.__update__(locals())
 
         if self._train_epochs > 0:
+            if "pretrain_epochs" in self.DiffEq.hparams:
+                self.DiffEq.hparams["pretrain_epochs"] = self.DiffEq.COMPLETED_EPOCHS
             self._configure_train_step(locals())
             self.trainer.fit(self.DiffEq, self.LitDataModule)

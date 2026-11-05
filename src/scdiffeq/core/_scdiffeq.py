@@ -425,9 +425,10 @@ class scDiffEq(
         Parameters
         ----------
         train_epochs : int, optional
-            Number of training epochs, by default 200
+            Number of dynamics training epochs, by default 2500.
         pretrain_epochs : int, optional
-            Number of pretrain epochs, by default 500
+            Number of autoencoder pretraining epochs before dynamics training,
+            by default 0. Only applies to models with an encoder.
         train_lr : float, optional
             Learning rate for training, by default None
         pretrain_callbacks : List, optional
@@ -459,6 +460,8 @@ class scDiffEq(
             Print every n epochs, by default 10
         Returns: None
         """
+        if pretrain_epochs > 0 and hasattr(self.DiffEq, "Encoder"):
+            self.pretrain(**ABCParse.function_kwargs(self.pretrain, locals()))
         self.train(**ABCParse.function_kwargs(self.train, locals()))
 
     def simulate(self) -> anndata.AnnData:

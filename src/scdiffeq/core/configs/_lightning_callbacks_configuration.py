@@ -76,7 +76,9 @@ class LightningCallbacksConfiguration(ABCParse.ABCParse):
 
     @property
     def DEPLOYED_CALLBACKS(self):
-        return self.cbs + self.BuiltInCallbacks
+        built_in = (self.BuiltInPreTrainCallbacks if self._stage == "pretrain"
+                    else self.BuiltInCallbacks)
+        return self.cbs + built_in
 
     def _update_callbacks(
         self, callbacks: List[lightning.pytorch.callbacks.Callback]

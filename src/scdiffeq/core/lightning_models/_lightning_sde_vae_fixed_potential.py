@@ -11,8 +11,8 @@ from typing import Literal, Optional, Union, List
 
 # -- operational class: -------------------------------------------------------
 class LightningSDE_VAE_FixedPotential(
-    mix_ins.PreTrainMixIn,
     mix_ins.PotentialMixIn,
+    mix_ins.PreTrainMixIn,
     mix_ins.VAEMixIn,
     base.BaseLightningDiffEq,
 ):
@@ -187,12 +187,7 @@ class LightningSDE_VAE_FixedPotential(
         self._configure_lightning_model(kwargs=locals())
 
     def pretrain_step(self, batch, batch_idx, stage=None):
-
-        batch = self.process_batch(batch, batch_idx)
-        X0_hat = self.Decoder(self.Encoder(batch.X0))
-        recon_loss = self.reconstruction_loss(X0_hat, batch.X0).sum()
-        self.log("pretrain_rl_mse", recon_loss.item())
-        return recon_loss
+        return mix_ins.VAEMixIn.pretrain_step(self, batch, batch_idx, stage=stage)
 
     def training_step(self, batch, batch_idx, *args, **kwargs):
         if self.PRETRAIN:
