@@ -57,7 +57,7 @@ class FateBiasDriftPriorVAEMixIn(object):
         train_optim = self.optimizers()[1]
         train_optim.zero_grad()
         
-        batch = base.BatchProcessor(batch, batch_idx)
+        batch = base.BatchProcessor(batch, batch_idx, fate_bias=True)
         X_hat, kl_div_loss = self.forward(batch.X0, batch.t)
         self.log(f"kl_div_{stage}", kl_div_loss.sum())
         

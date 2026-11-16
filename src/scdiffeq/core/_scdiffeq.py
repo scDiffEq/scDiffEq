@@ -54,7 +54,17 @@ class scDiffEq(
     weight_key : str, optional
         Key to use for weights, by default "W"
     obs_keys : List[str], optional
-        List of observation keys, by default []
+        Additional adata.obs columns to include in training batches, by default [].
+        The configured weight_key is always loaded first and used for growth
+        weighting, regardless of its position in obs_keys. Other observations
+        are ignored by ordinary model losses; custom consumers may read them.
+        This does not configure supervision, condition dynamics, or correct
+        batch effects. Annotations remain in adata.obs when obs_keys is omitted.
+        Fate-aware models require exactly one additional numeric integer ID
+        column matching the fate table index; extra auxiliary columns are
+        unsupported in that legacy positional contract.
+        Categorical observations require the upstream torch-adata encoding fix
+        (mvinyard/torch-adata#20); numeric label codes do not enable supervision.
     seed : int, optional
         Random seed, by default 0
     backend : str, optional
@@ -320,7 +330,10 @@ class scDiffEq(
             name (Optional[str], optional): Model name. Default is None.
             use_key (str, optional): Key to use for data. Default is "X_pca".
             weight_key (str, optional): Key to use for weights. Default is "W".
-            obs_keys (List[str], optional): List of observation keys. Default is [].
+            obs_keys (List[str], optional): Additional observations in training
+                batches; see the class documentation for consumers and the
+                fate-aware contract. Does not enable supervision, conditioning,
+                or batch correction. Default is [].
             seed (int, optional): Random seed. Default is 0.
             backend (str, optional): Backend to use. Default is "auto".
             gradient_clip_val (float, optional): Gradient clipping value. Default is 0.5.
