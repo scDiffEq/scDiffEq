@@ -198,10 +198,7 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
     ):
         super(LightningData, self).__init__()
 
-        # `_format_sinkhorn_weight_key` appends to this list. Copy it first: the
-        # caller's list is often `scDiffEq.__init__`'s `obs_keys=[]` default,
-        # and appending to that leaks the weight key into every subsequent model
-        # built in the same session -- a multi-seed sweep would fail on seed 2.
+        # Never modify caller-owned observation lists or the shared default.
         obs_keys = list(obs_keys) if obs_keys is not None else []
 
         self.__parse__(locals(), public=[None])
@@ -227,8 +224,13 @@ class LightningData(LightningAnnDataModule, ABCParse.ABCParse):
                 f"weight the Sinkhorn loss."
             )
             self._adata.obs[self._weight_key] = 1
-        if not self._weight_key in self._obs_keys:
-            self._obs_keys.append(self._weight_key)
+        # BatchProcessor reserves batch[2] for growth weights. AnnDataset
+        # emits observations in this order after time and cell state.
+        # Update our private copy in place: Lightning captures the constructor
+        # local list in hparams, which is used to create every dataset split.
+        self._obs_keys[:] = [self._weight_key] + [
+            key for key in self._obs_keys if key != self._weight_key
+        ]
 
     def _format_train_test_exposed_data(self):
         

@@ -62,7 +62,7 @@ class FateBiasVAEMixIn(object):
         train_optim = self.optimizers()[1]
         train_optim.zero_grad()
         
-        batch = base.BatchProcessor(batch, batch_idx)
+        batch = base.BatchProcessor(batch, batch_idx, fate_bias=True)
         X_hat = self.forward(batch.X0, batch.t)
         
         sinkhorn_loss = self.compute_sinkhorn_divergence(

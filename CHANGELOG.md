@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased
+
+### Observation routing and fate-batch compatibility (#127)
+
+- The configured growth-weight column now precedes all auxiliary observations
+  in training batches, including when it appears later in `obs_keys`. Additional
+  numeric observations no longer change normalized growth weights or the loss.
+  Weight normalization no longer modifies the input batch.
+- **Migration for custom batch consumers:** batches produced by scDiffEq use
+  `[time, X, weights, *auxiliary_observations]`. The auxiliary columns retain
+  their requested order after removing every occurrence of `weight_key`.
+  Update custom positional consumers that relied on the old observation order.
+- **Migration for direct fate-index callers:** use
+  `BatchProcessor(batch, batch_idx, fate_bias=True)` (or
+  `model.DiffEq.process_batch(batch, batch_idx, fate_bias=True)`) to access
+  `F_idx`. Without this opt-in, `F_idx` returns `None`, even for four-item
+  batches. All four built-in fate mixin consumers opt in explicitly.
+- Fate-aware processing preserves the legacy `[time, X, weights, fate_idx]`
+  layout and initial-time IDs, converted to integer strings for fate-table
+  lookup. It now requires exactly four tensors and finite integer-valued IDs
+  shaped `[batch_size, n_times, 1]`. Remove unrelated observations from
+  `obs_keys` for fate-aware training. Extra tensors, missing IDs, fractional
+  IDs, and multi-column categorical encodings now raise actionable errors
+  instead of being silently ignored or coerced.
+- `obs_keys` loads observations; it does not enable supervision, condition
+  dynamics, or correct technical batch effects. Omitted annotations remain
+  in `adata.obs`.
+
+Categorical integration and its regression coverage remain pending
+[torch-adata #20](https://github.com/mvinyard/torch-adata/issues/20).
+This numeric tensor-routing fix can proceed independently; it neither fixes
+categorical vocabulary alignment nor changes the torch-adata requirement.
+
 ## 1.1.5 (2026-11-04)
 
 ### Fixed-potential VAE training and model selection

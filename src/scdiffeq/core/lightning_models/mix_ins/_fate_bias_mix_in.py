@@ -56,7 +56,7 @@ class FateBiasMixIn(object):
     def step(self, batch, batch_idx=None, stage=None):
         
         
-        batch = base.BatchProcessor(batch, batch_idx)
+        batch = base.BatchProcessor(batch, batch_idx, fate_bias=True)
         X_hat = self.forward(Z0=batch.X0, t=batch.t)
         sinkhorn_loss = self.compute_sinkhorn_divergence(batch.X, X_hat, batch.W, batch.W_hat)
         self.log_sinkhorn_divergence(sinkhorn_loss=sinkhorn_loss, t=batch.t, stage=stage) 

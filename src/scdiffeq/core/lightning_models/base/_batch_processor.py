@@ -69,7 +69,9 @@ class BatchProcessor(ABCParse.ABCParse):
     0. t - time. always required
     1. X - data. tensor of size: [batch_size, len(t), n_dim]. always required.
     2. W - weight. tensor of size: [batch_size, len(t), 1]
-    3. F_idx - fate_idx. tensor of size: [batch_Size, len(t), 1]
+    3+. Auxiliary observations, ignored by ordinary training losses.
+        With fate_bias=True, exactly one auxiliary tensor is required:
+        numeric integer fate indices of size [batch_size, len(t), 1].
 
     Attributes:
         None
@@ -91,13 +93,16 @@ class BatchProcessor(ABCParse.ABCParse):
 
     """
 
-    def __init__(self, batch: List[torch.Tensor], batch_idx: int) -> None:
+    def __init__(
+        self, batch: List[torch.Tensor], batch_idx: int, *, fate_bias: bool = False
+    ) -> None:
         """
         Initialize the BatchProcessor object.
 
         Args:
             batch (List[torch.Tensor]): List of tensors in the batch.
             batch_idx (int): Index of the batch.
+            fate_bias (bool): Opt into the legacy [t, X, W, fate_idx] contract.
 
         Returns:
             None
@@ -105,6 +110,22 @@ class BatchProcessor(ABCParse.ABCParse):
         """
 
         self.__parse__(locals(), private=["batch"])
+        self._fate_bias = fate_bias
+        if fate_bias:
+            if len(batch) != 4:
+                raise ValueError(
+                    "Fate-aware training requires [time, X, weights, fate_idx]. "
+                    "Set obs_keys to exactly one numeric fate-index column "
+                    "(besides weight_key); additional observations are ambiguous."
+                )
+            fate = batch[3]
+            if (fate.shape != batch[1].shape[:2] + (1,)
+                    or not torch.isfinite(fate).all()
+                    or not (fate == fate.round()).all()):
+                raise ValueError(
+                    "Fate indices must be finite integer-valued numeric IDs with "
+                    "shape [batch_size, n_times, 1], not categorical encodings."
+                )
 
     def _sum_normalize(
         self, X: Union[torch.Tensor, np.ndarray], sample_axis=1
@@ -161,7 +182,7 @@ class BatchProcessor(ABCParse.ABCParse):
         """
         if not hasattr(self, "_W_hat"):
             if self.n_batch_items >= 3:
-                W = self._batch[2].transpose(1, 0)
+                W = self._batch[2].transpose(1, 0).clone()
                 for i in range(1, len(self.t)):
                     W[i] = torch.exp((self.t[i] - self.t[0]) * W[0])
                 W[0] = torch.ones_like(W[0])
@@ -180,7 +201,7 @@ class BatchProcessor(ABCParse.ABCParse):
     @property
     def F_idx(self):
         """Fate index tensor if available."""
-        if self.n_batch_items >= 4:
+        if self._fate_bias:
             return (
                 self._batch[3]
                 .transpose(1, 0)[0]
